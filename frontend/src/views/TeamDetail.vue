@@ -13,7 +13,17 @@
         <tbody>
           <tr v-for="m in team.members" :key="m.id">
             <td><router-link :to="`/members/${m.id}`">{{ m.first_name }} {{ m.last_name }}</router-link></td>
-            <td>{{ m.position || '-' }}</td>
+            <td>
+              <div v-if="editing[m.id]">
+                <input v-model="positions[m.id]" class="px-2 py-1 border rounded" />
+                <button @click="savePosition(m.id)" class="ml-2 px-2 py-1 bg-blue-600 text-white rounded">OK</button>
+                <button @click="cancelEdit(m.id)" class="ml-2 px-2 py-1 bg-gray-200 rounded">Annuler</button>
+              </div>
+              <div v-else>
+                {{ m.position || '-' }}
+                <button @click="startEdit(m.id, m.position)" class="ml-2 text-sm text-blue-600">Éditer</button>
+              </div>
+            </td>
             <td><button @click="removeMember(m.id)" class="delete-btn">Retirer</button></td>
           </tr>
         </tbody>
@@ -50,6 +60,8 @@ const loading = ref(true)
 const error = ref('')
 const newMemberId = ref('')
 const newPosition = ref('')
+const editing: any = ref({})
+const positions: any = ref({})
 
 const availableMembers = computed(() => {
   const memberIds = new Set((team.value?.members || []).map((m: any) => m.id))
@@ -85,6 +97,25 @@ async function addMember() {
 async function removeMember(memberId: number) {
   if (!await confirmDialog('Retirer ce membre de l\'équipe ?')) return
   await api.removeTeamMember(Number(route.params.id), memberId)
+  load()
+}
+
+function startEdit(memberId: number, current: string) {
+  editing.value = { ...editing.value, [memberId]: true }
+  positions.value = { ...positions.value, [memberId]: current || '' }
+}
+
+function cancelEdit(memberId: number) {
+  const copy = { ...editing.value }
+  delete copy[memberId]
+  editing.value = copy
+}
+
+async function savePosition(memberId: number) {
+  const teamId = Number(route.params.id)
+  const pos = positions.value[memberId]
+  await api.updateTeamMember(teamId, memberId, { position: pos })
+  cancelEdit(memberId)
   load()
 }
 

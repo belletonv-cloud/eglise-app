@@ -37,8 +37,21 @@
         <li v-for="t in member.teams" :key="t.id">
           <router-link :to="`/teams/${t.id}`">{{ t.name }}</router-link>
           <span v-if="t.position" class="position">— {{ t.position }}</span>
+          <button @click="leaveTeam(t.id)" class="ml-3 text-sm text-red-600">Quitter</button>
         </li>
       </ul>
+    </div>
+
+    <div class="card">
+      <h3>Rejoindre une équipe</h3>
+      <div class="flex gap-2 items-center">
+        <select v-model="joinTeamId" class="px-2 py-1 border rounded">
+          <option :value="null">-- Choisir une équipe --</option>
+          <option v-for="t in teams" :key="t.id" :value="t.id" v-if="!member.teams?.find(x => x.id === t.id)">{{ t.name }}</option>
+        </select>
+        <input v-model="joinPosition" placeholder="Position (ex: chanteur)" class="px-2 py-1 border rounded" />
+        <button @click="joinTeam" class="px-3 py-1 bg-green-600 text-white rounded">Rejoindre</button>
+      </div>
     </div>
 
     <div class="card">
@@ -55,6 +68,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '../utils/api'
 import NotificationPrefs from '../components/NotificationPrefs.vue'
+import { ref } from 'vue'
 
 const route = useRoute()
 const member = ref<any>(null)
@@ -62,6 +76,9 @@ const loading = ref(true)
 const error = ref('')
 const editing = ref(false)
 const form = ref<any>({})
+const teams = ref<any[]>([])
+const joinTeamId = ref<number | null>(null)
+const joinPosition = ref('')
 
 async function load() {
   try {
@@ -69,6 +86,7 @@ async function load() {
     const id = Number(route.params.id)
     if (isNaN(id)) throw new Error('ID invalide')
     member.value = await api.getMember(id)
+    teams.value = await api.getTeams()
     form.value = { ...member.value }
   } catch (e: any) {
     error.value = e.message
@@ -86,6 +104,21 @@ async function saveMember() {
 }
 
 onMounted(load)
+
+const leaveTeam = async (teamId: number) => {
+  const id = Number(route.params.id)
+  await api.removeTeamMember(teamId, id)
+  await load()
+}
+
+const joinTeam = async () => {
+  if (!joinTeamId.value) return
+  const id = Number(route.params.id)
+  await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
+  joinTeamId.value = null
+  joinPosition.value = ''
+  await load()
+}
 </script>
 
 <style scoped>

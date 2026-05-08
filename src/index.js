@@ -323,6 +323,20 @@ const routes0 = [
     return new Response(null, { status: 201, headers: CORS });
   }),
 
+  // Update team member (position)
+  route('PUT', '/api/teams/:tid/members/:mid', async (request, env, params) => {
+    const teamId = requireId({ id: params.tid });
+    const memberId = requireId({ id: params.mid });
+    if (!teamId || !memberId) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body) return badRequest('Corps JSON invalide');
+    await env.DB.prepare('UPDATE team_members SET position = ? WHERE team_id = ? AND member_id = ?')
+      .bind(body.position || null, teamId, memberId).run();
+    const updated = await env.DB.prepare('SELECT m.*, tm.position FROM members m JOIN team_members tm ON tm.member_id = m.id WHERE tm.team_id = ? AND m.id = ?')
+      .bind(teamId, memberId).first();
+    return json(updated);
+  }),
+
   route('DELETE', '/api/teams/:tid/members/:mid', async (request, env, params) => {
     const teamId = requireId({ id: params.tid });
     const memberId = requireId({ id: params.mid });

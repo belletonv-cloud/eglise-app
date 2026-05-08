@@ -39,6 +39,8 @@ export const api = {
     request<{ success: boolean }>(`/teams/${teamId}/members`, { method: 'POST', body: JSON.stringify({ member_id: memberId, position }) }),
   removeTeamMember: (teamId: number, memberId: number) =>
     request<{ success: boolean }>(`/teams/${teamId}/members/${memberId}`, { method: 'DELETE' }),
+  updateTeamMember: (teamId: number, memberId: number, data: { position?: string }) =>
+    request<any>(`/teams/${teamId}/members/${memberId}`, { method: 'PUT', body: JSON.stringify(data) }),
 
   getServiceTypes: () => request<ServiceType[]>('/service-types'),
 

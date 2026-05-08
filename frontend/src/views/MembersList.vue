@@ -12,6 +12,13 @@
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <div v-else class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div class="p-4 flex items-center gap-3">
+        <label class="text-sm text-gray-600">Filtrer par ministère :</label>
+        <select v-model="selectedTeam" class="border px-2 py-1 rounded">
+          <option :value="null">Tous</option>
+          <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
+        </select>
+      </div>
       <table class="w-full">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
@@ -23,7 +30,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-for="m in members" :key="m.id" class="hover:bg-gray-50">
+          <tr v-for="m in filteredMembers" :key="m.id" class="hover:bg-gray-50">
             <td class="px-4 py-3 font-medium text-gray-800">{{ m.first_name }} {{ m.last_name }}</td>
             <td class="px-4 py-3 text-gray-600">{{ m.email || '-' }}</td>
             <td class="px-4 py-3 text-gray-600">{{ m.phone || '-' }}</td>
@@ -111,6 +118,8 @@ import { api } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 
 const members = ref<any[]>([])
+const teams = ref<any[]>([])
+const selectedTeam = ref<number | null>(null)
 const loading = ref(true)
 const error = ref('')
 const showForm = ref(false)
@@ -147,6 +156,7 @@ const saveMember = async () => {
 const loadData = async () => {
   try {
     members.value = await api.getMembers()
+    teams.value = await api.getTeams()
   } catch (e: any) {
     error.value = e.message
   } finally {
@@ -154,5 +164,10 @@ const loadData = async () => {
   }
 }
 
-onMounted(loadData)
+  onMounted(loadData)
+
+const filteredMembers = computed(() => {
+  if (!selectedTeam.value) return members.value
+  return members.value.filter(m => (m.teams || []).some((t: any) => t.id === selectedTeam.value))
+})
 </script>
