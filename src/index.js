@@ -210,6 +210,26 @@ async function signOneClickToken(payloadJson, secret) {
     }
 }
 
+function generateSecureToken(bytes = 32) {
+  // base64url token
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    let s = '';
+    for (let i = 0; i < arr.length; i++) s += String.fromCharCode(arr[i]);
+    const b64 = btoa(s);
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  // Node fallback
+  try {
+    const buf = require('crypto').randomBytes(bytes);
+    return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch (e) {
+    // last fallback
+    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  }
+}
+
 async function verifyOneClickToken(token, secret) {
   try {
     const [b64payload, b64sig] = token.split('.')
@@ -756,16 +776,37 @@ const routes0 = [
           const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
           const planLink = `${frontend}/plans/${planId}`;
           const conflictsLink = `${frontend}/conflicts`;
-          // Build one-click revert link if secret provided
+
+          // Prefer to create a one-time DB token if possible; otherwise fallback to HMAC
           let oneclickLinkHtml = '';
-          if (env.ONECLICK_SECRET) {
-            try {
-              const payload = { action: 'revert_assignment', existing_scheduled_id: conflict.id, plan_id: planId, exp: Math.floor(Date.now()/1000) + 60*60*24 };
-              const token = await signOneClickToken(JSON.stringify(payload), env.ONECLICK_SECRET);
-              const oneclickFrontend = `${frontend}/admin/oneclick?token=${encodeURIComponent(token)}`;
-              oneclickLinkHtml = `<p><a href="${oneclickFrontend}">Annuler l'assignation existante (un clic)</a></p>`;
-            } catch (e) {
-              // ignore token generation errors
+          try {
+            // create table if not exists (idempotent)
+            await env.DB.prepare(`CREATE TABLE IF NOT EXISTS email_oneclicks (
+              id INTEGER PRIMARY KEY,
+              token TEXT UNIQUE,
+              payload_json TEXT,
+              used INTEGER DEFAULT 0,
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              used_at DATETIME
+            )`).run();
+
+            const payload = { action: 'revert_assignment', existing_scheduled_id: conflict.id, plan_id: planId, member_id: body.member_id, exp: Math.floor(Date.now()/1000) + 60*60*24 };
+            const payloadJson = JSON.stringify(payload);
+            const dbToken = generateSecureToken(32);
+            await env.DB.prepare('INSERT INTO email_oneclicks (token, payload_json, used) VALUES (?, ?, 0)').bind(dbToken, payloadJson).run();
+            const oneclickFrontend = `${frontend}/admin/oneclick?token=${encodeURIComponent(dbToken)}`;
+            oneclickLinkHtml = `<p><a href="${oneclickFrontend}">Annuler l'assignation existante (un clic)</a></p>`;
+          } catch (e) {
+            // fallback to HMAC token
+            if (env.ONECLICK_SECRET) {
+              try {
+                const payload = { action: 'revert_assignment', existing_scheduled_id: conflict.id, plan_id: planId, exp: Math.floor(Date.now()/1000) + 60*60*24 };
+                const token = await signOneClickToken(JSON.stringify(payload), env.ONECLICK_SECRET);
+                const oneclickFrontend = `${frontend}/admin/oneclick?token=${encodeURIComponent(token)}`;
+                oneclickLinkHtml = `<p><a href="${oneclickFrontend}">Annuler l'assignation existante (un clic)</a></p>`;
+              } catch (err) {
+                // ignore
+              }
             }
           }
 
