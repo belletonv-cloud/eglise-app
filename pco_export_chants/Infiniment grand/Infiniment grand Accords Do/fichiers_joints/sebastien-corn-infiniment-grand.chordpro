@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      
+      Planning Center - Login
+    </title>
+    <meta content="Login" name="apple-mobile-web-app-title">
+    <meta content="Log in to your church's Planning Center account." name="description">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:logo" content="https://login.planningcenteronline.com/assets/planning_center_1200px-1c3c00efe5c4c908006b9972bf08f509101798e075e6a2ca24ec4b6156dc25d6.png" size="1200x1200">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="TL4ol-9FcTqf6wiuhLYpjxKlk9SC6eq0BaxBknf6Ir7yIQ7Bo09Szz_k6ga_0alOvudCcYzK89LFrcggM4n6Ew" />
+    <link rel="stylesheet" href="https://login.planningcenteronline.com/assets/login-558e0d3098897edd9b2cbe573bd55215dc2283cf54f76dc8b4d1218a3b80b166.css" media="screen" />
+    
+    <script src="https://login.planningcenteronline.com/assets/vite/assets/login-V4dF-pK9.js" crossorigin="anonymous" type="module"></script>
+    <script src="https://ab5ddfb19446.edge.sdk.awswaf.com/ab5ddfb19446/33b184b1a0f1/challenge.js" defer="defer"></script>
+  </head>
+  <body class="sans-serif" data-color-scheme>
+    
+
+    <div class="container">
+      <div class="logo">
+        <a aria-label="Planning Center - Login" href="/login/new">
+          <svg xmlns="http://www.w3.org/2000/svg" width="501" height="73" aria-hidden="true" viewBox="0 0 501 73">
+  <path d="M135.26 42.14h-.7c-.94 0-1.41-.7-1.65-1.41V8.38c0-.94-.7-1.4-1.64-1.4h-4.22c-.94 0-1.64.7-1.64 1.4v36.33c0 2.58 2.34 4.93 4.92 4.7h4.7a1 1 0 0 0 .93-.95v-5.39c.23-.47-.24-.93-.7-.93Z" class="logo--text-color"/>
+  <path d="M219.88 19.16a16.9 16.9 0 0 0-10.55 3.75l-.7-2.1c-.24-.7-.7-.94-1.41-.94h-2.11c-.94 0-1.64.7-1.64 1.4V48c0 .93.7 1.4 1.64 1.4h3.98c1.41 0 1.88-.47 1.88-1.4V29.95c.47-1.18 3.75-4.22 8.2-4.22 3.99 0 6.1 2.58 6.1 7.26v15c0 .94.7 1.65 1.64 1.41h4.22c.94 0 1.64-.7 1.64-1.4V33.23c-.23-8.91-4.92-14.07-12.9-14.07Z" class="logo--text-color"/>
+  <path d="M444.44 42.84c-.23-.47-.46-.7-.7-.94h-.47c-.23 0-.47 0-.7.24-1.4.7-3.05 1.17-4.45 1.4-1.18 0-2.35-.23-2.35-2.81l.24-14.53h7.26c.94 0 1.64-.7 1.64-1.41v-3.52c0-.93-.7-1.4-1.4-1.4l-7.5-.24V10.5c0-.94-.7-1.4-1.41-1.4h-4.22c-.94 0-1.64.7-1.64 1.4l-.24 9.14h-2.8c-.95 0-1.65.7-1.65 1.4v3.29c0 .94.7 1.64 1.64 1.4l3.05.24v15c0 3.75.7 8.91 7.74 8.91 3.75 0 8.2-1.87 8.9-2.1.7-.24 1.17-.95.94-1.65v-.23l-1.88-3.05Z" class="logo--text-color"/>
+  <path d="M185.19 19.16c-5.4 0-8.91 2.58-10.55 3.75l-.7-2.1c-.24-.7-.71-.94-1.41-.94h-2.11c-.94 0-1.64.7-1.64 1.4V48c0 .93.7 1.4 1.64 1.4h3.98c1.4 0 1.88-.47 1.88-1.4V29.95c.47-1.18 3.75-4.22 8.2-4.22 3.99 0 6.1 2.58 6.1 7.26v15c0 .94.7 1.65 1.64 1.41h4.22c.94 0 1.64-.7 1.64-1.4V33.23c-.24-8.91-4.93-14.07-12.9-14.07Z" class="logo--text-color"/>
+  <path d="M153.3 19.16a33 33 0 0 0-10.54 1.64c-.7.24-1.17.94-1.17 1.64v.24l.7 2.81c0 .7.7 1.17 1.4 1.4h.47c2.82-.7 5.63-1.16 8.44-1.4 1.64 0 2.58.24 3.28.94.94.94 1.18 2.34.94 5.16-1.87-.47-3.75-.7-5.62-.7-7.27 0-12.2 3.74-12.2 9.6 0 5.86 4 10.08 9.85 10.08 3.52 0 6.33-1.17 9.38-3.28l.7 1.64c.24.7.7 1.18 1.4 1.18h2.12c.94 0 1.64-.7 1.64-1.41V33c0-7.98-.94-13.84-10.78-13.84Zm3.76 22.04c-1.65 2.1-3.99 3.51-6.57 3.51-2.34 0-4.45-1.87-4.45-4.22v-.46c0-2.82 2.34-4.7 6.1-4.7 1.87 0 3.5.48 5.15 1.18l-.23 4.69Z" class="logo--text-color"/>
+  <path d="M106.9 17.52a14.8 14.8 0 0 0-10.09 3.99l-.23.23-.47-2.58c-.24-.47-.7-.93-1.17-.7h-3.05c-.7 0-1.4.47-1.4 1.4V63.7c0 .94.7 1.4 1.63 1.64h4.46c1.17 0 1.64-.7 1.64-1.64l.23-14.53a15.59 15.59 0 0 0 7.97 2.1c8.68 0 15.47-7.26 15.47-16.64 0-9.84-6.33-17.1-15-17.1Zm-1.18 26.96c-1.88 0-3.98-.47-5.63-1.4-1.17-.48-1.87-1.65-1.87-3.05V29.7c0-.7.23-1.4.47-1.87a9 9 0 0 1 7.26-3.75c5.16 0 8.68 4.22 8.68 10.31 0 5.86-3.75 10.08-8.91 10.08Z" class="logo--text-color"/>
+  <path d="M499.77 20.57c-.7-1.17-3.52-1.64-5.63-1.64-4.69 0-7.5 2.58-8.9 3.75l-.71-1.88c-.23-.7-.7-1.17-1.4-1.17H481c-.94 0-1.64.7-1.64 1.4v26.73c0 .94.7 1.4 1.64 1.4h3.52c1.17 0 2.1-.23 2.1-1.4V29.01a8.11 8.11 0 0 1 6.57-3.52c.94 0 1.64.24 2.58.47.24 0 .47.24.7.24.47 0 1.18-.24 1.41-.94l1.88-3.52c.47-.23.47-.7 0-1.17Z" class="logo--text-color"/>
+  <path d="M314.81 19.87h-3.04c-.47 0-.94.23-1.17.93l-.7 2.11a14.23 14.23 0 0 0-9.85-3.98c-8.68 0-15 7.27-15 16.88 0 9.6 6.56 16.64 15.47 16.64 2.8 0 5.62-.7 8.2-1.88v.7a6.38 6.38 0 0 1-2.11 5.63c-1.88 2.11-4.69 3.05-8.44 3.05-3.05 0-5.86-1.4-7.27-2.34-.23 0-.46-.24-.7-.24-.47 0-.7.24-.94.47l-1.64 3.28c-.23.47-.23 1.17.47 1.4.94.71 5.86 3.76 11.96 3.76h.47c9.37-.23 15.94-6.1 15.94-14.06V21.27c-.24-.93-.94-1.4-1.64-1.4Zm-5.86 21.8c0 1.17-.7 2.34-1.87 3.04a11.76 11.76 0 0 1-5.63 1.41c-5.39 0-9.14-4.22-9.14-10.08 0-6.1 3.52-10.31 8.68-10.31a9 9 0 0 1 7.26 3.75c.47.47.47 1.17.47 1.87l.23 10.32Z" class="logo--text-color"/>
+  <path d="M354.43 40.03c-.23-.24-.7-.47-.94-.47-.47 0-.94.23-1.17.47l-.47.46c-1.4 1.41-3.05 2.82-6.56 2.82-4.69 0-8.44-3.99-8.44-8.91-.24-4.69 3.75-8.67 8.44-8.9h.23c2.35 0 4.46 1.16 6.1 2.8.23.24.7.47 1.17.7.47 0 .7-.23.94-.46l2.58-2.11c.23-.23.46-.7.7-.94 0-.47 0-.94-.24-1.17a12.82 12.82 0 0 0-11.01-5.16c-8.68 0-15.94 7.27-15.94 15.7 0 8.45 7.03 15.48 15.94 15.48 4.92 0 9.14-2.11 11.72-6.33.47-.7.23-1.64-.47-2.1l-2.58-1.88Z" class="logo--text-color"/>
+  <path d="M374.12 19.16c-8.67 0-15.24 6.8-15.24 15.47 0 8.91 6.57 15.48 15.24 15.48 4.22 0 8.44-1.41 11.25-3.76.47-.23.7-.7.7-.93 0-.47-.23-.7-.46-1.17l-2.11-2.82c-.24-.23-.47-.47-.94-.47s-.94.24-1.4.47a10.96 10.96 0 0 1-6.57 2.11 8.41 8.41 0 0 1-8.44-7.5h20.16c.7 0 1.4-.7 1.4-1.4s.24-1.41.24-2.12c0-7.5-5.86-13.36-13.83-13.36Zm-7.74 11.96a7.57 7.57 0 0 1 7.5-6.1 6.66 6.66 0 0 1 6.57 6.33l-14.06-.23Z" class="logo--text-color"/>
+  <path d="M409.28 19.16a16.9 16.9 0 0 0-10.55 3.75l-.7-2.1c-.23-.7-.7-.94-1.4-.94h-2.12c-.93 0-1.64.7-1.64 1.4V48c0 .93.7 1.4 1.64 1.4h3.99c1.4 0 1.88-.47 1.88-1.4V29.95c.46-1.18 3.75-4.22 8.2-4.22 3.99 0 6.1 2.58 6.1 7.26v15c0 .94.7 1.65 1.63 1.41h4.23c.93 0 1.64-.7 1.64-1.4V33.23c-.24-8.91-4.93-14.07-12.9-14.07Z" class="logo--text-color"/>
+  <path d="M241.91 6.04a4.45 4.45 0 1 0 0 8.9 4.8 4.8 0 0 0 4.7-4.22 4.8 4.8 0 0 0-4.23-4.68h-.47Z" class="logo--text-color"/>
+  <path d="M244.26 19.87h-4.22c-.94 0-1.64.7-1.64 1.4V48c0 .93.7 1.4 1.64 1.4h4.22c.94 0 1.64-.7 1.64-1.4V21.27c0-.7-.7-1.4-1.64-1.4Z" class="logo--text-color"/>
+  <path d="M268.4 19.16a16.9 16.9 0 0 0-10.55 3.75l-.7-2.1c-.23-.7-.7-.94-1.4-.94h-2.12c-.93 0-1.64.7-1.64 1.4V48c0 .93.7 1.4 1.64 1.4h3.99c1.4 0 1.87-.47 1.87-1.4V29.95c.47-1.18 3.75-4.22 8.2-4.22 4 0 6.1 2.58 6.1 7.26v15c0 .94.7 1.65 1.64 1.41h4.22c.94 0 1.64-.7 1.64-1.4V33.23c-.23-12.43-8.2-14.07-12.89-14.07Z" class="logo--text-color"/>
+  <path d="M462.02 19.16c-8.67 0-15.23 6.8-15.23 15.47 0 8.91 6.56 15.48 15.23 15.48 4.23 0 8.44-1.41 11.26-3.76.47-.23.7-.7.7-.93 0-.47-.23-.7-.47-1.17l-2.1-2.82c-.24-.23-.48-.47-.95-.47-.46 0-.93.24-1.4.47a10.97 10.97 0 0 1-6.57 2.11 8.03 8.03 0 0 1-8.2-7.5h20.16c.7 0 1.4-.7 1.4-1.4s.24-1.41.24-2.12c0-7.5-6.1-13.36-14.06-13.36Zm-7.5 11.96a7.76 7.76 0 0 1 7.5-6.1 6.66 6.66 0 0 1 6.57 6.33l-14.07-.23Z" class="logo--text-color"/>
+  <path d="M12 15h50v46H12z" class="logo--icon-foreground-color"/>
+  <path d="m46.41 28.77-8.2 2.35a8.8 8.8 0 0 1-4.92 0l-8.2-2.58c-.24 0-.71.23-.71.47v10.55c0 .23.23.47.47.7l10.08 3.05a2 2 0 0 0 1.64 0l10.08-3.05c.23 0 .47-.23.47-.7V29.24c0-.23-.24-.47-.7-.47Z" class="logo--icon-background-color"/>
+  <path d="M63.3 7.44 41.5.88a19.97 19.97 0 0 0-11.73 0L8.2 7.44A11.82 11.82 0 0 0 0 18.7v35.17C0 59 3.28 63.46 8.2 65.1L30 71.67a19.97 19.97 0 0 0 11.73 0l21.8-6.56c4.92-1.64 8.2-6.1 8.2-11.25V18.69a12.69 12.69 0 0 0-8.44-11.25Zm-9.15 35.63c0 1.41-.94 2.58-2.11 3.05l-14.53 4.45a5.18 5.18 0 0 1-3.75 0l-9.38-2.8s-.24 0-.24.23v7.03c0 .7-.7 1.17-1.4.94l-4.92-1.41c-.47-.24-.7-.7-.7-1.17v-28.6c0-2.58 2.57-4.45 5.15-3.75l12.66 3.75c.47.23.94 0 1.17 0l12.66-3.75c2.58-.94 5.39 1.17 5.39 3.98v18.05Z" class="logo--icon-background-color"/>
+</svg>
+
+</a>      </div>
+
+      <div class="content-wrapper ">
+        <div class="content">
+            <div class="alert alert--danger mb-2" role="alert">
+    Please log in first.
+  </div>
+
+
+          <h1>Login</h1>
+<form class="ios_safari_keychain_auto_submit_form" data-controller="require-inputs" data-turbo="false" action="https://login.planningcenteronline.com/login" accept-charset="UTF-8" method="post"><input type="hidden" name="authenticity_token" value="F7rJ3n9K5yA0A2Nqi6dbP6I_2Kej4KAFXUnKjWm7JvK9-HPsbExwCYBsRH6h4FxxR_bfMfHiZfN1qs6Q7BWJ0w" autocomplete="off" />
+  <div class="mb-2">
+    <label class="form-label" for="email">Your email or phone</label>
+    <div class="form-input-group form-input-group--prefix">
+      <svg class="symbol" role="img" aria-hidden="true"><use xlink:href="/assets/@planningcenter/icons/sprites/general-5b546c4ba54adc772ac6f8d81adee5153fbeb6d99d6c8659aed3bb8306661a91.svg#person"></use></svg>
+      <input type="text" name="login" id="email" placeholder="Email or phone" autocomplete="username" autofocus="autofocus" class="form-input" />
+    </div>
+  </div>
+
+  <label class="form-label" for="password">Your password</label>
+  <div class="form-input-group form-input-group--prefix form-input-group--suffix" data-controller="toggle-password-visibility">
+    <svg class="symbol" role="img" aria-hidden="true"><use xlink:href="/assets/@planningcenter/icons/sprites/general-5b546c4ba54adc772ac6f8d81adee5153fbeb6d99d6c8659aed3bb8306661a91.svg#lock"></use></svg>
+    <input type="password" name="password" id="password" value="" placeholder="Password" autocomplete="current-password" class="form-input" data-toggle-password-visibility-target="input" data-require-inputs-target="input" data-action="input-&gt;require-inputs#update" />
+    <button
+      id="toggle-password"
+      data-toggle-password-visibility-target="button"
+      data-action="toggle-password-visibility#toggle"
+      class="password-hidden"
+      tabindex="0"
+      type="button"
+      aria-label="Show password"
+      aria-pressed="false"
+      aria-controls="password"
+    >
+      <svg class="symbol icon--password-hidden" role="img" aria-hidden="true"><use xlink:href="/assets/@planningcenter/icons/sprites/general-5b546c4ba54adc772ac6f8d81adee5153fbeb6d99d6c8659aed3bb8306661a91.svg#show-eye"></use></svg>
+      <svg class="symbol icon--password-shown" role="img" aria-hidden="true"><use xlink:href="/assets/@planningcenter/icons/sprites/general-5b546c4ba54adc772ac6f8d81adee5153fbeb6d99d6c8659aed3bb8306661a91.svg#hide-eye"></use></svg>
+    </button>
+  </div>
+  <p class="c-gray-tint-2 fs-14 pt-1">
+    By logging in, you agree to our
+    <a href="https://www.planningcenter.com/terms" target="_blank" style="color: inherit; font-weight: normal; display: inline-block;">
+      Terms of Service
+    </a>
+    and
+    <a href="https://www.planningcenter.com/privacy" target="_blank" style="color: inherit; font-weight: normal; display: inline-block;">
+      Privacy Policy
+    </a>.
+  </p>
+
+  <div class="button-flex-group mt-3">
+    <input type="submit" name="commit" value="Log in" data-disable-with="Loading…" data-require-inputs-target="submit" data-disable-with="Log in" class="btn o-2@xs" />
+    <a class="btn btn--secondary" href="/password_reset/new">Need a password?</a>
+  </div>
+</form>
+        </div>
+      </div>
+
+        <footer>
+          <a href="https://planning.center/privacy/">Privacy Policy</a>
+          <span class="c-gray-tint-3">|</span>
+          <a href="https://planning.center/terms/">Terms of Service</a>
+        </footer>
+    </div>
+    <div class="bg-shapes">
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 897 1019">
+    <path fill="hsla(213, 100%, 61%, 0.1)" d="M897 162 601 54a192 192 0 0 0-218 64L162 415c-39 52-61 115-65 179L75 965c-1 18 1 36 5 54h817V162z"/>
+    <path fill="hsla(213, 100%, 61%, 0.1)" d="m897 225-142-82a175 175 0 0 0-206 23L303 399c-43 40-73 93-87 151l-79 329a175 175 0 0 0 29 140h731V225z"/>
+    <path fill="hsla(213, 100%, 61%, 0.1)" d="M897 196a165 165 0 0 0-166 7L463 381c-47 30-84 74-107 126L230 802a166 166 0 0 0 46 191l31 26h591V196z"/>
+    <path fill="hsla(213, 100%, 61%, 0.2)" d="M897 329c-24-2-48 1-70 10L574 449c-45 19-83 51-109 92L312 771a143 143 0 0 0 11 169l67 79h507V329z"/>
+    <path fill="hsla(213, 100%, 61%, 0.3)" d="m897 480-9 1-221 54c-39 9-74 29-101 58L409 758a117 117 0 0 0-15 138l71 123h432V480z"/>
+    <path fill="hsla(213, 100%, 61%, 0.5)" d="m897 610-135 8c-33 2-64 14-90 33L522 762a97 97 0 0 0-32 109l54 148h353V610z"/>
+    <path fill="hsla(213, 100%, 61%, 0.6)" d="m897 697-36-4c-29-4-59 1-85 15l-151 75a87 87 0 0 0-46 93l25 143h293V697z"/>
+    <path fill="hsla(213, 100%, 63%, 1)" d="M897 768c-14 0-27 2-40 6l-151 45a82 82 0 0 0-57 77v123h248V768z"/>
+  </svg>
+</div>
+
+
+    <script>
+  function PCOPageExpiredConfiguration() {
+    if(!window.PCOPageExpired) return
+
+    window.PCOPageExpiredCurrentPersonACID = ""
+    window.pcoPageExpired || (window.pcoPageExpired = new window.PCOPageExpired({
+      currentPersonACID: "",
+      env: "production",
+      withAlert: "false"
+    }))
+
+    window.addEventListener("load", function() { window.pcoPageExpired.init() })
+  };
+</script>
+
+<script src="https://login.planningcenteronline.com/assets/pco/page_expired/manifest-a54b95e665ddce86bb17d3cd6b908f6561009f3abd89df5927237ee5b66e0622.js" async="async" defer="defer" onload="PCOPageExpiredConfiguration()"></script>
+
+  </body>
+</html>

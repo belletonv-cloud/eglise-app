@@ -1,0 +1,8 @@
+name = "eglise-app"
+compatibility_date = "2024-05-01"
+main = "src/index.js"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "eglise-db"
+database_id = "38d955d1-b300-445e-b06e-cfd9b1b953f0"
