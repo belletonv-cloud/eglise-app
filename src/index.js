@@ -67,6 +67,33 @@ const ROLE_PERMISSIONS = {
 };
 
 async function getMemberFromRequest(request, env) {
+  // Prefer Firebase ID token in Authorization header (Bearer)
+  const auth = request.headers.get('authorization') || request.headers.get('Authorization')
+  if (auth && auth.toLowerCase().startsWith('bearer ')) {
+    const token = auth.split(' ')[1]
+    try {
+      // Validate token with Google's tokeninfo endpoint (simple, avoids key caching here)
+      if (!env.FIREBASE_PROJECT_ID) {
+        // fallback to header-based email if project id not set
+        const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
+        if (!email) return null
+        const m2 = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
+        return m2 || null
+      }
+      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
+      if (!res.ok) throw new Error('Invalid token')
+      const info = await res.json()
+      // Validate issuer and audience
+      const expectedIss = `https://securetoken.google.com/${env.FIREBASE_PROJECT_ID}`
+      if (info.iss !== expectedIss || info.aud !== env.FIREBASE_PROJECT_ID) throw new Error('Invalid token audience/issuer')
+      const email = info.email
+      if (!email) return null
+      const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
+      return m || null
+    } catch (e) {
+      // fallback to header-based email on any error
+    }
+  }
   const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
   if (!email) return null
   const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
@@ -680,14 +707,18 @@ const routes0 = [
           const member = await env.DB.prepare('SELECT first_name, last_name, email FROM members WHERE id = ?').bind(body.member_id).first();
           const existingTeam = await env.DB.prepare('SELECT t.name FROM teams t WHERE t.id = ?').bind(conflict.team_id).first();
           const subject = `Conflit planifié forcé pour ${member.first_name} ${member.last_name}`;
+          const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
+          const planLink = `${frontend}/plans/${planId}`;
+          const conflictsLink = `${frontend}/conflicts`;
           const html = `<p>Un ajout forcé a été effectué.</p>
             <ul>
-              <li>Service: ${plan.date} ${plan.time || ''}</li>
+              <li>Service: <a href="${planLink}">${plan.date} ${plan.time || ''}</a></li>
               <li>Membre: ${member.first_name} ${member.last_name} (${member.email || 'no email'})</li>
               <li>Assignation existante: ${existingTeam ? existingTeam.name : ('#'+conflict.team_id)} — ${conflict.position || '-'} (scheduled id ${conflict.id})</li>
               <li>Forcé par: ${body.forced_by || 'system'}</li>
               <li>Note: ${body.note || ''}</li>
-            </ul>`;
+            </ul>
+            <p><a href="${conflictsLink}">Voir les logs</a></p>`;
 
           // send via Resend
           const res = await fetch('https://api.resend.com/emails', {
@@ -1128,6 +1159,11 @@ const routes0 = [
       // authorization
       if (!await hasPermission(request, env, 'view_conflicts')) return json({ error: 'Forbidden' }, 403);
       const planId = url.searchParams.get('plan_id');
+      const member = url.searchParams.get('member');
+      const page = parseInt(url.searchParams.get('page') || '1', 10) || 1;
+      const per = Math.min(100, parseInt(url.searchParams.get('per') || '50', 10) || 50);
+      const offset = (page - 1) * per;
+
       let query = `
         SELECT scl.*, m.first_name, m.last_name, t.name as existing_team_name
         FROM scheduled_conflict_logs scl
@@ -1136,13 +1172,18 @@ const routes0 = [
         LEFT JOIN teams t ON t.id = sp.team_id
       `;
       const binds = [];
+      const conditions = [];
       if (planId) {
-        query += ' WHERE scl.plan_id = ?';
-        binds.push(planId);
+        conditions.push('scl.plan_id = ?'); binds.push(planId);
       }
-      query += ' ORDER BY scl.created_at DESC LIMIT 200';
+      if (member) {
+        conditions.push('(m.first_name || " " || m.last_name) LIKE ?'); binds.push('%' + member + '%');
+      }
+      if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
+      query += ' ORDER BY scl.created_at DESC LIMIT ? OFFSET ?';
+      binds.push(per, offset);
       const rows = await env.DB.prepare(query).bind(...binds).all();
-      return json(rows.results);
+      return json({ rows: rows.results, page, per });
     }),
 
     route('POST', '/api/email-logs', async (request, env) => {

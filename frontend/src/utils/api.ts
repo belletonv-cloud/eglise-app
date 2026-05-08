@@ -109,7 +109,15 @@ export const api = {
   deleteEmailTemplate: (id: number) => request<{ success: boolean }>(`/email-templates/${id}`, { method: 'DELETE' }),
   createEmailLog: (data: Partial<EmailLog>) => request<EmailLog>('/email-logs', { method: 'POST', body: JSON.stringify(data) }),
   getEmailLogs: () => request<EmailLog[]>('/email-logs'),
-  getConflictLogs: (planId?: number) => request<any[]>(`/scheduled-conflict-logs${planId ? '?plan_id=' + planId : ''}`),
+  getConflictLogs: (planId?: number, page?: number, per?: number, member?: string) => {
+    const params = new URLSearchParams()
+    if (planId) params.set('plan_id', String(planId))
+    if (page) params.set('page', String(page))
+    if (per) params.set('per', String(per))
+    if (member) params.set('member', member)
+    const qs = params.toString()
+    return request<any[]>(`/scheduled-conflict-logs${qs ? '?' + qs : ''}`)
+  },
   getCommunicationPreferences: (memberId: number) => request<any>(`/communication-preferences/${memberId}`),
   updateCommunicationPreferences: (data: any) => request<any>('/communication-preferences', { method: 'POST', body: JSON.stringify(data) }),
   sendEmail: (data: { recipient_email: string; subject: string; body: string; template_id?: number; recipient_member_id?: number }) =>
