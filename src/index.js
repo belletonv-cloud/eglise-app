@@ -1162,6 +1162,41 @@ const routes0 = [
       return json(logs.results);
     }),
 
+    // Member exceptions management (admin)
+    route('GET', '/api/member-exceptions', async (request, env) => {
+      if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+      const rows = await env.DB.prepare('SELECT me.*, m.first_name, m.last_name FROM member_exceptions me LEFT JOIN members m ON m.id = me.member_id ORDER BY me.created_at DESC').all();
+      return json(rows.results);
+    }),
+
+    route('POST', '/api/member-exceptions', async (request, env) => {
+      if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+      const body = await getBody(request);
+      if (!body || !body.member_id || !body.permission) return badRequest('member_id and permission required');
+      await env.DB.prepare('INSERT INTO member_exceptions (member_id, permission, granted) VALUES (?, ?, ?)').bind(body.member_id, body.permission, !!body.granted).run();
+      return json({ success: true }, 201);
+    }),
+
+    route('DELETE', '/api/member-exceptions/:id', async (request, env, params) => {
+      if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+      const id = requireId(params);
+      if (!id) return badRequest('Invalid ID');
+      await env.DB.prepare('DELETE FROM member_exceptions WHERE id = ?').bind(id).run();
+      return new Response(null, { status: 204, headers: CORS });
+    }),
+
+    // Admin: update member role
+    route('PUT', '/api/members/:id/role', async (request, env, params) => {
+      if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+      const id = requireId(params);
+      if (!id) return badRequest('Invalid ID');
+      const body = await getBody(request);
+      if (!body || !body.role) return badRequest('role required');
+      await env.DB.prepare('UPDATE members SET role = ? WHERE id = ?').bind(body.role, id).run();
+      const updated = await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(id).first();
+      return json(updated);
+    }),
+
     // Scheduled conflict logs (audit)
     route('GET', '/api/scheduled-conflict-logs', async (request, env, params, url) => {
       // authorization

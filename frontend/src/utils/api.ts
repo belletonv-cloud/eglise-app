@@ -114,6 +114,11 @@ export const api = {
   deleteEmailTemplate: (id: number) => request<{ success: boolean }>(`/email-templates/${id}`, { method: 'DELETE' }),
   createEmailLog: (data: Partial<EmailLog>) => request<EmailLog>('/email-logs', { method: 'POST', body: JSON.stringify(data) }),
   getEmailLogs: () => request<EmailLog[]>('/email-logs'),
+  // Member exceptions admin
+  getMemberExceptions: () => request<any[]>('/member-exceptions'),
+  createMemberException: (data: { member_id: number; permission: string; granted: boolean }) => request<any>('/member-exceptions', { method: 'POST', body: JSON.stringify(data) }),
+  deleteMemberException: (id: number) => request<any>(`/member-exceptions/${id}`, { method: 'DELETE' }),
+  updateMemberRole: (id: number, data: { role: string }) => request<any>(`/members/${id}/role`, { method: 'PUT', body: JSON.stringify(data) }),
   getConflictLogs: (planId?: number, page?: number, per?: number, member?: string) => {
     const params = new URLSearchParams()
     if (planId) params.set('plan_id', String(planId))

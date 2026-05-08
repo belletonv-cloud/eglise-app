@@ -92,6 +92,11 @@ const router = createRouter({
       name: 'conflicts',
       component: ConflictLogs,
     },
+    {
+      path: '/admin/members',
+      name: 'admin-members',
+      component: () => import('../views/AdminMembers.vue')
+    },
   ],
 })
 
