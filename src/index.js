@@ -183,8 +183,24 @@ const routes0 = [
   // MEMBERS
   // ========================================
   route('GET', '/api/members', async (request, env) => {
-    const result = await env.DB.prepare('SELECT * FROM members ORDER BY last_name ASC, first_name ASC').all();
-    return json(result.results);
+    // Get all members
+    const membersRes = await env.DB.prepare('SELECT * FROM members ORDER BY last_name ASC, first_name ASC').all();
+    const members = membersRes.results;
+
+    // Get team memberships for all members and build a map member_id -> teams[]
+    const tmRes = await env.DB.prepare(`
+      SELECT tm.member_id as member_id, t.id as team_id, t.name as team_name, t.description as team_description, tm.position as position
+      FROM team_members tm JOIN teams t ON t.id = tm.team_id
+    `).all();
+    const map = {};
+    for (const row of tmRes.results) {
+      if (!map[row.member_id]) map[row.member_id] = [];
+      map[row.member_id].push({ id: row.team_id, name: row.team_name, description: row.team_description, position: row.position });
+    }
+
+    // Attach teams array to each member
+    const withTeams = members.map(m => ({ ...m, teams: map[m.id] || [] }));
+    return json(withTeams);
   }),
 
   route('POST', '/api/members', async (request, env) => {

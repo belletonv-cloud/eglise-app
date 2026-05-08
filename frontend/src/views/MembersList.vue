@@ -28,10 +28,18 @@
             <td class="px-4 py-3 text-gray-600">{{ m.email || '-' }}</td>
             <td class="px-4 py-3 text-gray-600">{{ m.phone || '-' }}</td>
             <td class="px-4 py-3">
-              <span :class="typeClass(m.membership_type)"
-                class="px-2 py-1 rounded-full text-xs font-medium">
-                {{ typeLabel(m.membership_type) }}
-              </span>
+              <div class="flex flex-col gap-2">
+                <span :class="typeClass(m.membership_type)"
+                  class="px-2 py-1 rounded-full text-xs font-medium inline-block w-max">
+                  {{ typeLabel(m.membership_type) }}
+                </span>
+                <div v-if="m.teams && m.teams.length > 0" class="flex flex-wrap gap-2 mt-1">
+                  <span v-for="t in m.teams" :key="t.id" class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-lg">
+                    {{ t.name }}<span v-if="t.position"> · {{ t.position }}</span>
+                  </span>
+                </div>
+                <div v-else class="text-xs text-gray-400">Aucun ministère</div>
+              </div>
             </td>
             <td class="px-4 py-3 text-right">
               <button @click="editMember(m)"
