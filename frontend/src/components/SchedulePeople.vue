@@ -82,6 +82,7 @@
 import { ref, onMounted } from 'vue'
 import { api } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
+import { useToast } from '../stores/toast'
 
 const props = defineProps<{ planId: number }>()
 const emit = defineEmits<{ changed: [] }>()
@@ -112,15 +113,43 @@ const updateStatus = async (p: any, status: string) => {
   emit('changed')
 }
 
+const { show } = useToast()
+
 const addPerson = async () => {
-  await api.schedulePerson(props.planId, {
-    member_id: parseInt(newPerson.value.member_id),
-    position: newPerson.value.position || undefined,
-    team_id: newPerson.value.team_id || undefined,
-  })
-  showAdd.value = false
-  newPerson.value = { member_id: '', position: '', team_id: undefined }
-  loadPeople()
+  try {
+    await api.schedulePerson(props.planId, {
+      member_id: parseInt(newPerson.value.member_id),
+      position: newPerson.value.position || undefined,
+      team_id: newPerson.value.team_id || undefined,
+    })
+    show('Bénévole ajouté', 'success')
+    showAdd.value = false
+    newPerson.value = { member_id: '', position: '', team_id: undefined }
+    loadPeople()
+  } catch (e: any) {
+    // If conflict (409), allow forcing the scheduling
+    if ((e as any).status === 409) {
+      const ok = await confirmDialog('Conflit détecté: ce membre est déjà planifié pour ce service. Forcer l\'ajout ?')
+      if (ok) {
+        try {
+          await api.schedulePerson(props.planId, {
+            member_id: parseInt(newPerson.value.member_id),
+            position: newPerson.value.position || undefined,
+            team_id: newPerson.value.team_id || undefined,
+            force: true,
+          })
+          show('Bénévole ajouté malgré le conflit', 'success')
+          showAdd.value = false
+          newPerson.value = { member_id: '', position: '', team_id: undefined }
+          loadPeople()
+        } catch (err: any) {
+          show(err.message || 'Erreur', 'error')
+        }
+      }
+    } else {
+      show(e.message || 'Erreur', 'error')
+    }
+  }
 }
 
 const remove = async (p: any) => {

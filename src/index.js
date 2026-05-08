@@ -608,7 +608,7 @@ const routes0 = [
     if (err) return badRequest(err);
     // Prevent scheduling the same member twice for the same plan (even on another team)
     const conflict = await env.DB.prepare('SELECT id FROM scheduled_people WHERE plan_id = ? AND member_id = ?').bind(planId, body.member_id).first();
-    if (conflict) return json({ error: 'Member already scheduled for this plan' }, 409);
+    if (conflict && !body.force) return json({ error: 'Member already scheduled for this plan' }, 409);
 
     const result = await env.DB.prepare(
       'INSERT INTO scheduled_people (plan_id, member_id, team_id, position, status) VALUES (?, ?, ?, ?, ?)'
