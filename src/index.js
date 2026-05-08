@@ -190,6 +190,43 @@ async function dbAll(db, sql, ...params) {
   return await db.prepare(sql).bind(...params).all();
 }
 
+// Utility: create a HMAC token for one-click actions (very small, base64)
+const crypto = globalThis.crypto || require('crypto')
+async function signOneClickToken(payloadJson, secret) {
+  // secret is a string; use HMAC SHA256
+  if (crypto.subtle && crypto.getRandomValues) {
+    const enc = new TextEncoder();
+    const keyData = enc.encode(secret);
+    const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payloadJson));
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
+    return btoa(payloadJson) + '.' + b64;
+  } else {
+    const hmac = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
+    return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
+  }
+}
+
+async function verifyOneClickToken(token, secret) {
+  try {
+    const [b64payload, b64sig] = token.split('.')
+    const payloadJson = Buffer.from(b64payload, 'base64').toString('utf8')
+    const expected = crypto.subtle ? null : require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
+    if (crypto.subtle) {
+      // verify using subtle
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+      const sig = Uint8Array.from(atob(b64sig), c=>c.charCodeAt(0));
+      const ok = await crypto.subtle.verify('HMAC', key, sig, enc.encode(payloadJson));
+      if (!ok) return null
+      return JSON.parse(payloadJson)
+    } else {
+      if (expected !== b64sig) return null
+      return JSON.parse(payloadJson)
+    }
+  } catch (e) { return null }
+}
+
 const route = (method, path, handler) => {
   const names = [];
   const patternStr = path.replace(/:([^/]+)/g, (_, name) => {
@@ -718,6 +755,19 @@ const routes0 = [
           const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
           const planLink = `${frontend}/plans/${planId}`;
           const conflictsLink = `${frontend}/conflicts`;
+          // Build one-click revert link if secret provided
+          let oneclickLinkHtml = '';
+          if (env.ONECLICK_SECRET) {
+            try {
+              const payload = { action: 'revert_assignment', existing_scheduled_id: conflict.id, plan_id: planId, exp: Math.floor(Date.now()/1000) + 60*60*24 };
+              const token = await signOneClickToken(JSON.stringify(payload), env.ONECLICK_SECRET);
+              const oneclickFrontend = `${frontend}/admin/oneclick?token=${encodeURIComponent(token)}`;
+              oneclickLinkHtml = `<p><a href="${oneclickFrontend}">Annuler l'assignation existante (un clic)</a></p>`;
+            } catch (e) {
+              // ignore token generation errors
+            }
+          }
+
           const html = `<p>Un ajout forcé a été effectué.</p>
             <ul>
               <li>Service: <a href="${planLink}">${plan.date} ${plan.time || ''}</a></li>
@@ -726,7 +776,8 @@ const routes0 = [
               <li>Forcé par: ${body.forced_by || 'system'}</li>
               <li>Note: ${body.note || ''}</li>
             </ul>
-            <p><a href="${conflictsLink}">Voir les logs</a></p>`;
+            <p><a href="${conflictsLink}">Voir les logs</a></p>
+            ${oneclickLinkHtml}`;
 
           // send via Resend
           const res = await fetch('https://api.resend.com/emails', {
@@ -1329,6 +1380,31 @@ const routes0 = [
       }
 
       return json({ success: sendStatus === 'sent', status: sendStatus, remote: remoteResponse, error: errorMessage });
+    }),
+
+    // One-click action endpoint — executes an admin action based on a token
+    route('POST', '/api/oneclick', async (request, env) => {
+      const body = await getBody(request);
+      if (!body || !body.token) return badRequest('token required');
+      if (!env.ONECLICK_SECRET) return json({ error: 'Not configured' }, 500);
+      const payload = await verifyOneClickToken(body.token, env.ONECLICK_SECRET);
+      if (!payload) return json({ error: 'Invalid or expired token' }, 400);
+      // check expiry field
+      const now = Math.floor(Date.now()/1000);
+      if (payload.exp && payload.exp < now) return json({ error: 'Token expired' }, 400);
+      if (payload.action === 'revert_assignment' && payload.existing_scheduled_id) {
+        try {
+          // Delete the existing scheduled assignment
+          await env.DB.prepare('DELETE FROM scheduled_people WHERE id = ?').bind(payload.existing_scheduled_id).run();
+          // Log in scheduled_conflict_logs that revert was performed via one-click
+          await env.DB.prepare('INSERT INTO scheduled_conflict_logs (plan_id, member_id, existing_scheduled_id, forced_by, note) VALUES (?, ?, ?, ?, ?)')
+            .bind(payload.plan_id || null, payload.member_id || null, payload.existing_scheduled_id, 'oneclick', 'Reverted via one-click email').run();
+          return json({ success: true });
+        } catch (e) {
+          return json({ error: 'Action failed', details: e.message || String(e) }, 500);
+        }
+      }
+      return badRequest('Unknown action');
     }),
 
     // Communication Preferences
