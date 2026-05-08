@@ -595,7 +595,7 @@ const routes0 = [
     return json(people.results);
   }),
 
-  route('POST', '/api/plans/:id/scheduled-people', async (request, env, params) => {
+    route('POST', '/api/plans/:id/scheduled-people', async (request, env, params) => {
     const planId = requireId(params);
     if (!planId) return badRequest('ID plan invalide');
     const plan = await env.DB.prepare('SELECT id FROM plans WHERE id = ?').bind(planId).first();
@@ -632,6 +632,42 @@ const routes0 = [
       JOIN members m ON m.id = sp.member_id
       WHERE sp.id = ?
     `).bind(result.meta.last_row_id).first();
+
+    // If we logged a conflict above we may want to notify admin by email
+    try {
+      if (conflict && body.force) {
+        const admin = env.ADMIN_EMAIL || env.EMAIL_FROM || null;
+        if (admin && env.RESEND_API_KEY) {
+          const plan = await env.DB.prepare('SELECT date, time FROM plans WHERE id = ?').bind(planId).first();
+          const member = await env.DB.prepare('SELECT first_name, last_name, email FROM members WHERE id = ?').bind(body.member_id).first();
+          const existingTeam = await env.DB.prepare('SELECT t.name FROM teams t WHERE t.id = ?').bind(conflict.team_id).first();
+          const subject = `Conflit planifié forcé pour ${member.first_name} ${member.last_name}`;
+          const html = `<p>Un ajout forcé a été effectué.</p>
+            <ul>
+              <li>Service: ${plan.date} ${plan.time || ''}</li>
+              <li>Membre: ${member.first_name} ${member.last_name} (${member.email || 'no email'})</li>
+              <li>Assignation existante: ${existingTeam ? existingTeam.name : ('#'+conflict.team_id)} — ${conflict.position || '-'} (scheduled id ${conflict.id})</li>
+              <li>Forcé par: ${body.forced_by || 'system'}</li>
+              <li>Note: ${body.note || ''}</li>
+            </ul>`;
+
+          // send via Resend
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.RESEND_API_KEY}` },
+            body: JSON.stringify({ from: env.EMAIL_FROM || admin, to: admin, subject, html })
+          });
+          const text = await res.text();
+          let remote = null;
+          try { remote = JSON.parse(text); } catch { remote = text }
+          const status = res.ok ? 'sent' : 'failed';
+          await env.DB.prepare('INSERT INTO email_logs (template_id, subject, body, recipient_email, recipient_member_id, status, error_message) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            .bind(null, subject, html, admin, null, status, res.ok ? null : JSON.stringify(remote)).run();
+        }
+      }
+    } catch (e) {
+      // ignore notification errors
+    }
     return json(newEntry, 201);
   }),
 
@@ -1047,6 +1083,26 @@ const routes0 = [
         ORDER BY el.sent_at DESC
       `).all();
       return json(logs.results);
+    }),
+
+    // Scheduled conflict logs (audit)
+    route('GET', '/api/scheduled-conflict-logs', async (request, env, params, url) => {
+      const planId = url.searchParams.get('plan_id');
+      let query = `
+        SELECT scl.*, m.first_name, m.last_name, t.name as existing_team_name
+        FROM scheduled_conflict_logs scl
+        LEFT JOIN members m ON m.id = scl.member_id
+        LEFT JOIN scheduled_people sp ON sp.id = scl.existing_scheduled_id
+        LEFT JOIN teams t ON t.id = sp.team_id
+      `;
+      const binds = [];
+      if (planId) {
+        query += ' WHERE scl.plan_id = ?';
+        binds.push(planId);
+      }
+      query += ' ORDER BY scl.created_at DESC LIMIT 200';
+      const rows = await env.DB.prepare(query).bind(...binds).all();
+      return json(rows.results);
     }),
 
     route('POST', '/api/email-logs', async (request, env) => {

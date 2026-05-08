@@ -12,6 +12,7 @@ import HouseGroupsList from '../views/HouseGroupsList.vue'
 import HouseGroupDetail from '../views/HouseGroupDetail.vue'
 import EmailCompose from '../views/EmailCompose.vue'
 import EmailTemplatesList from '../views/EmailTemplatesList.vue'
+import ConflictLogs from '../views/ConflictLogs.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,6 +86,11 @@ const router = createRouter({
       path: '/email-templates',
       name: 'email-templates',
       component: EmailTemplatesList,
+    },
+    {
+      path: '/conflicts',
+      name: 'conflicts',
+      component: ConflictLogs,
     },
   ],
 })

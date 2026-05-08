@@ -29,6 +29,9 @@
           <router-link to="/email" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
             <span>📧</span> Emails
           </router-link>
+          <router-link to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
+            <span>⚠️</span> Conflits
+          </router-link>
         </nav>
         <div class="p-3 border-t border-gray-200">
           <button @click="logout" class="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">
