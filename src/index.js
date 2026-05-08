@@ -79,10 +79,10 @@ async function getMemberFromRequest(request, env) {
       const now = Date.now() / 1000;
       let info = cache.get(token);
       if (!info || (info.exp && info.exp < now)) {
-        if (!env.FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID not set');
-        const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
-        if (!res.ok) throw new Error('Invalid token')
-        info = await res.json()
+      if (!env.FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID not set');
+      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
+      if (!res.ok) throw new Error('Invalid token')
+      info = await res.json()
         // store with expiry if present or short TTL
         cache.set(token, info);
         // prune cache occasionally
@@ -99,9 +99,12 @@ async function getMemberFromRequest(request, env) {
       const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
       return m || null
     } catch (e) {
-      // fallback to header-based email on any error
+      // don't fallback here if project id is set; just return null
+      return null
     }
   }
+  // If FIREBASE_PROJECT_ID is configured, require Authorization bearer token for identification.
+  if (env.FIREBASE_PROJECT_ID) return null
   const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
   if (!email) return null
   const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
@@ -190,40 +193,38 @@ async function dbAll(db, sql, ...params) {
   return await db.prepare(sql).bind(...params).all();
 }
 
-// Utility: create a HMAC token for one-click actions (very small, base64)
-const crypto = globalThis.crypto || require('crypto')
+  // Utility: create a HMAC token for one-click actions (very small, base64)
+  const crypto = globalThis.crypto || require('crypto')
 async function signOneClickToken(payloadJson, secret) {
   // secret is a string; use HMAC SHA256
-  if (crypto.subtle && crypto.getRandomValues) {
-    const enc = new TextEncoder();
-    const keyData = enc.encode(secret);
-    const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payloadJson));
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
-    return btoa(payloadJson) + '.' + b64;
-  } else {
-    const hmac = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
-    return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
-  }
+    if (crypto.subtle && crypto.getRandomValues) {
+      const enc = new TextEncoder();
+      const keyData = enc.encode(secret);
+      const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payloadJson));
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
+      return btoa(payloadJson) + '.' + b64;
+    } else {
+      const hmac = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
+      return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
+    }
 }
 
 async function verifyOneClickToken(token, secret) {
   try {
     const [b64payload, b64sig] = token.split('.')
     const payloadJson = Buffer.from(b64payload, 'base64').toString('utf8')
-    const expected = crypto.subtle ? null : require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
     if (crypto.subtle) {
-      // verify using subtle
       const enc = new TextEncoder();
       const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
       const sig = Uint8Array.from(atob(b64sig), c=>c.charCodeAt(0));
       const ok = await crypto.subtle.verify('HMAC', key, sig, enc.encode(payloadJson));
       if (!ok) return null
       return JSON.parse(payloadJson)
-    } else {
-      if (expected !== b64sig) return null
-      return JSON.parse(payloadJson)
     }
+    const expected = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
+    if (expected !== b64sig) return null
+    return JSON.parse(payloadJson)
   } catch (e) { return null }
 }
 
@@ -1387,7 +1388,24 @@ const routes0 = [
       const body = await getBody(request);
       if (!body || !body.token) return badRequest('token required');
       if (!env.ONECLICK_SECRET) return json({ error: 'Not configured' }, 500);
-      const payload = await verifyOneClickToken(body.token, env.ONECLICK_SECRET);
+      // If email_oneclicks table exists, prefer DB-driven one-time tokens
+      let payload = null;
+      try {
+        const dbRow = await env.DB.prepare('SELECT * FROM email_oneclicks WHERE token = ?').bind(body.token).first();
+        if (dbRow) {
+          if (dbRow.used) return json({ error: 'Token already used' }, 400);
+          payload = JSON.parse(dbRow.payload_json || '{}');
+          // check expiry
+          const now = Math.floor(Date.now()/1000);
+          if (payload.exp && payload.exp < now) return json({ error: 'Token expired' }, 400);
+          // mark used
+          await env.DB.prepare('UPDATE email_oneclicks SET used = 1, used_at = datetime('"'now'"') WHERE id = ?').bind(dbRow.id).run();
+        } else {
+          payload = await verifyOneClickToken(body.token, env.ONECLICK_SECRET);
+        }
+      } catch (e) {
+        payload = await verifyOneClickToken(body.token, env.ONECLICK_SECRET);
+      }
       if (!payload) return json({ error: 'Invalid or expired token' }, 400);
       // check expiry field
       const now = Math.floor(Date.now()/1000);

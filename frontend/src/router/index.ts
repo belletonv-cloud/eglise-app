@@ -97,6 +97,11 @@ const router = createRouter({
       name: 'admin-members',
       component: () => import('../views/AdminMembers.vue')
     },
+    {
+      path: '/admin/oneclick',
+      name: 'admin-oneclick',
+      component: () => import('../views/AdminOneClick.vue')
+    },
   ],
 })
 

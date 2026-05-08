@@ -132,6 +132,7 @@ export const api = {
   updateCommunicationPreferences: (data: any) => request<any>('/communication-preferences', { method: 'POST', body: JSON.stringify(data) }),
   sendEmail: (data: { recipient_email: string; subject: string; body: string; template_id?: number; recipient_member_id?: number }) =>
     request<{ success: boolean; status: string }>('/send-email', { method: 'POST', body: JSON.stringify(data) }),
+  sendOneClick: (token: string) => request<any>('/oneclick', { method: 'POST', body: JSON.stringify({ token }) }),
 
   // FCM Notifications
   registerFCMToken: (memberId: number, token: string, deviceType?: string) =>
