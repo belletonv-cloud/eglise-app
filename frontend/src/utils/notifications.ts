@@ -35,8 +35,21 @@ export async function subscribeToPush(swRegistration: ServiceWorkerRegistration)
   }
 }
 
+export function extractFCMToken(subscription: PushSubscription): string | null {
+  // FCM endpoint format: https://fcm.googleapis.com/fcm/send/<TOKEN>
+  // Standard Web Push endpoint: https://<base>/<token>
+  const parts = subscription.endpoint.split('/');
+  const candidate = parts[parts.length - 1];
+  return candidate || null;
+}
+
 export async function registerToken(memberId: number, subscription: PushSubscription): Promise<void> {
-  await api.registerFCMToken(memberId, JSON.stringify(subscription), 'web');
+  const fcmToken = extractFCMToken(subscription);
+  if (!fcmToken) {
+    console.warn('Could not extract FCM token from subscription endpoint');
+    return;
+  }
+  await api.registerFCMToken(memberId, fcmToken, 'web');
 }
 
 export async function getExistingSubscription(swRegistration: ServiceWorkerRegistration): Promise<PushSubscription | null> {

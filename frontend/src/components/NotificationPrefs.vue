@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { isPushSupported, getNotificationPermission, requestPermission, subscribeToPush, registerToken, unsubscribe, getExistingSubscription } from '../utils/notifications';
+import { isPushSupported, getNotificationPermission, requestPermission, subscribeToPush, registerToken, unsubscribe, getExistingSubscription, extractFCMToken } from '../utils/notifications';
 
 const emit = defineEmits<{
   subscribed: [token: string]
@@ -121,7 +121,7 @@ async function subscribe() {
     if (sub) {
       await registerToken(props.memberId, sub);
       subscribed.value = true;
-      emit('subscribed', JSON.stringify(sub));
+      emit('subscribed', extractFCMToken(sub) || '');
     }
   } finally {
     subscribing.value = false;

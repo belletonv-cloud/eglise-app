@@ -1,5 +1,12 @@
 const KDRIVE_API = 'https://api.infomaniak.com'
 
+async function getKdriveToken(env) {
+  if (!env.INFOMANIAK_TOKEN) {
+    throw new Error('INFOMANIAK_TOKEN not configured');
+  }
+  return env.INFOMANIAK_TOKEN;
+}
+
 function createRouter(routes) {
   return function (request, env) {
     const url = new URL(request.url);
@@ -51,42 +58,20 @@ async function getBody(request) {
   }
 }
 
-let kdriveTokenCache = { token: null, expiresAt: 0 };
-
-async function getKdriveToken(env) {
-  if (kdriveTokenCache.token && Date.now() < kdriveTokenCache.expiresAt) {
-    return kdriveTokenCache.token;
-  }
-  const res = await fetch(`${KDRIVE_API}/oauth/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'client_credentials',
-      client_id: env.INFOMANIAK_CLIENT_ID,
-      client_secret: env.INFOMANIAK_CLIENT_SECRET,
-      scope: 'kDrive',
-    }),
-  });
-  if (!res.ok) throw new Error('Failed to get kDrive token');
-  const data = await res.json();
-  kdriveTokenCache = {
-    token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in || 3600) * 1000 - 60000,
-  };
-  return kdriveTokenCache.token;
-}
-
 async function kdriveUpload(env, file, filename) {
   const token = await getKdriveToken(env);
   const driveId = env.KDRIVE_DRIVE_ID || '3066287';
   const parentId = env.KDRIVE_PARENT_ID || '9';
-  const body = new FormData();
-  body.append('file', file, filename);
-  if (parentId) body.append('parent_id', parentId);
-  const res = await fetch(`${KDRIVE_API}/kdrive/${driveId}/files`, {
+  const size = file.size;
+  const buf = await file.arrayBuffer();
+  const url = `${KDRIVE_API}/3/drive/${driveId}/upload?directory_id=${parentId}&total_size=${size}&file_name=${encodeURIComponent(filename)}`;
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: buf,
   });
   if (!res.ok) {
     const err = await res.text();
@@ -99,8 +84,9 @@ async function kdriveUpload(env, file, filename) {
 async function kdriveGetFile(env, fileId) {
   const token = await getKdriveToken(env);
   const driveId = env.KDRIVE_DRIVE_ID || '3066287';
-  const res = await fetch(`${KDRIVE_API}/kdrive/${driveId}/files/${fileId}/download`, {
+  const res = await fetch(`${KDRIVE_API}/2/drive/${driveId}/files/${fileId}/download`, {
     headers: { Authorization: `Bearer ${token}` },
+    redirect: 'follow',
   });
   if (!res.ok) return null;
   return res;
@@ -109,10 +95,30 @@ async function kdriveGetFile(env, fileId) {
 async function kdriveDelete(env, fileId) {
   const token = await getKdriveToken(env);
   const driveId = env.KDRIVE_DRIVE_ID || '3066287';
-  await fetch(`${KDRIVE_API}/kdrive/${driveId}/files/${fileId}`, {
+  await fetch(`${KDRIVE_API}/2/drive/${driveId}/files/${fileId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+function parseKdriveFileId(fileUrl) {
+  if (!fileUrl) return null;
+  if (fileUrl.startsWith('kdrive:')) return fileUrl.slice(7);
+  const parts = fileUrl.split('/');
+  return parts.pop() || null;
+}
+
+function requireId(params) {
+  const id = parseInt(params.id, 10);
+  return isNaN(id) ? null : id;
+}
+
+async function dbFirst(db, sql, ...params) {
+  return await db.prepare(sql).bind(...params).first();
+}
+
+async function dbAll(db, sql, ...params) {
+  return await db.prepare(sql).bind(...params).all();
 }
 
 const route = (method, path, handler) => {
@@ -1248,7 +1254,7 @@ const routes2 = [
       return json({ error: e.message }, 500);
     }
 
-    const fileUrl = `${KDRIVE_API}/kdrive/files/${kdriveFile.id}/download`;
+    const fileUrl = `kdrive:${kdriveFile.id}`;
 
     const stmt = await env.DB.prepare(`
       INSERT INTO attachments (entity_type, entity_id, filename, file_url, file_type)
@@ -1266,7 +1272,7 @@ const routes2 = [
     const attachment = await dbFirst(env.DB, 'SELECT * FROM attachments WHERE id = ?', id);
     if (!attachment) return notFound();
 
-    const fileId = attachment.file_url.split('/').pop();
+    const fileId = parseKdriveFileId(attachment.file_url);
     if (!fileId) return notFound();
 
     const kdriveResp = await kdriveGetFile(env, fileId);
@@ -1284,7 +1290,7 @@ const routes2 = [
     const existing = await dbFirst(env.DB, 'SELECT id, file_url FROM attachments WHERE id = ?', id);
     if (!existing) return notFound();
 
-    const fileId = existing.file_url.split('/').pop();
+    const fileId = parseKdriveFileId(existing.file_url);
     if (fileId) await kdriveDelete(env, fileId).catch(() => {});
 
     await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(id).run();
