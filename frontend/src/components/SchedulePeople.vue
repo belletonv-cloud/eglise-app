@@ -127,9 +127,14 @@ const addPerson = async () => {
     newPerson.value = { member_id: '', position: '', team_id: undefined }
     loadPeople()
   } catch (e: any) {
-    // If conflict (409), allow forcing the scheduling
-    if ((e as any).status === 409) {
-      const ok = await confirmDialog('Conflit détecté: ce membre est déjà planifié pour ce service. Forcer l\'ajout ?')
+    // If conflict (409), allow forcing the scheduling and show conflict details
+    if ((e as any).status === 409 && (e as any).errorBody && (e as any).errorBody.conflict) {
+      const c = (e as any).errorBody.conflict
+      // Try to show team name by finding in teams list
+      const existingTeam = teams.value.find(t => t.id === c.team_id)
+      const teamLabel = existingTeam ? `${existingTeam.name}` : `équipe #${c.team_id}`
+      const msg = `Conflit: ce membre est déjà planifié comme '${c.position || '—'}' dans ${teamLabel}. Forcer l'ajout ?`
+      const ok = await confirmDialog(msg)
       if (ok) {
         try {
           await api.schedulePerson(props.planId, {
@@ -137,6 +142,7 @@ const addPerson = async () => {
             position: newPerson.value.position || undefined,
             team_id: newPerson.value.team_id || undefined,
             force: true,
+            forced_by: 'web-ui'
           })
           show('Bénévole ajouté malgré le conflit', 'success')
           showAdd.value = false
