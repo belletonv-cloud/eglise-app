@@ -72,20 +72,28 @@ async function getMemberFromRequest(request, env) {
   if (auth && auth.toLowerCase().startsWith('bearer ')) {
     const token = auth.split(' ')[1]
     try {
-      // Validate token with Google's tokeninfo endpoint (simple, avoids key caching here)
-      if (!env.FIREBASE_PROJECT_ID) {
-        // fallback to header-based email if project id not set
-        const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
-        if (!email) return null
-        const m2 = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
-        return m2 || null
+      // Simple, robust check via Google's tokeninfo endpoint with caching.
+      // This avoids implementing full JWT verification here while still validating audience/issuer/exp.
+      if (!getMemberFromRequest._tokenCache) getMemberFromRequest._tokenCache = new Map();
+      const cache = getMemberFromRequest._tokenCache;
+      const now = Date.now() / 1000;
+      let info = cache.get(token);
+      if (!info || (info.exp && info.exp < now)) {
+        if (!env.FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID not set');
+        const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
+        if (!res.ok) throw new Error('Invalid token')
+        info = await res.json()
+        // store with expiry if present or short TTL
+        cache.set(token, info);
+        // prune cache occasionally
+        if (cache.size > 500) {
+          for (const k of cache.keys()) { cache.delete(k); if (cache.size <= 250) break }
+        }
       }
-      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
-      if (!res.ok) throw new Error('Invalid token')
-      const info = await res.json()
-      // Validate issuer and audience
       const expectedIss = `https://securetoken.google.com/${env.FIREBASE_PROJECT_ID}`
       if (info.iss !== expectedIss || info.aud !== env.FIREBASE_PROJECT_ID) throw new Error('Invalid token audience/issuer')
+      // check expiry
+      if (info.exp && info.exp < now) throw new Error('Token expired')
       const email = info.email
       if (!email) return null
       const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()

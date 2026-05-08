@@ -11,6 +11,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
     if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+    // Try to attach Firebase ID token for robust server-side auth
+    if (user.value && typeof user.value.getIdToken === 'function') {
+      const token = await user.value.getIdToken(true).catch(() => null)
+      if (token) headers['Authorization'] = `Bearer ${token}`
+    }
   } catch {}
   const res = await fetch(`${API_BASE}${path}`, {
     headers,
