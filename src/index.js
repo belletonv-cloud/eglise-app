@@ -58,6 +58,40 @@ async function getBody(request) {
   }
 }
 
+// Authorization helpers (lightweight)
+const ROLE_PERMISSIONS = {
+  admin: ['*'],
+  scheduler: ['schedule', 'view_conflicts'],
+  editor: ['edit_members', 'edit_teams'],
+  viewer: [],
+};
+
+async function getMemberFromRequest(request, env) {
+  const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
+  if (!email) return null
+  const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
+  return m || null
+}
+
+async function hasPermission(request, env, permission) {
+  // wildcard permission
+  if (!permission) return false
+  const member = await getMemberFromRequest(request, env)
+  if (!member) return false
+  if (member.role === 'admin') return true
+
+  const rolePerms = ROLE_PERMISSIONS[member.role] || []
+  let allowed = rolePerms.includes('*') || rolePerms.includes(permission)
+
+  // check exceptions table (most recent entry wins)
+  const ex = await env.DB.prepare('SELECT granted FROM member_exceptions WHERE member_id = ? AND permission = ? ORDER BY created_at DESC LIMIT 1').bind(member.id, permission).first()
+  if (ex) {
+    allowed = !!ex.granted
+  }
+
+  return !!allowed
+}
+
 async function kdriveUpload(env, file, filename) {
   const token = await getKdriveToken(env);
   const driveId = env.KDRIVE_DRIVE_ID || '3066287';
@@ -605,6 +639,10 @@ const routes0 = [
     const err = validate({
       member_id: { required: true, type: 'int' },
     }, body);
+    // authorization: need scheduling permission
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
+    // if forcing, require force_schedule permission
+    if (body.force && !await hasPermission(request, env, 'force_schedule')) return json({ error: 'Forbidden to force' }, 403);
     if (err) return badRequest(err);
     // Prevent scheduling the same member twice for the same plan (even on another team)
     const conflict = await env.DB.prepare('SELECT id, team_id, position FROM scheduled_people WHERE plan_id = ? AND member_id = ?').bind(planId, body.member_id).first();
@@ -1087,6 +1125,8 @@ const routes0 = [
 
     // Scheduled conflict logs (audit)
     route('GET', '/api/scheduled-conflict-logs', async (request, env, params, url) => {
+      // authorization
+      if (!await hasPermission(request, env, 'view_conflicts')) return json({ error: 'Forbidden' }, 403);
       const planId = url.searchParams.get('plan_id');
       let query = `
         SELECT scl.*, m.first_name, m.last_name, t.name as existing_team_name

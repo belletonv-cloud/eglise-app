@@ -1,4 +1,5 @@
 import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment } from './types'
+import { user } from '../stores/auth'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
 
@@ -7,8 +8,12 @@ export function getApiBase() {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
+  try {
+    if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+  } catch {}
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers as Record<string, string> },
+    headers,
     ...options,
   })
   if (!res.ok) {
