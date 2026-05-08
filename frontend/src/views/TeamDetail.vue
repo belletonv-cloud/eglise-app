@@ -52,6 +52,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
+import { useToast } from '../stores/toast'
 
 const route = useRoute()
 const team = ref<any>(null)
@@ -62,6 +63,7 @@ const newMemberId = ref('')
 const newPosition = ref('')
 const editing: any = ref({})
 const positions: any = ref({})
+const { show } = useToast()
 
 const availableMembers = computed(() => {
   const memberIds = new Set((team.value?.members || []).map((m: any) => m.id))
@@ -88,16 +90,26 @@ async function load() {
 
 async function addMember() {
   if (!newMemberId.value) return
-  await api.addTeamMember(Number(route.params.id), Number(newMemberId.value), newPosition.value || undefined)
-  newMemberId.value = ''
-  newPosition.value = ''
-  load()
+  try {
+    await api.addTeamMember(Number(route.params.id), Number(newMemberId.value), newPosition.value || undefined)
+    show('Membre ajouté', 'success')
+    newMemberId.value = ''
+    newPosition.value = ''
+    load()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 
 async function removeMember(memberId: number) {
   if (!await confirmDialog('Retirer ce membre de l\'équipe ?')) return
-  await api.removeTeamMember(Number(route.params.id), memberId)
-  load()
+  try {
+    await api.removeTeamMember(Number(route.params.id), memberId)
+    show('Membre retiré', 'success')
+    load()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 
 function startEdit(memberId: number, current: string) {
@@ -114,9 +126,14 @@ function cancelEdit(memberId: number) {
 async function savePosition(memberId: number) {
   const teamId = Number(route.params.id)
   const pos = positions.value[memberId]
-  await api.updateTeamMember(teamId, memberId, { position: pos })
-  cancelEdit(memberId)
-  load()
+  try {
+    await api.updateTeamMember(teamId, memberId, { position: pos })
+    show('Rôle mis à jour', 'success')
+    cancelEdit(memberId)
+    load()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 
 onMounted(load)

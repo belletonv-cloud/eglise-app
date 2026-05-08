@@ -318,7 +318,10 @@ const routes0 = [
     if (!teamId) return badRequest('ID équipe invalide');
     const body = await getBody(request);
     if (!body || !body.member_id) return badRequest('member_id requis');
-    await env.DB.prepare('INSERT OR IGNORE INTO team_members (team_id, member_id, position) VALUES (?, ?, ?)')
+    // Prevent duplicate membership
+    const exists = await env.DB.prepare('SELECT id FROM team_members WHERE team_id = ? AND member_id = ?').bind(teamId, body.member_id).first();
+    if (exists) return json({ error: 'Member already in team' }, 409);
+    await env.DB.prepare('INSERT INTO team_members (team_id, member_id, position) VALUES (?, ?, ?)')
       .bind(teamId, body.member_id, body.position || null).run();
     return new Response(null, { status: 201, headers: CORS });
   }),
@@ -603,8 +606,12 @@ const routes0 = [
       member_id: { required: true, type: 'int' },
     }, body);
     if (err) return badRequest(err);
+    // Prevent scheduling the same member twice for the same plan (even on another team)
+    const conflict = await env.DB.prepare('SELECT id FROM scheduled_people WHERE plan_id = ? AND member_id = ?').bind(planId, body.member_id).first();
+    if (conflict) return json({ error: 'Member already scheduled for this plan' }, 409);
+
     const result = await env.DB.prepare(
-      'INSERT OR IGNORE INTO scheduled_people (plan_id, member_id, team_id, position, status) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO scheduled_people (plan_id, member_id, team_id, position, status) VALUES (?, ?, ?, ?, ?)'
     ).bind(
       planId, body.member_id, body.team_id || null,
       body.position || null, body.status || 'pending'

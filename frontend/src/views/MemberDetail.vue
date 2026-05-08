@@ -69,6 +69,7 @@ import { useRoute } from 'vue-router'
 import { api } from '../utils/api'
 import NotificationPrefs from '../components/NotificationPrefs.vue'
 import { ref } from 'vue'
+import { useToast } from '../stores/toast'
 
 const route = useRoute()
 const member = ref<any>(null)
@@ -105,19 +106,31 @@ async function saveMember() {
 
 onMounted(load)
 
+const { show } = useToast()
+
 const leaveTeam = async (teamId: number) => {
-  const id = Number(route.params.id)
-  await api.removeTeamMember(teamId, id)
-  await load()
+  try {
+    const id = Number(route.params.id)
+    await api.removeTeamMember(teamId, id)
+    show('Membre retiré de l\'équipe', 'success')
+    await load()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 
 const joinTeam = async () => {
-  if (!joinTeamId.value) return
-  const id = Number(route.params.id)
-  await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
-  joinTeamId.value = null
-  joinPosition.value = ''
-  await load()
+  try {
+    if (!joinTeamId.value) return
+    const id = Number(route.params.id)
+    await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
+    show('Vous avez rejoint l\'équipe', 'success')
+    joinTeamId.value = null
+    joinPosition.value = ''
+    await load()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 </script>
 

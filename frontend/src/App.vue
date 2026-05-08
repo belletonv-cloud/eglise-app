@@ -40,12 +40,7 @@
         <router-view />
       </main>
     </div>
-    <Toast
-      :message="toast.message"
-      :type="toast.type"
-      :visible="toast.visible"
-      @closed="hideToast"
-    />
+    <Toasts />
     <ConfirmDialog />
   </div>
 </template>
@@ -53,9 +48,7 @@
 <script setup lang="ts">
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
-import { toastState, hideToast } from './stores/toast';
-import Toast from './components/Toast.vue';
+import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 
-const toast = toastState();
 </script>

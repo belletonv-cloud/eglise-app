@@ -1,35 +1,21 @@
 import { reactive } from 'vue'
 
-export interface ToastState {
-  message: string
-  type: 'success' | 'error' | 'info'
-  visible: boolean
-  key: number
+type Toast = { id: number; message: string; type?: 'success' | 'error' }
+
+const state = reactive({ items: [] as Toast[] })
+let nextId = 1
+
+export function useToast() {
+  function show(message: string, type: 'success' | 'error' = 'success', timeout = 4000) {
+    const id = nextId++
+    state.items.push({ id, message, type })
+    setTimeout(() => dismiss(id), timeout)
+  }
+  function dismiss(id: number) {
+    const idx = state.items.findIndex(t => t.id === id)
+    if (idx >= 0) state.items.splice(idx, 1)
+  }
+  return { state, show, dismiss }
 }
 
-const state = reactive<ToastState>({
-  message: '',
-  type: 'info',
-  visible: false,
-  key: 0,
-})
-
-let timer: ReturnType<typeof setTimeout> | null = null
-
-export function showToast(message: string, type: 'success' | 'error' | 'info' = 'info', duration = 3000) {
-  if (timer) clearTimeout(timer)
-  state.message = message
-  state.type = type
-  state.visible = true
-  state.key++
-  timer = setTimeout(() => { state.visible = false }, duration)
-}
-
-export function hideToast() {
-  state.visible = false
-  if (timer) clearTimeout(timer)
-}
-
-export function toastState() {
-  return state
-}
+export default useToast
