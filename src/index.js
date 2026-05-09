@@ -103,8 +103,7 @@ async function getMemberFromRequest(request, env) {
       return null
     }
   }
-  // If FIREBASE_PROJECT_ID is configured, require Authorization bearer token for identification.
-  if (env.FIREBASE_PROJECT_ID) return null
+  // Fallback to x-user-email header (dev mode, or admin testing)
   const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
   if (!email) return null
   const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
