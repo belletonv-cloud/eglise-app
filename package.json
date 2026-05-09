@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "wrangler": "^4.88.0"
+  },
+  "scripts": {
+    "install-hooks": "git config core.hooksPath .githooks || true",
+    "scan-secrets": "rg -n --hidden --no-ignore -S '\\b(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|pco_pat_[A-Za-z0-9_-]{10,}|[A-Za-z0-9_-]{40,})\\b' || true"
   }
 }

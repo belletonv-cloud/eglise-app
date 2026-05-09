@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Running secret scan..."
+patterns=("[A-Za-z0-9_-]{40,}" "AKIA[0-9A-Z]{16}" "AIza[0-9A-Za-z_-]{35}" "pco_pat_[A-Za-z0-9_-]{10,}")
+for p in "${patterns[@]}"; do
+  if rg -n --hidden --no-ignore -S --pcre2 "$p" ./ >/dev/null 2>&1; then
+    echo "Potential secret matching pattern: $p"
+    echo "Abort commit. If this is a false positive, adjust .githooks/pre-commit or pattern list."
+    exit 1
+  fi
+done
+echo "No high-confidence secrets found. Proceeding with commit."
+exit 0
