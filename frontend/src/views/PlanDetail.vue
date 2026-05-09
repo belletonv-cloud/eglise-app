@@ -8,6 +8,8 @@
         <button @click="$router.push('/calendar')"
           class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">&larr; Calendrier</button>
         <div class="flex-1" />
+        <button @click="$router.push(`/plans/${plan.id}/setlist`)"
+          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">Vue musicien</button>
         <button @click="showEditForm = true"
           class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">Modifier</button>
         <button @click="deletePlan"

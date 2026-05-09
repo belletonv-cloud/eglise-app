@@ -1,4 +1,4 @@
-import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment } from './types'
+import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment, VolunteerPreferences, PlanTemplate, PlanTemplateItem } from './types'
 import { user } from '../stores/auth'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
@@ -133,6 +133,26 @@ export const api = {
   sendEmail: (data: { recipient_email: string; subject: string; body: string; template_id?: number; recipient_member_id?: number }) =>
     request<{ success: boolean; status: string }>('/send-email', { method: 'POST', body: JSON.stringify(data) }),
   sendOneClick: (token: string) => request<any>('/oneclick', { method: 'POST', body: JSON.stringify({ token }) }),
+
+  // Volunteer Preferences
+  getVolunteerPreferences: (memberId: number) => request<VolunteerPreferences>(`/volunteer-preferences/${memberId}`),
+  updateVolunteerPreferences: (memberId: number, data: Partial<VolunteerPreferences>) =>
+    request<VolunteerPreferences>(`/volunteer-preferences/${memberId}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Plan Templates
+  getPlanTemplates: () => request<PlanTemplate[]>('/plan-templates'),
+  createPlanTemplate: (data: Partial<PlanTemplate>) => request<PlanTemplate>('/plan-templates', { method: 'POST', body: JSON.stringify(data) }),
+  getPlanTemplate: (id: number) => request<PlanTemplate>(`/plan-templates/${id}`),
+  updatePlanTemplate: (id: number, data: Partial<PlanTemplate>) => request<PlanTemplate>(`/plan-templates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePlanTemplate: (id: number) => request<{ success: boolean }>(`/plan-templates/${id}`, { method: 'DELETE' }),
+  getPlanTemplateItems: (id: number) => request<PlanTemplateItem[]>(`/plan-templates/${id}/items`),
+  createPlanTemplateItem: (templateId: number, data: Partial<PlanTemplateItem>) =>
+    request<PlanTemplateItem>(`/plan-templates/${templateId}/items`, { method: 'POST', body: JSON.stringify(data) }),
+  updatePlanTemplateItem: (itemId: number, data: Partial<PlanTemplateItem>) =>
+    request<PlanTemplateItem>(`/plan-template-items/${itemId}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePlanTemplateItem: (itemId: number) => request<{ success: boolean }>(`/plan-template-items/${itemId}`, { method: 'DELETE' }),
+  applyPlanTemplate: (templateId: number, data: { date: string; time?: string; theme?: string; notes?: string }) =>
+    request<Plan>(`/plan-templates/${templateId}/apply`, { method: 'POST', body: JSON.stringify(data) }),
 
   // FCM Notifications
   registerFCMToken: (memberId: number, token: string, deviceType?: string) =>

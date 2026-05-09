@@ -231,3 +231,26 @@ CREATE TABLE IF NOT EXISTS notification_tokens (
 );
 
 CREATE INDEX idx_notification_tokens_member ON notification_tokens(member_id);
+
+-- Templates de plans (gabarits réutilisables)
+CREATE TABLE plan_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    service_type_id INTEGER REFERENCES service_types(id),
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE plan_template_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    plan_template_id INTEGER REFERENCES plan_templates(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    position INTEGER,
+    length_minutes INTEGER,
+    arrangement_id INTEGER REFERENCES arrangements(id),
+    transposed_key TEXT
+);
+
+CREATE INDEX idx_plan_template_items_template ON plan_template_items(plan_template_id);

@@ -11,6 +11,9 @@
           <router-link to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
             <span>📅</span> Services
           </router-link>
+          <router-link to="/plan-templates" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
+            <span>📋</span> Templates
+          </router-link>
           <router-link to="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
             <span>👥</span> Membres
           </router-link>

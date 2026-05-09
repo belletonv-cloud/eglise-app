@@ -13,6 +13,9 @@ import HouseGroupDetail from '../views/HouseGroupDetail.vue'
 import EmailCompose from '../views/EmailCompose.vue'
 import EmailTemplatesList from '../views/EmailTemplatesList.vue'
 import ConflictLogs from '../views/ConflictLogs.vue'
+import PlanTemplatesList from '../views/PlanTemplatesList.vue'
+import PlanTemplateDetail from '../views/PlanTemplateDetail.vue'
+import SetlistView from '../views/SetlistView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +40,23 @@ const router = createRouter({
       path: '/plans/:id',
       name: 'plan-detail',
       component: PlanDetail,
+      props: true,
+    },
+    {
+      path: '/plans/:id/setlist',
+      name: 'setlist',
+      component: SetlistView,
+      props: true,
+    },
+    {
+      path: '/plan-templates',
+      name: 'plan-templates',
+      component: PlanTemplatesList,
+    },
+    {
+      path: '/plan-templates/:id',
+      name: 'plan-template-detail',
+      component: PlanTemplateDetail,
       props: true,
     },
     {

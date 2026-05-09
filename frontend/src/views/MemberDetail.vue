@@ -54,6 +54,8 @@
       </div>
     </div>
 
+    <VolunteerPreferences :member-id="Number(route.params.id)" />
+
     <div class="card">
       <h3>Notifications push</h3>
       <NotificationPrefs :member-id="Number(route.params.id)" />
@@ -68,7 +70,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '../utils/api'
 import NotificationPrefs from '../components/NotificationPrefs.vue'
-import { ref } from 'vue'
+import VolunteerPreferences from '../components/VolunteerPreferences.vue'
 import { useToast } from '../stores/toast'
 
 const route = useRoute()

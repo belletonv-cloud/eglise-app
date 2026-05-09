@@ -145,6 +145,36 @@ export interface EmailLog {
   sent_at?: string
 }
 
+export interface VolunteerPreferences {
+  id?: number
+  member_id: number
+  unavailable_dates: string
+  max_services_per_month: number
+  notes?: string
+}
+
+export interface PlanTemplate {
+  id: number
+  name: string
+  description?: string
+  service_type_id?: number
+  item_count?: number
+  items?: PlanTemplateItem[]
+  created_at?: string
+}
+
+export interface PlanTemplateItem {
+  id: number
+  plan_template_id: number
+  type: string
+  title: string
+  description?: string
+  position?: number
+  length_minutes?: number
+  arrangement_id?: number
+  transposed_key?: string
+}
+
 export interface Attachment {
   id: number
   entity_type: string

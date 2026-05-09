@@ -2,10 +2,16 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">Planning des Services</h2>
-      <button @click="showForm = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-        + Nouveau service
-      </button>
+      <div class="flex gap-2">
+        <button @click="showApplyTemplate = true"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
+          + Template
+        </button>
+        <button @click="showForm = true"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+          + Nouveau service
+        </button>
+      </div>
     </div>
 
     <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
@@ -90,6 +96,44 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal Appliquer un template -->
+    <div v-if="showApplyTemplate" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showApplyTemplate = false">
+      <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
+        <h3 class="text-xl font-bold mb-4">Créer un service depuis un template</h3>
+        <form @submit.prevent="applyTemplate" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Template</label>
+            <select v-model="applyTemplateId" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2">
+              <option :value="null">Sélectionner...</option>
+              <option v-for="tpl in planTemplates" :key="tpl.id" :value="tpl.id">{{ tpl.name }} ({{ tpl.item_count }} élém.)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input v-model="applyForm.date" type="date" required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+            <input v-model="applyForm.time" type="time"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Thème</label>
+            <input v-model="applyForm.theme"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2" />
+          </div>
+          <div class="flex gap-3 justify-end pt-2">
+            <button type="button" @click="showApplyTemplate = false"
+              class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+            <button type="submit"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">Créer</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -101,10 +145,14 @@ import { api } from '../utils/api'
 const router = useRouter()
 const plans = ref<any[]>([])
 const serviceTypes = ref<any[]>([])
+const planTemplates = ref<any[]>([])
 const loading = ref(true)
 const error = ref('')
 const showForm = ref(false)
 const form = ref({ service_type_id: '', date: '', time: '10:00', theme: '', notes: '' })
+const showApplyTemplate = ref(false)
+const applyTemplateId = ref<number | null>(null)
+const applyForm = ref({ date: '', time: '10:00', theme: '' })
 
 const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 const formatDay = (d: string) => d ? new Date(d + 'T12:00:00').getDate().toString().padStart(2, '0') : ''
@@ -128,11 +176,25 @@ const createPlan = async () => {
   loadData()
 }
 
+const applyTemplate = async () => {
+  if (!applyTemplateId.value) return
+  await api.applyPlanTemplate(applyTemplateId.value, {
+    date: applyForm.value.date,
+    time: applyForm.value.time || undefined,
+    theme: applyForm.value.theme || undefined,
+  })
+  showApplyTemplate.value = false
+  applyTemplateId.value = null
+  applyForm.value = { date: '', time: '10:00', theme: '' }
+  loadData()
+}
+
 const loadData = async () => {
   try {
-    const [p, st] = await Promise.all([api.getPlans(), api.getServiceTypes()])
+    const [p, st, tpl] = await Promise.all([api.getPlans(), api.getServiceTypes(), api.getPlanTemplates()])
     plans.value = p
     serviceTypes.value = st
+    planTemplates.value = tpl
   } catch (e: any) {
     error.value = e.message
   } finally {
