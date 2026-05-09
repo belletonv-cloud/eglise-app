@@ -8,6 +8,9 @@
           <p class="text-sm text-gray-500 truncate">{{ user?.email }}</p>
         </div>
         <nav class="flex-1 p-2 space-y-1">
+          <router-link to="/mon-compte" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
+            <span>👤</span> Mon compte
+          </router-link>
           <router-link to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700" active-class="bg-blue-50 text-blue-700 font-medium">
             <span>📅</span> Services
           </router-link>

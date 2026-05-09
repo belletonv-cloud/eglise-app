@@ -134,6 +134,12 @@ export const api = {
     request<{ success: boolean; status: string }>('/send-email', { method: 'POST', body: JSON.stringify(data) }),
   sendOneClick: (token: string) => request<any>('/oneclick', { method: 'POST', body: JSON.stringify({ token }) }),
 
+  // Member Portal (self-service)
+  getMe: () => request<any>('/me'),
+  updateMe: (data: { phone?: string; notes?: string; birth_date?: string }) =>
+    request<any>('/me', { method: 'PUT', body: JSON.stringify(data) }),
+  getMySchedule: () => request<any[]>('/me/schedule'),
+
   // Volunteer Preferences
   getVolunteerPreferences: (memberId: number) => request<VolunteerPreferences>(`/volunteer-preferences/${memberId}`),
   updateVolunteerPreferences: (memberId: number, data: Partial<VolunteerPreferences>) =>

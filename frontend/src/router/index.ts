@@ -16,6 +16,7 @@ import ConflictLogs from '../views/ConflictLogs.vue'
 import PlanTemplatesList from '../views/PlanTemplatesList.vue'
 import PlanTemplateDetail from '../views/PlanTemplateDetail.vue'
 import SetlistView from '../views/SetlistView.vue'
+import MonCompte from '../views/MonCompte.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -116,6 +117,11 @@ const router = createRouter({
       path: '/admin/members',
       name: 'admin-members',
       component: () => import('../views/AdminMembers.vue')
+    },
+    {
+      path: '/mon-compte',
+      name: 'mon-compte',
+      component: MonCompte,
     },
     {
       path: '/admin/oneclick',
