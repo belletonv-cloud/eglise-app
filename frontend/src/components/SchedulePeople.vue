@@ -142,8 +142,8 @@ const addPerson = async () => {
             position: newPerson.value.position || undefined,
             team_id: newPerson.value.team_id || undefined,
             force: true,
-            forced_by: 'web-ui'
-          })
+            forced_by: 'web-ui',
+          } as any)
           show('Bénévole ajouté malgré le conflit', 'success')
           showAdd.value = false
           newPerson.value = { member_id: '', position: '', team_id: undefined }

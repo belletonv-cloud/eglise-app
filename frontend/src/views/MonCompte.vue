@@ -59,9 +59,8 @@
         </div>
         <div v-else class="space-y-3">
           <div v-for="s in schedule" :key="s.id"
-            @click="$router.push(`/plans/${s.plan_id}`)"
-            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer">
-            <div>
+            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+            <div @click="$router.push(`/plans/${s.plan_id}`)" class="flex-1 cursor-pointer">
               <div class="font-medium text-gray-800">{{ formatDate(s.date) }}</div>
               <div class="text-sm text-gray-500">
                 {{ s.service_type_name || 'Service' }}
@@ -69,10 +68,16 @@
               </div>
               <div v-if="s.position" class="text-sm text-gray-400">{{ s.position }}</div>
             </div>
-            <span :class="statusClass(s.status)"
-              class="px-2 py-1 rounded-full text-xs font-medium">
-              {{ statusLabel(s.status) }}
-            </span>
+            <div class="flex items-center gap-2 ml-4">
+              <span v-if="s.status === 'confirmed'" class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Confirmé</span>
+              <span v-else-if="s.status === 'declined'" class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Refusé</span>
+              <template v-else>
+                <button @click="respond(s.id, 'confirmed')" :disabled="responding === s.id"
+                  class="px-3 py-1 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer">Accepter</button>
+                <button @click="respond(s.id, 'declined')" :disabled="responding === s.id"
+                  class="px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 cursor-pointer">Refuser</button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -83,6 +88,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { api } from '../utils/api'
+import { useToast } from '../stores/toast'
 import VolunteerPreferences from '../components/VolunteerPreferences.vue'
 
 const member = ref<any>(null)
@@ -93,12 +99,7 @@ const saving = ref(false)
 const saved = ref(false)
 const form = ref({ phone: '', notes: '', birth_date: '' })
 
-const statusLabel = (s: string) =>
-  s === 'confirmed' ? 'Confirmé' : s === 'declined' ? 'Refusé' : 'En attente'
-const statusClass = (s: string) =>
-  s === 'confirmed' ? 'bg-green-100 text-green-700' :
-  s === 'declined' ? 'bg-red-100 text-red-700' :
-  'bg-yellow-100 text-yellow-700'
+const responding = ref<number | null>(null)
 
 function formatDate(d: string) {
   return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', {
@@ -123,6 +124,21 @@ async function load() {
     error.value = e.message
   } finally {
     loading.value = false
+  }
+}
+
+async function respond(scheduledId: number, status: string) {
+  responding.value = scheduledId
+  try {
+    const planId = schedule.value.find(s => s.id === scheduledId)?.plan_id
+    if (!planId) return
+    await api.updateSchedule(planId, scheduledId, { status })
+    const item = schedule.value.find(s => s.id === scheduledId)
+    if (item) item.status = status
+  } catch (e: any) {
+    useToast().show(e.message || 'Erreur', 'error')
+  } finally {
+    responding.value = null
   }
 }
 

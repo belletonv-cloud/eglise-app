@@ -19,3 +19,4 @@ export function useToast() {
 }
 
 export default useToast
+export const showToast = (message: string, type: 'success' | 'error' = 'success') => useToast().show(message, type)

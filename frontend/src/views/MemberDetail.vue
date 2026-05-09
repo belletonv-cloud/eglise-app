@@ -47,7 +47,9 @@
       <div class="flex gap-2 items-center">
         <select v-model="joinTeamId" class="px-2 py-1 border rounded">
           <option :value="null">-- Choisir une équipe --</option>
-          <option v-for="t in teams" :key="t.id" :value="t.id" v-if="!member.teams?.find(x => x.id === t.id)">{{ t.name }}</option>
+          <template v-for="t in teams" :key="t.id">
+            <option :value="t.id" v-if="!member.teams?.find((x: any) => x.id === t.id)">{{ t.name }}</option>
+          </template>
         </select>
         <input v-model="joinPosition" placeholder="Position (ex: chanteur)" class="px-2 py-1 border rounded" />
         <button @click="joinTeam" class="px-3 py-1 bg-green-600 text-white rounded">Rejoindre</button>
