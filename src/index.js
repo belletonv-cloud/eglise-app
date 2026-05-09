@@ -194,7 +194,7 @@ async function dbAll(db, sql, ...params) {
 }
 
   // Utility: create a HMAC token for one-click actions (very small, base64)
-  const crypto = globalThis.crypto || require('crypto')
+  const crypto = globalThis.crypto || require('node:crypto')
 async function signOneClickToken(payloadJson, secret) {
   // secret is a string; use HMAC SHA256
     if (crypto.subtle && crypto.getRandomValues) {
@@ -205,7 +205,7 @@ async function signOneClickToken(payloadJson, secret) {
       const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
       return btoa(payloadJson) + '.' + b64;
     } else {
-      const hmac = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
+      const hmac = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
       return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
     }
 }
@@ -222,7 +222,7 @@ function generateSecureToken(bytes = 32) {
   }
   // Node fallback
   try {
-    const buf = require('crypto').randomBytes(bytes);
+    const buf = require('node:crypto').randomBytes(bytes);
     return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   } catch (e) {
     // last fallback
@@ -242,7 +242,7 @@ async function verifyOneClickToken(token, secret) {
       if (!ok) return null
       return JSON.parse(payloadJson)
     }
-    const expected = require('crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
+    const expected = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
     if (expected !== b64sig) return null
     return JSON.parse(payloadJson)
   } catch (e) { return null }
@@ -1440,7 +1440,7 @@ const routes0 = [
           const now = Math.floor(Date.now()/1000);
           if (payload.exp && payload.exp < now) return json({ error: 'Token expired' }, 400);
           // mark used
-          await env.DB.prepare('UPDATE email_oneclicks SET used = 1, used_at = datetime('"'now'"') WHERE id = ?').bind(dbRow.id).run();
+          await env.DB.prepare("UPDATE email_oneclicks SET used = 1, used_at = datetime('now') WHERE id = ?").bind(dbRow.id).run();
         } else {
           payload = await verifyOneClickToken(body.token, env.ONECLICK_SECRET);
         }
