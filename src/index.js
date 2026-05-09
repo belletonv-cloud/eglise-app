@@ -1522,6 +1522,93 @@ const routes0 = [
       return json({ rows: rows.results, page, per });
     }),
 
+    // ========================================
+    // BULK EMAIL
+    // ========================================
+    route('POST', '/api/send-bulk-email', async (request, env) => {
+      const body = await getBody(request);
+      if (!body || !body.subject || !body.body) return badRequest('subject and body required');
+      if (!body.team_id && !body.plan_id && !body.member_ids) return badRequest('team_id, plan_id, or member_ids required');
+
+      const apiKey = env.RESEND_API_KEY;
+      const from = env.EMAIL_FROM || 'no-reply@example.com';
+      if (!apiKey) return badRequest('RESEND_API_KEY not configured');
+
+      let recipients = [];
+
+      if (body.team_id) {
+        const rows = await env.DB.prepare(`
+          SELECT DISTINCT m.email, m.id as member_id FROM members m
+          JOIN team_members tm ON tm.member_id = m.id
+          WHERE tm.team_id = ? AND m.email IS NOT NULL AND m.email != ''
+        `).bind(body.team_id).all();
+        recipients = rows.results;
+      } else if (body.plan_id) {
+        const rows = await env.DB.prepare(`
+          SELECT DISTINCT m.email, m.id as member_id FROM members m
+          JOIN scheduled_people sp ON sp.member_id = m.id
+          WHERE sp.plan_id = ? AND m.email IS NOT NULL AND m.email != ''
+        `).bind(body.plan_id).all();
+        recipients = rows.results;
+      } else if (body.member_ids) {
+        const placeholders = body.member_ids.map(() => '?').join(',');
+        const rows = await env.DB.prepare(`
+          SELECT email, id as member_id FROM members WHERE id IN (${placeholders}) AND email IS NOT NULL AND email != ''
+        `).bind(...body.member_ids).all();
+        recipients = rows.results;
+      }
+
+      if (recipients.length === 0) return json({ error: 'No recipients found' }, 400);
+
+      const results = { sent: 0, failed: 0, errors: [] };
+
+      for (const r of recipients) {
+        try {
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ from, to: r.email, subject: body.subject, html: body.body }),
+          });
+          if (res.ok) {
+            results.sent++;
+            await env.DB.prepare('INSERT INTO email_logs (subject, body, recipient_email, recipient_member_id, status) VALUES (?, ?, ?, ?, ?)')
+              .bind(body.subject, body.body, r.email, r.member_id || null, 'sent').run();
+          } else {
+            results.failed++;
+            const err = await res.text();
+            results.errors.push(`${r.email}: ${err}`);
+          }
+        } catch (e) {
+          results.failed++;
+          results.errors.push(`${r.email}: ${e.message}`);
+        }
+      }
+
+      return json(results);
+    }),
+
+    // ========================================
+    // STATS (for dashboard)
+    // ========================================
+    route('GET', '/api/stats', async (request, env) => {
+      const [members, activeMembers, upcomingPlans, songs, pendingSchedule, teams] = await Promise.all([
+        env.DB.prepare('SELECT COUNT(*) as c FROM members').first(),
+        env.DB.prepare("SELECT COUNT(*) as c FROM members WHERE membership_type = 'member'").first(),
+        env.DB.prepare("SELECT COUNT(*) as c FROM plans WHERE date >= date('now') AND status = 'planned'").first(),
+        env.DB.prepare('SELECT COUNT(*) as c FROM songs WHERE id IN (SELECT DISTINCT song_id FROM arrangements)').first(),
+        env.DB.prepare("SELECT COUNT(*) as c FROM scheduled_people WHERE status = 'pending'").first(),
+        env.DB.prepare('SELECT COUNT(*) as c FROM teams').first(),
+      ]);
+      return json({
+        members: members.c,
+        activeMembers: activeMembers.c,
+        upcomingPlans: upcomingPlans.c,
+        songsWithArrangements: songs.c,
+        pendingConfirmations: pendingSchedule.c,
+        teams: teams.c,
+      });
+    }),
+
     route('POST', '/api/email-logs', async (request, env) => {
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');

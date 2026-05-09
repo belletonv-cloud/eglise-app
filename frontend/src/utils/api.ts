@@ -160,6 +160,16 @@ export const api = {
   applyPlanTemplate: (templateId: number, data: { date: string; time?: string; theme?: string; notes?: string }) =>
     request<Plan>(`/plan-templates/${templateId}/apply`, { method: 'POST', body: JSON.stringify(data) }),
 
+  // Stats
+  getStats: () => request<{
+    members: number; activeMembers: number; upcomingPlans: number;
+    songsWithArrangements: number; pendingConfirmations: number; teams: number;
+  }>('/stats'),
+
+  // Bulk email
+  sendBulkEmail: (data: { subject: string; body: string; team_id?: number; plan_id?: number; member_ids?: number[] }) =>
+    request<{ sent: number; failed: number; errors: string[] }>('/send-bulk-email', { method: 'POST', body: JSON.stringify(data) }),
+
   // FCM Notifications
   registerFCMToken: (memberId: number, token: string, deviceType?: string) =>
     request<{ success: boolean }>('/fcm/register', { method: 'POST', body: JSON.stringify({ member_id: memberId, token, device_type: deviceType || 'web' }) }),
