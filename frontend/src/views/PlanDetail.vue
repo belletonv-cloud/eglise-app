@@ -4,16 +4,18 @@
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="plan">
-      <div class="flex items-center gap-3 mb-6">
+      <div class="flex items-center gap-2 mb-6 flex-wrap">
         <button @click="$router.push('/calendar')"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">&larr; Calendrier</button>
-        <div class="flex-1" />
+          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer shrink-0">&larr; Calendrier</button>
+        <div class="flex-1 min-w-0" />
         <button @click="$router.push(`/plans/${plan.id}/setlist`)"
-          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">Vue musicien</button>
+          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer shrink-0">Vue musicien</button>
+        <a :href="`${apiBase}/plans/${plan.id}/ical`" target="_blank"
+          class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer shrink-0">📅 iCal</a>
         <button @click="showEditForm = true"
-          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">Modifier</button>
+          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer shrink-0">Modifier</button>
         <button @click="deletePlan"
-          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer">Supprimer</button>
+          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer shrink-0">Supprimer</button>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -56,7 +58,13 @@
 
           <div class="space-y-2">
             <div v-for="(item, idx) in items" :key="item.id"
-              class="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-gray-300 group">
+              draggable="true"
+              @dragstart="onDragStart(idx)"
+              @dragover.prevent="onDragOver(idx)"
+              @dragenter.prevent
+              @drop="onDrop(idx)"
+              :class="{ 'border-blue-400': dragIndex === idx }"
+              class="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-gray-300 group transition-colors">
               <div class="flex flex-col items-center gap-0.5 pt-1">
                 <button @click="moveItem(idx, -1)" :disabled="idx === 0"
                   class="text-gray-400 hover:text-gray-600 text-xs disabled:opacity-30 cursor-pointer">&uarr;</button>
@@ -92,6 +100,11 @@
         <SchedulePeople :planId="plan.id" @changed="loadData" />
         <AttendanceSection :planId="plan.id" @changed="loadData" />
       </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <PlanChecklist :planId="plan.id" :serviceTypeId="plan.service_type_id" />
+        <SermonAudio :planId="plan.id" />
+      </div>
     </template>
   </div>
 </template>
@@ -99,13 +112,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { api } from '../utils/api'
+import { api, getApiBase } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 import PlanForm from '../components/PlanForm.vue'
 import PlanSongSelector from '../components/PlanSongSelector.vue'
 import SchedulePeople from '../components/SchedulePeople.vue'
 import AttendanceSection from '../components/AttendanceSection.vue'
+import PlanChecklist from '../components/PlanChecklist.vue'
+import SermonAudio from '../components/SermonAudio.vue'
 
+const apiBase = getApiBase()
 const route = useRoute()
 const router = useRouter()
 const plan = ref<any>(null)
@@ -220,6 +236,25 @@ const onSongChange = async (songId: number, arrangementId: number, transposedKey
   })
   changingItemId.value = null
   loadData()
+}
+
+const dragIndex = ref<number | null>(null)
+
+const onDragStart = (idx: number) => { dragIndex.value = idx }
+const onDragOver = (idx: number) => { /* visual feedback handled by class */ }
+const onDrop = async (idx: number) => {
+  if (dragIndex.value === null || dragIndex.value === idx) { dragIndex.value = null; return }
+  const from = dragIndex.value
+  const to = idx
+  dragIndex.value = null
+  
+  const [moved] = items.value.splice(from, 1)
+  items.value.splice(to, 0, moved)
+  
+  const updates = items.value.map((item: any, i: number) =>
+    api.updatePlanItem(item.id, { position: i + 1 })
+  )
+  await Promise.all(updates)
 }
 
 onMounted(loadData)

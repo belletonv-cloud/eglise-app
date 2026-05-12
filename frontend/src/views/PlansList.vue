@@ -22,7 +22,7 @@
       <div v-for="plan in plans" :key="plan.id"
         @click="goToPlan(plan.id)"
         class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md cursor-pointer transition-shadow">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div class="flex items-center gap-4">
             <div class="text-center min-w-[60px]">
               <div class="text-lg font-bold text-gray-800">{{ formatDay(plan.date) }}</div>
@@ -36,11 +36,11 @@
               <p v-if="plan.theme" class="text-sm text-gray-600 italic">« {{ plan.theme }} »</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 text-sm text-gray-500">
+          <div class="flex items-center gap-2 sm:gap-3 text-sm text-gray-500 flex-wrap">
             <span>{{ plan.items_count || 0 }} éléments</span>
             <span>·</span>
             <span>{{ plan.people_count || 0 }} personnes</span>
-            <span :class="statusClass(plan.status)" class="ml-2 px-2 py-1 rounded-full text-xs font-medium">
+            <span :class="statusClass(plan.status)" class="px-2 py-1 rounded-full text-xs font-medium">
               {{ statusLabel(plan.status) }}
             </span>
           </div>

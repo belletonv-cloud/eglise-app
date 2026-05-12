@@ -15,6 +15,7 @@
       </div>
     </div>
 
+    <div class="overflow-x-auto">
     <table class="w-full bg-white rounded shadow">
       <thead>
         <tr class="text-left border-b"><th class="p-2">Date</th><th class="p-2">Service</th><th class="p-2">Membre</th><th class="p-2">Assignation existante</th><th class="p-2">Forcé par</th><th class="p-2">Note</th></tr>
@@ -30,6 +31,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
 
     <div class="mt-4 flex items-center gap-3">
       <button @click="prev" class="px-2 py-1 bg-gray-200 rounded">Préc</button>

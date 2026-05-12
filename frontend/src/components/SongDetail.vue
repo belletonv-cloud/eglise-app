@@ -120,6 +120,10 @@
         @uploaded="onMediaUploaded"
       />
     </div>
+
+    <div v-if="currentArrangement" class="mt-8">
+      <ArrangementAnnotations :arrangement-id="currentArrangement.id" :key="'ann-' + currentArrangement.id" />
+    </div>
   </div>
 </template>
 
@@ -134,6 +138,7 @@ import { showToast } from '../stores/toast';
 import { confirmDialog } from '../stores/confirm';
 import ChordProEditor from './ChordProEditor.vue';
 import MediaUpload from './MediaUpload.vue';
+import ArrangementAnnotations from './ArrangementAnnotations.vue';
 
 const route = useRoute();
 const router = useRouter();

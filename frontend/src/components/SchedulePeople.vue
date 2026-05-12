@@ -30,7 +30,9 @@
               <option value="declined">Decliné</option>
             </select>
           </td>
-          <td class="px-3 py-2.5 text-right">
+          <td class="px-3 py-2.5 text-right space-x-2">
+            <button v-if="p.status === 'declined'" @click="showReplacements(p)"
+              class="text-amber-600 hover:text-amber-800 text-sm cursor-pointer">Remplacer</button>
             <button @click="remove(p)"
               class="text-red-600 hover:text-red-800 text-sm cursor-pointer">Retirer</button>
           </td>
@@ -38,6 +40,29 @@
       </tbody>
     </table>
     <div v-else class="text-center py-6 text-gray-400">Aucun bénévole planifié.</div>
+
+    <div v-if="showReplacement" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showReplacement = false">
+      <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+        <h4 class="text-lg font-bold mb-4">Remplacer {{ replacingPerson?.first_name }} {{ replacingPerson?.last_name }}</h4>
+        <div v-if="replacementsLoading" class="text-center py-4 text-gray-500">Recherche de remplaçants...</div>
+        <div v-else-if="replacements.length === 0" class="text-center py-4 text-gray-400">Aucun remplaçant disponible dans cette équipe.</div>
+        <div v-else class="space-y-2">
+          <div v-for="r in replacements" :key="r.id"
+            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <div>
+              <div class="font-medium text-gray-800">{{ r.first_name }} {{ r.last_name }}</div>
+              <div v-if="r.email" class="text-sm text-gray-500">{{ r.email }}</div>
+            </div>
+            <button @click="doReplace(r)"
+              class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer">Choisir</button>
+          </div>
+        </div>
+        <div class="flex justify-end mt-4">
+          <button @click="showReplacement = false"
+            class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Fermer</button>
+        </div>
+      </div>
+    </div>
 
     <div v-if="showAdd" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showAdd = false">
       <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
@@ -93,6 +118,10 @@ const teams = ref<any[]>([])
 const loading = ref(true)
 const showAdd = ref(false)
 const newPerson = ref({ member_id: '', position: '', team_id: undefined as number | undefined })
+const showReplacement = ref(false)
+const replacingPerson = ref<any>(null)
+const replacements = ref<any[]>([])
+const replacementsLoading = ref(false)
 
 const availableMembers = ref<any[]>([])
 
@@ -162,6 +191,27 @@ const remove = async (p: any) => {
   if (!await confirmDialog(`Retirer ${p.first_name} ${p.last_name} ?`)) return
   await api.removeSchedule(props.planId, p.id)
   loadPeople()
+}
+
+const showReplacements = async (p: any) => {
+  replacingPerson.value = p
+  showReplacement.value = true
+  replacementsLoading.value = true
+  try {
+    replacements.value = await api.getReplacements(props.planId, p.id)
+  } catch { replacements.value = [] }
+  finally { replacementsLoading.value = false }
+}
+
+const doReplace = async (r: any) => {
+  try {
+    await api.applyReplacement(props.planId, replacingPerson.value.id, r.id)
+    show('Remplacé par ' + r.first_name + ' ' + r.last_name, 'success')
+    showReplacement.value = false
+    loadPeople()
+  } catch (e: any) {
+    show(e.message || 'Erreur', 'error')
+  }
 }
 
 onMounted(async () => {

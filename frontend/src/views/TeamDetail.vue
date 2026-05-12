@@ -6,7 +6,8 @@
 
     <div class="card">
       <h3>Membres ({{ team.members?.length || 0 }})</h3>
-      <table v-if="team.members && team.members.length > 0">
+      <div v-if="team.members && team.members.length > 0" class="overflow-x-auto">
+      <table>
         <thead>
           <tr><th>Nom</th><th>Rôle</th><th></th></tr>
         </thead>
@@ -28,6 +29,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <div v-else class="empty">Aucun membre dans cette équipe.</div>
     </div>
 

@@ -1,0 +1,28 @@
+name: Weekly D1 Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Every Sunday at 3am
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: Backup D1 Database
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Create D1 backup
+        run: npx wrangler d1 backup create eglise-db
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      - name: Download latest backup
+        run: |
+          LATEST=$(npx wrangler d1 backup list eglise-db --format json | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n').filter(Boolean).map(JSON.parse);console.log(d.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]?.id||'')")
+          if [ -n "$LATEST" ]; then
+            npx wrangler d1 backup download eglise-db --backup-id=$LATEST --output=backups/
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

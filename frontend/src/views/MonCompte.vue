@@ -9,7 +9,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Informations personnelles</h2>
         <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Prénom</label>
               <p class="mt-1 text-gray-900">{{ member.first_name }}</p>

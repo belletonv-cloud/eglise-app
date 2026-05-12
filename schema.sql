@@ -48,6 +48,8 @@ CREATE TABLE plans (
     theme TEXT,
     notes TEXT,
     status TEXT DEFAULT 'planned', -- planned, completed, cancelled
+    reminder_j2_sent INTEGER DEFAULT 0,
+    reminder_j1_sent INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -254,3 +256,94 @@ CREATE TABLE plan_template_items (
 );
 
 CREATE INDEX idx_plan_template_items_template ON plan_template_items(plan_template_id);
+
+-- Checklist par poste (template par service_type)
+CREATE TABLE checklist_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_type_id INTEGER REFERENCES service_types(id),
+    position TEXT NOT NULL, -- e.g. 'son', 'technique', 'accueil', 'louange'
+    label TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE checklist_template_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    checklist_id INTEGER REFERENCES checklist_templates(id) ON DELETE CASCADE,
+    label TEXT NOT NULL,
+    position INTEGER DEFAULT 0
+);
+
+CREATE TABLE plan_checklists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    plan_id INTEGER REFERENCES plans(id) ON DELETE CASCADE,
+    member_id INTEGER REFERENCES members(id),
+    position TEXT NOT NULL,
+    done INTEGER DEFAULT 0,
+    label TEXT,
+    done_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Ajout colonne audio_url sur plans (enregistrement du sermon)
+ALTER TABLE plans ADD COLUMN audio_url TEXT;
+ALTER TABLE plans ADD COLUMN audio_title TEXT;
+
+-- Sondages (Polls)
+CREATE TABLE polls (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question TEXT NOT NULL,
+    max_votes INTEGER DEFAULT 1,
+    expires_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE poll_options (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    poll_id INTEGER REFERENCES polls(id) ON DELETE CASCADE,
+    label TEXT NOT NULL,
+    position INTEGER DEFAULT 0
+);
+
+CREATE TABLE poll_votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    poll_id INTEGER REFERENCES polls(id) ON DELETE CASCADE,
+    member_id INTEGER REFERENCES members(id),
+    poll_option_id INTEGER REFERENCES poll_options(id),
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(poll_id, member_id, poll_option_id)
+);
+
+-- Annonces et points de prière
+CREATE TABLE announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL DEFAULT 'announcement', -- 'announcement' or 'prayer'
+    content TEXT NOT NULL,
+    author_id INTEGER REFERENCES members(id),
+    plan_id INTEGER REFERENCES plans(id),
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX idx_announcements_type ON announcements(type);
+CREATE INDEX idx_announcements_plan ON announcements(plan_id);
+
+-- Webhooks
+CREATE TABLE webhooks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    events TEXT, -- JSON array of events
+    secret TEXT,
+    label TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE webhook_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    webhook_id INTEGER REFERENCES webhooks(id),
+    event TEXT,
+    status INTEGER,
+    response TEXT,
+    retry_count INTEGER DEFAULT 0,
+    max_retries INTEGER DEFAULT 6,
+    next_retry_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);

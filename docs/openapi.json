@@ -1,0 +1,1902 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Église App API",
+    "description": "API de gestion d'église — remplacement de Planning Center + Music Stand",
+    "version": "1.0.0",
+    "contact": { "email": "admin@eglise-app.ch" }
+  },
+  "servers": [
+    {
+      "url": "https://eglise-app.belletonv.workers.dev/api",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/songs": {
+      "get": {
+        "operationId": "listSongs",
+        "summary": "Liste tous les chants avec leur nombre d'arrangements",
+        "tags": ["Songs"],
+        "responses": {
+          "200": {
+            "description": "Liste des chants",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Song" } } } }
+          }
+        }
+      }
+    },
+    "/songs/{id}": {
+      "get": {
+        "operationId": "getSong",
+        "summary": "Détail d'un chant avec ses arrangements",
+        "tags": ["Songs"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du chant" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du chant", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SongDetail" } } } },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Chant non trouvé" }
+        }
+      }
+    },
+    "/arrangements/{id}": {
+      "put": {
+        "operationId": "updateArrangement",
+        "summary": "Met à jour un arrangement (name, key, tempo, chord_chart)",
+        "tags": ["Songs"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'arrangement" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ArrangementUpdate" } } }
+        },
+        "responses": {
+          "200": { "description": "Arrangement mis à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Arrangement non trouvé" }
+        }
+      }
+    },
+    "/members": {
+      "get": {
+        "operationId": "listMembers",
+        "summary": "Liste tous les membres avec leurs équipes",
+        "tags": ["Members"],
+        "responses": {
+          "200": { "description": "Liste des membres", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Member" } } } } }
+        }
+      },
+      "post": {
+        "operationId": "createMember",
+        "summary": "Crée un nouveau membre",
+        "tags": ["Members"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MemberCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Membre créé" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/members/{id}": {
+      "get": {
+        "operationId": "getMember",
+        "summary": "Détail d'un membre avec ses équipes",
+        "tags": ["Members"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du membre" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Membre non trouvé" }
+        }
+      },
+      "put": {
+        "operationId": "updateMember",
+        "summary": "Met à jour un membre",
+        "tags": ["Members"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MemberCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Membre mis à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMember",
+        "summary": "Supprime un membre",
+        "tags": ["Members"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "204": { "description": "Membre supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/members/{id}/role": {
+      "put": {
+        "operationId": "updateMemberRole",
+        "summary": "Met à jour le rôle d'un membre (admin only)",
+        "tags": ["Members"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "role": { "type": "string", "description": "Nouveau rôle (admin, scheduler, editor, etc.)" } }, "required": ["role"] } } }
+        },
+        "responses": {
+          "200": { "description": "Rôle mis à jour" },
+          "400": { "description": "ID ou rôle manquant" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "operationId": "listTeams",
+        "summary": "Liste toutes les équipes avec leur nombre de membres",
+        "tags": ["Teams"],
+        "responses": {
+          "200": { "description": "Liste des équipes" }
+        }
+      },
+      "post": {
+        "operationId": "createTeam",
+        "summary": "Crée une nouvelle équipe",
+        "tags": ["Teams"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TeamCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Équipe créée" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/teams/{id}": {
+      "get": {
+        "operationId": "getTeam",
+        "summary": "Détail d'une équipe avec ses membres",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" }
+        ],
+        "responses": {
+          "200": { "description": "Détail de l'équipe" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Équipe non trouvée" }
+        }
+      },
+      "put": {
+        "operationId": "updateTeam",
+        "summary": "Met à jour une équipe",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TeamCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Équipe mise à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTeam",
+        "summary": "Supprime une équipe",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" }
+        ],
+        "responses": {
+          "204": { "description": "Équipe supprimée" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/teams/{id}/members": {
+      "post": {
+        "operationId": "addTeamMember",
+        "summary": "Ajoute un membre à une équipe",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "position": { "type": "string" } }, "required": ["member_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Membre ajouté" },
+          "400": { "description": "member_id requis" },
+          "409": { "description": "Membre déjà dans l'équipe" }
+        }
+      }
+    },
+    "/teams/{tid}/members/{mid}": {
+      "put": {
+        "operationId": "updateTeamMember",
+        "summary": "Met à jour le poste d'un membre dans une équipe",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "tid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" },
+          { "name": "mid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "position": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Position mise à jour" },
+          "400": { "description": "ID invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "removeTeamMember",
+        "summary": "Retire un membre d'une équipe",
+        "tags": ["Teams"],
+        "parameters": [
+          { "name": "tid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'équipe" },
+          { "name": "mid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "204": { "description": "Membre retiré" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/service-types": {
+      "get": {
+        "operationId": "listServiceTypes",
+        "summary": "Liste tous les types de service",
+        "tags": ["Service Types"],
+        "responses": {
+          "200": { "description": "Liste des types de service" }
+        }
+      }
+    },
+    "/plans": {
+      "get": {
+        "operationId": "listPlans",
+        "summary": "Liste les plans (services). Filtre par month/year optionnel",
+        "tags": ["Plans"],
+        "parameters": [
+          { "name": "month", "in": "query", "schema": { "type": "string" }, "description": "Mois (1-12)" },
+          { "name": "year", "in": "query", "schema": { "type": "string" }, "description": "Année (ex: 2026)" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des plans" }
+        }
+      },
+      "post": {
+        "operationId": "createPlan",
+        "summary": "Crée un nouveau plan (service)",
+        "tags": ["Plans"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlanCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Plan créé" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/plans/{id}": {
+      "get": {
+        "operationId": "getPlan",
+        "summary": "Détail d'un plan",
+        "tags": ["Plans"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du plan" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "put": {
+        "operationId": "updatePlan",
+        "summary": "Met à jour un plan",
+        "tags": ["Plans"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlanCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Plan mis à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlan",
+        "summary": "Supprime un plan",
+        "tags": ["Plans"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "204": { "description": "Plan supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{id}/items": {
+      "get": {
+        "operationId": "listPlanItems",
+        "summary": "Liste les éléments d'un plan",
+        "tags": ["Plan Items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des éléments" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "post": {
+        "operationId": "createPlanItem",
+        "summary": "Ajoute un élément à un plan",
+        "tags": ["Plan Items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlanItemCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Élément créé" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      }
+    },
+    "/plan-items/{id}": {
+      "put": {
+        "operationId": "updatePlanItem",
+        "summary": "Met à jour un élément de plan",
+        "tags": ["Plan Items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlanItemUpdate" } } }
+        },
+        "responses": {
+          "200": { "description": "Élément mis à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Élément non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlanItem",
+        "summary": "Supprime un élément de plan",
+        "tags": ["Plan Items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "responses": {
+          "204": { "description": "Élément supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{id}/scheduled-people": {
+      "get": {
+        "operationId": "listScheduledPeople",
+        "summary": "Liste les bénévoles planifiés pour un service",
+        "tags": ["Scheduled People"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des bénévoles" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "post": {
+        "operationId": "createScheduledPerson",
+        "summary": "Planifie un bénévole pour un service",
+        "tags": ["Scheduled People"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScheduledPersonCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Bénévole planifié" },
+          "400": { "description": "ID ou corps invalide" },
+          "403": { "description": "Permission refusée" },
+          "404": { "description": "Plan non trouvé" },
+          "409": { "description": "Conflit — membre déjà planifié" }
+        }
+      }
+    },
+    "/plans/{pid}/scheduled-people/{sid}": {
+      "put": {
+        "operationId": "updateScheduledPerson",
+        "summary": "Met à jour le statut/position d'une planification",
+        "tags": ["Scheduled People"],
+        "parameters": [
+          { "name": "pid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" },
+          { "name": "sid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la planification" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "position": { "type": "string" }, "status": { "type": "string", "enum": ["pending", "confirmed", "declined"] } } } } }
+        },
+        "responses": {
+          "200": { "description": "Planification mise à jour" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Planification non trouvée" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteScheduledPerson",
+        "summary": "Supprime une planification",
+        "tags": ["Scheduled People"],
+        "parameters": [
+          { "name": "pid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" },
+          { "name": "sid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la planification" }
+        ],
+        "responses": {
+          "204": { "description": "Planification supprimée" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{pid}/attendances": {
+      "get": {
+        "operationId": "listPlanAttendances",
+        "summary": "Liste les présences pour un plan",
+        "tags": ["Attendances"],
+        "parameters": [
+          { "name": "pid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des présences" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/attendances": {
+      "get": {
+        "operationId": "listAttendances",
+        "summary": "Liste toutes les présences",
+        "tags": ["Attendances"],
+        "responses": {
+          "200": { "description": "Liste des présences" }
+        }
+      },
+      "post": {
+        "operationId": "createAttendance",
+        "summary": "Enregistre une présence",
+        "tags": ["Attendances"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "plan_id": { "type": "integer" }, "member_id": { "type": "integer" }, "status": { "type": "string", "default": "present" }, "notes": { "type": "string" } }, "required": ["plan_id", "member_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Présence enregistrée" },
+          "400": { "description": "Corps invalide ou déjà enregistré" }
+        }
+      }
+    },
+    "/attendances/{id}": {
+      "get": {
+        "operationId": "getAttendance",
+        "summary": "Détail d'une présence",
+        "tags": ["Attendances"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la présence" }
+        ],
+        "responses": {
+          "200": { "description": "Détail de la présence" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Présence non trouvée" }
+        }
+      },
+      "put": {
+        "operationId": "updateAttendance",
+        "summary": "Met à jour une présence (status, notes)",
+        "tags": ["Attendances"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la présence" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "notes": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Présence mise à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAttendance",
+        "summary": "Supprime une présence",
+        "tags": ["Attendances"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la présence" }
+        ],
+        "responses": {
+          "204": { "description": "Présence supprimée" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/house-groups": {
+      "get": {
+        "operationId": "listHouseGroups",
+        "summary": "Liste tous les groupes de maison",
+        "tags": ["House Groups"],
+        "responses": {
+          "200": { "description": "Liste des groupes" }
+        }
+      },
+      "post": {
+        "operationId": "createHouseGroup",
+        "summary": "Crée un groupe de maison",
+        "tags": ["House Groups"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HouseGroupCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Groupe créé" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/house-groups/{id}": {
+      "get": {
+        "operationId": "getHouseGroup",
+        "summary": "Détail d'un groupe de maison avec membres et réunions",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du groupe" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Groupe non trouvé" }
+        }
+      },
+      "put": {
+        "operationId": "updateHouseGroup",
+        "summary": "Met à jour un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HouseGroupCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Groupe mis à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Groupe non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteHouseGroup",
+        "summary": "Supprime un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "responses": {
+          "204": { "description": "Groupe supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/house-groups/{gid}/members": {
+      "post": {
+        "operationId": "addHouseGroupMember",
+        "summary": "Ajoute un membre à un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "gid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "role": { "type": "string", "default": "member" } }, "required": ["member_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Membre ajouté" },
+          "400": { "description": "ID ou member_id requis" }
+        }
+      }
+    },
+    "/house-groups/{gid}/members/{mid}": {
+      "delete": {
+        "operationId": "removeHouseGroupMember",
+        "summary": "Retire un membre d'un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "gid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" },
+          { "name": "mid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "204": { "description": "Membre retiré" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/house-groups/{gid}/meetings": {
+      "get": {
+        "operationId": "listGroupMeetings",
+        "summary": "Liste les réunions d'un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "gid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des réunions" },
+          "400": { "description": "ID invalide" }
+        }
+      },
+      "post": {
+        "operationId": "createGroupMeeting",
+        "summary": "Crée une réunion pour un groupe de maison",
+        "tags": ["House Groups"],
+        "parameters": [
+          { "name": "gid", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du groupe" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "date": { "type": "string", "format": "date" }, "notes": { "type": "string" } }, "required": ["date"] } } }
+        },
+        "responses": {
+          "201": { "description": "Réunion créée" },
+          "400": { "description": "ID ou date requis" }
+        }
+      }
+    },
+    "/email-templates": {
+      "get": {
+        "operationId": "listEmailTemplates",
+        "summary": "Liste les modèles d'email",
+        "tags": ["Emails"],
+        "responses": {
+          "200": { "description": "Liste des modèles" }
+        }
+      },
+      "post": {
+        "operationId": "createEmailTemplate",
+        "summary": "Crée un modèle d'email",
+        "tags": ["Emails"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmailTemplateCreate" } } }
+        },
+        "responses": {
+          "201": { "description": "Modèle créé" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/email-templates/{id}": {
+      "get": {
+        "operationId": "getEmailTemplate",
+        "summary": "Détail d'un modèle d'email",
+        "tags": ["Emails"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du modèle" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Modèle non trouvé" }
+        }
+      },
+      "put": {
+        "operationId": "updateEmailTemplate",
+        "summary": "Met à jour un modèle d'email",
+        "tags": ["Emails"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmailTemplateCreate" } } }
+        },
+        "responses": {
+          "200": { "description": "Modèle mis à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "404": { "description": "Modèle non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEmailTemplate",
+        "summary": "Supprime un modèle d'email",
+        "tags": ["Emails"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "204": { "description": "Modèle supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/email-logs": {
+      "get": {
+        "operationId": "listEmailLogs",
+        "summary": "Liste les logs d'emails envoyés",
+        "tags": ["Emails"],
+        "responses": {
+          "200": { "description": "Liste des logs" }
+        }
+      },
+      "post": {
+        "operationId": "createEmailLog",
+        "summary": "Ajoute une entrée manuelle aux logs d'email",
+        "tags": ["Emails"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "template_id": { "type": "integer" }, "subject": { "type": "string" }, "body": { "type": "string" }, "recipient_email": { "type": "string" }, "recipient_member_id": { "type": "integer" }, "status": { "type": "string" } }, "required": ["subject", "body", "recipient_email"] } } }
+        },
+        "responses": {
+          "201": { "description": "Log créé" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/send-email": {
+      "post": {
+        "operationId": "sendEmail",
+        "summary": "Envoie un email via Resend et logge le résultat",
+        "tags": ["Emails"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "recipient_email": { "type": "string" }, "subject": { "type": "string" }, "body": { "type": "string" }, "template_id": { "type": "integer" }, "recipient_member_id": { "type": "integer" } }, "required": ["recipient_email", "subject", "body"] } } }
+        },
+        "responses": {
+          "200": { "description": "Email envoyé ou échec rapporté" },
+          "400": { "description": "Corps invalide" }
+        }
+      }
+    },
+    "/send-bulk-email": {
+      "post": {
+        "operationId": "sendBulkEmail",
+        "summary": "Envoie un email en masse à une équipe, un plan ou des membres spécifiques",
+        "tags": ["Emails"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "subject": { "type": "string" }, "body": { "type": "string" }, "team_id": { "type": "integer" }, "plan_id": { "type": "integer" }, "member_ids": { "type": "array", "items": { "type": "integer" } } }, "required": ["subject", "body"] } } }
+        },
+        "responses": {
+          "200": { "description": "Résultat de l'envoi" },
+          "400": { "description": "Corps invalide ou aucun destinataire" }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Retourne le membre connecté avec ses équipes",
+        "tags": ["Member Portal"],
+        "responses": {
+          "200": { "description": "Profil du membre" },
+          "401": { "description": "Non authentifié" }
+        }
+      },
+      "put": {
+        "operationId": "updateMe",
+        "summary": "Met à jour les infos du membre connecté (phone, notes, birth_date)",
+        "tags": ["Member Portal"],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "phone": { "type": "string" }, "notes": { "type": "string" }, "birth_date": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Profil mis à jour" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    },
+    "/me/schedule": {
+      "get": {
+        "operationId": "getMySchedule",
+        "summary": "Retourne les planifications à venir du membre connecté",
+        "tags": ["Member Portal"],
+        "responses": {
+          "200": { "description": "Liste des planifications" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    },
+    "/me/firebase-status": {
+      "get": {
+        "operationId": "getFirebaseStatus",
+        "summary": "Vérifie si le membre connecté a lié un compte Firebase",
+        "tags": ["Member Portal"],
+        "responses": {
+          "200": { "description": "Statut de liaison Firebase" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    },
+    "/volunteer-preferences/{memberId}": {
+      "get": {
+        "operationId": "getVolunteerPreferences",
+        "summary": "Retourne les préférences de bénévolat d'un membre",
+        "tags": ["Volunteer Preferences"],
+        "parameters": [
+          { "name": "memberId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "200": { "description": "Préférences du membre" },
+          "400": { "description": "ID invalide" }
+        }
+      },
+      "put": {
+        "operationId": "updateVolunteerPreferences",
+        "summary": "Met à jour les préférences de bénévolat d'un membre",
+        "tags": ["Volunteer Preferences"],
+        "parameters": [
+          { "name": "memberId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "unavailable_dates": { "type": "array", "items": { "type": "string" } }, "max_services_per_month": { "type": "integer", "default": 4 }, "notes": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Préférences mises à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      }
+    },
+    "/plan-templates": {
+      "get": {
+        "operationId": "listPlanTemplates",
+        "summary": "Liste tous les modèles de plan",
+        "tags": ["Plan Templates"],
+        "responses": {
+          "200": { "description": "Liste des modèles" }
+        }
+      },
+      "post": {
+        "operationId": "createPlanTemplate",
+        "summary": "Crée un modèle de plan",
+        "tags": ["Plan Templates"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "description": { "type": "string" }, "service_type_id": { "type": "integer" } }, "required": ["name"] } } }
+        },
+        "responses": {
+          "201": { "description": "Modèle créé" },
+          "400": { "description": "name requis" }
+        }
+      }
+    },
+    "/plan-templates/{id}": {
+      "get": {
+        "operationId": "getPlanTemplate",
+        "summary": "Détail d'un modèle de plan avec ses éléments",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "200": { "description": "Détail du modèle" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Modèle non trouvé" }
+        }
+      },
+      "put": {
+        "operationId": "updatePlanTemplate",
+        "summary": "Met à jour un modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "description": { "type": "string" }, "service_type_id": { "type": "integer" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Modèle mis à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlanTemplate",
+        "summary": "Supprime un modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "204": { "description": "Modèle supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plan-templates/{id}/items": {
+      "get": {
+        "operationId": "listPlanTemplateItems",
+        "summary": "Liste les éléments d'un modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des éléments" },
+          "400": { "description": "ID invalide" }
+        }
+      },
+      "post": {
+        "operationId": "createPlanTemplateItem",
+        "summary": "Ajoute un élément à un modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "type": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "position": { "type": "integer" }, "length_minutes": { "type": "integer" }, "arrangement_id": { "type": "integer" }, "transposed_key": { "type": "string" } }, "required": ["type", "title"] } } }
+        },
+        "responses": {
+          "201": { "description": "Élément créé" },
+          "400": { "description": "type et title requis" }
+        }
+      }
+    },
+    "/plan-template-items/{id}": {
+      "put": {
+        "operationId": "updatePlanTemplateItem",
+        "summary": "Met à jour un élément de modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "type": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "position": { "type": "integer" }, "length_minutes": { "type": "integer" }, "arrangement_id": { "type": "integer" }, "transposed_key": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Élément mis à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlanTemplateItem",
+        "summary": "Supprime un élément de modèle de plan",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "responses": {
+          "204": { "description": "Élément supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plan-templates/{id}/apply": {
+      "post": {
+        "operationId": "applyPlanTemplate",
+        "summary": "Crée un plan à partir d'un modèle",
+        "tags": ["Plan Templates"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "date": { "type": "string", "format": "date" }, "time": { "type": "string" }, "theme": { "type": "string" }, "notes": { "type": "string" } }, "required": ["date"] } } }
+        },
+        "responses": {
+          "201": { "description": "Plan créé" },
+          "400": { "description": "date requise" },
+          "404": { "description": "Modèle non trouvé" }
+        }
+      }
+    },
+    "/member-exceptions": {
+      "get": {
+        "operationId": "listMemberExceptions",
+        "summary": "Liste les exceptions de permissions",
+        "tags": ["Member Exceptions"],
+        "responses": {
+          "200": { "description": "Liste des exceptions" },
+          "403": { "description": "Non autorisé" }
+        }
+      },
+      "post": {
+        "operationId": "createMemberException",
+        "summary": "Crée une exception de permission pour un membre",
+        "tags": ["Member Exceptions"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "permission": { "type": "string" }, "granted": { "type": "boolean" } }, "required": ["member_id", "permission"] } } }
+        },
+        "responses": {
+          "201": { "description": "Exception créée" },
+          "400": { "description": "member_id et permission requis" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/member-exceptions/{id}": {
+      "delete": {
+        "operationId": "deleteMemberException",
+        "summary": "Supprime une exception de permission",
+        "tags": ["Member Exceptions"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'exception" }
+        ],
+        "responses": {
+          "204": { "description": "Exception supprimée" },
+          "400": { "description": "ID invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/scheduled-conflict-logs": {
+      "get": {
+        "operationId": "listConflictLogs",
+        "summary": "Liste les logs de conflits de planification",
+        "tags": ["Conflict Logs"],
+        "parameters": [
+          { "name": "plan_id", "in": "query", "schema": { "type": "integer" }, "description": "Filtrer par plan" },
+          { "name": "member", "in": "query", "schema": { "type": "string" }, "description": "Recherche par nom de membre" },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "per", "in": "query", "schema": { "type": "integer", "default": 50 } }
+        ],
+        "responses": {
+          "200": { "description": "Logs de conflits" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/communication-preferences/{memberId}": {
+      "get": {
+        "operationId": "getCommunicationPreferences",
+        "summary": "Retourne les préférences de communication d'un membre",
+        "tags": ["Communication Preferences"],
+        "parameters": [
+          { "name": "memberId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du membre" }
+        ],
+        "responses": {
+          "200": { "description": "Préférences de communication" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/communication-preferences": {
+      "post": {
+        "operationId": "setCommunicationPreferences",
+        "summary": "Définit les préférences de communication d'un membre",
+        "tags": ["Communication Preferences"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "receive_emails": { "type": "boolean" }, "receive_sms": { "type": "boolean" }, "email_types": { "type": "string" } }, "required": ["member_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Préférences enregistrées" },
+          "400": { "description": "member_id requis" }
+        }
+      }
+    },
+    "/fcm/register": {
+      "post": {
+        "operationId": "registerFcmToken",
+        "summary": "Enregistre un token de notification push",
+        "tags": ["FCM"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "token": { "type": "string" }, "device_type": { "type": "string", "default": "web" } }, "required": ["member_id", "token"] } } }
+        },
+        "responses": {
+          "200": { "description": "Token enregistré" },
+          "400": { "description": "member_id et token requis" }
+        }
+      }
+    },
+    "/fcm/send": {
+      "post": {
+        "operationId": "sendFcmNotification",
+        "summary": "Envoie une notification push via FCM",
+        "tags": ["FCM"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "member_id": { "type": "integer" }, "plan_id": { "type": "integer" }, "tokens": { "type": "array", "items": { "type": "string" } }, "title": { "type": "string" }, "message": { "type": "string" }, "data": { "type": "object" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Notification envoyée" },
+          "400": { "description": "Corps invalide ou FCM non configuré" }
+        }
+      }
+    },
+    "/arrangements/{id}/media": {
+      "get": {
+        "operationId": "listArrangementMedia",
+        "summary": "Liste les médias attachés à un arrangement",
+        "tags": ["Media"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'arrangement" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des médias" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "operationId": "uploadMedia",
+        "summary": "Upload un fichier média pour un arrangement (multipart/form-data)",
+        "tags": ["Media"],
+        "requestBody": {
+          "required": true,
+          "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "file": { "type": "string", "format": "binary" }, "arrangement_id": { "type": "integer" }, "file_type": { "type": "string", "default": "audio" } }, "required": ["file", "arrangement_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Fichier uploadé" },
+          "400": { "description": "file et arrangement_id requis" }
+        }
+      }
+    },
+    "/attachments/{id}/file": {
+      "get": {
+        "operationId": "getAttachmentFile",
+        "summary": "Télécharge le fichier d'un attachement",
+        "tags": ["Media"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'attachement" }
+        ],
+        "responses": {
+          "200": { "description": "Fichier" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Attachement non trouvé" }
+        }
+      }
+    },
+    "/attachments/{id}": {
+      "delete": {
+        "operationId": "deleteAttachment",
+        "summary": "Supprime un attachement et son fichier kDrive",
+        "tags": ["Media"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'attachement" }
+        ],
+        "responses": {
+          "200": { "description": "Attachement supprimé" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Attachement non trouvé" }
+        }
+      }
+    },
+    "/oneclick": {
+      "post": {
+        "operationId": "executeOneClickAction",
+        "summary": "Exécute une action admin via un token à usage unique",
+        "tags": ["One-click"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } }, "required": ["token"] } } }
+        },
+        "responses": {
+          "200": { "description": "Action exécutée" },
+          "400": { "description": "Token invalide, expiré ou déjà utilisé" }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "getStats",
+        "summary": "Statistiques du dashboard (membres, plans, chants, etc.)",
+        "tags": ["Stats"],
+        "responses": {
+          "200": { "description": "Statistiques" }
+        }
+      }
+    },
+    "/plans/{id}/ical": {
+      "get": {
+        "operationId": "exportPlanIcal",
+        "summary": "Exporte un plan au format iCal",
+        "tags": ["iCal"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Fichier iCal" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      }
+    },
+    "/directory": {
+      "get": {
+        "operationId": "getDirectory",
+        "summary": "Annuaire des membres (avec téléphone et équipes)",
+        "tags": ["Directory"],
+        "responses": {
+          "200": { "description": "Annuaire des membres" }
+        }
+      }
+    },
+    "/checklist-templates": {
+      "get": {
+        "operationId": "listChecklistTemplates",
+        "summary": "Liste les modèles de checklist (filtre par service_type_id)",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "service_type_id", "in": "query", "schema": { "type": "integer" }, "description": "Filtrer par type de service" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des modèles" }
+        }
+      },
+      "post": {
+        "operationId": "createChecklistTemplate",
+        "summary": "Crée un modèle de checklist",
+        "tags": ["Checklist"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "position": { "type": "integer" }, "label": { "type": "string" }, "service_type_id": { "type": "integer" } }, "required": ["position", "label"] } } }
+        },
+        "responses": {
+          "201": { "description": "Modèle créé" },
+          "400": { "description": "position et label requis" }
+        }
+      }
+    },
+    "/checklist-templates/{id}": {
+      "delete": {
+        "operationId": "deleteChecklistTemplate",
+        "summary": "Supprime un modèle de checklist",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle" }
+        ],
+        "responses": {
+          "204": { "description": "Modèle supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/checklist-templates/{id}/items": {
+      "post": {
+        "operationId": "createChecklistTemplateItem",
+        "summary": "Ajoute un élément à un modèle de checklist",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du modèle de checklist" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "label": { "type": "string" }, "position": { "type": "integer" } }, "required": ["label"] } } }
+        },
+        "responses": {
+          "201": { "description": "Élément créé" },
+          "400": { "description": "label requis" }
+        }
+      }
+    },
+    "/checklist-template-items/{id}": {
+      "delete": {
+        "operationId": "deleteChecklistTemplateItem",
+        "summary": "Supprime un élément d'un modèle de checklist",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "responses": {
+          "204": { "description": "Élément supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{id}/checklist": {
+      "get": {
+        "operationId": "listPlanChecklists",
+        "summary": "Liste les checklists d'un plan",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des checklists" },
+          "400": { "description": "ID invalide" }
+        }
+      },
+      "post": {
+        "operationId": "createPlanChecklist",
+        "summary": "Ajoute un élément de checklist à un plan",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "position": { "type": "integer" }, "label": { "type": "string" }, "member_id": { "type": "integer" } }, "required": ["position", "label"] } } }
+        },
+        "responses": {
+          "201": { "description": "Élément créé" },
+          "400": { "description": "position et label requis" }
+        }
+      }
+    },
+    "/plan-checklists/{id}": {
+      "put": {
+        "operationId": "updatePlanChecklist",
+        "summary": "Marque un élément de checklist comme fait/non fait",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément de checklist" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "done": { "type": "boolean" } }, "required": ["done"] } } }
+        },
+        "responses": {
+          "200": { "description": "Élément mis à jour" },
+          "400": { "description": "ID ou corps invalide" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlanChecklist",
+        "summary": "Supprime un élément de checklist d'un plan",
+        "tags": ["Checklist"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'élément" }
+        ],
+        "responses": {
+          "204": { "description": "Élément supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{id}/audio": {
+      "post": {
+        "operationId": "uploadPlanAudio",
+        "summary": "Upload un fichier audio pour un plan (multipart/form-data)",
+        "tags": ["Audio"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "file": { "type": "string", "format": "binary" }, "title": { "type": "string" } }, "required": ["file"] } } }
+        },
+        "responses": {
+          "201": { "description": "Audio uploadé" },
+          "400": { "description": "file requis" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "get": {
+        "operationId": "getPlanAudio",
+        "summary": "Retourne les infos audio d'un plan",
+        "tags": ["Audio"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Infos audio" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "deletePlanAudio",
+        "summary": "Supprime l'audio d'un plan",
+        "tags": ["Audio"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Audio supprimé" },
+          "400": { "description": "ID invalide" }
+        }
+      }
+    },
+    "/plans/{id}/audio/stream": {
+      "get": {
+        "operationId": "streamPlanAudio",
+        "summary": "Stream le fichier audio d'un plan",
+        "tags": ["Audio"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "Flux audio" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Audio non trouvé" }
+        }
+      }
+    },
+    "/plans/{id}/replacements/{scheduledId}": {
+      "get": {
+        "operationId": "listReplacementCandidates",
+        "summary": "Liste les remplaçants potentiels pour une planification",
+        "tags": ["Replacements"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" },
+          { "name": "scheduledId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la planification" }
+        ],
+        "responses": {
+          "200": { "description": "Candidats au remplacement" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Planification non trouvée" }
+        }
+      },
+      "post": {
+        "operationId": "executeReplacement",
+        "summary": "Remplace un bénévole par un autre",
+        "tags": ["Replacements"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" },
+          { "name": "scheduledId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de la planification" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "new_member_id": { "type": "integer" } }, "required": ["new_member_id"] } } }
+        },
+        "responses": {
+          "200": { "description": "Remplacement effectué" },
+          "400": { "description": "ID ou new_member_id requis" },
+          "404": { "description": "Planification non trouvée" }
+        }
+      }
+    },
+    "/polls": {
+      "get": {
+        "operationId": "listPolls",
+        "summary": "Liste tous les sondages avec les options et mes votes",
+        "tags": ["Sondages"],
+        "responses": {
+          "200": { "description": "Liste des sondages" }
+        }
+      },
+      "post": {
+        "operationId": "createPoll",
+        "summary": "Crée un sondage",
+        "tags": ["Sondages"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "question": { "type": "string" }, "max_votes": { "type": "integer", "default": 1 }, "expires_at": { "type": "string", "format": "date-time" } }, "required": ["question"] } } }
+        },
+        "responses": {
+          "201": { "description": "Sondage créé" },
+          "400": { "description": "question requise" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/polls/{id}": {
+      "delete": {
+        "operationId": "deletePoll",
+        "summary": "Supprime un sondage",
+        "tags": ["Sondages"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du sondage" }
+        ],
+        "responses": {
+          "204": { "description": "Sondage supprimé" },
+          "400": { "description": "ID invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/polls/{id}/options": {
+      "post": {
+        "operationId": "createPollOption",
+        "summary": "Ajoute une option de vote à un sondage",
+        "tags": ["Sondages"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du sondage" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "label": { "type": "string" }, "position": { "type": "integer" } }, "required": ["label"] } } }
+        },
+        "responses": {
+          "201": { "description": "Option créée" },
+          "400": { "description": "label requis" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/poll-options/{id}": {
+      "delete": {
+        "operationId": "deletePollOption",
+        "summary": "Supprime une option de sondage",
+        "tags": ["Sondages"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'option" }
+        ],
+        "responses": {
+          "204": { "description": "Option supprimée" },
+          "400": { "description": "ID invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/polls/{id}/vote": {
+      "post": {
+        "operationId": "castPollVote",
+        "summary": "Vote pour une option de sondage",
+        "tags": ["Sondages"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du sondage" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "option_id": { "type": "integer" } }, "required": ["option_id"] } } }
+        },
+        "responses": {
+          "201": { "description": "Vote enregistré" },
+          "400": { "description": "option_id requis, sondage expiré ou max votes atteint" },
+          "401": { "description": "Non authentifié" },
+          "404": { "description": "Sondage non trouvé" }
+        }
+      },
+      "delete": {
+        "operationId": "removePollVote",
+        "summary": "Retire un vote",
+        "tags": ["Sondages"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du sondage" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "option_id": { "type": "integer" } }, "required": ["option_id"] } } }
+        },
+        "responses": {
+          "200": { "description": "Vote retiré" },
+          "400": { "description": "option_id requis" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    },
+    "/announcements": {
+      "get": {
+        "operationId": "listAnnouncements",
+        "summary": "Liste les annonces et points de prière (filtre par type)",
+        "tags": ["Annonces"],
+        "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["announcement", "prayer"] }, "description": "Filtrer par type" }
+        ],
+        "responses": {
+          "200": { "description": "Liste des annonces" }
+        }
+      },
+      "post": {
+        "operationId": "createAnnouncement",
+        "summary": "Crée une annonce ou un point de prière",
+        "tags": ["Annonces"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "content": { "type": "string" }, "type": { "type": "string", "default": "announcement" }, "plan_id": { "type": "integer" } }, "required": ["content"] } } }
+        },
+        "responses": {
+          "201": { "description": "Annonce créée" },
+          "400": { "description": "content requis" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    },
+    "/announcements/{id}": {
+      "put": {
+        "operationId": "updateAnnouncement",
+        "summary": "Met à jour une annonce",
+        "tags": ["Annonces"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'annonce" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "content": { "type": "string" }, "type": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Annonce mise à jour" },
+          "400": { "description": "ID ou corps invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAnnouncement",
+        "summary": "Supprime une annonce",
+        "tags": ["Annonces"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID de l'annonce" }
+        ],
+        "responses": {
+          "204": { "description": "Annonce supprimée" },
+          "400": { "description": "ID invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/export/{entity}": {
+      "get": {
+        "operationId": "exportCsv",
+        "summary": "Exporte une entité en CSV (members, songs, plans)",
+        "tags": ["Import/Export"],
+        "parameters": [
+          { "name": "entity", "in": "path", "required": true, "schema": { "type": "string", "enum": ["members", "songs", "plans"] }, "description": "Entité à exporter" }
+        ],
+        "responses": {
+          "200": { "description": "Fichier CSV" },
+          "400": { "description": "Entité invalide" }
+        }
+      }
+    },
+    "/import/{entity}": {
+      "post": {
+        "operationId": "importCsv",
+        "summary": "Importe des données depuis CSV (members, songs)",
+        "tags": ["Import/Export"],
+        "parameters": [
+          { "name": "entity", "in": "path", "required": true, "schema": { "type": "string", "enum": ["members", "songs"] }, "description": "Entité à importer" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "text/csv": { "schema": { "type": "string" } } }
+        },
+        "responses": {
+          "200": { "description": "Résultat de l'import" },
+          "400": { "description": "Entité invalide ou CSV invalide" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/invitations": {
+      "post": {
+        "operationId": "createInvitation",
+        "summary": "Crée une invitation par email pour un membre",
+        "tags": ["Invitations"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" } }, "required": ["email"] } } }
+        },
+        "responses": {
+          "201": { "description": "Invitation envoyée" },
+          "400": { "description": "email requis ou membre non trouvé" },
+          "403": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/invitations/{token}": {
+      "get": {
+        "operationId": "getInvitation",
+        "summary": "Vérifie la validité d'un token d'invitation",
+        "tags": ["Invitations"],
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Token d'invitation" }
+        ],
+        "responses": {
+          "200": { "description": "Infos de l'invitation" },
+          "400": { "description": "Token invalide, expiré ou déjà utilisé" }
+        }
+      }
+    },
+    "/invitations/{token}/redeem": {
+      "post": {
+        "operationId": "redeemInvitation",
+        "summary": "Utilise un token d'invitation pour lier un compte Firebase",
+        "tags": ["Invitations"],
+        "parameters": [
+          { "name": "token", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Token d'invitation" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "firebase_uid": { "type": "string" } }, "required": ["firebase_uid"] } } }
+        },
+        "responses": {
+          "200": { "description": "Compte lié" },
+          "400": { "description": "Token invalide/expiré ou firebase_uid déjà lié" }
+        }
+      }
+    },
+    "/attendance-stats": {
+      "get": {
+        "operationId": "getAttendanceStats",
+        "summary": "Statistiques de présence (total, par membre, par mois)",
+        "tags": ["Attendance Stats"],
+        "parameters": [
+          { "name": "year", "in": "query", "schema": { "type": "string" }, "description": "Année (défaut: année courante)" },
+          { "name": "member_id", "in": "query", "schema": { "type": "integer" }, "description": "Filtrer par membre" }
+        ],
+        "responses": {
+          "200": { "description": "Statistiques de présence" }
+        }
+      }
+    },
+    "/plans/{id}/qr-checkin": {
+      "get": {
+        "operationId": "getPlanQrCheckin",
+        "summary": "Génère une URL de check-in par QR code pour un plan",
+        "tags": ["Plans"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "ID du plan" }
+        ],
+        "responses": {
+          "200": { "description": "URL de check-in" },
+          "400": { "description": "ID invalide" },
+          "404": { "description": "Plan non trouvé" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Song": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "ccli_number": { "type": "string" },
+          "copyright": { "type": "string" },
+          "notes": { "type": "string" },
+          "arrangement_count": { "type": "integer" }
+        }
+      },
+      "SongDetail": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "author": { "type": "string" },
+          "ccli_number": { "type": "string" },
+          "copyright": { "type": "string" },
+          "notes": { "type": "string" },
+          "arrangements": { "type": "array", "items": { "$ref": "#/components/schemas/Arrangement" } }
+        }
+      },
+      "Arrangement": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "song_id": { "type": "integer" },
+          "name": { "type": "string" },
+          "key": { "type": "string" },
+          "tempo": { "type": "integer" },
+          "chord_chart": { "type": "string" }
+        }
+      },
+      "ArrangementUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "key": { "type": "string" },
+          "tempo": { "type": "integer" },
+          "chord_chart": { "type": "string" }
+        }
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "birth_date": { "type": "string" },
+          "membership_type": { "type": "string" },
+          "baptism_date": { "type": "string" },
+          "notes": { "type": "string" },
+          "role": { "type": "string" },
+          "teams": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "MemberCreate": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "birth_date": { "type": "string" },
+          "membership_type": { "type": "string", "default": "guest" },
+          "baptism_date": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "required": ["first_name", "last_name"]
+      },
+      "TeamCreate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "service_type": { "type": "string" }
+        },
+        "required": ["name"]
+      },
+      "PlanCreate": {
+        "type": "object",
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "service_type_id": { "type": "integer" },
+          "time": { "type": "string" },
+          "theme": { "type": "string" },
+          "notes": { "type": "string" },
+          "status": { "type": "string", "default": "planned" }
+        },
+        "required": ["date", "service_type_id"]
+      },
+      "PlanItemCreate": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "position": { "type": "integer" },
+          "length_minutes": { "type": "integer" },
+          "arrangement_id": { "type": "integer" },
+          "transposed_key": { "type": "string" }
+        },
+        "required": ["type", "title"]
+      },
+      "PlanItemUpdate": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "position": { "type": "integer" },
+          "length_minutes": { "type": "integer" },
+          "arrangement_id": { "type": "integer" },
+          "transposed_key": { "type": "string" }
+        }
+      },
+      "ScheduledPersonCreate": {
+        "type": "object",
+        "properties": {
+          "member_id": { "type": "integer" },
+          "team_id": { "type": "integer" },
+          "position": { "type": "string" },
+          "status": { "type": "string", "default": "pending" },
+          "force": { "type": "boolean" },
+          "forced_by": { "type": "string" },
+          "note": { "type": "string" }
+        },
+        "required": ["member_id"]
+      },
+      "HouseGroupCreate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "leader_id": { "type": "integer" },
+          "meeting_day": { "type": "string" },
+          "meeting_time": { "type": "string" },
+          "location": { "type": "string" }
+        },
+        "required": ["name"]
+      },
+      "EmailTemplateCreate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "subject": { "type": "string" },
+          "body": { "type": "string" },
+          "variables": { "type": "string" }
+        },
+        "required": ["name", "subject", "body"]
+      }
+    }
+  }
+}

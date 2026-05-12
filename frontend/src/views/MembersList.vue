@@ -19,6 +19,7 @@
           <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
         </select>
       </div>
+      <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
@@ -57,6 +58,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <div v-if="members.length === 0" class="text-center py-12 text-gray-400">
         Aucun membre.
       </div>

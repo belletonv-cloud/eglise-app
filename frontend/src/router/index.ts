@@ -16,8 +16,19 @@ import ConflictLogs from '../views/ConflictLogs.vue'
 import PlanTemplatesList from '../views/PlanTemplatesList.vue'
 import PlanTemplateDetail from '../views/PlanTemplateDetail.vue'
 import SetlistView from '../views/SetlistView.vue'
+import CalendarView from '../views/CalendarView.vue'
 import MonCompte from '../views/MonCompte.vue'
 import Dashboard from '../views/Dashboard.vue'
+import Historique from '../views/Historique.vue'
+import Annuaire from '../views/Annuaire.vue'
+import InvitationAccept from '../views/InvitationAccept.vue'
+import LogsView from '../views/LogsView.vue'
+import SondagesList from '../views/SondagesList.vue'
+import Annonces from '../views/Annonces.vue'
+import MemberProfile from '../views/MemberProfile.vue'
+import WebhooksView from '../views/WebhooksView.vue'
+import MessagesView from '../views/MessagesView.vue'
+import KioskView from '../views/KioskView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,8 +39,18 @@ const router = createRouter({
       component: Dashboard,
     },
     {
+      path: '/calendar',
+      name: 'calendar',
+      component: CalendarView,
+    },
+    {
       path: '/',
       name: 'home',
+      component: Dashboard,
+    },
+    {
+      path: '/plans',
+      name: 'plans',
       component: PlansList,
     },
     {
@@ -133,6 +154,57 @@ const router = createRouter({
       path: '/admin/oneclick',
       name: 'admin-oneclick',
       component: () => import('../views/AdminOneClick.vue')
+    },
+    {
+      path: '/historique',
+      name: 'historique',
+      component: Historique,
+    },
+    {
+      path: '/annuaire',
+      name: 'annuaire',
+      component: Annuaire,
+    },
+    {
+      path: '/invitation',
+      name: 'invitation',
+      component: InvitationAccept,
+    },
+    {
+      path: '/sondages',
+      name: 'sondages',
+      component: SondagesList,
+    },
+    {
+      path: '/annonces',
+      name: 'annonces',
+      component: Annonces,
+    },
+    {
+      path: '/logs',
+      name: 'logs',
+      component: LogsView,
+    },
+    {
+      path: '/webhooks',
+      name: 'webhooks',
+      component: WebhooksView,
+    },
+    {
+      path: '/messages',
+      name: 'messages',
+      component: MessagesView,
+    },
+    {
+      path: '/members/:id/profile',
+      name: 'member-profile',
+      component: MemberProfile,
+      props: true,
+    },
+    {
+      path: '/kiosk/:id',
+      name: 'kiosk',
+      component: KioskView,
     },
   ],
 })

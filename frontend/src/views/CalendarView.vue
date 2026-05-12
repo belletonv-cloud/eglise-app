@@ -20,7 +20,7 @@
         </div>
         <div v-for="(day, i) in calendarDays" :key="i"
           @click="createPlan(day)"
-          class="bg-white min-h-[100px] p-1.5 cursor-pointer hover:bg-blue-50 transition-colors"
+          class="bg-white min-h-[60px] md:min-h-[100px] p-1 cursor-pointer hover:bg-blue-50 transition-colors"
           :class="{ 'text-gray-400': !day.isCurrentMonth, 'bg-blue-50/30': isToday(day.date) }">
           <div class="text-xs font-medium mb-1" :class="isToday(day.date) ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center' : ''">
             {{ day.day }}

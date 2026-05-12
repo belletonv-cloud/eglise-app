@@ -50,6 +50,10 @@ function badRequest(msg = 'Bad Request') {
   return json({ error: msg }, 400);
 }
 
+function unauthorized(msg = 'Unauthorized') {
+  return json({ error: msg }, 403);
+}
+
 async function getBody(request) {
   try {
     return await request.json();
@@ -61,8 +65,11 @@ async function getBody(request) {
 // Authorization helpers (lightweight)
 const ROLE_PERMISSIONS = {
   admin: ['*'],
-  scheduler: ['schedule', 'view_conflicts'],
-  editor: ['edit_members', 'edit_teams'],
+  scheduler: ['schedule', 'view_conflicts', 'force_schedule'],
+  editor: ['edit_members', 'edit_teams', 'manage_members'],
+  music_director: ['schedule', 'edit_music', 'view_conflicts'],
+  tech_director: ['schedule', 'view_conflicts', 'edit_tech'],
+  volunteer: [],
   viewer: [],
 };
 
@@ -103,7 +110,10 @@ async function getMemberFromRequest(request, env) {
       return null
     }
   }
-  // Fallback to x-user-email header (dev mode, or admin testing)
+  // Dev fallback: x-user-email + X-Auth-Secret (disabled if DEV_AUTH_SECRET not set)
+  const authSecret = request.headers.get('X-Auth-Secret') || request.headers.get('x-auth-secret')
+  if (!env.DEV_AUTH_SECRET) return null
+  if (authSecret !== env.DEV_AUTH_SECRET) return null
   const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
   if (!email) return null
   const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
@@ -207,6 +217,21 @@ async function signOneClickToken(payloadJson, secret) {
       const hmac = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
       return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
     }
+}
+
+function csvEscape(val) {
+  if (val === null || val === undefined) return '';
+  const s = String(val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function toCsv(rows, columns) {
+  const header = columns.join(',') + '\n';
+  const body = rows.map(row => columns.map(col => csvEscape(row[col])).join(',')).join('\n');
+  return header + body;
 }
 
 function generateSecureToken(bytes = 32) {
@@ -346,6 +371,7 @@ const routes0 = [
       body.baptism_date || null, body.notes || null
     ).run();
     const newMember = await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(result.meta.last_row_id).first();
+    triggerWebhooks(env, 'member.created', newMember).catch(() => {});
     return json(newMember, 201);
   }),
 
@@ -551,6 +577,7 @@ const routes0 = [
       FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id
       WHERE p.id = ?
     `).bind(result.meta.last_row_id).first();
+    triggerWebhooks(env, 'plan.created', newPlan).catch(() => {});
     return json(newPlan, 201);
   }),
 
@@ -577,6 +604,7 @@ const routes0 = [
       FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id
       WHERE p.id = ?
     `).bind(id).first();
+    if (updated) triggerWebhooks(env, 'plan.updated', updated).catch(() => {});
     return json(updated);
   }),
 
@@ -584,6 +612,7 @@ const routes0 = [
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM plans WHERE id = ?').bind(id).run();
+    triggerWebhooks(env, 'plan.deleted', { id }).catch(() => {});
     return new Response(null, { status: 204, headers: CORS });
   }),
 
@@ -837,6 +866,24 @@ const routes0 = [
     } catch (e) {
       // ignore notification errors
     }
+    // Send push notification to the scheduled member
+    try {
+      const planForNotif = await env.DB.prepare('SELECT date, time, theme FROM plans WHERE id = ?').bind(planId).first();
+      const memberTokens = await env.DB.prepare('SELECT token FROM notification_tokens WHERE member_id = ?').bind(body.member_id).all();
+      if (memberTokens.results.length > 0 && env.FCM_SERVER_KEY) {
+        const title = 'Nouvelle assignation';
+        const msg = `Tu es planifié(e) pour le ${planForNotif.date}${planForNotif.time ? ' à ' + planForNotif.time.slice(0,5) : ''}`;
+        for (const t of memberTokens.results) {
+          fetch('https://fcm.googleapis.com/fcm/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `key=${env.FCM_SERVER_KEY}` },
+            body: JSON.stringify({ to: t.token, notification: { title, body: msg }, data: { plan_id: String(planId), action: 'view_plan' } }),
+          }).catch(() => {});
+        }
+      }
+    } catch (e) { /* ignore push errors */ }
+
+    triggerWebhooks(env, 'schedule.created', newEntry).catch(() => {});
     return json(newEntry, 201);
   }),
 
@@ -1882,6 +1929,122 @@ const routes2 = [
     return json(result.results);
   }),
 
+  // ========================================
+  // ANNOTATIONS (partagées/privées)
+  // ========================================
+  route('GET', '/api/arrangements/:id/annotations', async (request, env, params) => {
+    const arrId = requireId(params);
+    if (!arrId) return badRequest('Invalid arrangement ID');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return unauthorized();
+    const annotations = await env.DB.prepare(`
+      SELECT aa.*, m.first_name, m.last_name
+      FROM arrangement_annotations aa
+      LEFT JOIN members m ON m.id = aa.member_id
+      WHERE aa.arrangement_id = ?
+        AND (aa.is_shared = 1 OR aa.member_id = ?)
+      ORDER BY aa.created_at ASC
+    `).bind(arrId, member.id).all();
+    return json(annotations.results);
+  }),
+
+  route('POST', '/api/arrangements/:id/annotations', async (request, env, params) => {
+    const arrId = requireId(params);
+    if (!arrId) return badRequest('Invalid arrangement ID');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return unauthorized();
+    const body = await getBody(request);
+    if (!body || !body.content) return badRequest('content is required');
+    const result = await env.DB.prepare(
+      'INSERT INTO arrangement_annotations (arrangement_id, member_id, content, is_shared) VALUES (?, ?, ?, ?)'
+    ).bind(arrId, member.id, body.content, body.is_shared ? 1 : 0).run();
+    const annotation = await env.DB.prepare(`
+      SELECT aa.*, m.first_name, m.last_name
+      FROM arrangement_annotations aa
+      LEFT JOIN members m ON m.id = aa.member_id
+      WHERE aa.id = ?
+    `).bind(result.meta.last_row_id).first();
+    return json(annotation, 201);
+  }),
+
+  route('PUT', '/api/annotations/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('Invalid annotation ID');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return unauthorized();
+    const body = await getBody(request);
+    if (!body) return badRequest();
+    const annotation = await env.DB.prepare('SELECT * FROM arrangement_annotations WHERE id = ?').bind(id).first();
+    if (!annotation) return notFound('Annotation not found');
+    if (annotation.member_id !== member.id && member.role !== 'admin') return unauthorized();
+    const updates = [];
+    const values = [];
+    if (body.content !== undefined) { updates.push('content = ?'); values.push(body.content); }
+    if (body.is_shared !== undefined) { updates.push('is_shared = ?'); values.push(body.is_shared ? 1 : 0); }
+    if (updates.length === 0) return badRequest('No fields to update');
+    updates.push("updated_at = datetime('now')");
+    values.push(id);
+    await env.DB.prepare(`UPDATE arrangement_annotations SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run();
+    const updated = await env.DB.prepare(`
+      SELECT aa.*, m.first_name, m.last_name
+      FROM arrangement_annotations aa
+      LEFT JOIN members m ON m.id = aa.member_id
+      WHERE aa.id = ?
+    `).bind(id).first();
+    return json(updated);
+  }),
+
+  route('DELETE', '/api/annotations/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('Invalid annotation ID');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return unauthorized();
+    const annotation = await env.DB.prepare('SELECT * FROM arrangement_annotations WHERE id = ?').bind(id).first();
+    if (!annotation) return notFound('Annotation not found');
+    if (annotation.member_id !== member.id && member.role !== 'admin') return unauthorized();
+    await env.DB.prepare('DELETE FROM arrangement_annotations WHERE id = ?').bind(id).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
+  // RESOURCE PERMISSIONS (RBAC fin)
+  // ========================================
+  route('GET', '/api/resource-permissions', async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member || member.role !== 'admin') return unauthorized();
+    const perms = await env.DB.prepare('SELECT * FROM resource_permissions ORDER BY created_at DESC').all();
+    return json(perms.results);
+  }),
+
+  route('POST', '/api/resource-permissions', async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member || member.role !== 'admin') return unauthorized();
+    const body = await getBody(request);
+    if (!body || !body.member_id || !body.resource_type || !body.resource_id || !body.permission)
+      return badRequest('member_id, resource_type, resource_id, permission required');
+    const existing = await env.DB.prepare(
+      'SELECT id FROM resource_permissions WHERE member_id = ? AND resource_type = ? AND resource_id = ? AND permission = ?'
+    ).bind(body.member_id, body.resource_type, body.resource_id, body.permission).first();
+    if (existing) {
+      await env.DB.prepare('UPDATE resource_permissions SET granted = ? WHERE id = ?').bind(body.granted !== false ? 1 : 0, existing.id).run();
+    } else {
+      await env.DB.prepare(
+        'INSERT INTO resource_permissions (member_id, resource_type, resource_id, permission, granted) VALUES (?, ?, ?, ?, ?)'
+      ).bind(body.member_id, body.resource_type, body.resource_id, body.permission, body.granted !== false ? 1 : 0).run();
+    }
+    const perms = await env.DB.prepare('SELECT * FROM resource_permissions WHERE member_id = ?').bind(body.member_id).all();
+    return json(perms.results, 201);
+  }),
+
+  route('DELETE', '/api/resource-permissions/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('Invalid permission ID');
+    const member = await getMemberFromRequest(request, env);
+    if (!member || member.role !== 'admin') return unauthorized();
+    await env.DB.prepare('DELETE FROM resource_permissions WHERE id = ?').bind(id).run();
+    return json({ success: true });
+  }),
+
   route('POST', '/api/upload', async (request, env, params) => {
     let formData;
     try {
@@ -1949,11 +2112,1080 @@ const routes2 = [
 
 const router = createRouter([...routes0, ...routes2]);
 
+const routes3 = [
+  // ========================================
+  // iCal EXPORT
+  // ========================================
+  route('GET', '/api/plans/:id/ical', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    const plan = await env.DB.prepare(`
+      SELECT p.*, st.name as service_type_name
+      FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id WHERE p.id = ?
+    `).bind(id).first();
+    if (!plan) return notFound();
+
+    const scheduled = await env.DB.prepare(`
+      SELECT sp.*, m.first_name, m.last_name, m.email, t.name as team_name
+      FROM scheduled_people sp
+      JOIN members m ON m.id = sp.member_id
+      LEFT JOIN teams t ON t.id = sp.team_id
+      WHERE sp.plan_id = ?
+    `).bind(id).all();
+
+    const dtStart = plan.time
+      ? `${plan.date.replace(/-/g, '')}T${plan.time.replace(/:/g, '')}00`
+      : `${plan.date.replace(/-/g, '')}T100000`;
+    const dtEnd = plan.time
+      ? `${plan.date.replace(/-/g, '')}T${String(parseInt(plan.time.replace(/:/g, '')) + 100).padStart(6, '0')}00`
+      : `${plan.date.replace(/-/g, '')}T120000`;
+
+    let desc = `Service: ${plan.service_type_name || 'Général'}\nThème: ${plan.theme || '-'}\n\nParticipants:\n`;
+    for (const s of scheduled.results) {
+      desc += `${s.team_name ? `[${s.team_name}] ` : ''}${s.first_name} ${s.last_name}${s.position ? ` (${s.position})` : ''}\n`;
+    }
+
+    const ical = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Église App//FR',
+      'BEGIN:VEVENT',
+      `UID:plan-${id}@eglise-app`,
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtEnd}`,
+      `SUMMARY:${plan.service_type_name || 'Service'}${plan.theme ? ` - ${plan.theme}` : ''}`,
+      `DESCRIPTION:${desc.replace(/\n/g, '\\n')}`,
+      `LOCATION:Église`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    return new Response(ical, {
+      headers: {
+        ...CORS,
+        'Content-Type': 'text/calendar; charset=utf-8',
+        'Content-Disposition': `attachment; filename="service-${plan.id}.ics"`,
+      },
+    });
+  }),
+
+  // ========================================
+  // DIRECTORY (annuaire en ligne)
+  // ========================================
+  route('GET', '/api/directory', async (request, env) => {
+    const members = await env.DB.prepare(`
+      SELECT m.id, m.first_name, m.last_name, m.email, m.phone,
+        COALESCE(
+          (SELECT GROUP_CONCAT(t.name, ', ') FROM team_members tm2 JOIN teams t ON t.id = tm2.team_id WHERE tm2.member_id = m.id),
+          ''
+        ) as team_names
+      FROM members m
+      WHERE m.membership_type IN ('member', 'inactive')
+        AND m.phone IS NOT NULL AND m.phone != ''
+      ORDER BY m.last_name ASC, m.first_name ASC
+    `).all();
+    return json(members.results);
+  }),
+
+  // ========================================
+  // CHECKLIST PAR POSTE
+  // ========================================
+  route('GET', '/api/checklist-templates', async (request, env, params, url) => {
+    const serviceTypeId = url.searchParams.get('service_type_id');
+    let rows;
+    if (serviceTypeId) {
+      rows = await env.DB.prepare('SELECT * FROM checklist_templates WHERE service_type_id = ? ORDER BY position ASC').bind(Number(serviceTypeId)).all();
+    } else {
+      rows = await env.DB.prepare('SELECT ct.*, st.name as service_type_name FROM checklist_templates ct LEFT JOIN service_types st ON st.id = ct.service_type_id ORDER BY ct.label ASC').all();
+    }
+    const templates = rows.results;
+    for (const t of templates) {
+      const items = await env.DB.prepare('SELECT * FROM checklist_template_items WHERE checklist_id = ? ORDER BY position ASC').bind(t.id).all();
+      t.items = items.results;
+    }
+    return json(templates);
+  }),
+
+  route('POST', '/api/checklist-templates', async (request, env) => {
+    const body = await getBody(request);
+    if (!body || !body.position || !body.label) return badRequest('position and label required');
+    const result = await env.DB.prepare('INSERT INTO checklist_templates (service_type_id, position, label) VALUES (?, ?, ?)')
+      .bind(body.service_type_id || null, body.position, body.label).run();
+    const created = await env.DB.prepare('SELECT * FROM checklist_templates WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(created, 201);
+  }),
+
+  route('DELETE', '/api/checklist-templates/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM checklist_templates WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  // Checklist template items
+  route('POST', '/api/checklist-templates/:id/items', async (request, env, params) => {
+    const checklistId = requireId(params);
+    if (!checklistId) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body || !body.label) return badRequest('label required');
+    const maxPos = await env.DB.prepare('SELECT COALESCE(MAX(position), 0) + 1 as next_pos FROM checklist_template_items WHERE checklist_id = ?').bind(checklistId).first();
+    const result = await env.DB.prepare('INSERT INTO checklist_template_items (checklist_id, label, position) VALUES (?, ?, ?)')
+      .bind(checklistId, body.label, body.position ?? maxPos.next_pos).run();
+    const created = await env.DB.prepare('SELECT * FROM checklist_template_items WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(created, 201);
+  }),
+
+  route('DELETE', '/api/checklist-template-items/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM checklist_template_items WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  // Plan checklists (per-service checklist state)
+  route('GET', '/api/plans/:id/checklist', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID invalide');
+    const items = await env.DB.prepare('SELECT * FROM plan_checklists WHERE plan_id = ? ORDER BY id ASC').bind(planId).all();
+    return json(items.results);
+  }),
+
+  route('POST', '/api/plans/:id/checklist', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body || !body.position || !body.label) return badRequest('position and label required');
+    const result = await env.DB.prepare('INSERT INTO plan_checklists (plan_id, member_id, position, done, label) VALUES (?, ?, ?, 0, ?)')
+      .bind(planId, body.member_id || null, body.position, body.label).run();
+    const created = await env.DB.prepare('SELECT * FROM plan_checklists WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(created, 201);
+  }),
+
+  route('PUT', '/api/plan-checklists/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body) return badRequest('Corps requis');
+    await env.DB.prepare(`UPDATE plan_checklists SET done = ?, done_at = CASE WHEN ? THEN datetime('now') ELSE NULL END WHERE id = ?`)
+      .bind(body.done ? 1 : 0, body.done ? 1 : 0, id).run();
+    const updated = await env.DB.prepare('SELECT * FROM plan_checklists WHERE id = ?').bind(id).first();
+    return json(updated);
+  }),
+
+  route('DELETE', '/api/plan-checklists/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM plan_checklists WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  // ========================================
+  // SERMON AUDIO (attachments on plans)
+  // ========================================
+  route('POST', '/api/plans/:id/audio', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const plan = await env.DB.prepare('SELECT id FROM plans WHERE id = ?').bind(planId).first();
+    if (!plan) return notFound('Plan non trouvé');
+
+    let formData;
+    try {
+      formData = await request.formData();
+    } catch {
+      return badRequest('Invalid multipart form data');
+    }
+
+    const file = formData.get('file');
+    const title = formData.get('title') || 'Enregistrement';
+
+    if (!file) return badRequest('file required');
+
+    let kdriveFile;
+    try {
+      kdriveFile = await kdriveUpload(env, file, `sermon-${planId}-${file.name}`);
+    } catch (e) {
+      return json({ error: e.message }, 500);
+    }
+
+    const fileUrl = `kdrive:${kdriveFile.id}`;
+
+    // Store in attachments table
+    await env.DB.prepare('INSERT INTO attachments (entity_type, entity_id, filename, file_url, file_type) VALUES (?, ?, ?, ?, ?)')
+      .bind('plan', planId, file.name, fileUrl, 'audio').run();
+
+    // Also set audio_url on plans for convenience
+    await env.DB.prepare('UPDATE plans SET audio_url = ?, audio_title = ? WHERE id = ?')
+      .bind(fileUrl, title, planId).run();
+
+    return json({ success: true, file_url: fileUrl, title }, 201);
+  }),
+
+  route('GET', '/api/plans/:id/audio', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const plan = await env.DB.prepare('SELECT audio_url, audio_title FROM plans WHERE id = ?').bind(planId).first();
+    if (!plan) return notFound();
+    const attachments = await env.DB.prepare("SELECT * FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio' ORDER BY created_at DESC")
+      .bind(planId).all();
+    return json({ audio_url: plan.audio_url, audio_title: plan.audio_title, attachments: attachments.results });
+  }),
+
+  route('GET', '/api/plans/:id/audio/stream', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const plan = await env.DB.prepare('SELECT audio_url FROM plans WHERE id = ?').bind(planId).first();
+    if (!plan || !plan.audio_url) return notFound('Aucun audio');
+    const fileId = parseKdriveFileId(plan.audio_url);
+    if (!fileId) return notFound();
+    const attachment = await dbFirst(env.DB, "SELECT id FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio' ORDER BY created_at DESC LIMIT 1", planId);
+    if (!attachment) return notFound();
+    const resp = await kdriveGetFile(env, fileId);
+    if (!resp) return notFound();
+    const headers = new Headers(resp.headers);
+    headers.set('Cache-Control', 'public, max-age=31536000');
+    return new Response(resp.body, { headers });
+  }),
+
+  route('DELETE', '/api/plans/:id/audio', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const attachments = await env.DB.prepare("SELECT * FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio'").bind(planId).all();
+    for (const a of attachments.results) {
+      const fileId = parseKdriveFileId(a.file_url);
+      if (fileId) await kdriveDelete(env, fileId).catch(() => {});
+      await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(a.id).run();
+    }
+    await env.DB.prepare('UPDATE plans SET audio_url = NULL, audio_title = NULL WHERE id = ?').bind(planId).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
+  // REPLACEMENT SUGGESTION (quand un bénévole refuse)
+  // ========================================
+  route('GET', '/api/plans/:id/replacements/:scheduledId', async (request, env, params) => {
+    const planId = requireId({ id: params.id });
+    const scheduledId = requireId({ id: params.scheduledId });
+    if (!planId || !scheduledId) return badRequest('ID invalide');
+    const sp = await env.DB.prepare('SELECT * FROM scheduled_people WHERE id = ? AND plan_id = ?').bind(scheduledId, planId).first();
+    if (!sp) return notFound();
+
+    // Find same team members not already scheduled for this plan, with email
+    const candidates = await env.DB.prepare(`
+      SELECT DISTINCT m.id, m.first_name, m.last_name, m.email, m.phone,
+        tm.position as member_position
+      FROM members m
+      JOIN team_members tm ON tm.member_id = m.id
+      WHERE tm.team_id = ?
+        AND m.id != ?
+        AND m.id NOT IN (SELECT member_id FROM scheduled_people WHERE plan_id = ?)
+        AND m.email IS NOT NULL AND m.email != ''
+      ORDER BY m.last_name ASC
+    `).bind(sp.team_id, sp.member_id, planId).all();
+    return json(candidates.results);
+  }),
+
+  route('POST', '/api/plans/:id/replacements/:scheduledId', async (request, env, params) => {
+    const planId = requireId({ id: params.id });
+    const scheduledId = requireId({ id: params.scheduledId });
+    if (!planId || !scheduledId) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body || !body.new_member_id) return badRequest('new_member_id required');
+
+    const sp = await env.DB.prepare('SELECT * FROM scheduled_people WHERE id = ? AND plan_id = ?').bind(scheduledId, planId).first();
+    if (!sp) return notFound();
+
+    // Update the scheduled person to the new member
+    await env.DB.prepare('UPDATE scheduled_people SET member_id = ?, status = ? WHERE id = ?')
+      .bind(body.new_member_id, 'pending', scheduledId).run();
+
+    // Notify the new member via email
+    try {
+      const plan = await env.DB.prepare('SELECT date, time, theme FROM plans WHERE id = ?').bind(planId).first();
+      const newMember = await env.DB.prepare('SELECT first_name, last_name, email FROM members WHERE id = ?').bind(body.new_member_id).first();
+      const apiKey = env.RESEND_API_KEY;
+      const from = env.EMAIL_FROM || 'no-reply@example.com';
+      if (apiKey && newMember && newMember.email) {
+        const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
+        const html = `<p>Bonjour ${newMember.first_name},</p>
+          <p>Tu as été ajouté(e) comme remplaçant(e) pour le service du <strong>${plan.date} ${plan.time || ''}</strong>.</p>
+          <p>Merci de confirmer ta disponibilité: <a href="${frontend}/mon-compte">Mon compte</a></p>`;
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({ from, to: newMember.email, subject: `Remplacement — Service ${plan.date}`, html }),
+        });
+      }
+    } catch (e) { /* ignore notification errors */ }
+
+    const updated = await env.DB.prepare(`
+      SELECT sp.*, m.first_name, m.last_name, m.email, t.name as team_name
+      FROM scheduled_people sp
+      JOIN members m ON m.id = sp.member_id
+      LEFT JOIN teams t ON t.id = sp.team_id
+      WHERE sp.id = ?
+    `).bind(scheduledId).first();
+    return json(updated);
+  }),
+  // Attendance stats
+  route('GET', '/api/attendance-stats', async (request, env, params, url) => {
+    const year = url.searchParams.get('year') || String(new Date().getFullYear());
+    const memberId = url.searchParams.get('member_id');
+
+    let where = "strftime('%Y', a.check_in_time) = ?";
+    const binds = [year];
+    if (memberId) { where += ' AND a.member_id = ?'; binds.push(Number(memberId)); }
+
+    // Total attendances
+    const total = await env.DB.prepare(`SELECT COUNT(*) as c FROM attendances a WHERE ${where}`).bind(...binds).first();
+
+    // Per member stats
+    const perMember = await env.DB.prepare(`
+      SELECT a.member_id, m.first_name, m.last_name, COUNT(*) as count
+      FROM attendances a JOIN members m ON m.id = a.member_id
+      WHERE ${where} GROUP BY a.member_id ORDER BY count DESC
+    `).bind(...binds).all();
+
+    // Per month breakdown
+    const perMonth = await env.DB.prepare(`
+      SELECT strftime('%m', a.check_in_time) as month, COUNT(*) as count
+      FROM attendances a WHERE ${where}
+      GROUP BY month ORDER BY month ASC
+    `).bind(...binds).all();
+
+    // Top recent
+    const recent = await env.DB.prepare(`
+      SELECT a.*, m.first_name, m.last_name, p.date as plan_date
+      FROM attendances a JOIN members m ON m.id = a.member_id JOIN plans p ON p.id = a.plan_id
+      WHERE ${where} ORDER BY a.check_in_time DESC LIMIT 20
+    `).bind(...binds).all();
+
+    return json({
+      total: total.c,
+      perMember: perMember.results,
+      perMonth: perMonth.results,
+      recent: recent.results,
+    });
+  }),
+
+  // ========================================
+  // INVITATION SYSTEM
+  // ========================================
+  route('POST', '/api/invitations', async (request, env) => {
+    const body = await getBody(request);
+    if (!body || !body.email) return badRequest('email required');
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+
+    const member = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(body.email).first();
+    if (!member) return badRequest('Aucun membre avec cet email');
+
+    const token = generateSecureToken(48);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS invitation_tokens (id INTEGER PRIMARY KEY AUTOINCREMENT, member_id INTEGER REFERENCES members(id), token TEXT UNIQUE, expires_at TEXT, used INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime(\'now\')))').run();
+    await env.DB.prepare('INSERT INTO invitation_tokens (member_id, token, expires_at) VALUES (?, ?, ?)').bind(member.id, token, expires_at).run();
+
+    // Send email
+    try {
+      const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
+      const link = `${frontend}/invitation?token=${token}`;
+      const html = `<p>Bonjour ${member.first_name},</p>
+        <p>Tu as été invité(e) à rejoindre l'application Église.</p>
+        <p><a href="${link}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;">Activer mon compte</a></p>
+        <p>Ce lien expire dans 7 jours.</p>`;
+      const apiKey = env.RESEND_API_KEY;
+      const from = env.EMAIL_FROM || 'no-reply@example.com';
+      if (apiKey) {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({ from, to: body.email, subject: 'Invitation à rejoindre Église App', html }),
+        });
+      }
+    } catch (e) { /* ignore */ }
+
+    return json({ success: true, email: body.email }, 201);
+  }),
+
+  route('GET', '/api/invitations/:token', async (request, env, params) => {
+    const token = params.token;
+    const row = await env.DB.prepare('SELECT it.*, m.first_name, m.last_name, m.email FROM invitation_tokens it JOIN members m ON m.id = it.member_id WHERE it.token = ?').bind(token).first();
+    if (!row) return badRequest('Token invalide');
+    if (row.used) return badRequest('Token déjà utilisé');
+    if (row.expires_at < new Date().toISOString()) return badRequest('Token expiré');
+    return json({ member_id: row.member_id, first_name: row.first_name, last_name: row.last_name, email: row.email });
+  }),
+
+  route('POST', '/api/invitations/:token/redeem', async (request, env, params) => {
+    const token = params.token;
+    const body = await getBody(request);
+    if (!body || !body.firebase_uid) return badRequest('firebase_uid required');
+
+    const row = await env.DB.prepare('SELECT * FROM invitation_tokens WHERE token = ?').bind(token).first();
+    if (!row) return badRequest('Token invalide');
+    if (row.used) return badRequest('Token déjà utilisé');
+    if (row.expires_at < new Date().toISOString()) return badRequest('Token expiré');
+
+    // Check no other member has this firebase_uid
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS member_firebase (id INTEGER PRIMARY KEY AUTOINCREMENT, member_id INTEGER UNIQUE REFERENCES members(id), firebase_uid TEXT UNIQUE, created_at TEXT DEFAULT (datetime(\'now\')))').run();
+    const existing = await env.DB.prepare('SELECT member_id FROM member_firebase WHERE firebase_uid = ?').bind(body.firebase_uid).first();
+    if (existing) return badRequest('Ce compte Firebase est déjà lié à un membre');
+
+    await env.DB.prepare('INSERT INTO member_firebase (member_id, firebase_uid) VALUES (?, ?)').bind(row.member_id, body.firebase_uid).run();
+    await env.DB.prepare('UPDATE invitation_tokens SET used = 1 WHERE id = ?').bind(row.id).run();
+
+    return json({ success: true, member_id: row.member_id });
+  }),
+
+  // Verify firebase link for member portal
+  route('GET', '/api/me/firebase-status', async (request, env) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const fb = await env.DB.prepare('SELECT firebase_uid FROM member_firebase WHERE member_id = ?').bind(member.id).first();
+    return json({ linked: !!fb, firebase_uid: fb?.firebase_uid || null });
+  }),
+
+  // QR check-in token for a plan
+  route('GET', '/api/plans/:id/qr-checkin', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const plan = await env.DB.prepare('SELECT id, date FROM plans WHERE id = ?').bind(planId).first();
+    if (!plan) return notFound();
+    // Generate a short-lived token for check-in
+    const token = generateSecureToken(16);
+    const payload = JSON.stringify({ action: 'qr_checkin', plan_id: planId, exp: Math.floor(Date.now()/1000) + 3600 });
+    const signed = await signOneClickToken(payload, env.ONECLICK_SECRET || 'default-secret');
+    return json({ checkin_url: `${env.FRONTEND_URL || 'https://eglise-app.pages.dev'}/checkin?plan=${planId}&token=${encodeURIComponent(signed)}`, plan_id: planId, date: plan.date });
+  }),
+
+  // ========================================
+  // SONDAGES (Polls)
+  // ========================================
+  route('GET', '/api/polls', async (request, env) => {
+    const rows = await env.DB.prepare(`
+      SELECT p.*, (SELECT COUNT(*) FROM poll_votes pv WHERE pv.poll_id = p.id) as vote_count
+      FROM polls p ORDER BY p.created_at DESC
+    `).all();
+    const polls = rows.results;
+    for (const poll of polls) {
+      poll.options = (await env.DB.prepare('SELECT * FROM poll_options WHERE poll_id = ? ORDER BY position ASC').bind(poll.id).all()).results;
+      const member = await getMemberFromRequest(request, env);
+      if (member) {
+        const myVotes = await env.DB.prepare('SELECT poll_option_id FROM poll_votes WHERE poll_id = ? AND member_id = ?').bind(poll.id, member.id).all();
+        poll.my_votes = myVotes.results.map(v => v.poll_option_id);
+      }
+    }
+    return json(polls);
+  }),
+
+  route('POST', '/api/polls', async (request, env) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const body = await getBody(request);
+    if (!body || !body.question) return badRequest('question required');
+    const maxVotes = body.max_votes || 1;
+    const expiresAt = body.expires_at || null;
+    const result = await env.DB.prepare('INSERT INTO polls (question, max_votes, expires_at) VALUES (?, ?, ?)').bind(body.question, maxVotes, expiresAt).run();
+    const poll = await env.DB.prepare('SELECT * FROM polls WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(poll, 201);
+  }),
+
+  route('DELETE', '/api/polls/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM polls WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  route('POST', '/api/polls/:id/options', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const pollId = requireId(params);
+    if (!pollId) return badRequest('ID sondage invalide');
+    const body = await getBody(request);
+    if (!body || !body.label) return badRequest('label required');
+    const maxPos = await env.DB.prepare('SELECT COALESCE(MAX(position), 0) + 1 as next FROM poll_options WHERE poll_id = ?').bind(pollId).first();
+    const result = await env.DB.prepare('INSERT INTO poll_options (poll_id, label, position) VALUES (?, ?, ?)').bind(pollId, body.label, body.position ?? maxPos.next).run();
+    const opt = await env.DB.prepare('SELECT * FROM poll_options WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(opt, 201);
+  }),
+
+  route('DELETE', '/api/poll-options/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM poll_options WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  route('POST', '/api/polls/:id/vote', async (request, env, params) => {
+    const pollId = requireId(params);
+    if (!pollId) return badRequest('ID sondage invalide');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const body = await getBody(request);
+    if (!body || !body.option_id) return badRequest('option_id required');
+
+    const poll = await env.DB.prepare('SELECT * FROM polls WHERE id = ?').bind(pollId).first();
+    if (!poll) return notFound('Sondage non trouvé');
+    if (poll.expires_at && poll.expires_at < new Date().toISOString()) return badRequest('Sondage expiré');
+
+    const myVotes = await env.DB.prepare('SELECT id FROM poll_votes WHERE poll_id = ? AND member_id = ?').bind(pollId, member.id).all();
+    if (myVotes.results.length >= poll.max_votes) return badRequest(`Maximum ${poll.max_votes} vote(s) atteint`);
+
+    const existing = await env.DB.prepare('SELECT id FROM poll_votes WHERE poll_id = ? AND member_id = ? AND poll_option_id = ?').bind(pollId, member.id, body.option_id).first();
+    if (existing) return badRequest('Tu as déjà voté pour cette option');
+
+    await env.DB.prepare('INSERT INTO poll_votes (poll_id, member_id, poll_option_id) VALUES (?, ?, ?)').bind(pollId, member.id, body.option_id).run();
+    return json({ success: true }, 201);
+  }),
+
+  route('DELETE', '/api/polls/:id/vote', async (request, env, params) => {
+    const pollId = requireId(params);
+    if (!pollId) return badRequest('ID sondage invalide');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const body = await getBody(request);
+    if (!body || !body.option_id) return badRequest('option_id required');
+    await env.DB.prepare('DELETE FROM poll_votes WHERE poll_id = ? AND member_id = ? AND poll_option_id = ?').bind(pollId, member.id, body.option_id).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
+  // ANNONCES & POINTS DE PRIÈRE
+  // ========================================
+  route('GET', '/api/announcements', async (request, env, params, url) => {
+    const type = url.searchParams.get('type');
+    let query = 'SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id';
+    const binds = [];
+    if (type === 'prayer') {
+      query += " WHERE a.type = 'prayer'";
+    } else if (type === 'announcement') {
+      query += " WHERE a.type = 'announcement'";
+    }
+    query += ' ORDER BY a.created_at DESC LIMIT 50';
+    const rows = await env.DB.prepare(query).bind(...binds).all();
+    return json(rows.results);
+  }),
+
+  route('POST', '/api/announcements', async (request, env) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const body = await getBody(request);
+    if (!body || !body.content) return badRequest('content required');
+    const type = body.type || 'announcement';
+    const result = await env.DB.prepare('INSERT INTO announcements (type, content, author_id, plan_id) VALUES (?, ?, ?, ?)')
+      .bind(type, body.content, member.id, body.plan_id || null).run();
+    const created = await env.DB.prepare('SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id WHERE a.id = ?')
+      .bind(result.meta.last_row_id).first();
+    return json(created, 201);
+  }),
+
+  route('PUT', '/api/announcements/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body) return badRequest('Corps requis');
+    await env.DB.prepare('UPDATE announcements SET content = ?, type = ? WHERE id = ?')
+      .bind(body.content, body.type || 'announcement', id).run();
+    const updated = await env.DB.prepare('SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id WHERE a.id = ?').bind(id).first();
+    return json(updated);
+  }),
+
+  route('DELETE', '/api/announcements/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM announcements WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  // ========================================
+  // MESSAGERIE INTERNE
+  // ========================================
+  route('POST', '/api/messages', async (request, env) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const body = await getBody(request);
+    if (!body || !body.content) return badRequest('content required');
+    const subject = body.subject || null;
+    const recipients = Array.isArray(body.recipients) ? body.recipients : [];
+    const res = await env.DB.prepare('INSERT INTO messages (sender_id, subject, content) VALUES (?, ?, ?)').bind(member.id, subject, body.content).run();
+    const messageId = res.meta.last_row_id;
+    for (const rid of recipients) {
+      await env.DB.prepare('INSERT INTO message_recipients (message_id, recipient_id) VALUES (?, ?)').bind(messageId, rid).run();
+    }
+    // also create a recipient copy for the sender
+    await env.DB.prepare('INSERT INTO message_recipients (message_id, recipient_id) VALUES (?, ?)').bind(messageId, member.id).run();
+    const created = await env.DB.prepare('SELECT m.*, mr.* FROM messages m WHERE m.id = ?').bind(messageId).first();
+    return json(created, 201);
+  }),
+
+  route('GET', '/api/messages/inbox', async (request, env) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const rows = await env.DB.prepare(`
+      SELECT m.id, m.sender_id, m.subject, m.content, m.created_at, mr.read_at, mem.first_name as sender_first, mem.last_name as sender_last
+      FROM message_recipients mr
+      JOIN messages m ON m.id = mr.message_id
+      LEFT JOIN members mem ON mem.id = m.sender_id
+      WHERE mr.recipient_id = ?
+      ORDER BY m.created_at DESC
+    `).bind(member.id).all();
+    return json(rows.results);
+  }),
+
+  route('GET', '/api/messages/:id', async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    const allowed = await env.DB.prepare('SELECT 1 FROM message_recipients WHERE message_id = ? AND recipient_id = ? LIMIT 1').bind(id, member.id).first();
+    if (!allowed) return json({ error: 'Forbidden' }, 403);
+    const msg = await env.DB.prepare('SELECT m.*, mem.first_name as sender_first, mem.last_name as sender_last FROM messages m LEFT JOIN members mem ON mem.id = m.sender_id WHERE m.id = ?').bind(id).first();
+    const recipients = (await env.DB.prepare('SELECT recipient_id, read_at FROM message_recipients WHERE message_id = ?').bind(id).all()).results;
+    return json({ ...msg, recipients });
+  }),
+
+  route('POST', '/api/messages/:id/read', async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('UPDATE message_recipients SET read_at = datetime(\'now\') WHERE message_id = ? AND recipient_id = ?').bind(id, member.id).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
+  // IMPORT / EXPORT CSV
+  // ========================================
+  route('GET', '/api/export/:entity', async (request, env, params) => {
+    const entity = params.entity;
+    let rows;
+    let columns;
+    let filename;
+
+    if (entity === 'members') {
+      rows = await env.DB.prepare('SELECT id, first_name, last_name, email, phone, membership_type, notes FROM members ORDER BY last_name ASC').all();
+      columns = ['id', 'first_name', 'last_name', 'email', 'phone', 'membership_type', 'notes'];
+      filename = 'membres.csv';
+    } else if (entity === 'songs') {
+      rows = await env.DB.prepare(`
+        SELECT s.id, s.title, s.author, s.ccli_number, s.copyright, a.name as arrangement_name, a.key, a.tempo
+        FROM songs s LEFT JOIN arrangements a ON a.song_id = s.id ORDER BY s.title ASC
+      `).all();
+      columns = ['id', 'title', 'author', 'ccli_number', 'copyright', 'arrangement_name', 'key', 'tempo'];
+      filename = 'chants.csv';
+    } else if (entity === 'plans') {
+      rows = await env.DB.prepare(`
+        SELECT p.id, p.date, p.time, p.theme, p.status, st.name as service_type
+        FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id ORDER BY p.date DESC
+      `).all();
+      columns = ['id', 'date', 'time', 'theme', 'status', 'service_type'];
+      filename = 'services.csv';
+    } else {
+      return badRequest('Entité invalide. Utilise members, songs, ou plans');
+    }
+
+    const csv = toCsv(rows.results, columns);
+    return new Response(csv, {
+      headers: {
+        ...CORS,
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
+  }),
+
+  route('POST', '/api/import/:entity', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
+    const entity = params.entity;
+    let body;
+    try {
+      body = await request.text();
+    } catch {
+      return badRequest('Corps requis');
+    }
+    const lines = body.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return badRequest('CSV doit avoir un en-tête et au moins une ligne');
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    let imported = 0;
+    const errors = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      try {
+        const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1').replace(/""/g, '"'));
+        const row = {};
+        headers.forEach((h, idx) => { row[h] = values[idx] || null; });
+
+        if (entity === 'members') {
+          await env.DB.prepare('INSERT OR IGNORE INTO members (first_name, last_name, email, phone, membership_type, notes) VALUES (?, ?, ?, ?, ?, ?)')
+            .bind(row.first_name, row.last_name, row.email || null, row.phone || null, row.membership_type || 'guest', row.notes || null).run();
+          imported++;
+        } else if (entity === 'songs') {
+          await env.DB.prepare('INSERT OR IGNORE INTO songs (title, author, ccli_number, copyright, notes) VALUES (?, ?, ?, ?, ?)')
+            .bind(row.title, row.author || null, row.ccli_number || null, row.copyright || null, row.notes || null).run();
+          imported++;
+        } else {
+          return badRequest('Entité invalide. Utilise members ou songs');
+        }
+      } catch (e) {
+        errors.push({ line: i + 1, error: e.message });
+      }
+    }
+
+    return json({ imported, errors: errors.length ? errors : undefined });
+  }),
+
+  // API logs view (admin only)
+  route('GET', '/api/logs', async (request, env, params, url) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const page = parseInt(url.searchParams.get('page') || '1', 10) || 1;
+    const per = Math.min(100, parseInt(url.searchParams.get('per') || '50', 10) || 50);
+    const offset = (page - 1) * per;
+
+    const rows = await env.DB.prepare(`SELECT * FROM api_logs ORDER BY created_at DESC LIMIT ? OFFSET ?`).bind(per, offset).all();
+    const total = await env.DB.prepare('SELECT COUNT(*) as c FROM api_logs').first();
+    return json({ rows: rows.results, total: total.c, page, per });
+  }),
+
+  route('DELETE', '/api/logs', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    await env.DB.prepare("DELETE FROM api_logs WHERE created_at < datetime('now', '-7 days')").run();
+    return json({ success: true });
+  }),
+
+  // Backup (dump data as JSON)
+  route('GET', '/api/backup', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const tables = ['members', 'teams', 'team_members', 'service_types', 'plans', 'plan_items', 'songs', 'arrangements', 'plan_songs', 'scheduled_people', 'attendances', 'house_groups', 'group_members', 'group_meetings', 'email_templates', 'email_logs', 'communication_preferences', 'notification_tokens', 'plan_templates', 'plan_template_items', 'volunteer_preferences', 'polls', 'poll_options', 'poll_votes', 'announcements'];
+    const backup = {};
+    for (const table of tables) {
+      try {
+        const rows = await env.DB.prepare(`SELECT * FROM ${table}`).all();
+        backup[table] = rows.results;
+      } catch (e) { backup[table] = []; }
+    }
+    return new Response(JSON.stringify(backup, null, 2), {
+      headers: {
+        ...CORS,
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="eglise-backup-${new Date().toISOString().slice(0, 10)}.json"`,
+      },
+    });
+  }),
+
+  // ========================================
+  // GLOBAL SEARCH
+  // ========================================
+  route('GET', '/api/search', async (request, env, params, url) => {
+    const q = url.searchParams.get('q');
+    if (!q || q.length < 2) return json({ results: [] });
+
+    const term = '%' + q + '%';
+    const [members, songs, plans, teams, announcements] = await Promise.all([
+      env.DB.prepare("SELECT id, first_name, last_name, email, phone, 'member' as type FROM members WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? LIMIT 10")
+        .bind(term, term, term).all(),
+      env.DB.prepare("SELECT id, title, author, 'song' as type FROM songs WHERE title LIKE ? OR author LIKE ? LIMIT 10")
+        .bind(term, term).all(),
+      env.DB.prepare("SELECT p.id, p.date, p.theme, p.notes, st.name as service_type, 'plan' as type FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id WHERE p.theme LIKE ? OR p.notes LIKE ? OR st.name LIKE ? LIMIT 10")
+        .bind(term, term, term).all(),
+      env.DB.prepare("SELECT id, name, description, 'team' as type FROM teams WHERE name LIKE ? OR description LIKE ? LIMIT 10")
+        .bind(term, term).all(),
+      env.DB.prepare("SELECT id, content, type, 'announcement' as type FROM announcements WHERE content LIKE ? LIMIT 10")
+        .bind(term).all(),
+    ]);
+
+    return json({
+      results: [
+        ...members.results,
+        ...songs.results,
+        ...plans.results,
+        ...teams.results,
+        ...announcements.results,
+      ],
+      query: q,
+    });
+  }),
+
+  // ========================================
+  // WEBHOOKS
+  // ========================================
+  // CRUD for webhook configurations
+  route('GET', '/api/webhooks', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const rows = await env.DB.prepare('SELECT * FROM webhooks ORDER BY created_at DESC').all();
+    return json(rows.results);
+  }),
+
+  route('POST', '/api/webhooks', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const body = await getBody(request);
+    if (!body || !body.url || !body.events) return badRequest('url and events required');
+    const result = await env.DB.prepare('INSERT INTO webhooks (url, events, secret, label) VALUES (?, ?, ?, ?)')
+      .bind(body.url, JSON.stringify(body.events), body.secret || null, body.label || null).run();
+    const created = await env.DB.prepare('SELECT * FROM webhooks WHERE id = ?').bind(result.meta.last_row_id).first();
+    return json(created, 201);
+  }),
+
+  route('PUT', '/api/webhooks/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    const body = await getBody(request);
+    if (!body) return badRequest('Corps requis');
+    await env.DB.prepare('UPDATE webhooks SET url = COALESCE(?, url), events = COALESCE(?, events), secret = COALESCE(?, secret), label = COALESCE(?, label) WHERE id = ?')
+      .bind(body.url || null, body.events ? JSON.stringify(body.events) : null, body.secret ?? null, body.label ?? null, id).run();
+    const updated = await env.DB.prepare('SELECT * FROM webhooks WHERE id = ?').bind(id).first();
+    return json(updated);
+  }),
+
+  route('DELETE', '/api/webhooks/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM webhooks WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204, headers: CORS });
+  }),
+
+  // Webhook logs
+  route('GET', '/api/webhook-logs', async (request, env, params, url) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const page = parseInt(url.searchParams.get('page') || '1', 10) || 1;
+    const per = Math.min(100, parseInt(url.searchParams.get('per') || '50', 10) || 50);
+    const offset = (page - 1) * per;
+    const rows = await env.DB.prepare('SELECT * FROM webhook_logs ORDER BY created_at DESC LIMIT ? OFFSET ?').bind(per, offset).all();
+    const total = await env.DB.prepare('SELECT COUNT(*) as c FROM webhook_logs').first();
+    return json({ rows: rows.results, total: total.c, page, per });
+  }),
+
+  // Generic incoming webhook (for Zapier/Make/Calendly to push data)
+  route('POST', '/api/webhook/incoming/:token', async (request, env, params) => {
+    const token = params.token;
+    const wh = await env.DB.prepare('SELECT * FROM webhooks WHERE secret = ?').bind(token).first();
+    if (!wh) return json({ error: 'Invalid token' }, 401);
+
+    let body;
+    try { body = await request.json(); } catch { body = await request.text().catch(() => ''); }
+
+    // Log the incoming webhook
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhook_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      webhook_id INTEGER, event TEXT, status INTEGER, response TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`).run();
+    await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response) VALUES (?, ?, ?, ?)')
+      .bind(wh.id, 'incoming', 200, typeof body === 'string' ? body.slice(0, 500) : JSON.stringify(body).slice(0, 500)).run();
+
+    // For Zapier/Make: just acknowledge receipt
+    return json({ success: true, received: true });
+  }),
+];
+
+const allRoutes = [...routes0, ...routes2, ...routes3];
+const router2 = createRouter(allRoutes);
+
+// Simple in-memory rate limiter
+const rateLimitMap = new Map();
+function rateLimit(request) {
+  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
+  const key = ip + ':' + request.url;
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  const maxReqs = 100;
+  let entry = rateLimitMap.get(key);
+  if (!entry || entry.reset < now) {
+    entry = { count: 0, reset: now + windowMs };
+    rateLimitMap.set(key, entry);
+  }
+  entry.count++;
+  if (entry.count > maxReqs) return true;
+  if (rateLimitMap.size > 10000) {
+    for (const [k, v] of rateLimitMap) {
+      if (v.reset < now) rateLimitMap.delete(k);
+    }
+  }
+  return false;
+}
+
+async function logApiCall(request, env, response, duration, error) {
+  try {
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS api_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      method TEXT, path TEXT, status INTEGER, duration INTEGER,
+      error TEXT, created_at TEXT DEFAULT (datetime('now'))
+    )`).run();
+    const status = response ? response.status : 500;
+    const errMsg = error ? error.message : (response && response.status >= 400 ? await response.clone().text().catch(() => '') : null);
+    await env.DB.prepare('INSERT INTO api_logs (method, path, status, duration, error) VALUES (?, ?, ?, ?, ?)')
+      .bind(request.method, new URL(request.url).pathname, status, duration, errMsg)
+      .run();
+  } catch (e) { /* ignore */ }
+}
+
+async function triggerWebhooks(env, event, payload) {
+  try {
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhooks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      url TEXT NOT NULL, events TEXT, secret TEXT, label TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`).run();
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhook_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      webhook_id INTEGER, event TEXT, status INTEGER, response TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`).run();
+
+    const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
+    for (const wh of webhooks.results) {
+      let events;
+      try { events = JSON.parse(wh.events || '[]'); } catch { events = []; }
+      if (!events.includes(event) && !events.includes('*')) continue;
+
+      try {
+        const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
+        const res = await fetch(wh.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Secret': wh.secret || '',
+            'X-Event': event,
+          },
+          body,
+        });
+        const resText = await res.text().catch(() => '').then(t => t.slice(0, 500));
+        if (res.ok) {
+          await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response) VALUES (?, ?, ?, ?)')
+            .bind(wh.id, event, res.status, resText).run();
+        } else {
+          const nextRetry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+          await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response, retry_count, max_retries, next_retry_at) VALUES (?, ?, ?, ?, 0, 6, ?)')
+            .bind(wh.id, event, res.status, resText, nextRetry).run();
+        }
+      } catch (e) {
+        const nextRetry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+        await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response, retry_count, max_retries, next_retry_at) VALUES (?, ?, ?, ?, 0, 6, ?)')
+          .bind(wh.id, event, 0, e.message, nextRetry).run();
+      }
+    }
+  } catch (e) { /* ignore webhook errors */ }
+}
+
+async function processWebhookRetries(env) {
+  try {
+    const due = await env.DB.prepare(`
+      SELECT wl.*, w.url, w.secret
+      FROM webhook_logs wl
+      JOIN webhooks w ON w.id = wl.webhook_id
+      WHERE wl.next_retry_at IS NOT NULL
+        AND wl.next_retry_at <= datetime('now')
+        AND wl.retry_count < wl.max_retries
+      ORDER BY wl.next_retry_at ASC
+      LIMIT 20
+    `).all();
+
+    for (const log of due.results) {
+      try {
+        const body = JSON.stringify({ event: JSON.parse(log.event || '{}') });
+        const res = await fetch(log.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(log.secret ? { 'X-Webhook-Secret': log.secret } : {}),
+          },
+          body,
+        });
+        const resText = await res.text().catch(() => '').then(t => t.slice(0, 500));
+        if (res.ok) {
+          await env.DB.prepare('UPDATE webhook_logs SET status = ?, response = ?, next_retry_at = NULL, retry_count = retry_count + 1 WHERE id = ?')
+            .bind(res.status, resText, log.id).run();
+        } else {
+          const backoff = [5, 15, 45, 120, 360, 1080];
+          const nextDelay = (backoff[log.retry_count + 1] || 1080) * 60 * 1000;
+          const nextRetry = new Date(Date.now() + nextDelay).toISOString();
+          await env.DB.prepare('UPDATE webhook_logs SET status = ?, response = ?, next_retry_at = ?, retry_count = retry_count + 1 WHERE id = ?')
+            .bind(res.status, resText, nextRetry, log.id).run();
+        }
+      } catch (e) {
+        const backoff = [5, 15, 45, 120, 360, 1080];
+        const nextDelay = (backoff[log.retry_count + 1] || 1080) * 60 * 1000;
+        const nextRetry = new Date(Date.now() + nextDelay).toISOString();
+        await env.DB.prepare('UPDATE webhook_logs SET status = 0, response = ?, next_retry_at = ?, retry_count = retry_count + 1 WHERE id = ?')
+          .bind(e.message, nextRetry, log.id).run();
+      }
+    }
+  } catch (e) { /* ignore retry errors */ }
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS });
     }
-    return router(request, env);
+    if (rateLimit(request)) {
+      return new Response('Too Many Requests', { status: 429, headers: CORS });
+    }
+    const startTime = Date.now();
+    try {
+      const response = await router2(request, env);
+      logApiCall(request, env, response, Date.now() - startTime);
+      return response;
+    } catch (e) {
+      logApiCall(request, env, null, Date.now() - startTime, e);
+      throw e;
+    }
+  },
+
+  // Scheduled handler for reminders + webhook retries (cron trigger)
+  async scheduled(event, env) {
+    await processWebhookRetries(env);
+
+    const apiKey = env.RESEND_API_KEY;
+    const from = env.EMAIL_FROM || 'no-reply@example.com';
+    const frontend = env.FRONTEND_URL || 'https://eglise-app.pages.dev';
+
+    async function sendReminders(daysBefore, columnFlag) {
+      const plans = await env.DB.prepare(`
+        SELECT p.id, p.date, p.time, p.theme, st.name as service_type_name
+        FROM plans p
+        LEFT JOIN service_types st ON st.id = p.service_type_id
+        WHERE p.date = date('now', '+${daysBefore} days')
+          AND p.status = 'planned'
+          AND p.${columnFlag} = 0
+      `).all();
+
+      for (const plan of plans.results) {
+        const participants = await env.DB.prepare(`
+          SELECT m.first_name, m.last_name, m.email, sp.status, sp.position, t.name as team_name
+          FROM scheduled_people sp
+          JOIN members m ON m.id = sp.member_id
+          LEFT JOIN teams t ON t.id = sp.team_id
+          WHERE sp.plan_id = ?
+        `).bind(plan.id).all();
+
+        for (const p of participants.results) {
+          if (!p.email) continue;
+          if (p.status === 'declined') continue;
+          const dayLabel = daysBefore === 2 ? 'J-2' : 'rappel';
+          const html = `<p>Bonjour ${p.first_name},</p>
+            <p>Ceci est un ${dayLabel} : tu es planifié(e) pour le service du <strong>${plan.date} à ${plan.time || '10:00'}</strong>.</p>
+            ${p.team_name ? `<p>Équipe: ${p.team_name}${p.position ? ` (${p.position})` : ''}</p>` : ''}
+            <p>Merci de confirmer ta présence sur <a href="${frontend}/mon-compte">ton compte</a>.</p>
+            <p>Merci !</p>`;
+          try {
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+              body: JSON.stringify({ from, to: p.email, subject: `Rappel: Service ${plan.date}`, html }),
+            });
+          } catch (e) { /* ignore */ }
+        }
+
+        await env.DB.prepare(`UPDATE plans SET ${columnFlag} = 1 WHERE id = ?`).bind(plan.id).run();
+      }
+    }
+
+    await sendReminders(2, 'reminder_j2_sent');
+    await sendReminders(1, 'reminder_j1_sent');
   },
 };

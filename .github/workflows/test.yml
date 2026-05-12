@@ -1,0 +1,41 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Check syntax
+        run: node --check src/index.js
+      - name: Run unit tests
+        run: npx vitest run test/helpers.test.js --reporter=verbose
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Type check
+        run: npx vue-tsc --build --noEmit
+        working-directory: frontend
+      - name: Build
+        run: npm run build
+        working-directory: frontend

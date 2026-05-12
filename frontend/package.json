@@ -8,16 +8,23 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "firebase": "^12.12.1",
     "tailwindcss": "^4.2.4",
     "vue": "^3.5.32",
+    "vue-i18n": "^10.0.8",
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^24.12.2",
     "@vitejs/plugin-vue": "^6.0.6",

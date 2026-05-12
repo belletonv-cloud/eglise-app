@@ -17,13 +17,20 @@ export default defineConfig({
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigationPreload: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
-            urlPattern: /^https?:\/\/.*\/api\/.*/,
+            urlPattern: /^https:\/\/eglise-app\.belletonv\.workers\.dev\/api\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
+              networkTimeoutSeconds: 5,
+              backgroundSync: {
+                name: 'api-sync-queue',
+                options: { maxRetentionTime: 24 * 60 },
+              },
             },
           },
         ],

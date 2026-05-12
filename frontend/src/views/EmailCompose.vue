@@ -78,6 +78,7 @@
     <div class="mt-8">
       <h2 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100">Logs d'emails récents</h2>
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
@@ -101,6 +102,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </div>

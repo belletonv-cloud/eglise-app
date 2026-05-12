@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div>
     <h1 class="text-xl font-bold mb-4">One-click action</h1>
     <div v-if="error" class="text-red-600">{{ error }}</div>
     <div v-else>

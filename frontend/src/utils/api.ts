@@ -11,6 +11,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
     if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+    // Dev auth secret for local development (bypasses Firebase)
+    if (import.meta.env.VITE_DEV_AUTH_SECRET) headers['X-Auth-Secret'] = import.meta.env.VITE_DEV_AUTH_SECRET
     // Try to attach Firebase ID token for robust server-side auth
     if (user.value && typeof user.value.getIdToken === 'function') {
       const token = await user.value.getIdToken(true).catch(() => null)
@@ -176,9 +178,163 @@ export const api = {
   sendFCMNotification: (data: { member_id?: number; plan_id?: number; tokens?: string[]; title: string; message: string }) =>
     request<{ success: boolean; sent: number; failed: number }>('/fcm/send', { method: 'POST', body: JSON.stringify(data) }),
 
+  // Annotations
+  getArrangementAnnotations: (arrangementId: number) => request<any[]>(`/arrangements/${arrangementId}/annotations`),
+  createAnnotation: (arrangementId: number, data: { content: string; is_shared?: boolean }) =>
+    request<any>(`/arrangements/${arrangementId}/annotations`, { method: 'POST', body: JSON.stringify(data) }),
+  updateAnnotation: (id: number, data: { content?: string; is_shared?: boolean }) =>
+    request<any>(`/annotations/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAnnotation: (id: number) => request<{ success: boolean }>(`/annotations/${id}`, { method: 'DELETE' }),
+
+  // Resource Permissions (RBAC)
+  getResourcePermissions: () => request<any[]>('/resource-permissions'),
+  createResourcePermission: (data: { member_id: number; resource_type: string; resource_id: number; permission: string; granted?: boolean }) =>
+    request<any>('/resource-permissions', { method: 'POST', body: JSON.stringify(data) }),
+  deleteResourcePermission: (id: number) => request<{ success: boolean }>(`/resource-permissions/${id}`, { method: 'DELETE' }),
+
   // Media (Attachments)
   getArrangementMedia: (arrangementId: number) => request<Attachment[]>(`/arrangements/${arrangementId}/media`),
   addArrangementMedia: (arrangementId: number, data: { file_url: string; filename: string; file_type?: string }) =>
     request<Attachment>(`/arrangements/${arrangementId}/media`, { method: 'POST', body: JSON.stringify(data) }),
   deleteAttachment: (id: number) => request<{ success: boolean }>(`/attachments/${id}`, { method: 'DELETE' }),
+
+  // Push notifications - register service worker token
+  registerForPush: async (memberId: number) => {
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return
+    if (Notification.permission !== 'granted') {
+      const perm = await Notification.requestPermission()
+      if (perm !== 'granted') return
+    }
+    // Register or find existing SW
+    const reg = await navigator.serviceWorker.register('/sw.js')
+    // We use FCM directly via the API, no need for VAPID keys
+    return reg
+  },
+
+  // Invitations
+  getInvitation: (token: string) => request<any>(`/invitations/${token}`),
+  redeemInvitation: (token: string, firebaseUid: string) =>
+    request<any>(`/invitations/${token}/redeem`, { method: 'POST', body: JSON.stringify({ firebase_uid: firebaseUid }) }),
+  createInvitation: (email: string) =>
+    request<any>('/invitations', { method: 'POST', body: JSON.stringify({ email }) }),
+
+  // Attendance stats
+  getAttendanceStats: (year?: string) => {
+    const params = year ? `?year=${year}` : ''
+    return request<any>(`/attendance-stats${params}`)
+  },
+
+  // Firebase link status
+  getFirebaseStatus: () => request<any>('/me/firebase-status'),
+
+  // iCal export
+  getPlanIcalUrl: (planId: number) => `${API_BASE}/plans/${planId}/ical`,
+
+  // Directory (annuaire)
+  getDirectory: () => request<any[]>('/directory'),
+
+  // Messages
+  getInbox: () => request<any[]>('/messages/inbox'),
+  getMessage: (id: number) => request<any>(`/messages/${id}`),
+  sendMessage: (data: { subject?: string; content: string; recipients: number[] }) => request<any>('/messages', { method: 'POST', body: JSON.stringify(data) }),
+  markMessageRead: (id: number) => request<any>(`/messages/${id}/read`, { method: 'POST' }),
+
+  // Checklist templates
+  getChecklistTemplates: (serviceTypeId?: number) => {
+    const params = serviceTypeId ? `?service_type_id=${serviceTypeId}` : ''
+    return request<any[]>(`/checklist-templates${params}`)
+  },
+  createChecklistTemplate: (data: { service_type_id?: number; position: string; label: string }) =>
+    request<any>('/checklist-templates', { method: 'POST', body: JSON.stringify(data) }),
+  deleteChecklistTemplate: (id: number) =>
+    request<{ success: boolean }>(`/checklist-templates/${id}`, { method: 'DELETE' }),
+  addChecklistTemplateItem: (checklistId: number, data: { label: string; position?: number }) =>
+    request<any>(`/checklist-templates/${checklistId}/items`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteChecklistTemplateItem: (id: number) =>
+    request<{ success: boolean }>(`/checklist-template-items/${id}`, { method: 'DELETE' }),
+
+  // Plan checklists
+  getPlanChecklist: (planId: number) => request<any[]>(`/plans/${planId}/checklist`),
+  addPlanChecklistItem: (planId: number, data: { position: string; label: string; member_id?: number }) =>
+    request<any>(`/plans/${planId}/checklist`, { method: 'POST', body: JSON.stringify(data) }),
+  updatePlanChecklist: (id: number, data: { done: boolean }) =>
+    request<any>(`/plan-checklists/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePlanChecklist: (id: number) =>
+    request<{ success: boolean }>(`/plan-checklists/${id}`, { method: 'DELETE' }),
+
+  // Sermon audio
+  getPlanAudio: (planId: number) => request<{ audio_url: string | null; audio_title: string | null; attachments: any[] }>(`/plans/${planId}/audio`),
+  uploadPlanAudio: async (planId: number, file: File, title: string) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('title', title)
+    const headers: Record<string, string> = {}
+    try {
+      if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+      if (user.value && typeof user.value.getIdToken === 'function') {
+        const token = await user.value.getIdToken(true).catch(() => null)
+        if (token) headers['Authorization'] = `Bearer ${token}`
+      }
+    } catch {}
+    const res = await fetch(`${API_BASE}/plans/${planId}/audio`, { method: 'POST', headers, body: formData })
+    if (!res.ok) { const e = new Error((await res.json().catch(() => ({ error: res.statusText }))).error); throw e }
+    return res.json()
+  },
+  deletePlanAudio: (planId: number) => request<{ success: boolean }>(`/plans/${planId}/audio`, { method: 'DELETE' }),
+
+  // Replacements
+  getReplacements: (planId: number, scheduledId: number) =>
+    request<any[]>(`/plans/${planId}/replacements/${scheduledId}`),
+  applyReplacement: (planId: number, scheduledId: number, newMemberId: number) =>
+    request<any>(`/plans/${planId}/replacements/${scheduledId}`, { method: 'POST', body: JSON.stringify({ new_member_id: newMemberId }) }),
+
+  getPolls: () => request<any[]>('/polls'),
+  createPoll: (data: { question: string; max_votes?: number }) =>
+    request<any>('/polls', { method: 'POST', body: JSON.stringify(data) }),
+  deletePoll: (id: number) => request<{ success: boolean }>(`/polls/${id}`, { method: 'DELETE' }),
+  createPollOption: (pollId: number, label: string) =>
+    request<any>(`/polls/${pollId}/options`, { method: 'POST', body: JSON.stringify({ label }) }),
+  deletePollOption: (id: number) =>
+    request<{ success: boolean }>(`/poll-options/${id}`, { method: 'DELETE' }),
+  createVote: (pollId: number, optionId: number) =>
+    request<any>(`/polls/${pollId}/vote`, { method: 'POST', body: JSON.stringify({ option_id: optionId }) }),
+  deleteVote: (pollId: number, optionId: number) =>
+    request<any>(`/polls/${pollId}/vote`, { method: 'DELETE', body: JSON.stringify({ option_id: optionId }) }),
+
+  getAnnouncements: (type?: string) => {
+    const params = type ? `?type=${type}` : ''
+    return request<any[]>(`/announcements${params}`)
+  },
+  createAnnouncement: (data: { type: string; content: string; plan_id?: number }) =>
+    request<any>('/announcements', { method: 'POST', body: JSON.stringify(data) }),
+  updateAnnouncement: (id: number, data: { content: string; type?: string }) =>
+    request<any>(`/announcements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteAnnouncement: (id: number) =>
+    request<{ success: boolean }>(`/announcements/${id}`, { method: 'DELETE' }),
+
+  // Webhooks
+  getWebhooks: () => request<any[]>('/webhooks'),
+  createWebhook: (data: { url: string; events: string[]; label?: string; secret?: string }) =>
+    request<any>('/webhooks', { method: 'POST', body: JSON.stringify(data) }),
+  updateWebhook: (id: number, data: any) =>
+    request<any>(`/webhooks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteWebhook: (id: number) =>
+    request<{ success: boolean }>(`/webhooks/${id}`, { method: 'DELETE' }),
+  getWebhookLogs: () => request<any[]>('/webhook-logs'),
+
+  exportCsv: (entity: string) => {
+    const base = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
+    return `${base}/export/${entity}`
+  },
+  importCsv: async (entity: string, csvContent: string) => {
+    const headers: Record<string, string> = { 'Content-Type': 'text/csv' }
+    try {
+      const { user } = await import('../stores/auth')
+      if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+    } catch {}
+    const base = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
+    const res = await fetch(`${base}/import/${entity}`, { method: 'POST', headers, body: csvContent })
+    if (!res.ok) { const e = new Error((await res.json().catch(() => ({ error: res.statusText }))).error); throw e }
+    return res.json()
+  },
 }

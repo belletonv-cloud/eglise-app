@@ -31,6 +31,19 @@
           <div v-if="upcomingPlans.length === 0" class="text-center py-8 text-gray-400">
             Aucun service à venir.
           </div>
+
+          <!-- QR codes for plans -->
+          <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-4">QR Code d'accès</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div v-for="plan in upcomingPlans.slice(0, 4)" :key="plan.id"
+                class="border border-gray-200 rounded-lg p-3 text-center">
+                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`"
+                  alt="QR check-in" class="mx-auto mb-2" loading="lazy" />
+                <div class="text-xs text-gray-500">{{ formatDate(plan.date) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Interface de check-in -->
@@ -45,6 +58,14 @@
               </div>
               <button @click="selectedPlan = null"
                 class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Changer</button>
+              <button @click="showQR = !showQR"
+                class="text-sm text-indigo-600 hover:text-indigo-800 cursor-pointer ml-2">QR</button>
+            </div>
+
+            <div v-if="showQR" class="mt-3 text-center">
+              <img   :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + selectedPlan.id)}`"
+                alt="QR check-in" class="mx-auto" />
+              <p class="text-xs text-gray-400 mt-1">Scannez pour check-in rapide</p>
             </div>
 
             <!-- Recherche de membre -->
@@ -147,6 +168,7 @@ const attendances = ref<any[]>([])
 const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const showManualCheckIn = ref(false)
+const showQR = ref(false)
 const manualForm = ref({ first_name: '', last_name: '' })
 const allMembers = ref<any[]>([])
 
@@ -158,6 +180,8 @@ const formatDate = (d: string) => {
 const formatTime = (t: string) => {
   return t ? new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''
 }
+
+const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
 const loadData = async () => {
   try {

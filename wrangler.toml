@@ -8,3 +8,6 @@ main = "src/index.js"
 binding = "DB"
 database_name = "eglise-db"
 database_id = "38d955d1-b300-445e-b06e-cfd9b1b953f0"
+
+[triggers]
+crons = ["0 8 * * *"]

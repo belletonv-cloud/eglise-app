@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     name: Deploy Worker
     steps:
