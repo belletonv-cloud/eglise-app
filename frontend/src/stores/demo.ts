@@ -24,7 +24,6 @@ export function disableInteractiveView() {
 }
 
 export function initInteractiveView() {
-  if (localStorage.getItem('interactive-view') === 'true') {
-    enableInteractiveView()
-  }
+  // Activer la démo par défaut, même si l'utilisateur est authentifié
+  enableInteractiveView()
 }
