@@ -1,6 +1,6 @@
 import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment, VolunteerPreferences, PlanTemplate, PlanTemplateItem } from './types'
 import { user } from '../stores/auth'
-import { isDemoMode, demoUser } from '../stores/demo'
+import { isInteractiveView, interactiveUser } from '../stores/demo'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
 
@@ -11,8 +11,8 @@ export function getApiBase() {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
-    const activeUser = isDemoMode.value ? demoUser.value : user.value
-    if (isDemoMode.value) {
+    const activeUser = isInteractiveView.value ? interactiveUser.value : user.value
+    if (isInteractiveView.value) {
       // Demo mode: use x-demo-email header (server will create member on-the-fly)
       headers['x-demo-email'] = activeUser.email
     } else if (activeUser && activeUser.email) {

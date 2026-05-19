@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { isAuthenticated } from '../stores/auth'
-import { isDemoMode } from '../stores/demo'
+import { isInteractiveView } from '../stores/demo'
 import HomePage from '../views/HomePage.vue'
 import SongDetail from '../components/SongDetail.vue'
 import PlansList from '../views/PlansList.vue'
@@ -254,7 +254,7 @@ const router = createRouter({
 // Public routes (invitation) are accessible without auth
 router.beforeEach((to) => {
   if (publicRoutes.includes(to.name as string)) return true
-  if (isAuthenticated.value || isDemoMode.value) return true
+  if (isAuthenticated.value || isInteractiveView.value) return true
   return true
 })
 

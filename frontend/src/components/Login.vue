@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginWithEmail, loginWithGoogle } from '../stores/auth';
-import { enableDemoMode } from '../stores/demo';
+import { enableInteractiveView } from '../stores/demo';
 
 const router = useRouter();
 const email = ref('');
@@ -47,7 +47,7 @@ const handleGoogleLogin = async () => {
 };
 
 const enterDemo = () => {
-  enableDemoMode();
+  enableInteractiveView();
 };
 
 const goToTour = () => {

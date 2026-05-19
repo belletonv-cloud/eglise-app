@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { enableDemoMode } from '../stores/demo'
+import { enableInteractiveView } from '../stores/demo'
 
 const router = useRouter()
 const tourActive = ref(false)
@@ -189,7 +189,7 @@ function goToFeature(f: any) {
 }
 
 function enterDemo() {
-  enableDemoMode()
+  enableInteractiveView()
   router.push('/dashboard')
 }
 </script>

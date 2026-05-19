@@ -1,13 +1,13 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
-    <Login v-if="!isAuthenticated && !isDemoMode" />
+    <Login v-if="!isAuthenticated && !isInteractiveView" />
     <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
         :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div>
             <h1 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ $t('app.title') }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isDemoMode ? '🎸 Mode Démo' : (user?.email || '') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🎸 Mode Démo' : (user?.email || '') }}</p>
           </div>
           <button @click="mobileSidebarOpen = false" class="lg:hidden p-1 text-gray-500 hover:text-gray-700 cursor-pointer">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -94,7 +94,7 @@
           <button @click="toggleLang" class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">
             {{ lang === 'fr' ? $t('app.lang_en') : $t('app.lang_fr') }}
           </button>
-          <button v-if="isDemoMode" @click="disableDemoMode" class="w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer">
+          <button v-if="isInteractiveView" @click="disableInteractiveView" class="w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer">
             Quitter l'accueil interactif
           </button>
           <button v-else @click="logout" class="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer">
@@ -132,7 +132,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
-import { isDemoMode, demoUser, initDemoMode, disableDemoMode } from './stores/demo';
+import { isInteractiveView, interactiveUser, initInteractiveView, disableInteractiveView } from './stores/demo';
 import { api } from './utils/api';
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
@@ -164,8 +164,8 @@ window.addEventListener('online', () => { online.value = true })
 window.addEventListener('offline', () => { online.value = false })
 
 onMounted(async () => {
-  initDemoMode()
-  if (!isAuthenticated.value && !isDemoMode.value) return
+  initInteractiveView()
+  if (!isAuthenticated.value && !isInteractiveView.value) return
   if (!('Notification' in window)) return
 
   const permission = await Notification.requestPermission().catch(() => 'denied')

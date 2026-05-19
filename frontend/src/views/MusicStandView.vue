@@ -168,8 +168,8 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'
-import { isDemoMode } from '../stores/demo'
-import { getDemoSong, demoSongs as demoSongsData } from '../stores/demoData'
+import { isInteractiveView } from '../stores/demo'
+import { getInteractiveSong, interactiveSongs as interactiveSongsData } from '../stores/demoData'
 
 const route = useRoute()
 const router = useRouter()
@@ -538,8 +538,8 @@ async function loadSongData(songId: number, arrId: number | null) {
 
   if (!songId) return
   try {
-    if (isDemoMode.value) {
-      song.value = getDemoSong(songId)
+    if (isInteractiveView.value) {
+      song.value = getInteractiveSong(songId)
     } else {
       song.value = await api.getSong(songId)
     }
@@ -582,9 +582,9 @@ onMounted(async () => {
   await loadSetlist()
 
   // Load browser songs (all songs with charts) for Song Browser
-  if (isDemoMode.value) {
-    demoSongs.value = demoSongsData
-    if (!planId.value) setlistSongs.value = demoSongsData
+  if (isInteractiveView.value) {
+    demoSongs.value = interactiveSongsData
+    if (!planId.value) setlistSongs.value = interactiveSongsData
   } else {
     try {
       const songs = await api.getSongs()

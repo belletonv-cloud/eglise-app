@@ -40,8 +40,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../utils/api'
-import { isDemoMode } from '../stores/demo'
-import { demoSongs } from '../stores/demoData'
+import { isInteractiveView } from '../stores/demo'
+import { interactiveSongs } from '../stores/demoData'
 
 const router = useRouter()
 const songs = ref<any[]>([])
@@ -66,8 +66,8 @@ function openMusicStand(song: any) {
 }
 
 onMounted(async () => {
-  if (isDemoMode.value) {
-    songs.value = demoSongs.map(s => ({
+  if (isInteractiveView.value) {
+    songs.value = interactiveSongs.map(s => ({
       id: s.id,
       title: s.title,
       author: s.author,
