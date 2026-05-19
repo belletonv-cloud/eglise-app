@@ -3,6 +3,10 @@
   "scripts": {
     "install-hooks": "git config core.hooksPath .githooks || true",
     "scan-secrets": "rg -n --hidden --no-ignore -S '\\b(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|pco_pat_[A-Za-z0-9_-]{10,}|[A-Za-z0-9_-]{40,})\\b' || true",
+    "demo": "echo '🚀 Démarrage de la démo...' && cd frontend && npm install && npm run dev",
+    "demo:quick": "echo '⚡ Ouvrez index.html dans votre navigateur pour la démo rapide!' && python -m http.server 8080 2>/dev/null || python3 -m http.server 8080 2>/dev/null || node -e \"const http=require('http'),fs=require('fs'),path=require('path');http.createServer((req,res)=>{const file=req.url==='/'?'index.html':req.url.slice(1);try{res.end(fs.readFileSync(file))}catch{res.statusCode=404;res.end('Not found')}}).listen(8080,()=>console.log('Server running at http://localhost:8080'))\"",
+    "demo:build": "cd frontend && npm run build && echo '✅ Build terminé! Ouvrez frontend/dist/index.html'",
+    "setup": "echo '📦 Installation des dépendances frontend...' && cd frontend && npm install && echo '✅ Installation terminée!'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:run": "vitest run",
