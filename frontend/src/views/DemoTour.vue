@@ -3,7 +3,7 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-content">
-        <h1>🎸 Église App — Mode Démo</h1>
+        <h1>🚀 Église App — Accueil Interactif</h1>
         <p class="hero-sub">
           Découvrez toutes les fonctionnalités de l'application de gestion d'église.
           <br />Inspiré de <strong>Planning Center</strong>, <strong>Music Stand</strong> et plus encore.

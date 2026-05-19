@@ -236,8 +236,10 @@ export default {
   },
   menu: {
     account: 'Mon compte',
+    interactive_home: 'Accueil Interactif',
     dashboard: 'Tableau de bord',
-    calendar: 'Calendrier',
+    home: 'Accueil',
+  calendar: 'Calendrier',
     services: 'Services',
     templates: 'Modèles',
     members: 'Membres',

@@ -236,8 +236,10 @@ export default {
   },
   menu: {
     account: 'My Account',
+    interactive_home: 'Interactive Home',
     dashboard: 'Dashboard',
-    calendar: 'Calendar',
+    home: 'Home',
+  calendar: 'Calendar',
     services: 'Services',
     templates: 'Templates',
     members: 'Members',

@@ -3,28 +3,28 @@
  */
 import { ref } from 'vue'
 
-export const isDemoMode = ref(false)
-export const demoUser = ref<any>(null)
+export const isInteractiveView = ref(false)
+export const interactiveUser = ref<any>(null)
 
-export function enableDemoMode() {
-  isDemoMode.value = true
-  demoUser.value = {
+export function enableInteractiveView() {
+  isInteractiveView.value = true
+  interactiveUser.value = {
     email: 'demo@cieuxouverts.bzh',
-    displayName: 'Démo Cieux Ouverts',
+    displayName: 'Accueil Interactif Cieux Ouverts',
     role: 'admin',
     getIdToken: async () => 'demo-token',
   }
-  localStorage.setItem('demo-mode', 'true')
+  localStorage.setItem('interactive-view', 'true')
 }
 
-export function disableDemoMode() {
-  isDemoMode.value = false
-  demoUser.value = null
-  localStorage.removeItem('demo-mode')
+export function disableInteractiveView() {
+  isInteractiveView.value = false
+  interactiveUser.value = null
+  localStorage.removeItem('interactive-view')
 }
 
-export function initDemoMode() {
-  if (localStorage.getItem('demo-mode') === 'true') {
-    enableDemoMode()
+export function initInteractiveView() {
+  if (localStorage.getItem('interactive-view') === 'true') {
+    enableInteractiveView()
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Demo mode mock data — used as fallback when API fails in demo mode
  */
-export const demoSongs = [
+export const interactiveSongs = [
   {
     id: 1,
     title: 'AU CŒUR DE LA LOUANGE',
@@ -471,7 +471,7 @@ Tu es fidèle, toujours fidèle
   }
 ]
 
-export const demoMembers = [
+export const interactiveMembers = [
   { id: 1, email: 'pasteur@eglise.fr', first_name: 'Jean', last_name: 'Dupont', role: 'admin', member_type: 'staff', phone: '+33 6 12 34 56 78', notes: 'Pasteur principal', created_at: '2024-01-15T10:00:00Z' },
   { id: 2, email: 'marie@eglise.fr', first_name: 'Marie', last_name: 'Laurent', role: 'music_director', member_type: 'regular', phone: '+33 6 23 45 67 89', notes: 'Directrice musicale', created_at: '2024-02-01T10:00:00Z' },
   { id: 3, email: 'pierre@eglise.fr', first_name: 'Pierre', last_name: 'Martin', role: 'scheduler', member_type: 'regular', phone: '+33 6 34 56 78 90', notes: 'Responsable planning', created_at: '2024-02-15T10:00:00Z' },
@@ -489,7 +489,7 @@ export const demoMembers = [
   { id: 15, email: 'david@eglise.fr', first_name: 'David', last_name: 'Durand', role: 'volunteer', member_type: 'regular', phone: '+33 6 44 55 66 77', notes: 'Guitariste acoustique', created_at: '2024-08-15T10:00:00Z' },
 ]
 
-export const demoTeams = [
+export const interactiveTeams = [
   { id: 1, name: 'Louange', description: 'Équipe de worship et musique', created_at: '2024-01-01T00:00:00Z' },
   { id: 2, name: 'Technique', description: 'Son, lumières, vidéo', created_at: '2024-01-01T00:00:00Z' },
   { id: 3, name: 'Accueil', description: 'Équipe d\'accueil et café', created_at: '2024-01-01T00:00:00Z' },
@@ -515,7 +515,7 @@ export const demoTeamMembers = [
   { team_id: 5, member_id: 3, position: 'Membre' },
 ]
 
-export const demoPlans = [
+export const interactivePlans = [
   {
     id: 1001,
     date: new Date().toISOString().slice(0, 10),
@@ -592,7 +592,7 @@ export const demoPlans = [
   }
 ]
 
-export const demoHouseGroups = [
+export const interactiveHouseGroups = [
   {
     id: 1,
     name: 'Groupe Centre-ville',
@@ -734,49 +734,49 @@ export const demoEmailTemplates = [
   },
 ]
 
-export const demoStats = {
-  members: demoMembers.length,
-  activeMembers: demoMembers.filter(m => m.member_type === 'regular').length,
-  upcomingPlans: demoPlans.filter(p => new Date(p.date) >= new Date()).length,
-  songsWithArrangements: demoSongs.length,
+export const interactiveStats = {
+  members: interactiveMembers.length,
+  activeMembers: interactiveMembers.filter(m => m.member_type === 'regular').length,
+  upcomingPlans: interactivePlans.filter(p => new Date(p.date) >= new Date()).length,
+  songsWithArrangements: interactiveSongs.length,
   pendingConfirmations: 5,
-  teams: demoTeams.length,
+  teams: interactiveTeams.length,
 }
 
-export const demoPlan = demoPlans[0]
+export const demoPlan = interactivePlans[0]
 
-export function getDemoSong(id: number) {
-  return demoSongs.find(s => s.id === id) || demoSongs[0]
+export function getInteractiveSong(id: number) {
+  return interactiveSongs.find(s => s.id === id) || interactiveSongs[0]
 }
 
-export function getDemoSongs() {
-  return demoSongs
+export function getInteractiveSongs() {
+  return interactiveSongs
 }
 
-export function getDemoMember(id: number) {
-  return demoMembers.find(m => m.id === id) || demoMembers[0]
+export function getInteractiveMember(id: number) {
+  return interactiveMembers.find(m => m.id === id) || interactiveMembers[0]
 }
 
-export function getDemoMembers() {
-  return demoMembers
+export function getInteractiveMembers() {
+  return interactiveMembers
 }
 
-export function getDemoTeam(id: number) {
-  return demoTeams.find(t => t.id === id) || demoTeams[0]
+export function getInteractiveTeam(id: number) {
+  return interactiveTeams.find(t => t.id === id) || interactiveTeams[0]
 }
 
-export function getDemoTeams() {
-  return demoTeams
+export function getInteractiveTeams() {
+  return interactiveTeams
 }
 
-export function getDemoPlan(id: number) {
-  return demoPlans.find(p => p.id === id) || demoPlans[0]
+export function getInteractivePlan(id: number) {
+  return interactivePlans.find(p => p.id === id) || interactivePlans[0]
 }
 
-export function getDemoPlans() {
-  return demoPlans
+export function getInteractivePlans() {
+  return interactivePlans
 }
 
-export function getDemoStats() {
-  return demoStats
+export function getInteractiveStats() {
+  return interactiveStats
 }
