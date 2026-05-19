@@ -129,10 +129,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
-import { isInteractiveView, interactiveUser, initInteractiveView, disableInteractiveView } from './stores/demo';
+import { isInteractiveView, interactiveUser, initInteractiveView, disableInteractiveView, enableInteractiveView } from './stores/demo';
 import { api } from './utils/api';
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
@@ -149,6 +149,7 @@ const toggleLang = () => {
 
 const mobileSidebarOpen = ref(false)
 const route = useRoute()
+const router = useRouter()
 watch(() => route.path, () => { mobileSidebarOpen.value = false })
 
 const isDark = ref(localStorage.getItem('dark-mode') === 'true')
@@ -173,4 +174,9 @@ onMounted(async () => {
 
   // Service worker is registered by api.ts registerForPush() — avoid duplicate registration
 })
+
+function enterInteractive() {
+  enableInteractiveView()
+  router.push('/interactive')
+}
 </script>
