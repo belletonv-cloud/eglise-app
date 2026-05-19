@@ -38,7 +38,7 @@ import MusicStandView from '../views/MusicStandView.vue'
 import MusicStandListView from '../views/MusicStandListView.vue'
 import DemoTour from '../views/DemoTour.vue'
 
-const publicRoutes = ['invitation', 'demo-tour']
+const publicRoutes = ['invitation', 'demo-tour', 'interactive']
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +46,11 @@ const router = createRouter({
     {
       path: '/demo-tour',
       name: 'demo-tour',
+      component: DemoTour,
+    },
+    {
+      path: '/interactive',
+      name: 'interactive',
       component: DemoTour,
     },
     {
