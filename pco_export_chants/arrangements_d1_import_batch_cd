@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TON SANG PARLE BEAUCOUP MIEUX', '', NULL, ''
+  FROM songs WHERE title = 'TON SANG PARLE BEAUCOUP MIEUX' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TOUT A TOI', '', NULL, ''
+  FROM songs WHERE title = 'TOUT A TOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES ASSIS SUR LE TRONE', '', NULL, ''
+  FROM songs WHERE title = 'TU ES ASSIS SUR LE TRONE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES GRAND', '', NULL, ''
+  FROM songs WHERE title = 'TU ES GRAND' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES LE MAITRE', '', NULL, ''
+  FROM songs WHERE title = 'TU ES LE MAITRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES LE PLUS BEAU', '', NULL, ''
+  FROM songs WHERE title = 'TU ES LE PLUS BEAU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES LE ROI PUISSANT', '', NULL, ''
+  FROM songs WHERE title = 'TU ES LE ROI PUISSANT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES MERVEILLEUX', '', NULL, ''
+  FROM songs WHERE title = 'TU ES MERVEILLEUX' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

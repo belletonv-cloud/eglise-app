@@ -1,0 +1,25 @@
+REFRAIN 2 = Refrain 1 + Refrain 2
+Tout ton peuple [F]crie :Tu es [G]saint
+Toi le Roi des [Em]rois, "Tu es [Am]saint" 
+Dieu d''éterni[Dm]té, tu es [G]saint (À) jamais tu es[C] saint
+
+
+
+
+
+
+
+'
+  FROM songs WHERE title = 'A jamais tu es saint' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '                  C                       F
+Oh happy day (Oh happy day)
+                  C                        A7
+Oh happy day (Oh happy day)
+
+
+                         Dm                                  G
+When Jesus washed (when Jesus washed)
+                         Dm                             G
+Oh when he washed (when he washed)
+                          Dm                              G

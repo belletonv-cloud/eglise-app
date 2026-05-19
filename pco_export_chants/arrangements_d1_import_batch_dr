@@ -1,0 +1,25 @@
+Que ton [Cm]peuple se [Gm]réveille
+Seigneur [Bb]tu sauves et [F]guéris
+Souffle [Eb]sur [F]notre [Gm]pays 
+COLUMN_BREAK
+
+
+PONT
+Dans nos [Bb]villes et nos ré[F]gions  
+Dans nos [Cm]familles, nos [Gm]maisons
+Que toutes[Cm] les généra[F]tions
+Soient en[Cm]flammées [Dm]pour ton [Gm]nom
+Viens ren[Bb]verser nos id[F]oles
+Change-[Cm]nous par ta Pa[Gm]role
+Nous bran[Gm]dissons l’étend[F]ard
+De Jés[Cm]us le [Dm]Roi de G[Gm]loire'
+  FROM songs WHERE title = 'Souffle Sur Notre Pays' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'la bonté de Dieu in F', '', NULL, 'Couplet 1
+Je t''aime [F]Seigneur, ta bon[Bb]té ne faillit [F]jamais
+Chaque [Dm]jour, tu me [Bb]tiens dans tes [C]mains
+Du mo[Dm7]ment où je me lève[Bb]        et jusqu''à mon cou[F]cher
+Je chante[Bb]rai la bonté [Csus4]de mon [F]Dieu
+
+
+Refrain

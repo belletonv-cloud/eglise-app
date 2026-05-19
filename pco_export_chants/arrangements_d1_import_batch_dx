@@ -1,0 +1,25 @@
+[F]Pas besoin d''diplô[Gm7]me, [C]pas besoin d''la[F]tin, [Dm7]Juste aimer son[Gm7] nom, [C]Et son Esprit [F]Saint
+Et l''on devient fou, Fou de ce Dieu là, Ce bon Dieu d''amour, Bon Dieu tout en moi
+
+COUPLET 2
+Pas besoin d''froncer, froncer les sourcils
+Pas besoin d''crisper, Louer c''est facile, Qui dit qu''on est saoul
+Alors qu''on l''est pas?, Nous on sait qu''en nous, C''est Dieu qui fait ça
+
+
+Je veux de te louer, woh'
+  FROM songs WHERE title = 'Si tu veux le louer' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'REFRAIN
+F / G / C / G / C 
+Venez chantons pour le Roi des rois.
+Acclamons-le notre sauveur.
+Entrons dans ses portes avec des cris de joie.
+Des danses au Roi de gloire.
+
+COUPLET
+C / G / C / G / C
+Le sauveur de l’humanité. Le Roi qui mérite nos louanges.
+Unis dans la fraternité.
+Nous venons lui rendre nos hommages.
+

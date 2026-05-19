@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LOUANGE A L''''AGNEAU !', '', NULL, ''
+  FROM songs WHERE title = 'LOUANGE A L''AGNEAU !' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LOUE SOIT DIEU', '', NULL, ''
+  FROM songs WHERE title = 'LOUE SOIT DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LUMIERE DU MONDE', '', NULL, ''
+  FROM songs WHERE title = 'LUMIERE DU MONDE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'MAJESTE', '', NULL, ''
+  FROM songs WHERE title = 'MAJESTE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'MANIFESTE-TOI', '', NULL, ''
+  FROM songs WHERE title = 'MANIFESTE-TOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'MA VIE EST EN TOI SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'MA VIE EST EN TOI SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'MERCI (d''''un coeur reconnaissant)', '', NULL, ''
+  FROM songs WHERE title = 'MERCI (d''un coeur reconnaissant)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'MERVEILLEUX, SI MERVEILLEUX', '', NULL, ''
+  FROM songs WHERE title = 'MERVEILLEUX, SI MERVEILLEUX' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

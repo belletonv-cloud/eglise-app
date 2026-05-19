@@ -1,0 +1,25 @@
+Et les fonda[Eb]tions tremblent 
+au [F]son de cette [Bb]voix   [F] [Gm]
+Toute la mai[Cm]son se rem[Dm]plit de fu[Gm]mée
+Je tombe à ge[Eb]noux, je [F]ne peux que cri[Bb]er   [Gm]
+
+
+
+
+
+Couplet 3
+L''éternel me [Eb]dit qui [F]pourrait j''envo[Bb]yer   [F] [Gm]
+Qui se lève[Cm]ra et [Dm]marchera pour [Gm]nous  [Cm] [Gm]
+Je dis: “ me voi[Eb]ci ” par[F]tout je chante[Bb]rai'
+  FROM songs WHERE title = 'SAINT, SAINT, SAINT (est l''Eternel des armées)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'SAINT, SAINT, SAINT (HOSANNA)', '', NULL, ''
+  FROM songs WHERE title = 'SAINT, SAINT, SAINT (HOSANNA)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'SEIGNEUR D''''AMOUR', '', NULL, ''
+  FROM songs WHERE title = 'SEIGNEUR D''AMOUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'SEIGNEUR PAR LA CLARTE (BRILLE, O JESUS)', '', NULL, ''
+  FROM songs WHERE title = 'SEIGNEUR PAR LA CLARTE (BRILLE, O JESUS)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'SEIGNEUR, TU ES MA FORCE (EXODE 15)', '', NULL, ''

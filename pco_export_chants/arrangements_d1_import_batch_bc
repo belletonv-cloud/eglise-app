@@ -1,0 +1,25 @@
+
+[Em]Nous l’a[Bm]vons vrai[Em]ment reçu
+[Em]L’Esprit [Bm]promis [Em]par Jésus
+[Em]Il nous [Bm]libère [Em]par son feu
+[Em]Pour lou[Bm]er le [Em]nom [D]de [Em]Dieu
+'
+  FROM songs WHERE title = 'LA OU EST L’ESPRIT DU SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LE FILS DE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'LE FILS DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LE FLEUVE DE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'LE FLEUVE DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LENT A LA COLERE', '', NULL, ''
+  FROM songs WHERE title = 'LENT A LA COLERE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LES CIEUX PROCLAMENT', '', NULL, ''
+  FROM songs WHERE title = 'LES CIEUX PROCLAMENT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'L''''ETERNEL DIEU, AU MILIEU DE TOI', '', NULL, ''
+  FROM songs WHERE title = 'L''ETERNEL DIEU, AU MILIEU DE TOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LEVE-TOI', '', NULL, ''
+  FROM songs WHERE title = 'LEVE-TOI' LIMIT 1;

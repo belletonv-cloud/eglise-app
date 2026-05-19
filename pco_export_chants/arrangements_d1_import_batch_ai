@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'BENIS L''ETERNEL' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BENI SOIT LE NOM DU SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'BENI SOIT LE NOM DU SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BENI SOIT LE NOM DU SEIGNEUR (Je demeure)', '', NULL, ''
+  FROM songs WHERE title = 'BENI SOIT LE NOM DU SEIGNEUR (Je demeure)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BENI SOIT TON NOM', '', NULL, ''
+  FROM songs WHERE title = 'BENI SOIT TON NOM' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BENISSEZ LE SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'BENISSEZ LE SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BRISER LES CHAINES', '', NULL, ''
+  FROM songs WHERE title = 'BRISER LES CHAINES' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en A', '', NULL, 'Car [D]Dieu est un [A]Dieu puissant
+Il [E]règne de [F#m]son saint lieu
+[D]Avec sa[A]gesse, amour
+Oui [Bm]Dieu est un [C#m]Dieu pui[F#m]ssant
+
+
+
+Car [D]Dieu est un [A]Dieu puissant

@@ -1,0 +1,25 @@
+'
+  FROM songs WHERE title = 'Adonaï' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '     
+Je n''oublies au[G]cun de Tes bienfaits
+À chaque fo[D]is q''j''y pense mon coeur est rempli
+De paroles pour Te lo[C]uer
+De paroles pour Te l[G]ouer [D]
+
+
+Quand tout va [Em]mal
+Ô mon âme, pourquoi t''abats-[Bm]tu?
+Même au mil[Bm]ieu de la tempête, Il est [D]là  (x2)
+Moi, je Le louerai e[C]ncore [Em]
+Moi, je Le louerai e[D]ncore 
+ 
+
+O mon [C]âme bénis L''Etern[Em]el!
+O mon [D]âme bénis L''Etern[C]el!
+'
+  FROM songs WHERE title = 'Bénis l''Eternel' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+Dieu est là, Dieu est là 
+Dieu est là pour te bénir, Dieu est là.

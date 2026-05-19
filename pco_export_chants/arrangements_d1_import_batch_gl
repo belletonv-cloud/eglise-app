@@ -1,0 +1,25 @@
+
+
+PONT
+Un cri [Am7]sur mes lèvres, ma vie [C]te célèbre.
+Tu es [G]bon, tu es [D/F#]bon.
+Vent, so[Am7]leil ou pluie, mon cœur [C]te redit :
+Tu es [G]bon, tu es [D/F#]bon.'
+  FROM songs WHERE title = 'Tu es bon' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+G  D A  D
+Bm  A D
+ 
+
+  G
+Je prie, je déclare dans l''atmosphère
+A
+Saint-Esprit, oui tu l''attestes
+    D          A    G
+Ton règne, ton autorité
+ 
+  G
+Je crois et je confesse à mon âme
+A
+Tes meurtrissures me guérissent

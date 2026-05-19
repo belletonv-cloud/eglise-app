@@ -1,0 +1,25 @@
+Comme nous pardonnons aussi
+   F                   G           C
+A ceux qui nous ont offensés.
+COLUMN_BREAK
+
+             Am    Em
+Ne nous laisse pas
+          F           C
+Entrer en tentation,
+           F      C          Gsus4
+Mais délivre-nous du mal.
+                C                F
+Car c''est à toi qu''appartiennent
+    Am               Em            F   G
+Le règne, la puissance et la gloire
+Am        Em           F   G        C
+Pour les siècles des siècles. Amen.'
+  FROM songs WHERE title = 'Notre Père' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Le [A]roi dans sa splendeur, vê[F#m7]tu de majesté,
+La terre se réjouit,[D2] la terre se réjouit.
+Il est[A] paré d’éclat, la [F#m7]nuit essaie de fuir
+Au son de sa voix,[D2] au son de sa voix.
+
+

@@ -1,0 +1,25 @@
+
+Je t''offre ce moment Seigneur,    O mon Roi;
+
+                 Dm9     Dm7 Dm7 G G              C
+
+Dans tout ce que je dis et fais        Sois glorifié.
+
+        Fm7               G             Em7           Am7
+
+Oh Saint Esprit prend la place, Sur le trône de mon coeur;
+
+
+                 Dm9     Dm7      G        C
+
+Je t''offre ce moment Seigneur,      O mon Roi.
+
+
+
+
+'
+  FROM songs WHERE title = 'JE T''OFFRE CE MOMENT' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, '-', '', NULL, 'In[C]fini[Bb]ment, a[C]bondam[Bb]ment, bien au-de[F]là, De tout [C]ce que tu de[Bb]mandes
+Au [C]tra[Bb]vers de [C]la puis[Bb]sance, qui a[F]git en [C]toi
+

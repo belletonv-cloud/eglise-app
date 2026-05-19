@@ -1,0 +1,25 @@
+COUPLET 6
+            Am 	F 
+On verra que nous sommes ses disciples
+            Am 	             D 
+À l’amour qui nous unira.
+                             F 	   C 	       E7 	Am 
+Nous n’aurons qu’un seul but : élever Jésus
+             F 	      G 	    C 	Fsus2 / C 
+Et que son salut soit répandu.		
+'
+  FROM songs WHERE title = 'Une seule église' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Mes yeux ont vu ta majesté 
+Touche mes lèvres, purifie-moi 
+Revêtu de sainteté 
+Je viens pour t''adorer 
+ 
+Je veux devenir louange 
+Je veux devenir parfum 
+Etre un sacrifice vivant 
+Embrasé sur l''autel 
+
+Je veux devenir louange 
+Je veux devenir parfum 
+Je veux n''être plus qu''un chant 

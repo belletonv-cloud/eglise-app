@@ -1,0 +1,25 @@
+Que tu es [F#m]fort et puissant.
+[A]Nul ne peut te résist[C#m]er, sois glorif[B]ié ;
+Dieu, tu es [B]fort et puissant.
+
+[A]Rien n’est impossible à t[C#m]oi, ô Roi des r[B]ois,
+Dieu, tu es [F#m]fort et puissant.
+[A]Au dessus de tous les n[C#m]oms, nous déclar[B]ons
+Que tu es [B]fort et puissant.
+
+[A][C#m][B][F#m]
+
+PONT
+[A]Rien ne peut me [C#m]séparer de [B]ton amour 
+ma[F#m]nifesté en [A]Jésus-Christ.
+Mon [C#m]sauveur règne aux c[B]ieux.'
+  FROM songs WHERE title = 'Fort et puissant' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+[C#m][A][E][G#m]
+[C#m] Amour p[A]arfait, tu t’es d[E]onné à la cr[G#m]oix pour tout effac[C#m]er.
+ De mes p[A]échés tu t’es ch[E]argé sur le b[B]ois.
+
+Refrain
+C’est par [A]ta grâce, ta grâce [C#m]seule que je suis par[B]donné.
+C’est par [A]ta grâce, ta grâce [C#m]seule que tu m’as ra[B]cheté.

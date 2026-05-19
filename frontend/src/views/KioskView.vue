@@ -1,12 +1,12 @@
 <template>
   <div class="kiosk" @click="nextSong" @keydown="onKeydown" tabindex="0" ref="kioskEl">
-    <div v-if="loading" class="loading-full">Chargement...</div>
+    <div v-if="loading" class="loading-full">{{$t('kiosk.loading')}}</div>
     <div v-else-if="error" class="loading-full text-red-500">{{ error }}</div>
 
     <template v-else-if="currentSong">
       <div class="kiosk-header">
         <div class="kiosk-info">
-          <span class="kiosk-service">{{ plan?.service_type_name || 'Service' }}</span>
+          <span class="kiosk-service">{{ plan?.service_type_name || $t('kiosk.default_service') }}</span>
           <span class="kiosk-date">{{ formatDate(plan?.date) }}</span>
         </div>
         <div class="kiosk-song-count">{{ songIndex + 1 }} / {{ songs.length }}</div>
@@ -15,7 +15,7 @@
       <div class="kiosk-body">
         <div class="kiosk-song-title">{{ currentSong.song_title }}</div>
         <div class="kiosk-song-key" v-if="currentSong.transposed_key">
-          Ton: <strong>{{ currentSong.transposed_key }}</strong>
+          {{ $t('arrangement.original_key') }} <strong>{{ currentSong.transposed_key }}</strong>
           <span v-if="currentSong.arrangement_name"> · {{ currentSong.arrangement_name }}</span>
         </div>
 
@@ -26,28 +26,30 @@
             <div v-if="line.type === 'normal'" class="chart-lyric">{{ line.lyrics }}</div>
           </div>
         </div>
-        <div v-else class="kiosk-no-chart">Pas de grille disponible</div>
+        <div v-else class="kiosk-no-chart">{{$t('kiosk.no_chart')}}</div>
       </div>
 
       <div class="kiosk-footer">
-        <button @click.stop="prevSong" class="kiosk-nav-btn">◀ Précédent</button>
-        <button @click.stop="exitKiosk" class="kiosk-exit-btn">✕ Quitter</button>
-        <button @click.stop="nextSong" class="kiosk-nav-btn">Suivant ▶</button>
+        <button @click.stop="prevSong" class="kiosk-nav-btn">◀ {{$t('kiosk.prev')}}</button>
+        <button @click.stop="exitKiosk" class="kiosk-exit-btn">✕ {{$t('kiosk.exit')}}</button>
+        <button @click.stop="nextSong" class="kiosk-nav-btn">{{$t('kiosk.next')}} ▶</button>
       </div>
     </template>
 
-    <div v-else class="loading-full">Aucun chant dans ce service</div>
+    <div v-else class="loading-full">{{ $t('kiosk.no_songs') }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { parseChordPro } from '../utils/chordpro'
 
 const route = useRoute()
 const router = useRouter()
+const { t, locale } = useI18n()
 const kioskEl = ref<HTMLElement | null>(null)
 
 const plan = ref<any>(null)
@@ -65,7 +67,7 @@ const parsedLines = computed(() => {
 
 function formatDate(d: string) {
   if (!d) return ''
-  return new Date(d).toLocaleDateString('fr-FR', {
+  return new Date(d).toLocaleDateString(locale.value === 'fr' ? 'fr-FR' : 'en-US', {
     weekday: 'long', day: 'numeric', month: 'long'
   })
 }
@@ -107,7 +109,7 @@ function enterFullscreen() {
 
 onMounted(async () => {
   const id = parseInt(route.params.id as string)
-  if (isNaN(id)) { error.value = 'ID invalide'; loading.value = false; return }
+  if (isNaN(id)) { error.value = t('app.invalid_id'); loading.value = false; return }
 
   try {
     const [planData, items] = await Promise.all([
@@ -140,7 +142,7 @@ onMounted(async () => {
       })
     )
     songs.value = loadedSongs
-    if (loadedSongs.length === 0) error.value = 'Aucun chant dans ce service'
+    if (loadedSongs.length === 0) error.value = t('kiosk.no_songs')
   } catch (e: any) {
     error.value = e.message
   } finally {

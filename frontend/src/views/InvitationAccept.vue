@@ -1,17 +1,17 @@
 <template>
   <div class="max-w-md mx-auto mt-12">
-    <div v-if="loading" class="text-center py-12 text-gray-500">Vérification de l'invitation...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('invitation.loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-6 rounded-xl">
-      <h2 class="text-lg font-bold mb-2">Lien invalide</h2>
+      <h2 class="text-lg font-bold mb-2">{{ $t('invitation.invalid') }}</h2>
       <p>{{ error }}</p>
     </div>
     <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Bienvenue {{ invite?.first_name }} !</h1>
-      <p class="text-gray-500 mb-6">Tu es invité(e) à rejoindre l'application Église en tant que {{ invite?.first_name }} {{ invite?.last_name }} ({{ invite?.email }}).</p>
-      <p class="text-sm text-gray-400 mb-6">Connecte-toi avec ton compte Google pour lier ton profil.</p>
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ $t('invitation.welcome', { name: invite?.first_name }) }}</h1>
+      <p class="text-gray-500 mb-6">{{ $t('invitation.invite_text', { name: invite?.first_name + ' ' + invite?.last_name, email: invite?.email }) }}</p>
+      <p class="text-sm text-gray-400 mb-6">{{ $t('invitation.login_hint') }}</p>
       <button @click="redeem"
         class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-        Se connecter avec Google
+        {{ $t('invitation.login_button') }}
       </button>
     </div>
   </div>

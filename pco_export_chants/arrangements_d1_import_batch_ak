@@ -1,0 +1,25 @@
+[Am]Dieu, nous ferons [E7]des exploits, Car c''est lui seul qui [Am]écrase l''ennemi,
+Chantons et crions [E7]la victoire : Christ est [Am]Roi ! [E7]Christ est [Am]Roi !
+
+[E7]Christ est [Am]Roi ! Hé !'
+  FROM songs WHERE title = 'CHANT DE VICTOIRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'CHANTONS', '', NULL, ''
+  FROM songs WHERE title = 'CHANTONS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'CONSUME-MOI', '', NULL, ''
+  FROM songs WHERE title = 'CONSUME-MOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DANSE ET CHANTE', '', NULL, ''
+  FROM songs WHERE title = 'DANSE ET CHANTE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DANS TES BRAS', '', NULL, ''
+  FROM songs WHERE title = 'DANS TES BRAS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DEBOUT', '', NULL, ''
+  FROM songs WHERE title = 'DEBOUT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DE TOUT MON CŒUR', '', NULL, ''
+  FROM songs WHERE title = 'DE TOUT MON CŒUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DEVANT TON AUTEL', '', NULL, ''

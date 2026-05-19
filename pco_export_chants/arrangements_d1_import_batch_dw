@@ -1,0 +1,25 @@
+PRE REFRAIN 2
+C''est mainte[Fm]nant, c''est mainten[Db]ant
+Que les c[Ab]ieux sont ouv[Eb]erts
+C''est mainte[Fm]nant, c''est mainten[Db]ant
+Que ta gl[Ab]oire touche la ter[Eb]re
+
+
+
+
+
+
+
+
+
+'
+  FROM songs WHERE title = 'Viens Esprit du Seigneur (NDLM)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'EXO', '', NULL, 'REFRAIN
+
+[F]Si tu veux le louer, sa[Gm7]che, Qu[Bb]''il faut que tu le [C]fasses avec le cœur
+[F]Si tu veux le louer, l[Gm7]âche, L[Bb]es pensées qui t''att[C]achent et te font peur
+Si tu veux le louer, aime, Ton âme et celle aussi de ton voisin
+Si tu veux le louer, sème, Le vent que tu récolteras demain
+
+COUPLET 1

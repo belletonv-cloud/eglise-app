@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Templates de plans</h2>
+      <h2 class="text-2xl font-bold text-gray-800">{{ $t('planTemplates.title') }}</h2>
       <button @click="showForm = true"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-        + Nouveau template
+        {{ $t('planTemplates.new') }}
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('planTemplates.loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <div v-else class="space-y-3">
@@ -21,43 +21,43 @@
             <p v-if="tpl.description" class="text-sm text-gray-500">{{ tpl.description }}</p>
           </div>
           <div class="text-sm text-gray-500">
-            {{ tpl.item_count || 0 }} éléments
+            {{ tpl.item_count || 0 }} {{ $t('planTemplates.items') }}
           </div>
         </div>
       </div>
 
       <div v-if="templates.length === 0" class="text-center py-12 text-gray-400">
-        Aucun template pour le moment.
+        {{ $t('planTemplates.not_found') }}
       </div>
     </div>
 
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">
       <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
-        <h3 class="text-xl font-bold mb-4">Nouveau template</h3>
+        <h3 class="text-xl font-bold mb-4">{{ $t('planTemplates.create_title') }}</h3>
         <form @submit.prevent="createTemplate" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplates.name') }}</label>
             <input v-model="form.name" required
               class="w-full border border-gray-300 rounded-lg px-3 py-2" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplates.description') }}</label>
             <textarea v-model="form.description" rows="2"
               class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type de service</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplates.service_type') }}</label>
             <select v-model="form.service_type_id"
               class="w-full border border-gray-300 rounded-lg px-3 py-2">
-              <option :value="null">Tous</option>
+              <option :value="null">{{ $t('planTemplates.all') }}</option>
               <option v-for="st in serviceTypes" :key="st.id" :value="st.id">{{ st.name }}</option>
             </select>
           </div>
           <div class="flex gap-3 justify-end">
             <button type="button" @click="showForm = false"
-              class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+              class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('planTemplates.cancel') }}</button>
             <button type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">Créer</button>
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">{{ $t('planTemplates.create') }}</button>
           </div>
         </form>
       </div>

@@ -1,0 +1,25 @@
+
+
+[E] D’un même [Am]cœur pour le Sei[D]gneur,
+ Le créa[G]teur du [D/F#]vrai bonheur.[Em]
+ [Am]Tu es [B7]glorieux, mon [Em]roi.
+[E] Tu fais de [Am]moi ton servi[D]teur.
+ Père, je veux [G]que ma [D/F#]joie de[Em]meure,
+ Car c’est en [C]toi que je veux [B7]être éternelle[Em]ment.'
+  FROM songs WHERE title = 'NOUS ADORONS ADONAÏ' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS AVONS SOIF DE PLUS', '', NULL, '    Em          D       G     C          Em7        D       C 
+1 - Nous avons soif de plus, Souffle de Dieu, nous t''attendons 
+ Em          D       G   C          Em7      D         C  
+Nous avons soif de plus, Esprit de Dieu, souffle sur nous 
+Am           G      D
+Remplis nous à nouveau (bis) 
+
+         G                D        Em7              C 
+Feu dévorant, attise en nous, La passion pour ton nom 
+           G                 D
+Esprit de Dieu, tombe en ce lieu,
+                Em7                   D       C
+Sois le seul maître, Sois le seul maître en nous 
+
+   

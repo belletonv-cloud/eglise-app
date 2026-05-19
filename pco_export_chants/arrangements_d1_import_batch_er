@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'Notre Dieu' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Si je ca[Em]chais quoi que ce soit, tu le verr[D]ais  
+Tu le [Bm]saurais, rien ne t''est ca[C]ché
+Si m[Em]es lèvres honoraient ton nom
+Mais que [D]mon cœur était éloi[Bm]gné
+Tu n''y pren[C]drais pas plaisir
+ 
+Ce que tu cher[C]ches va bien au-delà des m[D]ots
+Va bien au-delà des ch[Bm]ants
+C''est une vie qui t''est ent[Am]ièrement consacrée
+Dans le se[C]cret
+Quand les hommes ne me voient [D]plus
+Quand j''ai devancé l''au[Bm]rore
+Je veux tout laisser, jusqu''à[C] avoir
+
+Un cœur d''adorateur[Em] (un cœur d''adorateur)
+Un cœur d''adorateur[D] (un cœur d''adorateur)
+Un cœur d''adorateur[Bm] (un cœur d''adorateur)
+Un cœur d''adorateur[C] (un cœur d''adorateur)
+Un cœur qui te désire[Em] (un cœur qui te désire)
+Un coeur qui te recherche[D] (un cœur qui te recherche)
+Un coeur qui s''humilie[Bm] (un cœur qui s''humilie)
+Un cœur d''adorateur[C]
+ 

@@ -1,0 +1,25 @@
+'
+  FROM songs WHERE title = 'Venez chantons' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[Fm] _ _ _ [Bb] _ _ _ _ [F] _  [Gm] _ [F] _ [Bb] _ [C] _ _ [F] _ _ _ 
+
+COUPLET 1
+Tout au fond de moi je [Bb] savais 
+Que tu étais toujours là [C] près [F] de moi
+Ton regard d''amour me suivait [Bb] 
+Me courait, me [C] guidait chaque jour
+[Db] _ [Gm] [Dm] Pour accomplir par [F] ta [Bb] justice 
+Ta [C] [F] promesse en moi
+
+
+COUPLET 2
+Tu _ [C] [F] m''avais choisi [Bb] Seigneur 
+Bien avant que je [F] ne sois formé
+Tes projets conçus pour mon [Bb] bonheur 
+Sont écrits là [C] dans mon cœur _ 
+[Db] [Dm] Rien d''autre [F] dans ce monde n''est plus [Bb] précieux 
+Que ta [C] promesse [F] en [Cm] moi
+
+COLUMN_BREAK
+REFRAIN
+[Eb] Près [C] de toi [Gm] Seigneur, oui [F] je veux vivre [Cm] 

@@ -1,0 +1,25 @@
+Pourtant je m''avance avec révérence
+Qui au ciel est comparable à toi ? Et qui sur la terre est ton égal ?
+Tu es élevé bien au dessus de tout, Je veux m''incliner pour t''exalter
+
+Et je tombe face à terre en présence de ta gloire
+Oui je tombe face à terre en présence de ta gloire
+
+Viens rayonner de ta gloire, Viens rayonner de ta gloire
+Prends la place qui te revient, ô Roi de gloire
+
+
+[Dm]'
+  FROM songs WHERE title = 'ACCUEILLI DANS LES PARVIS DU ROI' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en D', '', NULL, 'Couplet 1
+Quel sau[D]veur merveilleux je po[C#/A]]ssède
+Il s''est [G]sacrifié pour [D]moi
+Et sa [D]vie innocente, il [A]cède
+Pour mo[Bm]urir sur l''infâme [G/D]bois
+
+
+Couplet 2
+Il re[D]nonce à la gloire cé[F#m]]les[A]te
+Pour le [Em]plan rédemp[G]teur de [D]Dieu
+L''appa[D]rence est la plus mo[A]deste

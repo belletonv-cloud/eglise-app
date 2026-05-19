@@ -1,79 +1,82 @@
 <template>
   <div class="member-detail" v-if="member">
-    <button @click="$router.push('/members')" class="back-btn">← Membres</button>
+    <button @click="$router.push('/members')" class="back-btn">{{ $t('memberDetail.back') }}</button>
     <h1>{{ member.first_name }} {{ member.last_name }}</h1>
 
     <div class="card">
-      <h3>Informations</h3>
-      <p><strong>Email :</strong> {{ member.email || '-' }}</p>
-      <p><strong>Téléphone :</strong> {{ member.phone || '-' }}</p>
-      <p><strong>Statut :</strong> <span class="badge" :class="member.membership_type">{{ member.membership_type }}</span></p>
-      <p><strong>Notes :</strong> {{ member.notes || '-' }}</p>
-      <button @click="editing = !editing" class="edit-btn">{{ editing ? 'Annuler' : 'Modifier' }}</button>
+      <h3>{{ $t('memberDetail.info') }}</h3>
+      <p><strong>{{ $t('memberDetail.email') }} :</strong> {{ member.email || '-' }}</p>
+      <p><strong>{{ $t('memberDetail.phone') }} :</strong> {{ member.phone || '-' }}</p>
+      <p><strong>{{ $t('memberDetail.status') }} :</strong> <span class="badge" :class="member.membership_type">{{ typeLabel(member.membership_type) }}</span></p>
+      <p><strong>{{ $t('memberDetail.notes') }} :</strong> {{ member.notes || '-' }}</p>
+      <button @click="editing = !editing" class="edit-btn">{{ editing ? $t('memberDetail.cancel') : $t('memberDetail.edit') }}</button>
     </div>
 
     <div v-if="editing" class="card">
-      <h3>Modifier</h3>
+      <h3>{{ $t('memberDetail.edit_title') }}</h3>
       <form @submit.prevent="saveMember">
-        <label>Prénom <input v-model="form.first_name" required /></label>
-        <label>Nom <input v-model="form.last_name" required /></label>
-        <label>Email <input v-model="form.email" type="email" /></label>
-        <label>Téléphone <input v-model="form.phone" /></label>
-        <label>Statut
+        <label>{{ $t('memberDetail.first_name') }} <input v-model="form.first_name" required /></label>
+        <label>{{ $t('memberDetail.last_name') }} <input v-model="form.last_name" required /></label>
+        <label>{{ $t('memberDetail.email') }} <input v-model="form.email" type="email" /></label>
+        <label>{{ $t('memberDetail.phone') }} <input v-model="form.phone" /></label>
+        <label>{{ $t('memberDetail.status') }}
           <select v-model="form.membership_type">
-            <option value="guest">Invitée</option>
-            <option value="member">Membre</option>
-            <option value="inactive">Inactif</option>
+            <option value="guest">{{ $t('memberDetail.types.guest') }}</option>
+            <option value="member">{{ $t('memberDetail.types.member') }}</option>
+            <option value="inactive">{{ $t('memberDetail.types.inactive') }}</option>
           </select>
         </label>
-        <label>Notes <textarea v-model="form.notes" rows="3"></textarea></label>
-        <button type="submit" class="save-btn">Enregistrer</button>
+        <label>{{ $t('memberDetail.notes') }} <textarea v-model="form.notes" rows="3"></textarea></label>
+        <button type="submit" class="save-btn">{{ $t('memberDetail.save') }}</button>
       </form>
     </div>
 
     <div class="card" v-if="member.teams && member.teams.length > 0">
-      <h3>Équipes ({{ member.teams.length }})</h3>
+      <h3>{{ $t('memberDetail.teams_title', { count: member.teams.length }) }}</h3>
       <ul>
         <li v-for="t in member.teams" :key="t.id">
           <router-link :to="`/teams/${t.id}`">{{ t.name }}</router-link>
           <span v-if="t.position" class="position">— {{ t.position }}</span>
-          <button @click="leaveTeam(t.id)" class="ml-3 text-sm text-red-600">Quitter</button>
+          <button @click="leaveTeam(t.id)" class="ml-3 text-sm text-red-600">{{ $t('memberDetail.leave') }}</button>
         </li>
       </ul>
     </div>
 
     <div class="card">
-      <h3>Rejoindre une équipe</h3>
+      <h3>{{ $t('memberDetail.join_title') }}</h3>
       <div class="flex gap-2 items-center">
         <select v-model="joinTeamId" class="px-2 py-1 border rounded">
-          <option :value="null">-- Choisir une équipe --</option>
+          <option :value="null">{{ $t('memberDetail.join_select') }}</option>
           <template v-for="t in teams" :key="t.id">
             <option :value="t.id" v-if="!member.teams?.find((x: any) => x.id === t.id)">{{ t.name }}</option>
           </template>
         </select>
-        <input v-model="joinPosition" placeholder="Position (ex: chanteur)" class="px-2 py-1 border rounded" />
-        <button @click="joinTeam" class="px-3 py-1 bg-green-600 text-white rounded">Rejoindre</button>
+        <input v-model="joinPosition" :placeholder="$t('memberDetail.join_position')" class="px-2 py-1 border rounded" />
+        <button @click="joinTeam" class="px-3 py-1 bg-green-600 text-white rounded">{{ $t('memberDetail.join_button') }}</button>
       </div>
     </div>
 
     <VolunteerPreferences :member-id="Number(route.params.id)" />
 
     <div class="card">
-      <h3>Notifications push</h3>
+      <h3>{{ $t('memberDetail.notifications') }}</h3>
       <NotificationPrefs :member-id="Number(route.params.id)" />
     </div>
   </div>
-  <div v-else-if="loading" class="loading">Chargement...</div>
+  <div v-else-if="loading" class="loading">{{ $t('memberDetail.loading') }}</div>
   <div v-else class="error">{{ error }}</div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import NotificationPrefs from '../components/NotificationPrefs.vue'
 import VolunteerPreferences from '../components/VolunteerPreferences.vue'
 import { useToast } from '../stores/toast'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const member = ref<any>(null)
@@ -85,11 +88,17 @@ const teams = ref<any[]>([])
 const joinTeamId = ref<number | null>(null)
 const joinPosition = ref('')
 
+const typeLabel = (tl: string) => {
+  const key = `memberDetail.types.${tl}`
+  const translated = t(key)
+  return translated === key ? tl : translated
+}
+
 async function load() {
   try {
     loading.value = true
     const id = Number(route.params.id)
-    if (isNaN(id)) throw new Error('ID invalide')
+    if (isNaN(id)) throw new Error(t('app.invalid_id'))
     member.value = await api.getMember(id)
     teams.value = await api.getTeams()
     form.value = { ...member.value }
@@ -116,10 +125,10 @@ const leaveTeam = async (teamId: number) => {
   try {
     const id = Number(route.params.id)
     await api.removeTeamMember(teamId, id)
-    show('Membre retiré de l\'équipe', 'success')
+    show(t('memberDetail.removed'), 'success')
     await load()
   } catch (e: any) {
-    show(e.message || 'Erreur', 'error')
+    show(e.message || t('memberDetail.error'), 'error')
   }
 }
 
@@ -128,12 +137,12 @@ const joinTeam = async () => {
     if (!joinTeamId.value) return
     const id = Number(route.params.id)
     await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
-    show('Vous avez rejoint l\'équipe', 'success')
+    show(t('memberDetail.joined'), 'success')
     joinTeamId.value = null
     joinPosition.value = ''
     await load()
   } catch (e: any) {
-    show(e.message || 'Erreur', 'error')
+    show(e.message || t('memberDetail.error'), 'error')
   }
 }
 </script>

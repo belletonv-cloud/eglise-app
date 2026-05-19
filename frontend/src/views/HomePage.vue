@@ -1,8 +1,8 @@
 <template>
   <div class="home">
     <div class="content">
-      <h2>Chants ({{ filteredSongs.length }})<span v-if="offlineMode" class="offline-badge">Offline</span></h2>
-      <div v-if="loading">Chargement...</div>
+      <h2>{{ $t('home.title') }} ({{ filteredSongs.length }})<span v-if="offlineMode" class="offline-badge">{{ $t('home.offline') }}</span></h2>
+      <div v-if="loading">{{ $t('loading') }}</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <ul v-else>
         <li v-for="song in filteredSongs" :key="song.id" @click="goToSong(song.id)" class="song-item">

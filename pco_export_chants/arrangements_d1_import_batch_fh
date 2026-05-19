@@ -1,0 +1,25 @@
+[Am]Tous mes chemins par Sa voie (tout changé)
+Tous m[F]es déserts en abondance (tout changé)
+Son [G]feu s''est allumé en moi
+
+Bridge 1
+Il est [C]Dieu Il est grand
+Il est fort [F]et puissant
+Il est bon [C]pour toujours
+Ét[G]ernel en amour (bis)
+
+
+Bridge 2 
+Tout changé [Am], Tout changé, [F]Tout changé
+Di[G]eu a tout changé [C] (bis)
+'
+  FROM songs WHERE title = 'Quel jour de joie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en C', '', NULL, 'Couple 1
+Quand je [C]marche dans la vallée de l''ombre de la mort
+Que je suis [G/B]face à mon destin
+Quand le che[F]min devient tou[Am]jours plus é[G]troit
+Je ne veux [C]plus noyer mon chagrin
+Je veux faire [G/B]face au lendemain
+Me raccro[F]cher à Tes pro[Am]messes et à Ta [G/B]voix
+

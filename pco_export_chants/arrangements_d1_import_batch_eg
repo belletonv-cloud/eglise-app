@@ -1,0 +1,25 @@
+
+
+Ô Dieu,[A] tu es grand ! Nous chantons : 
+Ô [F#m7]Dieu, tu es grand ! Et tous verront,
+Ô [D2]Dieu, combien[E] tu es grand ![A]
+COLUMN_BREAK
+Car [A]d’âge en âge il règne, 
+les [F#m7]temps sont dans sa main.
+Commencement et fin,[D2] commencement et fin.
+Le Père,[A] le Fils, l’Esprit, [F#m7]trinité divine.
+Le lion et l’agneau,[D2] le lion et l’agneau.
+
+
+
+[A]Le plus grand des noms, [F#m7]digne de louange.
+Mon [DM7]cœur s’écrie : Ô Dieu,[E] tu es grand ![A]
+(× 2)'
+  FROM songs WHERE title = 'Le roi dans sa splendeur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+[Dm]Saint, [F]saint, [C]tu es saint, [Gm]Seigneur Dieu [F]de l’univ[C]ers.
+[Gm]Tu es [F]couron[C]né de grâce, [Bb]revêtu [C]de majes[Dm]té.
+
+
+[F]Grand est ton [C]nom, et puis[Gm]sant dans les [Dm]âges.

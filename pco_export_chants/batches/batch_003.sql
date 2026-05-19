@@ -1,0 +1,11 @@
+-- Generated from arrangements_for_d1.json (324 arrangements)
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CE NOM SI MERVEILLEUX', '', NULL, '' FROM songs WHERE title = 'CE NOM SI MERVEILLEUX' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CE QUI M''''ETAIT CHER (TE CONNAITRE)', '', NULL, '' FROM songs WHERE title = 'CE QUI M''ETAIT CHER (TE CONNAITRE)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CHANGE MON CŒUR', '', NULL, '' FROM songs WHERE title = 'CHANGE MON CŒUR' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CHANT DE VICTOIRE', '', NULL, ' Avec [Am]Dieu, nous ferons [E7]des exploits, Car c''est lui seul qui [Am]écrase l''ennemi, Chantons et crions [E7]la victoire : Christ est [Am]Roi ! Car [G]Dieu a gagné [C]le combat, Et [Dm]libéré[G] son [Am]peuple. Sa [G]parole a vaincu [C]l''ennemi, La [Dm]terre entière [E7]verra qu''avec [Am]Dieu, nous ferons [E7]des exploits, Car c''est lui seul qui [Am]écrase l''ennemi, Chantons et crions [E7]la victoire : Christ est [Am]Roi ! [E7]Christ est [Am]Roi ! [E7]Christ est [Am]Roi ! Hé !' FROM songs WHERE title = 'CHANT DE VICTOIRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CHANTONS', '', NULL, '' FROM songs WHERE title = 'CHANTONS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'CONSUME-MOI', '', NULL, '' FROM songs WHERE title = 'CONSUME-MOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'DANSE ET CHANTE', '', NULL, '' FROM songs WHERE title = 'DANSE ET CHANTE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'DANS TES BRAS', '', NULL, '' FROM songs WHERE title = 'DANS TES BRAS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'DEBOUT', '', NULL, '' FROM songs WHERE title = 'DEBOUT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart) SELECT id, 'DE TOUT MON CŒUR', '', NULL, '' FROM songs WHERE title = 'DE TOUT MON CŒUR' LIMIT 1;

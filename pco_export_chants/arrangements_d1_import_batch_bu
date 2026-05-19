@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUAND J''''INVOQUE LE SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'QUAND J''INVOQUE LE SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE JE BRULE POUR TOI', '', NULL, ''
+  FROM songs WHERE title = 'QUE JE BRULE POUR TOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE L''''ESPRIT DE VERITE', '', NULL, ''
+  FROM songs WHERE title = 'QUE L''ESPRIT DE VERITE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE MA LOUANGE (mon adoration)', '', NULL, ''
+  FROM songs WHERE title = 'QUE MA LOUANGE (mon adoration)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE MA LOUANGE TE PLAISE', '', NULL, '
+Do|Re|Mi|Fa|So|La|Si
+JEM933 - Que ma louange te plaise 
+Sol
+
+( Matthieu Marvane - Matthieu Marvane )
+
+Couplet 1
+...
+
+Sol         Sim  Mim      Do 
+Je veux chanter  toute ma vie.

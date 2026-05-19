@@ -1,0 +1,25 @@
+           D
+Sur les linteaux de mon coeur 
+       Bm
+J''ai le sang de Jésus-Christ (x4)
+               G
+'
+  FROM songs WHERE title = 'Dans le puissant nom de Jésus' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Dm 	C/D 	Dm 
+Le Dieu de victoire habite en moi. (× 2)
+Gm7 	Gm 	A 
+Je marche non par la vue, mais par la foi,	
+Gm7 	Am7 	BbM7 	C 
+Le Dieu de victoire habite en moi.	
+
+Dm 	C/D 	Dm 
+Le Dieu de victoire habite en moi. (× 2)
+Gm7 	Gm 	A 
+Je marche non par la vue, mais par la foi,	
+Gm7 	Am7 	Dm 
+Le Dieu de victoire habite en moi.
+
+Gm7 	Dm7 
+Je chanterai et danserai,
+C/E 	F 

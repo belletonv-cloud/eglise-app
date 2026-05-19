@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="font-semibold text-gray-800 dark:text-gray-100">Enregistrement audio</h3>
+      <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('sermonAudio.title') }}</h3>
     </div>
 
     <div v-if="audio" class="space-y-2">
@@ -12,14 +12,14 @@
           <span class="text-sm text-gray-600 dark:text-gray-400 truncate block">{{ att.filename }}</span>
           <audio :src="getAttachmentUrl(att)" controls class="w-full mt-1" v-if="att.file_type === 'audio'" />
         </div>
-        <button @click="deleteAudio(att.id)" class="text-red-400 hover:text-red-600 text-xs cursor-pointer ml-2">Suppr.</button>
+        <button @click="deleteAudio(att.id)" class="text-red-400 hover:text-red-600 text-xs cursor-pointer ml-2">{{ $t('sermonAudio.delete') }}</button>
       </div>
     </div>
 
-    <div v-if="!audio" class="text-center py-4 text-sm text-gray-400">Aucun enregistrement.</div>
+    <div v-if="!audio" class="text-center py-4 text-sm text-gray-400">{{ $t('sermonAudio.no_recording') }}</div>
 
     <div class="mt-3">
-      <input v-model="audioTitle" placeholder="Titre de la prédication"
+      <input v-model="audioTitle" :placeholder="$t('sermonAudio.placeholder')"
         class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded mb-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" />
       <input ref="fileInput" type="file" accept="audio/*" @change="upload" class="block w-full text-sm text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
     </div>
@@ -28,9 +28,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { api, getApiBase } from '../utils/api'
 
 const props = defineProps<{ planId: number }>()
+const { t } = useI18n()
 
 const apiBase = getApiBase()
 const audio = ref<any>(null)
@@ -62,12 +64,12 @@ const upload = async () => {
   const file = fileInput.value?.files?.[0]
   if (!file) return
   try {
-    const result = await api.uploadPlanAudio(props.planId, file, audioTitle.value || 'Enregistrement')
+    const result = await api.uploadPlanAudio(props.planId, file, audioTitle.value || t('sermonAudio.upload_title'))
     audioTitle.value = ''
     if (fileInput.value) fileInput.value.value = ''
     await load()
   } catch (e: any) {
-    alert('Erreur upload: ' + e.message)
+    alert(t('sermonAudio.upload_error') + e.message)
   }
 }
 

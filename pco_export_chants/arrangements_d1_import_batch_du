@@ -1,0 +1,25 @@
+
+
+PRE REFRAIN
+Je suis né de Dieu[G], je suis victor[Am]ieux  Je suis né pour influen[F]cer, 
+Rempli du Saint-esprit[C] [G] [Am] [F]
+
+
+REFRAIN
+[C]Je louerai Son [G/B]Nom Je louerai Son [Am]Nom
+Je louerai Son [F]Nom Je suis plus que vainqueur [C]
+
+Oh oh oh 
+ 
+COUPLET 3
+[C]Toute arme forgée contre moi[G] Est nulle et sans effet[AM] 
+Le Ressuscité vit en moi[F] Son Nom est Jésus[C]
+
+ C / G / Am / F
+Je suis plus que vainqueur x5 // Né pour influencer x5 // Je suis victorieux x5
+Oh oh oh '
+  FROM songs WHERE title = 'Je louerai son nom' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+[Fm]Esprit [Db]Saint, [Ab]Toi le don parfait,[Eb] mon héritage[Fm]
+Envoyé[Db] des Cieux pour [Ab]embraser la ter[Eb]re

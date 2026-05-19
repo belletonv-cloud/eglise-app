@@ -1,0 +1,25 @@
+
+[Dm]L''esprit Saint et [C]l''épouse fidèle 
+[Gm]Disent: viens c''est leur [Dm]coeur qui a[C]ppelle
+
+[F]Viens, ô Jésus, toi [C]l''époux bien-aimé
+[Gm]Tous tes élus ne [Asus4]cessent de chan[A]ter
+
+Couplet 3
+
+[Dm]Tous les peuples et [C]toutes les nations
+[Gm]D''un seul coeur, avec [Dm]les milliers [C]d''anges
+[F]Entonneront en l''hon[C]neur de son nom
+[Gm]Ce chant de gloire avec [Asus4]force et lou[A]ange'
+  FROM songs WHERE title = 'A L''AGNEAU DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'AUPRES DE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'AUPRES DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'AVEC TON ESPRIT', '', NULL, ''
+  FROM songs WHERE title = 'AVEC TON ESPRIT' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'BENIS L''''ETERNEL', '', NULL, 'Couplet 1
+
+Je n''oublie [G]aucun de Tes bienfaits
+A chaque [D]fois qu''j''y pense mon coeur est rempli

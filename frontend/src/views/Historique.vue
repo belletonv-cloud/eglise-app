@@ -1,25 +1,25 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Historique des services</h1>
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{$t('history.title')}}</h1>
 
     <div class="flex gap-2 mb-4 flex-wrap">
       <select v-model="yearFilter" @change="loadHistory"
         class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-        <option value="">Toutes les années</option>
+        <option value="">{{$t('history.filter_all_years')}}</option>
         <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
       </select>
       <select v-model="typeFilter" @change="loadHistory"
         class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-        <option value="">Tous les types</option>
+        <option value="">{{$t('history.filter_all_types')}}</option>
         <option v-for="st in serviceTypes" :key="st.id" :value="st.id">{{ st.name }}</option>
       </select>
-      <input v-model="searchQuery" @input="loadHistory" placeholder="Rechercher..."
+      <input v-model="searchQuery" @input="loadHistory" :placeholder="$t('history.search_placeholder')"
         class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex-1" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{$t('plan.loading')}}</div>
 
-    <div v-else-if="plans.length === 0" class="text-center py-12 text-gray-400">Aucun service passé trouvé.</div>
+    <div v-else-if="plans.length === 0" class="text-center py-12 text-gray-400">{{$t('history.no_results')}}</div>
 
     <div v-else class="space-y-3">
       <div v-for="plan in plans" :key="plan.id"
@@ -31,21 +31,21 @@
               <span v-if="plan.time" class="text-sm text-gray-500">{{ plan.time?.slice(0, 5) }}</span>
               <span class="px-2 py-0.5 rounded-full text-xs font-medium"
                 :class="plan.service_type_name ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600'">
-                {{ plan.service_type_name || 'Service' }}
+                {{ plan.service_type_name || $t('plan.service') }}
               </span>
               <span v-if="plan.theme" class="text-sm text-gray-500 italic truncate">— {{ plan.theme }}</span>
             </div>
             <div class="flex gap-4 mt-1 text-xs text-gray-500">
-              <span>{{ plan.items_count || 0 }} éléments</span>
-              <span>{{ plan.people_count || 0 }} participants</span>
+              <span>{{ plan.items_count || 0 }} {{$t('history.elements')}}</span>
+              <span>{{ plan.people_count || 0 }} {{$t('history.participants')}}</span>
             </div>
           </div>
           <div class="flex gap-2 shrink-0">
             <router-link :to="`/plans/${plan.id}`"
-              class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Voir</router-link>
-            <a :href="`${apiBase}/plans/${plan.id}/ical`" target="_blank"
+              class="px-3 py-1 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{{$t('history.see')}}</router-link>
+<a :href="`${apiBase}/plans/${plan.id}/ical`" target="_blank"
               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-              📅 iCal
+               📅 {{$t('plan.ical')}}
             </a>
           </div>
         </div>

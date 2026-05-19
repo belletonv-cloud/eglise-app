@@ -1,0 +1,25 @@
+[C] Je chante de [F]joie dans le Nom du Seig[G]neur !
+
+
+Je [C]célébrerai le [F]Nom de Cel[G]ui que mon cœur [C]aime
+Oui ! Je [Am]bénirai Le [F]Nom de mon sauv[G]eur
+Je cé[C]lébrerai le [F]Nom de Cel[G]ui que mon cœur [C]aime
+Oui ! Je [Am]bénirai le [F]Nom du Seig[C]neur [F] [Am] [G]
+
+
+[C]Je célèbre[F]rai [Am]le Nom du Seig[G]neur '
+  FROM songs WHERE title = 'Je me réjouis dans le Nom du Seigneur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+Couplet et refrain :[Bm] [A] [F#m] [G]
+
+[Bm] [A] [F#m] Adon[G]aï       x2
+Que le [Bm]Dieu des es[A]prits, des pro[G]phètes
+Des[A]cende en ce [Bm]lieu x2 [A] [F#m] [G]
+
+[G] Nous voulons le voir
+[A] Nous voulons le vivre
+[Bm] Révèle-nous les choses qui [D]nous sont cachées[G] x2
+
+
+[G]Prophétise, [A]prophétise, [Bm]prophétise enco[A]re

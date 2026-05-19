@@ -1,0 +1,25 @@
+
+
+[G]Nous venons célébrer Dieu [C/E]Nous voulons [D/F#]L''adorer
+[G]Devant Lui nous nous courbons [C/E]Pour élever [C]Son nom
+
+
+Laissons [G]entrer le roi de [D]gloire Acclamons [G/B]le Dieu de [C]victoire
+Il est [Em]vainqueur, faisons Lui [D/F#]place Il est roi, [C]Il est roi [C]et Seigneur
+
+[G]Dieu est là, Il nous attend, [C/E]Il entend nos [D/F#]prières
+[G]Sa parole est éternelle, [C/E]Elle est notre essentielle
+
+
+[Em]Accueillons [G]notre Dieu
+[C]Il est le [Am]merveilleux, [Em]glorieux, [G]majestueux [Am]'
+  FROM songs WHERE title = 'Laissons entrer' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LA BENEDICTION (V1)', '', NULL, '[G] Dieu te bénit,[C] et te garde, [G] Il rayonne sur [D]toi, Il t''accorde sa [Em]grâce 
+Ton Dieu se [C]tourne vers toi, [G] Te don[D]ne la [G]paix
+
+                  [Em]A[C]men A[G]men A[D]men, [Em]A[C]men A[G]men A[D]men
+
+Que sa [Em]faveur, reste sur toi, Pour plus [C]de mille, générations
+Sur ta [G]famille, et tes enfants, Et les [D]enfants, de leurs enfants
+

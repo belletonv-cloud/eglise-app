@@ -1,21 +1,23 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{t('plan.loading')}}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="plan">
       <div class="flex items-center gap-2 mb-6 flex-wrap">
         <button @click="$router.push('/calendar')"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer shrink-0">&larr; Calendrier</button>
+          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer shrink-0">{{t('plan.back')}}</button>
         <div class="flex-1 min-w-0" />
         <button @click="$router.push(`/plans/${plan.id}/setlist`)"
-          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer shrink-0">Vue musicien</button>
+          class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer shrink-0">{{t('plan.musician_view')}}</button>
+        <button v-if="songItems.length > 0" @click="openMusicStand"
+          class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 cursor-pointer shrink-0">🎵 Music Stand</button>
         <a :href="`${apiBase}/plans/${plan.id}/ical`" target="_blank"
-          class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer shrink-0">📅 iCal</a>
+          class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer shrink-0">📅 {{t('plan.ical')}}</a>
         <button @click="showEditForm = true"
-          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer shrink-0">Modifier</button>
+          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer shrink-0">{{t('plan.edit')}}</button>
         <button @click="deletePlan"
-          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer shrink-0">Supprimer</button>
+          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer shrink-0">{{t('plan.delete')}}</button>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -25,7 +27,7 @@
               {{ formatDate(plan.date) }}
             </h1>
             <p class="text-gray-500 mt-1">
-              {{ plan.service_type_name || 'Service' }}
+              {{ plan.service_type_name || t('plan.service') }}
               <span v-if="plan.time"> &middot; {{ plan.time?.slice(0, 5) }}</span>
             </p>
             <p v-if="plan.theme" class="text-gray-700 mt-2 italic">{{ plan.theme }}</p>
@@ -41,19 +43,19 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Ordre du culte ({{ items.length }})</h2>
+            <h2 class="text-lg font-semibold text-gray-800">{{t('plan.order')}} ({{ items.length }})</h2>
             <div class="flex gap-2">
               <button @click="showSongSelector = true"
-                class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">+ Chant</button>
+                class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">{{t('plan.add_song')}}</button>
               <button @click="addItem('header')"
-                class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">+ Titre</button>
+                class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">{{t('plan.add_header')}}</button>
               <button @click="addItem('announcement')"
-                class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">+ Annonce</button>
+                class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">{{t('plan.add_announcement')}}</button>
             </div>
           </div>
 
           <div v-if="items.length === 0" class="text-center py-8 text-gray-400">
-            Aucun élément. Ajoutez des chants, titres ou annonces.
+            {{t('plan.no_items')}}
           </div>
 
           <div class="space-y-2">
@@ -86,10 +88,10 @@
                 <div v-if="item.type === 'song'" class="mt-1">
                   <button @click="changeSong(item)"
                     class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer">
-                    {{ item.arrangement_name ? 'Changer de chant' : 'Lier un chant' }}
+                    {{ item.arrangement_name ? t('plan.type.change_song') : t('plan.type.link_song') }}
                   </button>
                   <span v-if="item.transposed_key" class="text-xs text-gray-400 ml-2">
-                    Transposé en {{ item.transposed_key }}
+                    {{t('plan.type.transposed')}} {{ item.transposed_key }}
                   </span>
                 </div>
               </div>
@@ -110,8 +112,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api, getApiBase } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 import PlanForm from '../components/PlanForm.vue'
@@ -124,6 +127,7 @@ import SermonAudio from '../components/SermonAudio.vue'
 const apiBase = getApiBase()
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const plan = ref<any>(null)
 const items = ref<any[]>([])
 const loading = ref(true)
@@ -133,16 +137,23 @@ const showSongSelector = ref(false)
 const showChangeSong = ref(false)
 const changingItemId = ref<number | null>(null)
 
+const songItems = computed(() => items.value.filter(i => i.type === 'song' && i.arrangement_id))
+
+function openMusicStand() {
+  const first = songItems.value[0]
+  if (first) {
+    router.push(`/music-stand/${first.song_id}/${first.arrangement_id}?plan=${plan.value?.id}`)
+  }
+}
+
 const statusClass = (s: string) =>
   s === 'completed' ? 'bg-green-100 text-green-700' :
   s === 'cancelled' ? 'bg-red-100 text-red-700' :
   'bg-blue-100 text-blue-700'
 
-const statusLabel = (s: string) =>
-  s === 'completed' ? 'Terminé' : s === 'cancelled' ? 'Annulé' : 'Planifié'
+const statusLabel = (s: string) => t('plan.status.' + (s || 'planned'))
 
-const typeLabel = (t: string) =>
-  t === 'song' ? 'Chant' : t === 'header' ? 'Titre' : t === 'media' ? 'Média' : t === 'announcement' ? 'Annonce' : t
+const typeLabel = (type: string) => t('plan.type.' + (type || 'unknown'))
 
 const formatDate = (d: string) => {
   const date = new Date(d)
@@ -166,7 +177,7 @@ const loadData = async () => {
 }
 
 const deletePlan = async () => {
-  if (!await confirmDialog('Supprimer ce service ?')) return
+  if (!await confirmDialog(t('plan.confirm_delete'))) return
   await api.deletePlan(plan.value.id)
   router.push('/calendar')
 }
@@ -177,16 +188,16 @@ const onEditSaved = () => {
 }
 
 const addItem = async (type: string) => {
-  const titles: Record<string, string> = { header: 'Nouvelle section', announcement: 'Annonce', media: 'Média' }
+  const titles: Record<string, string> = { header: t('plan.type.new_header'), announcement: t('plan.type.announcement'), media: t('plan.type.media') }
   const item = await api.createPlanItem(plan.value.id, {
     type,
-    title: titles[type] || 'Nouvel élément',
+    title: titles[type] || t('plan.type.new_item'),
   })
   items.value.push({ ...item, song_title: null, arrangement_name: null, transposed_key: null })
 }
 
 const deleteItem = async (item: any) => {
-  if (!await confirmDialog('Supprimer cet élément ?')) return
+  if (!await confirmDialog(t('plan.confirm_item_delete'))) return
   await api.deletePlanItem(item.id)
   items.value = items.value.filter((i: any) => i.id !== item.id)
 }
@@ -208,7 +219,7 @@ const onSongSelect = async (songId: number, arrangementId: number, transposedKey
   showSongSelector.value = false
   const item = await api.createPlanItem(plan.value.id, {
     type: 'song',
-    title: 'Chant',
+    title: t('plan.type.song'),
     arrangement_id: arrangementId,
     transposed_key: transposedKey,
   })

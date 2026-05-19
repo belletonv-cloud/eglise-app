@@ -1,0 +1,25 @@
+
+Version anglaise:
+[Bm]Your grace abounds in [A]deepest [D]waters, 
+Your sove[A]reign hand Will be my [G]guide
+[Bm]Where feet may fail and [A]fear sur[D]rounds me, 
+You''ve never [A]failed and you won''t [G]start now
+
+versin fr:[Bm]Ta grâce me plonge dans [A]les pro[D]fondeurs,
+Ta main puis[A]sante me guide[G]ra
+[Bm]Quand mes pieds tremblent et [A]la peur m''[D]inonde
+Tu es pr[A]ésent, Tu ne faillis [G]pas,
+
+Pont:
+[Bm]Saint-Esprit repousse [G]les limites de ma foi
+Apprends-[D]moi à marcher sur l’eau
+Peu [A]importe où Tu m’appelles
+[Bm]Conduis-moi plus loin que [G]je n’oserai m''avancer
+Et ma [D]foi sera fortifiée dans la [A]présence de mon Sauveur.
+
+[Bm] [A] [D] [A] [G]
+
+'
+  FROM songs WHERE title = 'OCEAN' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'O DIEU TU ES GRAND', '', NULL, ''

@@ -1,0 +1,25 @@
+Fils de [Bb]Dieu, Ado[F]naï, Yéshou[C]a !
+[F]Juste et fi[C]dèle, [Gm]fort et redout[Dm]able,
+L’Éter[Bb]nel des Ar[F]mées est ton [C]nom !
+
+
+[Dm]Gloire, [F]gloire [C]à l’Agneau, [Gm]gloire au Sei[F]gneur de la v[C]ie.
+[Gm]Viens é[F]tablir [C]ton royaume, [Bb]nous couvrir [C]de ton Es[Dm]prit.
+
+
+
+[Bb]Yéshou[Dm]a, [C]Yéshou[Am]a, [Bb]Yéshou[Dm]a shim[C]kha. (× 2)'
+  FROM songs WHERE title = 'Grand est ton nom' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+Je vi[G]ens t’offr[D/F#]ir, Seign[Em]eur, 
+[Am]ce que [G]j’ai de meille[D/F#]ur.
+Je [G]viens t’offr[D/F#]ir ma vi[Em]e, 
+[Am]oui, à [G]toi, Jésus-Chri[D/F#]st.
+Et même [Em]si [D/F#]je suis fragi[G]le, 
+et même [Em]si [D/F#]c’est diffici[C/G]le,
+
+COUPLET 2
+Je vi[G]ens te di[D/F#]re, Seign[Em]eur, 
+[Am]que tu [G]es mon bonhe[D/F#]ur.
+Non, [G]rien ne pe[D/F#]ut détrui[Em]re 

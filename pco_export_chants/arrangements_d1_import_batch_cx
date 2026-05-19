@@ -1,0 +1,25 @@
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Sol', '', NULL, 'J’é[G]lève un Alleluia, En pré[C]sence de mes ennemis  
+J’é[Em]lève un Alleluia, Plus [D]fort que tous les doutes en moi 
+J’é[G]lève un Alleluia, Mon [C]arme est une mélodie 
+J’é[Em]lève un Alleluia, Le [D]Dieu des cieux combat pour moi 
+
+Ref : [C]Je chanterai au [G]cœur de la tempête, [Em]Toujours plus fort Je ferai [D]monter mes louanges
+Du [C]milieu des cendres [G]L’espoir se lève, La [Em]mort est vaincue Le [D]Roi est vivant
+
+J’é[G]lève un Alleluia, Avec, [C]tout ce qui est en moi 
+J’é[Em]lève un Alleluia, Les té[D]nèbres fuient je le vois 
+J’é[G]lève un alléluia, Même quand [C]tout semble mystérieux 
+J’é[Em]lève un alléluia, La [D]peur n’a plus d’emprise sur moi'
+  FROM songs WHERE title = 'J''ELEVE UN ALLELUIA' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Je chanterai[G] de tout cœu[D]r, les mervei[A]lles de  Jésus, mon Sei[Bm]gneur 
+Il m''a ô[G]té des tén[D]èbres, il m''a déli[A]vré de tout pé[D]ché
+Car mon Dieu est fidèle, il ne m''abandonne jamais
+Je n''ai plus rien à craindre car mon Dieu m''a libéré 
+
+J[D]e suis dans[G] la joie[D], une joie[A] immen[Bm]se
+Je suis dans[G] l''allégresse[D], car mon [A]Dieu m''a libé[D]ré
+
+Je chanterai de tout coeur  Les merveilles de mon papa Yahwé  
+Il m’a oté des ténèbres Il m’a délivré de tout péché

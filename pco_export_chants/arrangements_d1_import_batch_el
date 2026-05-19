@@ -1,0 +1,25 @@
+Je [G]loue quand je suis fort, ou [C]seul(e) dans le [G]combat, 
+Ma [D]louange est une arme[C] où l''ennemi [G]se noie
+
+
+Car [D]tant que je vivrai, [C]tout en moi chantera 
+
+
+[Em]Béni [C]l''Etern[G]el ô [D]mon âme, [Em]Béni [C]l''Etern[G]el ô mon [D]âme
+[Em]Béni [C]l''Etern[G]el ô [D]mon âme, [Em]Béni [C]l''Etern[G]el ô mon [D]âme
+
+
+[G]Je loue le Dieu fidèle, je [Am]loue le Dieu vrai, 
+[Bm]Et je loue car tu as [Am]vaincu la [C]mort x3
+
+[G]Je loue le Dieu fidèle, je [Am]loue le Dieu vrai [Bm]Et je loue car il n''y a [Am]personne comme [G]toi 
+
+'
+  FROM songs WHERE title = 'Béni l''Eternel ô mon âme' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Intro
+[C] [F] [Am] [G] [C]
+
+[C] Je me réj[F]ouis dans le Nom du Seign[C]eur ! [F]
+[C] Je me conf[F]ie dans le Nom du Seig[G]neur ! [F]
+[C] Je lève les [F]mains dans le Nom du Seig[C]neur ! [F]

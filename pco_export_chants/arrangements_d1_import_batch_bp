@@ -1,0 +1,25 @@
+Refrain
+[C]Tu es saint, Tu es saint
+[G]Tu es saint, Tu es saint [E]
+[Am]Tu es saint, Tu es [F]saint
+Je désire [C]Te voir. '
+  FROM songs WHERE title = 'OUVRE LES YEUX DE MON CŒUR' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en Bb', '', NULL, 'intro
+
+O [Bb]venez adorons-Le 
+O [Dm7]venez [Ebmaj7]ado[Gm]rons-[F]Le
+O [Cm]venez [Dm7]ado[Eb]rons-[Gm] Le
+[Bb/F]Christ [F]le Sei[Gm]gneur
+
+O [Bb]venez adorons-Le 
+O [Dm7]venez [Ebmaj7]ado[Gm7]rons-[F]Le
+O [Cm]venez [Bb/Dm7]ado[F7/Eb]rons-[Gm]Le 
+[Bb/F]Christ [F7]le Sei[Bb]gneur
+
+Car [Bb]Toi seul en es [Bb]digne, 
+Car [Dm7] Toi seul en es [Gm]di[F]gne
+Car [Cm7]Toi seul [Bb/Dm]en est [Eb]di[Gm7]gne
+[Bb/F]Christ [F]le Sei[Bb]gneur
+
+

@@ -1,0 +1,25 @@
+[Dm]Sh''ma Israël Ado[F]naï elohenou, [C]Adonaï e[Dm]had.
+                     
+[Dm]Sh''ma Israël Ado[F]naï elohenou, [C]Adonaï e[Dm]had.
+
+[F]Sh''ma Israël Ado[C]naï elohenou, [Dm]Ado[Bb]naï [A]ehad.
+
+[F]Sh''ma Israël Ado[C]naï elohenou, [Bb]Ado[C]naï e[Dm]had.
+ 
+   
+1. E[Dm]coute, Israël, le Sei[F]gneur est notre Dieu,
+ [C]Le Seigneur est [Dm]Un
+E[F]coute, Israël, le Sei[C]gneur est notre Dieu
+[Dm]Le Seigneur est [Asus4]un
+E[F]coute, Israël, le Sei[C]gneur est notre Dieu
+[Bb]Le Sei[C]gneur est [Dm]un
+
+
+Bridge
+[Bb]Sh''ma Isra[Dm]ël, [F]Sh''ma Isra[C]ël, [Bb]Sh''ma Isra[Dm]ël
+[Bb]Sh''ma Isra[Dm]ël, [F]Sh''ma Isra[C]ël, [Bb]Sh''ma Isra[Dm]ël 
+'
+  FROM songs WHERE title = 'Sh''ma Israël' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, ''
+  FROM songs WHERE title = 'Je chanterai l’Eternel' LIMIT 1;

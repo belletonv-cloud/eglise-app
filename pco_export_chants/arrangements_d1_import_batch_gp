@@ -1,0 +1,25 @@
+Car le combat est celui du Seigneur.
+A 	Dm 
+La victoire est assurée,
+Gm7 	Am7 	Bb 	C2 
+Car notre Dieu est vainqueur.	'
+  FROM songs WHERE title = 'Le Dieu de victoire' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[A][C#m][B][F#m]
+
+[A]          [C#m]             [B].      [F#m]
+Oh ! oh ! oh  ! oh ! oh ! oh ! x2
+
+[A] Dieu, tu es ma [C#m]force et mon chant,
+[B] Chaque jour je me [F#m]confie en toi.
+[A] Tout puissant, mon [C#m]sauveur règne aux c[B]ieux.[E/G#]
+
+[A] Dieu tu es ma [C#m]force, mon appui,
+[B] La forteresse où je [F#m]me réfugie,
+[A] Le rocher qui [C#m]protège ma v[B]ie.
+
+[F#m]Malgré les ténèbres et les dan[C#m]gers qui m’entourent,
+[B]Je lève les yeux pour accueil[F#m]lir ton secours.
+[A]Je ne craindrai pas si [C#m]tu veilles sur m[B]oi.
+
+Je suis [A]venu pour te rencontr[C#m]er, pour proclam[B]er

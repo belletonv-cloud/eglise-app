@@ -1,0 +1,25 @@
+D                             A                           Em7                            A     
+Bien que faible et pauvre, je te donne tout, Prends toute ma vie.
+'
+  FROM songs WHERE title = 'AU CŒUR DE LA LOUANGE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'A CELUI QUI NOUS AIME', '', NULL, ''
+  FROM songs WHERE title = 'A CELUI QUI NOUS AIME' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'A GENOUX', '', NULL, ''
+  FROM songs WHERE title = 'A GENOUX' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en F', '', NULL, 'couplet 1
+
+[Dm]Elevé à la [C]droite de Dieu
+[Gm]Couronné de [Dm]mille cou[C]ronnes
+[F]Tu resplendis comme un [C]soleil radieux
+[Gm]Les êtres crient au[Asus4]tour de ton [A]trône
+
+Refrain
+[Dm]A l''agneau de Dieu soit la [Gm]gloire
+[Gm]A l''agneau de Dieu, la vic[C]toire
+[F]A l''agneau de Dieu soit le [C]règne
+Pour tous les [Gm]siècles, A[Asus4]men
+
+Couplet 2

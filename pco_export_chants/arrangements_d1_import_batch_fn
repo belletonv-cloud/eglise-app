@@ -1,0 +1,25 @@
+[A]la paix en Jé[Dm]sus !
+
+2 - Nous vous an[Dm]nonçons la joie
+Nous vous an[Gm]nonçons la joie
+Nous vous an[A]nonçons la [Dm]joie
+Nous vous an[A]non[Dm]çons [A]la [Dm]joie, 
+[A]la joie en Jé[Dm]sus !
+
+
+3 - Nous vous an[Dm]nonçons l''amour
+Nous vous an[Gm]nonçons l''amour
+Nous vous an[A]nonçons l''a[Dm]mour
+Nous vous an[A]non[Dm]çons [A]l''a[Dm]mour,
+[A]l''amour en Jé[Dm]sus !
+
+
+4 - Nous vous an[Dm]nonçons la paix,.
+Nous vous an[Gm]nonçons la joie
+Nous vous an[A]nonçons l''a[Dm]mour
+Nous vous an[A]non[Dm]çons [A]la [Dm]paix, 
+[A]la [Dm]joie, [A]l''amour en Jé[Dm]sus !
+'
+  FROM songs WHERE title = 'Evenu Shalom Halem' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en C', '', NULL, '    C                                      F               C

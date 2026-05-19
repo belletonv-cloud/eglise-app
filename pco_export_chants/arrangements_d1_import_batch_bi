@@ -1,0 +1,25 @@
+[C]Nous décla[D]rons qu’il n’y a qu’un seul [Em]Dieu,
+En[C]voyé sur la [D]terre Jésus venu des [Em]cieux
+[G]Nous sommes [C]prêts à [D]lui donner nos [Em]vies,
+[G]Nous vou[C]lons sa [D]gloire sur ce [Em]pays
+'
+  FROM songs WHERE title = 'NOUS CRIONS VICTOIRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS CROYONS', '', NULL, ''
+  FROM songs WHERE title = 'NOUS CROYONS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS NE SOMMES PLUS', '', NULL, ''
+  FROM songs WHERE title = 'NOUS NE SOMMES PLUS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS SOMMES UN', '', NULL, ''
+  FROM songs WHERE title = 'NOUS SOMMES UN' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS T''''ADORONS (NOUS T’AIMONS)', '', NULL, ''
+  FROM songs WHERE title = 'NOUS T''ADORONS (NOUS T’AIMONS)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS T''''ADORONS (O PERE)', '', NULL, ''
+  FROM songs WHERE title = 'NOUS T''ADORONS (O PERE)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS TIENDRONS', '', NULL, ''
+  FROM songs WHERE title = 'NOUS TIENDRONS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

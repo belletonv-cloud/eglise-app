@@ -1,0 +1,25 @@
+-- Generated from arrangements_for_d1.json (324 arrangements)
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'AMOUR EXTRAVAGANT', '', NULL, ''
+  FROM songs WHERE title = 'AMOUR EXTRAVAGANT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ABBA PERE', '', NULL, ''
+  FROM songs WHERE title = 'ABBA PERE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en G', '', NULL, '
+Intro
+C2 Em7 G/D D
+           
+C2 Em7 G/D D
+           
+Couplet
+
+G  D/F#  Em C     A/C# D
+Abrite-moi sous tes ailes,
+G/B     C  Am               D
+Couvre-moi par ta main puissante.
+
+
+Refrain
+
+G       G/B  C     D      G

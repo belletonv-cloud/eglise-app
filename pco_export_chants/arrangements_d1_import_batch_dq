@@ -1,0 +1,25 @@
+<b>2e fois : </b>Nous élevons le [Am9]nom de [C/D]Jésus-[G]Christ.
+
+
+[G] Le roi ras[D]semble [Em]son ar[C]mée, [G]L’ennemi [D]tremble [Em]sous ses [CM7]pieds,
+[G] La victoire [D]est assu[Em]rée[C] Si nous mar[Am7]chons unis [Em]à ses [D]côtés, Ouo-hou-oh ! 
+ [G]La foi est [D]notre [Em]boucli[C2]er, [G] Et sa pa[D]role [Em]notre é[CM7]pée,
+[G] Ses armes [D]nous sont don[Em]nées [C] Pour tenir [Am7]ferme et pour [Em]tout sur[D]monter.'
+  FROM songs WHERE title = 'Nous annonçons le Roi' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+[Gm]Comme le vent de l’océan, [F]balaie nos te[Gm]rres 
+[Eb]Souffle Esprit du [Cm] Dieu vivant, [F]sur l’Ég[Dm]lise en[Gm]tère
+[Gm]Comme les vagues de la mer, em[F]brassent nos riv[Gm]ages
+[Eb]Que ta grâce in[Cm]onde [F]nos villes et [Dm]nos vill[Gm]ages
+
+
+COUPLET 2
+[Gm]Comme les rayons de soleil [F]percent les [Gm]nuages
+[Eb]Brille ô Saint es[Cm]prit sur le [F]cœur qui perd cou[Dm]rage
+[Gm]Comme le phare dans la nuit [F]au port nous ram[Gm]ène
+[Eb]Que le monde voit [Cm]ta lumière [F]que ton [Dm]Règne [Gm]vienne 
+
+
+REFRAIN
+Qu’à ta [Bb]voix les cœurs s’é[F]veillent

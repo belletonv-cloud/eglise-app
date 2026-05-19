@@ -1,0 +1,25 @@
+    Em               D       G   C        Em7      D       C 
+2 - Viens comme un vent violent, Nous revêtir de   ta puissance 
+Em       D         G    C      Em7       D     C 
+Délivre les   captifs   Libère-nous pour te louer 
+Am             G        D
+Seigneur, envoie ta gloire (bis)'
+  FROM songs WHERE title = 'NOUS AVONS SOIF DE PLUS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS CONTEMPLONS', '', NULL, ''
+  FROM songs WHERE title = 'NOUS CONTEMPLONS' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS CRIONS VICTOIRE', '', NULL, '[Em]Nous voulons [C]être [D]cette généra[Em]tion,
+Remplie du Saint-Es[C]prit [D]et de compa[Em]ssion
+[C]Nous voulons [D]vivre à fond notre pas[Em]sion,
+[C]Sans compromis ni [D]doute en Christ
+ Nous nous con[Em]fions
+[G]Nous por[C]tons [D]la croix du sa[Em]lut
+[G]Le me[C]ssage que [D]Satan est vain[Em]cu
+
+
+
+Nous crions [C]Victoire, [D]Honneur,
+ Lou[Bm]ange à notre [Em]Dieu (bis)
+[Em]Nous décla[C]rons qu’il [D]n’y a qu’une i[Em]ssue,
+Oui c’est Jésus-[C]Christ [D]le chemin du sa[Em]lut

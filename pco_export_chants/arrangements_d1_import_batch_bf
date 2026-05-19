@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'MYSTERE DE L''ADORATION' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NI PAR FORCE', '', NULL, ''
+  FROM songs WHERE title = 'NI PAR FORCE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NI PAR PUISSANCE', '', NULL, ''
+  FROM songs WHERE title = 'NI PAR PUISSANCE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOTRE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'NOTRE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOTRE PERE', '', NULL, ''
+  FROM songs WHERE title = 'NOTRE PERE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOTRE PERE QUI ES AUX CIEUX', '', NULL, ''
+  FROM songs WHERE title = 'NOTRE PERE QUI ES AUX CIEUX' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS ADORONS ADONAÏ', '', NULL, '
+{key:Em}
+
+[Em]Nous adorons Adonaï,[Am]
+[D]Nous ado[D/F#]rons Él-Shad[G]daï.[Bsus4][B7]
+[Em]Nous élevons ton grand nom,[Am]
+[Em]Nous te lou[B7]ons Sei[Em]gneur.
+

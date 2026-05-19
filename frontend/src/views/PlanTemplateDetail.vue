@@ -1,17 +1,17 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="template">
       <div class="flex items-center gap-3 mb-6">
         <button @click="$router.push('/plan-templates')"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">&larr; Templates</button>
+          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('planTemplateDetail.back') }}</button>
         <div class="flex-1" />
         <button @click="showApply = true"
-          class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">Appliquer</button>
+          class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">{{ $t('planTemplateDetail.apply') }}</button>
         <button @click="deleteTemplate"
-          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer">Supprimer</button>
+          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer">{{ $t('planTemplateDetail.delete') }}</button>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
@@ -27,19 +27,19 @@
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800">Éléments ({{ items.length }})</h2>
+          <h2 class="text-lg font-semibold text-gray-800">{{ $t('planTemplateDetail.items_title', { count: items.length }) }}</h2>
           <div class="flex gap-2">
             <button @click="addItem('song')"
-              class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">+ Chant</button>
+              class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">{{ $t('planTemplateDetail.add_song') }}</button>
             <button @click="addItem('header')"
-              class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">+ Titre</button>
+              class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">{{ $t('planTemplateDetail.add_header') }}</button>
             <button @click="addItem('announcement')"
-              class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">+ Annonce</button>
+              class="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">{{ $t('planTemplateDetail.add_announcement') }}</button>
           </div>
         </div>
 
         <div v-if="items.length === 0" class="text-center py-8 text-gray-400">
-          Aucun élément. Ajoutez des chants, titres ou annonces.
+          {{ $t('planTemplateDetail.no_items') }}
         </div>
 
         <div class="space-y-2">
@@ -76,28 +76,28 @@
 
       <div v-if="showApply" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showApply = false">
         <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
-          <h3 class="text-xl font-bold mb-4">Appliquer « {{ template.name }} »</h3>
+          <h3 class="text-xl font-bold mb-4">{{ $t('planTemplateDetail.apply_title', { name: template.name }) }}</h3>
           <form @submit.prevent="applyTemplate" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplateDetail.date') }}</label>
               <input v-model="applyForm.date" type="date" required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplateDetail.time') }}</label>
               <input v-model="applyForm.time" type="time"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Thème</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('planTemplateDetail.theme') }}</label>
               <input v-model="applyForm.theme"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2" />
             </div>
             <div class="flex gap-3 justify-end">
               <button type="button" @click="showApply = false"
-                class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('planTemplateDetail.cancel') }}</button>
               <button type="submit"
-                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">Créer le service</button>
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">{{ $t('planTemplateDetail.create_plan') }}</button>
             </div>
           </form>
         </div>
@@ -109,9 +109,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 import { useToast } from '../stores/toast'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -125,8 +128,15 @@ const editDescription = ref('')
 const showApply = ref(false)
 const applyForm = ref({ date: '', time: '', theme: '' })
 
-const typeLabel = (t: string) =>
-  t === 'song' ? 'Chant' : t === 'header' ? 'Titre' : t === 'media' ? 'Média' : t === 'announcement' ? 'Annonce' : t
+const typeLabel = (tl: string) => {
+  const map: Record<string, string> = {
+    song: t('planTemplateDetail.types.song'),
+    header: t('planTemplateDetail.types.header'),
+    media: t('planTemplateDetail.types.media'),
+    announcement: t('planTemplateDetail.types.announcement'),
+  }
+  return map[tl] || tl
+}
 
 async function loadData() {
   const id = parseInt(route.params.id as string)
@@ -159,21 +169,26 @@ async function saveTemplate() {
     name: editName.value,
     description: editDescription.value || undefined,
   })
-  useToast().show('Template mis à jour', 'success')
+  useToast().show(t('planTemplateDetail.updated'), 'success')
 }
 
 async function deleteTemplate() {
-  if (!await confirmDialog('Supprimer ce template ?')) return
+  if (!await confirmDialog(t('planTemplateDetail.confirm_delete'))) return
   await api.deletePlanTemplate(parseInt(route.params.id as string))
   router.push('/plan-templates')
 }
 
 async function addItem(type: string) {
   const id = parseInt(route.params.id as string)
-  const titles: Record<string, string> = { song: 'Chant', header: 'Nouvelle section', announcement: 'Annonce', media: 'Média' }
+  const titles: Record<string, string> = {
+    song: t('planTemplateDetail.types.song'),
+    header: t('planTemplateDetail.types.new_header'),
+    announcement: t('planTemplateDetail.types.announcement'),
+    media: t('planTemplateDetail.types.media'),
+  }
   const item = await api.createPlanTemplateItem(id, {
     type,
-    title: titles[type] || 'Nouvel élément',
+    title: titles[type] || t('planTemplateDetail.types.new_item'),
     position: items.value.length + 1,
   })
   items.value.push(item)
@@ -188,7 +203,7 @@ async function updateItem(item: any) {
 }
 
 async function deleteItem(item: any) {
-  if (!await confirmDialog('Supprimer cet élément ?')) return
+  if (!await confirmDialog(t('planTemplateDetail.confirm_item_delete'))) return
   await api.deletePlanTemplateItem(item.id)
   items.value = items.value.filter((i: any) => i.id !== item.id)
 }
@@ -214,7 +229,7 @@ async function applyTemplate() {
     theme: applyForm.value.theme || undefined,
   })
   showApply.value = false
-  useToast().show('Service créé !', 'success')
+  useToast().show(t('planTemplateDetail.plan_created'), 'success')
   router.push(`/plans/${plan.id}`)
 }
 

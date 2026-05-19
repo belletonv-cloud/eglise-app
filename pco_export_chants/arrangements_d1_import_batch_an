@@ -1,0 +1,25 @@
+Dieu est [Dm]là, [G7]   Dieu est [C]là 
+
+
+Dieu est [Dm]à pour te bé[G7]nir, Dieu est [Cm7b]là.
+
+
+Dieu est [F]là, pour te b[G7]énir, te con[Em]soler, te gu[A]érir.
+
+Si tu [Dm]crois en sa [G7]parole, Dieu est [C]là.
+
+
+ 
+Si tu [Dm]crois, [G7]mon a[C]mi,
+
+[Am]Cette his[Dm]toire [G7]est pour [Cm7b]toi.
+
+C''est pour [F]toi qu''un jour Jésus est appa[Gm7]rût,
+
+Et sais-[Em]tu que sans Jésus tu es per[Am]du ?
+
+Viens à [Dm]Lui aujourd''[Gm7]hui, toi au[C]ssi.'
+  FROM songs WHERE title = 'DIEU EST LA' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU EST LA SOURCE DE MA JOIE', '', NULL, ''
+  FROM songs WHERE title = 'DIEU EST LA SOURCE DE MA JOIE' LIMIT 1;

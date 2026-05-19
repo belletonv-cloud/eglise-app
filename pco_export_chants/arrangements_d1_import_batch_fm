@@ -1,0 +1,25 @@
+
+Accueillons le [D]Roi de [Em]gloire
+Accueillons le Roi [D/F#]de [G]gloire
+Accueillons le [Bm]Roi de [G]gloire
+Parmi [F#/D]nous
+
+Pont 2
+
+Poussons des [D]cris de [Em]joie
+Acclamons le [D/F#]Roi des [G]rois
+Accueillons le [Bm]Roi de [G]gloire
+Parmi [F#/D]nous
+
+'
+  FROM songs WHERE title = 'Acceuillons le roi' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en Dm', '', NULL, 'Evenou [Dm]shalom alerhem !
+Evenou [Gm]shalom alerhem !
+Evenou [A]shalom ale[Dm]rhem !
+Evenou [A]sha[Dm]lom, [A]sha[Dm]lom, [A]shalom ale[Dm]rhem !
+
+1 - Nous vous an[Dm]nonçons la paix
+Nous vous an[Gm]nonçons la paix
+Nous vous an[A]nonçons la [Dm]paix
+Nous vous an[A]non[Dm]çons, [A]la [Dm]paix, 

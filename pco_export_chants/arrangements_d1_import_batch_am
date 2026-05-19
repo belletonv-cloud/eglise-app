@@ -1,0 +1,25 @@
+
+Couplet 2
+
+Nous é[A]tions si in[Bm]dignes mais 
+Il [G]est mort pour nous [Bm]tous
+Il nous [F#m]remplit de son [Bm]Esprit, 
+mainte[G]nant nous décla[A]rons
+Que son [Em]amour dure à [A]jamais
+et ses [Em]bontés pour l’é[Bm]terni[A]té !
+
+Pont
+
+Même [Bm]si je ne comprends [F#m]pas
+tous les [Am]plans formés pour [Em]moi.
+Ma [A#m]vie est dans tes [F]mains 
+et à tra[Em]vers les [D]yeux de la [G]foi je [A]vois'
+  FROM songs WHERE title = 'DIEU EST BON EN TOUT TEMPS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU EST ELEVE', '', NULL, ''
+  FROM songs WHERE title = 'DIEU EST ELEVE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU EST LA', '', NULL, '
+
+
+

@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'Quelle grâce Incomparable' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+[A/C#]Au-dessus des [E]puis[D]sances, [Esus]Au-[E]dessus des [A]rois,
+ Au-[A/C#]dessus de [E/D]la na[D]ture et [Esus]de la [E]créa[A]tion ;
+Au-[A/G#]dessus [F#m]de tous Les [A7maj/E]plans des hommes [D]sa[A/C#]ges, 
+[Bm7]Bien avant le [D/A]monde, tu exis[E/G#]tais.
+
+
+[A]Au-[A/C#]dessus des [E/D]roy[D]aumes,[Esus]Au-[E]dessus des [A]trônes, 
+Au-[A/C#]dessus des [E/D]mer[D]veilles Que [Esus]ce monde [E]a con[A]nues ; 
+Par [A/G#]dessus [F#m]tous les [A7maj/E]trésors de la [D]ter[A/C#]re, 
+[Bm7]Rien ne peut me[D/A]surer ta va[C#sus]leur. [C#]
+
+
+[A]Cruci[Bm7]fié, [E/G#]seul, abandon[A]né,
+Tu as souf[Bm7]fert mé[E/G#]prisé, reje[A]té,
+[A/G#]Telle une [F#m]rose, [A7maj/E]foulée par nos [D]pieds,
+[A/C#]Tu m''as sau[Bm7]vé, [A/C#]tu m''as ai[D2]mé [D]
+[Esus][E]Par dessus [A]tout.
+
+'
+  FROM songs WHERE title = 'Au dessus de tout - Crucifié' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Bénis le Sei[A]gneur ô mon â[D]me N’oublie aucun [E]de ses bienfaits[A]

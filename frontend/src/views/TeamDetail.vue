@@ -1,15 +1,15 @@
 <template>
   <div class="team-detail" v-if="team">
-    <button @click="$router.push('/teams')" class="back-btn">← Équipes</button>
+    <button @click="$router.push('/teams')" class="back-btn">{{t('team.back')}}</button>
     <h1>{{ team.name }}</h1>
     <p v-if="team.description" class="desc">{{ team.description }}</p>
 
     <div class="card">
-      <h3>Membres ({{ team.members?.length || 0 }})</h3>
+      <h3>{{t('team.members')}} ({{ team.members?.length || 0 }})</h3>
       <div v-if="team.members && team.members.length > 0" class="overflow-x-auto">
       <table>
         <thead>
-          <tr><th>Nom</th><th>Rôle</th><th></th></tr>
+          <tr><th>{{t('table.name')}}</th><th>{{t('table.role')}}</th><th></th></tr>
         </thead>
         <tbody>
           <tr v-for="m in team.members" :key="m.id">
@@ -18,14 +18,14 @@
               <div v-if="editing[m.id]">
                 <input v-model="positions[m.id]" class="px-2 py-1 border rounded" />
                 <button @click="savePosition(m.id)" class="ml-2 px-2 py-1 bg-blue-600 text-white rounded">OK</button>
-                <button @click="cancelEdit(m.id)" class="ml-2 px-2 py-1 bg-gray-200 rounded">Annuler</button>
+                <button @click="cancelEdit(m.id)" class="ml-2 px-2 py-1 bg-gray-200 rounded">{{ $t('generic.cancel') }}</button>
               </div>
               <div v-else>
                 {{ m.position || '-' }}
-                <button @click="startEdit(m.id, m.position)" class="ml-2 text-sm text-blue-600">Éditer</button>
+                <button @click="startEdit(m.id, m.position)" class="ml-2 text-sm text-blue-600">{{t('team.edit')}}</button>
               </div>
             </td>
-            <td><button @click="removeMember(m.id)" class="delete-btn">Retirer</button></td>
+            <td><button @click="removeMember(m.id)" class="delete-btn">{{t('team.remove')}}</button></td>
           </tr>
         </tbody>
       </table>
@@ -34,29 +34,31 @@
     </div>
 
     <div class="card">
-      <h3>Ajouter un membre</h3>
+      <h3>{{t('team.add_member')}}</h3>
       <form @submit.prevent="addMember">
         <select v-model="newMemberId" required>
-          <option value="" disabled>Choisir un membre...</option>
+          <option value="" disabled>{{t('team.select_member')}}</option>
           <option v-for="m in availableMembers" :key="m.id" :value="m.id">{{ m.first_name }} {{ m.last_name }}</option>
         </select>
-        <label style="margin-top:8px">Rôle <input v-model="newPosition" placeholder="leader, musicien, tech..." /></label>
-        <button type="submit" class="add-btn">Ajouter</button>
+        <label style="margin-top:8px">{{t('team.position')}} <input v-model="newPosition" :placeholder="t('team.position_placeholder')" /></label>
+        <button type="submit" class="add-btn">{{t('team.add')}}</button>
       </form>
     </div>
   </div>
-  <div v-else-if="loading" class="loading">Chargement...</div>
-  <div v-else class="error">{{ error }}</div>
+  <div v-else-if="loading" class="loading">{{t('team.loading')}}</div>
+  <div v-else class="error">{{t('team.error')}}: {{ error }}</div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 import { useToast } from '../stores/toast'
 
 const route = useRoute()
+const { t } = useI18n()
 const team = ref<any>(null)
 const allMembers = ref<any[]>([])
 const loading = ref(true)
@@ -94,20 +96,20 @@ async function addMember() {
   if (!newMemberId.value) return
   try {
     await api.addTeamMember(Number(route.params.id), Number(newMemberId.value), newPosition.value || undefined)
-    show('Membre ajouté', 'success')
+    show(t('team.added'), 'success')
     newMemberId.value = ''
     newPosition.value = ''
     load()
   } catch (e: any) {
-    show(e.message || 'Erreur', 'error')
+    show(e.message || t('team.error'), 'error')
   }
 }
 
 async function removeMember(memberId: number) {
-  if (!await confirmDialog('Retirer ce membre de l\'équipe ?')) return
+  if (!await confirmDialog(t('team.confirm_remove'))) return
   try {
     await api.removeTeamMember(Number(route.params.id), memberId)
-    show('Membre retiré', 'success')
+    show(t('team.removed'), 'success')
     load()
   } catch (e: any) {
     show(e.message || 'Erreur', 'error')
@@ -130,11 +132,11 @@ async function savePosition(memberId: number) {
   const pos = positions.value[memberId]
   try {
     await api.updateTeamMember(teamId, memberId, { position: pos })
-    show('Rôle mis à jour', 'success')
+    show(t('team.position_updated'), 'success')
     cancelEdit(memberId)
     load()
   } catch (e: any) {
-    show(e.message || 'Erreur', 'error')
+    show(e.message || t('team.error'), 'error')
   }
 }
 

@@ -1,0 +1,25 @@
+Pont 
+Re[Am]lâche les miracles
+Re[F]lâche les prodiges
+Re[G]lâche les anges
+Re[E]lâche nous voulons voir Ta gloire'
+  FROM songs WHERE title = 'Relâche Ta gloire' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Couplet 1
+
+[C]Je veux proclamer le nom de Jésus,
+[Am]Sur chaque coeur et chaque pensée
+Car je [F]sais que la paix est dans ta présence
+En Toi, [C]Jésus
+
+
+Couplet 2
+[C]Je veux proclamer le nom de Jésus
+[Am]Et voir peu à peu les liens se briser
+Déclare l’espérance et la liberté 
+Je parle de [C]Jésus
+
+Ton nom est pui[G]ssance, oui Ton nom [F]guérit
+Ton [C]nom est vie,
+brises les [G]chaînes, brille dans l’ombre[F], [C]brûle tel un feu
+

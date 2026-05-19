@@ -1,0 +1,25 @@
+'
+  FROM songs WHERE title = 'Le nom de Jésus' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[G][C][G][C][G][C][G][C][G]
+
+[G] Je veux le proclamer du sommet des montagnes :
+[C] Ta grâce est sans limite, ta bonté sans égale.
+[Em] Ta tendresse m’envahit, ta bonté [D/F#]me poursuit,
+[G] Ton amour m’émervei[D]lle.
+
+
+REFRAIN
+Et je [G]chante car tu es bon.
+Et je danse car [G/F#]tu es bon.
+Et je [C]crie de joie : Tu es bon,
+Tu es bon pour moi.
+(× 2)
+
+[G][C][G][C][G][C][G][C][G]
+COLUMN_BREAK
+[G] Rien dans tout l’univers à toi ne [G/E]se c[G/D]ompare.
+[C] Les océans, la terre, sont reflets [C/D]de ta gloire.
+[Em] Dans mes plus sombres nuits, 
+ta splendeur [D/F#]m’éblouit,
+[G] Ton amour m’émervei[D]lle.

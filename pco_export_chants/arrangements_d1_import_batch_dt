@@ -1,0 +1,25 @@
+Je vois les cieux ouverts
+           Em             C                 G     D 
+ et Jésus debout à la droite du Père
+El l''esprit descendre sur mes sœurs et frères
+ 
+                G    C        Em             D
+Alors je danse (x7), dans sa présence
+Quand les cieux sont ouvert sa gloire descend
+
+Je veux la gloire descendre sur ton église
+
+
+Le fils va être élevé, dans l''église et dans no vies
+Le royaume s''est approché Oh prépare toi à voir l''esprit se répandre et les gens venir à Jésus
+
+
+Quand les malade viendront l''esprit els guérira
+Il repartiront sauvé témoin de sa grace
+
+Les esprits chassés, pour la gloire du fils !'
+  FROM songs WHERE title = 'Cieux Ouverts' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+[C]Je veux danser et lou[G]er peu importe ce que je [Am]vis
+Le Ressuscité vit en [F]moi, Son Nom est Jésus[C] 

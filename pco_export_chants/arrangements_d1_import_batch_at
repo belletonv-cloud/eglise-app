@@ -1,0 +1,25 @@
+                
+                [Bm7]  [Em]'
+  FROM songs WHERE title = 'GRANDES ET MERVEILLEUSES' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'GUERIS CE PAYS', '', NULL, ''
+  FROM songs WHERE title = 'GUERIS CE PAYS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'HOSANNA', '', NULL, ''
+  FROM songs WHERE title = 'HOSANNA' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'HOSANNA (au plus haut des cieux)', '', NULL, ''
+  FROM songs WHERE title = 'HOSANNA (au plus haut des cieux)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'HOSANNA (Ouvrons les portes au Roi)', '', NULL, ''
+  FROM songs WHERE title = 'HOSANNA (Ouvrons les portes au Roi)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'HOSANNA (Un chant s''''élève)', '', NULL, ''
+  FROM songs WHERE title = 'HOSANNA (Un chant s''élève)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'J''''AIME TA PRESENCE', '', NULL, ''
+  FROM songs WHERE title = 'J''AIME TA PRESENCE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE CHANTE UN ALLELUIA', '', NULL, ''
+  FROM songs WHERE title = 'JE CHANTE UN ALLELUIA' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

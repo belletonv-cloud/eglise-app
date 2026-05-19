@@ -1,0 +1,25 @@
+Seigneur, en tout temps, je fête ton Nom !
+                         F               G  C
+Que ma bouche chante ta louange '
+  FROM songs WHERE title = 'Que ma bouche chante ta louange' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en Cm', '', NULL, 'Refrain
+Cm        Ab           G                  Cm
+Célébrez l’Éternel, habitants de la terre
+Fm                      Cm
+Vous, tous les peuples et les nations, 
+G 	Fm/Ab 	Adim 	G/B 	Cm 
+Réjou	is	sez-	vous 	en 	lui x2
+
+
+  Ab              Bb
+1. Ensemble nous disons 
+   Eb               Cm
+La grandeur du Seigneur, 
+D                     G7
+Il est bon pour Israël. 
+Ab               Bb    G7/B        Cm
+Joignez-vous à moi pour l’adorer, 
+Eb         D         G
+C’est le seul Sauveur. 
+

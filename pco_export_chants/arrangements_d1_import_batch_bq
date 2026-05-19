@@ -1,0 +1,25 @@
+Nous [C]Te donnons la gloire
+Nous [C/Fb]]Te don[F]nons la [Am7]gloi[G]re
+Nous [Dm7]Te don[Fbm7]nons la [F]gloi[Am7]re
+[C/G]Christ [G]le Sei[C]gneur
+
+Nous [Db]Te louerons à jamais
+Nous [Fm]Te loue[Gb]rons à [Bbm7]ja[Ab/C]mais
+Nous [Ebm7]Te loue[Fm7]rons à [Gb]ja[Bb]mais
+[Cb/A]Christ [Ab]le Sei[Db]gneur
+
+Nous [Db]Te louerons à jamais
+Nous [Fm]Te loue[Gb]rons à [Bbm7]ja[Ab/C]mais
+Nous [Ebm7]Te loue[Fm7]rons à [Gb]ja[Bb]mais
+[Cbm]Christ [Ab]le Sei[Db]gneur
+
+O [Dbm]venez adorons-Le 
+O [Fm]venez [Gb]ado[Bbm]rons-[Abm]Le
+O [Ebm]venez [Fm]ado[Gb]rons [Bbm]Le 
+[Cbm]Christ [Ab]le Sei[Db]gneur
+
+O [Dbm]venez adorons-Le 
+O [Fm]venez a[Gb]do[Bbm7]rons-[Ab]Le
+O [Ebm7]venez [Fm]ado[Gb]rons [Bbm]Le 
+[Cbm]Christ [Ab]le Sei[Gb]gneur'
+  FROM songs WHERE title = 'O VENEZ ADOREZ-LE (Peuple Fidèle)' LIMIT 1;

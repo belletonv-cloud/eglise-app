@@ -1,0 +1,25 @@
+Par ta [Cm7]grâce je vis ; j’existe pour t’ador[Fsus4]er.[F]
+
+PONT
+[Eb] Les forteresses tom[Bb/D]beront[F] et les hauteurs s’ab[Cm7]aisser[Bb/D]ont.
+[Eb] Tu es couronné vain[Bb/D]queur. [F]Tu es vainqueur, tu es vainqueur !
+(× 3)[Eb/G][F/A][B][Eb]
+
+
+
+À la [Bb]croix, ton œuvre accomplie, ton corps [Gm7]fut enseveli.
+La mort [Cm7]n’a pu te retenir ;
+tu es [Fsus4]couronné vain[F]queur.
+Ô Jé[Bb]sus, tu es le messie,l’espé[Gm7]rance du monde entier.
+Par ta [Cm7]grâce je vis ; j’existe pour t’ador[Fsus4]er.[F]
+
+[Eb/G][F/A][Bb][Cm7][Bb/D][Eb]'
+  FROM songs WHERE title = 'Couronné vainqueur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Momentum Musique', '', NULL, '[C] [Am] [Em] [F] [C] [G]
+[Am]Quand l’avenir [Em]me paraît sombre
+[F]Dieu, oui [C]tu me rappe[G]lles
+Que [Am]tu n’as pas dit [Em]ton dernier mot
+[F]Ton am[C]our est étern[G]el
+
+[F]Change ma [G]vie, [Em]transforme-[F]moi

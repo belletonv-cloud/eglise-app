@@ -1,0 +1,25 @@
+[F#m]Je chan[D]terai encore[A]'
+  FROM songs WHERE title = 'Chantons Alléluia (Victoire musique et Floara-Mae Spinks)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+[Em]Pardon, pardon [Am7]d’avoir jugé.
+[Em]Pardon, pardon [Am]d’avoir condam[D]né.
+[Em]Pardon, pardon [Am7]d’avoir blessé,
+[Em]Pardon, pardon [Am]d’avoir criti[D]qué.
+
+[D/G]C’est [G]vrai, mon cœur [G/C]est tor[C]tueux.
+[D/G]C’est [G]vrai, il est [Am7]dur et orgueil[D]leux.
+Et [D/E]sans [Em7]toi, je ne [G/A]peux [Am7]pas changer.
+[C]Seigneur, viens [D]m’apprendre à ai[G]mer.
+
+[Em]Pardon de mé[Am7]priser mes frères.
+[Em]Pardon de res[Am]ter là sans rien [D]faire.
+[Em]Pardon, c’est mon [Am7]cœur qui te prie.
+[Em]Pardon, oh viens [Am]purifier ma [D]vie.
+
+ [Em]Tu nous as donné ta vi[Bm]e. Tu as donné ton Esprit[CM7] 
+pour que l’on soit tes témoi[Gsus]ns.[G]
+[Em] Tu as dit, c’est par l’amour[Bm]
+Que le monde qui nous entoure[CM7]
+verra que tu es viva[Gsus]nt.[G]
+[Am7] Alors entends nos pri[Bm7]ères, 

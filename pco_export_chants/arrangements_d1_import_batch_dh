@@ -1,0 +1,25 @@
+
+Ye[G]shu-u-u-u-[A][Bm]a-aa-aa-a[D]-aa-a-[A]a
+
+'
+  FROM songs WHERE title = 'Yeshoua' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Cm                Ab            Bbsus Cm            Ab            Bbsus4Bb
+C’est Ton cœur que je recherche , Dès que le soleil se lève  
+
+
+ Ab     Bb       Eb  Bb/D   Cm
+Je connais Ta douce voix 
+Fm               Ab              Bbsus4Bb
+Mon cœur ne brûle que pour Toi  
+ 
+C’est Toi seul que je désire 
+Même quand mes pensées chavirent 
+Je connais Ta douce voix 
+Jésus Tu m’attires à Toi 
+ 
+          Ab       Cm
+Pour un cœur à cœur 
+      Bb
+Avec Toi Seigneur 
+    Ab                Cm

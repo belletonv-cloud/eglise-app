@@ -1,0 +1,25 @@
+
+Que le Roi des rois fasse son entrée
+Avec puissance et gloire
+Que le Roi des rois fasse son entrée
+
+Accueillons le Roi de gloire
+Accueillons le Roi de gloire
+Accueillons le Roi de gloire
+Parmi nous
+
+Poussons des cris de joie
+Acclamons le Roi des rois
+Accueillons le Roi de gloire
+Parmi nous'
+  FROM songs WHERE title = 'Accueillons le roi' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc G', '', NULL, '[G] De nos mon[D]tagnes et [Em]nos val[C]lées,  [G]De nos cam[D]pagnes et [Em]nos ci[CM7]tés,
+[G] Un peuple [D]nombreux s’as[Em]semble, [C] Pour louer [Am7]Dieu et pro[Em]clamer [D]ensemble, Ouo-hou-oh !
+ [G]Qu’il est le [D]créa[Em]teur,[C2][G] Qu’il fait de [D]nous [Em]sa de[CM7]meure
+[G] Pour être [D]sel et lu[Em]mière.[C] Dieu nous ap[Am7]pelle à ser[Em]vir sur [D]la terre.
+
+
+Nous annonçons le [G]roi, allé[D/F#]luia, Nous proclamons son [C/E]nom sur [D/F#]ce pa[G]ys. 
+Nous célébrons sa [C]gloire, Nous chantons sa vic[G/B]toire 
+<b>1er fois : </b>Et nous vivons les [Am7]dons de son Es[D]prit.

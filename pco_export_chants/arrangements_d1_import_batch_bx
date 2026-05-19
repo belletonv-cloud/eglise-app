@@ -1,0 +1,25 @@
+          Sol     Re   
+Que ma louange te plaise,
+          Mim     Do  
+Que ma louange t''élève,
+          Sol    Re   
+Que ma louange réjouisse
+             Do  
+ton cœur, Seigneur.
+       Do     
+Wa-o-a-o, wa-o-a-o.
+
+Transposer
+
+Sol
+ 
+ 
+ 
+ 
+ 
+
+
+
+© 2025 © Rephi - Sources tirées de JEMAF et SHIR - facebook - Accords chords lyrics paroles à télécharger partitions et transposition pour les églises - Louanges et musiques chrétiennes Guitare et Piano - Louanges et musiques chrétiennes Guitare et Piano'
+  FROM songs WHERE title = 'QUE MA LOUANGE TE PLAISE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

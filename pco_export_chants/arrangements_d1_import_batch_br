@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PARDON, SEIGNEUR, PARDON', '', NULL, ''
+  FROM songs WHERE title = 'PARDON, SEIGNEUR, PARDON' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PERE ATTIRE-MOI (O DIEU VIVANT)', '', NULL, ''
+  FROM songs WHERE title = 'PERE ATTIRE-MOI (O DIEU VIVANT)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PERE DES LUMIERES', '', NULL, ''
+  FROM songs WHERE title = 'PERE DES LUMIERES' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PERE JE ME DEMANDE (JE CELEBRE TON NOM)', '', NULL, ''
+  FROM songs WHERE title = 'PERE JE ME DEMANDE (JE CELEBRE TON NOM)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PERE (Oui tu es mon père)', '', NULL, ''
+  FROM songs WHERE title = 'PERE (Oui tu es mon père)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PEUPLE DE DIEU, LEVE LES YEUX', '', NULL, ''
+  FROM songs WHERE title = 'PEUPLE DE DIEU, LEVE LES YEUX' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PEUPLES ELEVEZ LES BANNIERES', '', NULL, ''
+  FROM songs WHERE title = 'PEUPLES ELEVEZ LES BANNIERES' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PLONGE-MOI DANS TA RIVIERE', '', NULL, ''
+  FROM songs WHERE title = 'PLONGE-MOI DANS TA RIVIERE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)

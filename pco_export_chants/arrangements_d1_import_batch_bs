@@ -1,0 +1,25 @@
+  SELECT id, 'PLUS ESCLAVE (Je suis enfant de Dieu)', '', NULL, ''
+  FROM songs WHERE title = 'PLUS ESCLAVE (Je suis enfant de Dieu)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'POUR LA DUREE DES TEMPS', '', NULL, ''
+  FROM songs WHERE title = 'POUR LA DUREE DES TEMPS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'POUSSE DES CRIS DE JOIE (L''''ETERNEL A DETOURNE)', '', NULL, ''
+  FROM songs WHERE title = 'POUSSE DES CRIS DE JOIE (L''ETERNEL A DETOURNE)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en C', '', NULL, '
+Refrain
+[C]Pousse un cri de joie mon âme, 
+[D7]En l''honneur de l''Eternel.
+[F]Chante avec reconnaissance, 
+[G7]Car il est le Dieu fidèle.
+[C]Pousse un cri de joie mon âme, 
+[D7]En l''honneur de son grand nom.
+[F]Réjouis-toi en sa présence, 
+[G7]Car il est fidèle et bon.
+
+
+Couplet 1
+[F]C''est lui qui me délivre [C]du poids de mon passé,
+[D7]C''est lui qui enlève [G7]ma culpabilité.
+

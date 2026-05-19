@@ -1,0 +1,25 @@
+
+O[A]h,[E] [B]merci pour la croix, ton [F#m]amour pour moi.
+O[A]h,[E] ta [C#m]grâce ne faillit p[B]as.
+
+[C#m][A][E][G#m]
+[C#m] Rien ne p[A]ourrait me just[E]ifier, ton pard[G#m]on est immérit[C#m]é.
+Tous mes e[A]fforts ne suff[E]iraient à me sauv[B]er.
+
+Pont
+[A] Ta grâce justifie,[E] ta grâce m’affranchit,
+[B] Ta grâce purifie,[F#m] ta grâce m’offre la vie.
+[A] Ta grâce m’a sauvé,[E] ta grâce a pardonné,
+[B] Ta grâce m’a comblé,[F#m] ta grâce m’a libéré.
+(× 3)[C#m]
+'
+  FROM songs WHERE title = 'Ta grâce seule' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[G]Ensemble louons Le Seigneur Il est viv[D]ant!
+Ensemble [C]louons Le Seigneur Il [D]est viv[G]ant! x2
+
+[G]Eh-ehhhhh [D]ah-ahhhhh [C]louons Le Seigneur Il [D]est viv[G]ant!
+[G]Eh-ehhhhh [D]ah-ahhhhh [C]louons Le Seigneur Il [D]est viv[G]ant!
+
+[G]Ensemble élèvons Le Seigneur Il est viv[D]ant!
+Ensemble [C]élèvons Le Seigneur Il [D]est viv[G]ant! x2

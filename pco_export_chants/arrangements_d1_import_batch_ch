@@ -1,0 +1,25 @@
+Qui [D]crie vic[G]toire dès [A]mainte[D]nant.
+
+Son [D]nom est [A]Parole de [Bm]Dieu,
+Il [G]juge et [Em]règne dans les [A]cieux !
+Il [D]est le [G]Lion [A]de Ju[D]da
+Qui [D]a tr[G]iomphé [A]du com[D]bat ! 
+
+Celui qui vit en moi est plus fort 
+Que celui qui est dans le monde !
+
+Alléluia, tu as remporté la victoire
+Alléluia, tu as tout gagné pour moi'
+  FROM songs WHERE title = 'VICTOIRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VIENS DANSER AVEC MOI', '', NULL, ''
+  FROM songs WHERE title = 'VIENS DANSER AVEC MOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VIENS FEU DE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'VIENS FEU DE DIEU' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VIENS, NE TARDE PLUS : ADORE', '', NULL, '[D]Viens, ne tarde plus, ad[G/D]ore.[D]
+[A]Viens, ne tarde plus, donn[Em]e ton cœur.[G]
+[D]Viens tel que tu es, ad[G/D]ore.[D]
+[A]Viens tel que tu es devan[Em]t ton Dieu.[G]
+[D]Viens.

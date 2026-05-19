@@ -1,0 +1,25 @@
+  SELECT id, 'JE N’AI RIEN A CRAINDRE', '', NULL, ''
+  FROM songs WHERE title = 'JE N’AI RIEN A CRAINDRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'J''''ENTRE DANS TON SANCTUAIRE', '', NULL, ''
+  FROM songs WHERE title = 'J''ENTRE DANS TON SANCTUAIRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE SUIS LIBRE', '', NULL, ''
+  FROM songs WHERE title = 'JE SUIS LIBRE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en F', '', NULL, 'F                            Gm
+Je suis né pour te louer,
+[C]Je suis né pour [F]glori[C/E]fier ton [Dm]nom
+En toutes [Gm]circonstances
+[C]Apprendre à te [C7]dire merci
+
+
+[F]Je suis né pour [Gm]t''aimer
+[C]Je suis né pour [F]t''ado[C/E]rer mon [Dm]Dieu
+Obéir à [Gm]Ta voix
+[C]Je suis [C7]fais pour [F]Toi
+
+'
+  FROM songs WHERE title = 'JE SUIS NE POUR TE LOUER' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE SUIS VENU TE LOUER', '', NULL, ''

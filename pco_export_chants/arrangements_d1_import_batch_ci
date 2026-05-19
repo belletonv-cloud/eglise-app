@@ -1,0 +1,25 @@
+
+
+[G]Un jour, toute langue dira[D] : Tu es Dieu.
+[G]Un jour, tout genou fléchira[D].
+[G]Mais le vrai trésor est pour ceux[Bm]
+Qui t’ont chois[Em7]i dès aujourd’hui[A].[Asus4][A]'
+  FROM songs WHERE title = 'VIENS, NE TARDE PLUS : ADORE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VIENS SAINT-ESPRIT', '', NULL, ''
+  FROM songs WHERE title = 'VIENS SAINT-ESPRIT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VIENS SAINT-ESPRIT VIENS (VOICI NOS COEUR)', '', NULL, ''
+  FROM songs WHERE title = 'VIENS SAINT-ESPRIT VIENS (VOICI NOS COEUR)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'YAHWE', '', NULL, ''
+  FROM songs WHERE title = 'YAHWE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ELEVE-TOI (Nous désirons)', '', NULL, ''
+  FROM songs WHERE title = 'ELEVE-TOI (Nous désirons)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, ''
+  FROM songs WHERE title = 'Persevere' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Persevere', '', NULL, ''
+  FROM songs WHERE title = 'Persevere' LIMIT 1;

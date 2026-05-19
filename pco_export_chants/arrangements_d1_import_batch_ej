@@ -1,0 +1,25 @@
+
+REFRAIN
+[Am]Viens Esprit de révé[C]lation
+Souffle [Em]sur nous,
+Souffle [D]sur nous
+
+
+PONT
+Nous avons be[Am]soin de Toi
+En cet ins[Em]tant
+Seigneur [C]sois le centre de [Em]nos [D]vies
+Et qu''en moi s''é[Am]lève un chant, Une mélo[Em]die,
+Témoi[C]gnant de Ta Grâce [Em]infin[D]ie'
+  FROM songs WHERE title = 'Inonde ce lieu te te présence' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[Gm]Jésus [F]Jésus [Eb]Jésus
+    
+Tu es [Gm]élevé
+
+Au-[F]dessus de tout [Eb]'
+  FROM songs WHERE title = 'Jésus tu es élevé au dessus de tout' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Couplet 1
+
+Sol   Sol          Mim  

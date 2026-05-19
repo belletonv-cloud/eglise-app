@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+
+
+
+
+'
+  FROM songs WHERE title = 'Je m''attends à toi' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Jesus Culture', '', NULL, '[Intro] D       Gmaj7           D       Gmaj7
+ 
+D                                                Gmaj7
+Tu es notre espoir, rien n''a plus de valeur
+                                        D
+Rien n''est aussi grand et rien n''est plus beau
+        Gmaj7
+Que Ta présence
+
+D                                        Gmaj7

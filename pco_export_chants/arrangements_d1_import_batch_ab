@@ -1,0 +1,25 @@
+Même si les océans se déchaînent,
+G      G/B   C     D     Em
+Je les traverserai avec Toi.
+Em                 C      D       Em
+Père, Tu domines les tempêtes,
+G/B         C          D      C2
+Je suis tranquille car Tu es là.
+
+
+
+
+
+
+Couplet
+   G  D/F# Em     C  A/C# D
+En Jésus seul je me confie,
+G/B    C    Am                   D
+Il me donne force, calme et puissance.'
+  FROM songs WHERE title = 'ABRITE-MOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ACCUEILLI DANS LES PARVIS DU ROI', '', NULL, ''
+  FROM songs WHERE title = 'ACCUEILLI DANS LES PARVIS DU ROI' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'test', '', NULL, '[Dm]Accueilli dans les parvis du Roi, Je suis introduit dans ta présence
+Je suis là sur le lieu de ta grâce,

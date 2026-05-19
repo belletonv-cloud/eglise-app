@@ -1,0 +1,25 @@
+
+[G]Ensemble acclamons Le Seigneur Il est viv[D]ant!
+Ensemble [C]acclamons Le Seigneur Il [D]est viv[G]ant! x2
+
+[G]Ensemble adorons Le Seigneur Il est viv[D]ant!
+Ensemble [C]adorons Le Seigneur Il [D]est viv[G]ant! x2'
+  FROM songs WHERE title = 'Ensemble louons le Seigneur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[B]Jeunes et vieux se réjou[Em]iront ensemble
+Les jeu[Am]nes filles danseront de j[Bm]oie !
+
+[Em]Laï, laï, laï, laï, laï, laï, laï, laï,
+[Am] Laï, laï, laï, laï, laï,
+[Am]Laï, laï, laï, laï, laï, laï, laï, laï,
+[B]Laï, laï,
+
+Je [B]changerai leur de[Am]uil en allé[B]gresse
+Et je les c[Am]onsoler[B]ai.
+
+Refrain
+Je [Am]leur donner[D]ai la j[G]oie,
+Au [C]lieu du cha[Fm]grin,
+Je [B]leur donne[Em]rai [B]la j[Em]oie.[B] [E]
+
+Je [Am]leur donner[D]ai la j[G]oie,

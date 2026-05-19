@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'UN SI GRAND MIRACLE', '', NULL, ''
+  FROM songs WHERE title = 'UN SI GRAND MIRACLE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'UN VIN NOUVEAU', '', NULL, ''
+  FROM songs WHERE title = 'UN VIN NOUVEAU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VASES D''''ARGILE (Grâce Infinie)', '', NULL, ''
+  FROM songs WHERE title = 'VASES D''ARGILE (Grâce Infinie)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VENEZ LE CELEBRER', '', NULL, ''
+  FROM songs WHERE title = 'VENEZ LE CELEBRER' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'VERS TOI SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'VERS TOI SEIGNEUR' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en D', '', NULL, 'REFRAIN
+Vic[D]toire au [A]Seigneur de la [Bm]vie,
+Vic[G]toire au [Em]Dieu de l''infi[A]ni !
+Vic[D]toire au [G]nom de [A]Jésus-[D]Christ,
+Vic[D]toire [G]pour le [A]Saint-Es[D]prit !
+
+Le [D]règne est [A]pour le Tout-Puis[Bm]sant,
+Le [G]règne pour [Em]lui dans tous les [A]temps,
+Car [D]l''Agneau [G]a ver[A]sé son  [D]sang

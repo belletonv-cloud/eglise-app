@@ -1,0 +1,25 @@
+
+                                                                                                D                   Am
+Dans tout ce que je fais, Je veux ta volonté
+C            D         G
+Sois le Maître en moi !'
+  FROM songs WHERE title = 'JE TE DONNE MON CŒUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE TE DONNE TOUT', '', NULL, ''
+  FROM songs WHERE title = 'JE TE DONNE TOUT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE VEUX CHANTER (UN CHANT D''''AMOUR)', '', NULL, ''
+  FROM songs WHERE title = 'JE VEUX CHANTER (UN CHANT D''AMOUR)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JOUR DE JOIE', '', NULL, '
+intro: 
+
+[Dm]Jour de joie, jour [Gm]de victoire, [C]Il étend sa [F]main d''en haut
+[Dm]Me retire des [Gm]grandes eaux, [A7]Il me saisit et me dé[Dm]livre
+
+[F]L''Eternel est [Cm7b]mon appui, [Dm]Devant tous mes [A7#]ennemis
+[Bb]Dieu se lève [C]avec é[F]clat, [Bb]Et Il marche [A7]devant [Dm]moi'
+  FROM songs WHERE title = 'JOUR DE JOIE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LA DANS LE FEU', '', NULL, ''
+  FROM songs WHERE title = 'LA DANS LE FEU' LIMIT 1;

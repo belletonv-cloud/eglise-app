@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIGNE ES-TU', '', NULL, ''
+  FROM songs WHERE title = 'DIGNE ES-TU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ENTENDS MON CŒUR', '', NULL, ''
+  FROM songs WHERE title = 'ENTENDS MON CŒUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'EN TOI JE SAIS QUI JE SUIS', '', NULL, ''
+  FROM songs WHERE title = 'EN TOI JE SAIS QUI JE SUIS' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ESPRIT DE DIEU', '', NULL, '[B][C#][D#m]
+[B] Oui, nous voulons ê[C#]tre un peuple embras[D#m]é, L’Église que ton c[D#m]œur attend.
+[B] Viens briser nos ch[C#]aînes, détruis notre org[D#m]ueil, Seigneur, fais-le m[D#m]aintenant.
+
+Notre [G#m]Père, plein de bont[D#m]é, nos cœurs [F#]à toi s’aband[C#]onnent.
+Pour ce [G#m]monde que tu as t[F#/A#]ant aimé, Seigneur, [B]voici nos cour[C#]onnes.
+
+
+Esprit de D[F#]ieu, Esprit du d[D#m]ieu vivant,  Souffle du n[B]ord, souffle du s[C#]ud,
+Souffle de l’[D#m]est, souffle de l’ou[C#/E#]est.
+Esprit de D[F#]ieu, Esprit du d[D#m]ieu vivant, Souffle des qu[B]atre vents[C#] et descends sur n[F#]ous.
+
+
+[B] Envoie ta puiss[C#]ance, rends-nous les tém[D#m]oins D’un royaume qui s[D#m]e répand.
+[B] Fais brûler nos cœ[C#]urs au sein des tén[D#m]èbres Comme un phare dans l’[D#m]océan.

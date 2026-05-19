@@ -1,0 +1,25 @@
+Ébloui[Bm] devant [G]Toi, Éter[D]nel, [D2] [D]
+Ébahi[Bm] par l''a[G]mour de Ton [Asus4]ciel,
+Je suis [Bm]là, à Tes [G]pieds,
+Je [D/F#]viens T''ado[Asus4]rer.
+Je dés[Em]ire habi[G]ter [A]près de [Bm]Toi.
+
+
+Couplet 3
+[Bm]Je vois Ton [G]bras, [D]je sens Ta [Asus4]main,
+[Bm]Tu me pro[G]tèges, [D]Tu me sou[Asus4]tiens.
+Tu [Em]es, Tu seras[G] toujours [D]là  [D2]  [D]
+
+
+Pont
+[G]Tu es ma lum[A]ière,
+[Bm]En Toi j''ai un [A]Père.
+[G]Reçois ma priè[D]re.'
+  FROM songs WHERE title = 'Ébloui (Version acoustique)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, ''
+  FROM songs WHERE title = 'viens toucher ma vie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Couplet 1
+In[F#m]fini[E]ment, a[F#m]bondam[E]ment, bien au-de[ B ]là
+De tout [ F#m]ce que tu de[E]mandes

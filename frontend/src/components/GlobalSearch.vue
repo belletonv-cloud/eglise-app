@@ -3,7 +3,7 @@
     <div class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
       <span class="text-gray-400">🔍</span>
       <input v-model="query" @input="search" @keydown.escape="close" @keydown.enter="goFirst"
-        placeholder="Rechercher..."
+        :placeholder="$t('search.placeholder')"
         class="bg-transparent border-none outline-none text-sm text-gray-800 dark:text-gray-200 w-full placeholder-gray-400" />
     </div>
     <div v-if="query.length >= 2 && results.length" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto z-50">
@@ -23,9 +23,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api, getApiBase } from '../utils/api'
 
 const router = useRouter()
+const { t } = useI18n()
 const query = ref('')
 const results = ref<any[]>([])
 let timeout: any = null
@@ -51,7 +53,7 @@ const iconFor = (type: string) => {
 const labelFor = (r: any) => {
   if (r.type === 'member') return `${r.first_name} ${r.last_name}`
   if (r.type === 'song') return r.title
-  if (r.type === 'plan') return `${r.service_type || 'Service'} — ${r.date}`
+  if (r.type === 'plan') return `${r.service_type || t('plan.service')}${t('generic.separator')}${r.date}`
   if (r.type === 'team') return r.name
   if (r.type === 'announcement') return r.content?.slice(0, 80)
   return ''
@@ -62,7 +64,7 @@ const detailFor = (r: any) => {
   if (r.type === 'song') return r.author || ''
   if (r.type === 'plan') return r.theme || r.notes || ''
   if (r.type === 'team') return r.description || ''
-  if (r.type === 'announcement') return r.type === 'prayer' ? '🙏 Prière' : '📢 Annonce'
+  if (r.type === 'announcement') return r.type === 'prayer' ? `🙏 ${t('search.typePrayer')}` : `📢 ${t('plan.type.announcement')}`
   return ''
 }
 

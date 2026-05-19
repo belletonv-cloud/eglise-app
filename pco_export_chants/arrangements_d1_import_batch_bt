@@ -1,0 +1,25 @@
+
+
+Couplet 2
+[F]C''est lui qui me guérit [C]de toutes mes maladies,
+[D7]C''est lui qui agit 5G7]par grâce dans ma vie.
+
+
+Couplet 3
+[F]C''est lui qui me protège, [C]car il est mon Sauveur,
+[D7]C''est lui qui m''arrache [G7]à toutes mes frayeurs.
+
+'
+  FROM songs WHERE title = 'POUSSE UN CRI DE JOIE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PRENDS MOI AU DELA DU PARVIS', '', NULL, ''
+  FROM songs WHERE title = 'PRENDS MOI AU DELA DU PARVIS' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PRES DE TOI', '', NULL, ''
+  FROM songs WHERE title = 'PRES DE TOI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'PROSTERNES', '', NULL, ''
+  FROM songs WHERE title = 'PROSTERNES' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUAND JE CONTEMPLE TA SAINTETE', '', NULL, ''
+  FROM songs WHERE title = 'QUAND JE CONTEMPLE TA SAINTETE' LIMIT 1;

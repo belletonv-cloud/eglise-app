@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'O DIEU TU ES GRAND' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OFFRONS AU SEIGNEUR RECONNAISSANCE', '', NULL, ''
+  FROM songs WHERE title = 'OFFRONS AU SEIGNEUR RECONNAISSANCE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OH HAPPY DAY', '', NULL, ''
+  FROM songs WHERE title = 'OH HAPPY DAY' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OH JESUS, MON SAUVEUR', '', NULL, ''
+  FROM songs WHERE title = 'OH JESUS, MON SAUVEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OH ! VIENS DEVANT LE SAINT TRONE', '', NULL, ''
+  FROM songs WHERE title = 'OH ! VIENS DEVANT LE SAINT TRONE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'O SAINT ESPRIT, (Viens des quatre vents)', '', NULL, ''
+  FROM songs WHERE title = 'O SAINT ESPRIT, (Viens des quatre vents)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OUI, DIEU REGNE', '', NULL, ''
+  FROM songs WHERE title = 'OUI, DIEU REGNE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OUVRE LES YEUX', '', NULL, ''
+  FROM songs WHERE title = 'OUVRE LES YEUX' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OUVRE LES YEUX DE MON CŒUR', '', NULL, 'Refrain
+[C]Ouvre les yeux de mon coeur

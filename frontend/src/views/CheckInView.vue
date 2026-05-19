@@ -1,40 +1,38 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
     
     <template v-else>
       <div class="max-w-4xl mx-auto">
         <div class="flex items-center gap-4 mb-6">
           <button @click="$router.back()" 
-            class="text-gray-600 hover:text-gray-800 cursor-pointer">← Retour</button>
-          <h2 class="text-2xl font-bold text-gray-800">Check-in</h2>
+            class="text-gray-600 hover:text-gray-800 cursor-pointer">{{ $t('checkin.back') }}</button>
+          <h2 class="text-2xl font-bold text-gray-800">{{ $t('checkin.title') }}</h2>
         </div>
 
-        <!-- Séléction du plan -->
         <div v-if="!selectedPlan" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h3 class="text-lg font-semibold mb-4">Choisir un service</h3>
+          <h3 class="text-lg font-semibold mb-4">{{ $t('checkin.select_plan') }}</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div v-for="plan in upcomingPlans" :key="plan.id"
               @click="selectPlan(plan)"
               class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer hover:shadow-md transition-all">
               <div class="font-semibold text-gray-800">{{ formatDate(plan.date) }}</div>
-              <div class="text-sm text-gray-500">{{ plan.service_type_name || 'Service' }} 
+              <div class="text-sm text-gray-500">{{ plan.service_type_name || $t('calendar.service') }} 
                 <span v-if="plan.time">{{ plan.time?.slice(0, 5) }}</span>
               </div>
               <div v-if="plan.theme" class="text-sm text-gray-600 mt-1 italic">« {{ plan.theme }} »</div>
               <div class="text-xs text-gray-400 mt-2">
-                {{ plan.attendance_count || 0 }} présent(s)
+                {{ plan.attendance_count || 0 }} {{ $t('checkin.present') }}
               </div>
             </div>
           </div>
           <div v-if="upcomingPlans.length === 0" class="text-center py-8 text-gray-400">
-            Aucun service à venir.
+            {{ $t('checkin.no_upcoming') }}
           </div>
 
-          <!-- QR codes for plans -->
           <div class="mt-8">
-            <h3 class="text-lg font-semibold mb-4">QR Code d'accès</h3>
+            <h3 class="text-lg font-semibold mb-4">{{ $t('checkin.qr_code') }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div v-for="plan in upcomingPlans.slice(0, 4)" :key="plan.id"
                 class="border border-gray-200 rounded-lg p-3 text-center">
@@ -46,7 +44,6 @@
           </div>
         </div>
 
-        <!-- Interface de check-in -->
         <div v-else>
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
@@ -57,7 +54,7 @@
                 </p>
               </div>
               <button @click="selectedPlan = null"
-                class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Changer</button>
+                class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">{{ $t('checkin.change') }}</button>
               <button @click="showQR = !showQR"
                 class="text-sm text-indigo-600 hover:text-indigo-800 cursor-pointer ml-2">QR</button>
             </div>
@@ -65,19 +62,17 @@
             <div v-if="showQR" class="mt-3 text-center">
               <img   :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + selectedPlan.id)}`"
                 alt="QR check-in" class="mx-auto" />
-              <p class="text-xs text-gray-400 mt-1">Scannez pour check-in rapide</p>
+              <p class="text-xs text-gray-400 mt-1">{{ $t('checkin.scan_hint') }}</p>
             </div>
 
-            <!-- Recherche de membre -->
             <div class="mb-4">
               <input v-model="searchQuery" 
                 @input="searchMembers"
-                placeholder="Rechercher un membre par nom..."
+                :placeholder="$t('checkin.search_placeholder')"
                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
                 autofocus>
             </div>
 
-            <!-- Résultats de recherche -->
             <div v-if="searchResults.length > 0" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
               <div v-for="member in searchResults" :key="member.id"
                 @click="checkIn(member)"
@@ -87,25 +82,23 @@
                   <div class="text-sm text-gray-500">{{ member.email || member.phone || '' }}</div>
                 </div>
                 <button class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
-                  Check-in
+                  {{ $t('checkin.checkin_button') }}
                 </button>
               </div>
             </div>
 
-            <!-- Check-in manuel (non-membre) -->
             <div class="border-t border-gray-200 pt-4">
               <button @click="showManualCheckIn = true"
                 class="text-sm text-blue-600 hover:text-blue-800">
-                + Check-in manuel (invité)
+                {{ $t('checkin.manual') }}
               </button>
             </div>
           </div>
 
-          <!-- Liste des présents -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold mb-4">Présents ({{ attendances.length }})</h3>
+            <h3 class="text-lg font-semibold mb-4">{{ $t('checkin.present_count', { count: attendances.length }) }}</h3>
             <div v-if="attendances.length === 0" class="text-center py-8 text-gray-400">
-              Aucun check-in pour le moment.
+              {{ $t('checkin.no_checkin') }}
             </div>
             <div v-else class="space-y-2">
               <div v-for="att in attendances" :key="att.id"
@@ -122,27 +115,26 @@
         </div>
       </div>
 
-      <!-- Modal check-in manuel -->
       <div v-if="showManualCheckIn" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showManualCheckIn = false">
         <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-          <h3 class="text-lg font-bold mb-4">Check-in manuel</h3>
+          <h3 class="text-lg font-bold mb-4">{{ $t('checkin.manual_title') }}</h3>
           <form @submit.prevent="manualCheckIn" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('members.last_name') }}</label>
               <input v-model="manualForm.last_name" required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('members.first_name') }}</label>
               <input v-model="manualForm.first_name"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div class="flex gap-3 justify-end pt-2">
               <button type="button" @click="showManualCheckIn = false"
-                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('checkin.cancel') }}</button>
               <button type="submit"
                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
-                Check-in
+                {{ $t('checkin.checkin_button') }}
               </button>
             </div>
           </form>
@@ -155,11 +147,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'
 import { confirmDialog } from '../stores/confirm'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 const loading = ref(true)
 const error = ref('')
 const upcomingPlans = ref<any[]>([])
@@ -174,11 +168,11 @@ const allMembers = ref<any[]>([])
 
 const formatDate = (d: string) => {
   const date = new Date(d)
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return date.toLocaleDateString(locale.value === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-const formatTime = (t: string) => {
-  return t ? new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''
+const formatTime = (tl: string) => {
+  return tl ? new Date(tl).toLocaleTimeString(locale.value === 'fr' ? 'fr-FR' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : ''
 }
 
 const origin = typeof window !== 'undefined' ? window.location.origin : ''
@@ -189,7 +183,6 @@ const loadData = async () => {
       api.getPlans(),
       api.getMembers()
     ])
-    // Filtrer les plans à venir
     const now = new Date()
     upcomingPlans.value = plans
       .filter((p: any) => new Date(p.date) >= now)
@@ -239,8 +232,6 @@ const checkIn = async (member: any) => {
 const manualCheckIn = async () => {
   if (!manualForm.value.last_name) return
   try {
-    // Créer un membre invité temporaire ou utiliser un membre existant
-    // Pour simplifier, on check juste avec un membre existant ou on crée
     let memberId = allMembers.value.find((m: any) => 
       m.last_name.toLowerCase() === manualForm.value.last_name.toLowerCase() &&
       (!manualForm.value.first_name || m.first_name?.toLowerCase() === manualForm.value.first_name.toLowerCase())
@@ -278,7 +269,7 @@ const loadAttendances = async () => {
 }
 
 const removeAttendance = async (id: number) => {
-  if (!await confirmDialog('Supprimer ce check-in ?')) return
+  if (!await confirmDialog(t('checkin.remove_confirm'))) return
   await api.deleteAttendance(id)
   await loadAttendances()
 }

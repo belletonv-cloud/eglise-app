@@ -1,0 +1,25 @@
+
+Appelle-moi au secours[G#m] 
+Quand ta barque prends [A]l''eau
+Certains que Mon a[B]mour ne fera pas défaut[C#m]
+Dans l''adversi[G#m]té, sois fort et prends cou[A]rage
+Je t''arrache au dan[B]ger et te mène au [C#m]large
+'
+  FROM songs WHERE title = 'Sois tranquille (Loire en Gloire)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en D', '', NULL, '
+[D]Souffle sur nous, souffle[A] sur nous
+[Bm7]Souffle sur nous ton vent de gloire
+[D]Souffle sur nous, souffle[A] sur nous
+[Bm7]Souffle sur nous ton vent de gloire
+
+Refrain 
+
+[D] Que le Roi des rois fasse son entrée
+Avec puissance et gloire
+[G]  Que le Roi des rois fasse son entrée
+[Bm]  Que le Roi des rois fasse[Bm7]  son entrée
+Avec puissance et gloire
+[G]  Que le Roi des rois fasse son entrée
+
+Pont 1

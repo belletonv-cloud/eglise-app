@@ -1,0 +1,25 @@
+Bienheureux ceux qui prient et qui pleurent, ton amour vient consoler leurs cœurs
+               B                                 Em                      Am                                B
+Bienheureux les petits et les pauvres,  le royaume des cieux est à eux ! (bis)
+   
+
+         B                                     Em                    Am                               B
+Heureux ceux qui ont soif de justice, ils seront abreuvés de l’Esprit
+                 B                                                Em                         Am                            B
+Bienheureux sont les cœurs doux, les cœurs purs, ils auront ta terre en héritage ! (bis)
+
+
+                  B                                       Em           Am                             B
+Bienheureux sont les artisans de paix, ils seront appelés fils de Dieu
+                 B                                              Em                       Am                                 B
+Bienheureux ceux qui souffrent pour ton nom, tu les combleras de tes bienfaits
+'
+  FROM songs WHERE title = 'Sauve ton peuple' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '              F#m		          D                     A                   E	
+Attire mon cœur,  attire mon âme, attire-moi, Saint-Esprit
+
+
+F#m                                            D
+   Du haut du ciel tu descends,  tu mets en moi un feu divin
+E                                      C#

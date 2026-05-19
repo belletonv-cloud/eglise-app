@@ -1,26 +1,26 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
     
     <template v-else-if="group">
       <div class="flex items-center gap-3 mb-6">
         <button @click="$router.push('/house-groups')"
-          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">← Retour</button>
+          class="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('houseGroups.back', '← Retour') }}</button>
         <div class="flex-1" />
         <button @click="showEditForm = true"
-          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">Modifier</button>
+          class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">{{ $t('houseGroups.edit') }}</button>
         <button @click="deleteGroup"
-          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer">Supprimer</button>
+          class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer">{{ $t('houseGroups.delete') }}</button>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <h1 class="text-2xl font-bold text-gray-800">{{ group.name }}</h1>
         <p v-if="group.leader_first" class="text-gray-500 mt-1">
-          Leader : {{ group.leader_first }} {{ group.leader_last }}
+          {{ $t('houseGroups.leader') }} : {{ group.leader_first }} {{ group.leader_last }}
         </p>
         <p v-if="group.meeting_day" class="text-gray-600 mt-2">
-          📅 {{ group.meeting_day }}<span v-if="group.meeting_time"> à {{ group.meeting_time }}</span>
+          📅 {{ group.meeting_day }}<span v-if="group.meeting_time"> {{ $t('at') }} {{ group.meeting_time }}</span>
         </p>
         <p v-if="group.location" class="text-gray-600 mt-1">📍 {{ group.location }}</p>
         <p v-if="group.description" class="text-gray-600 mt-3">{{ group.description }}</p>
@@ -30,15 +30,15 @@
         <!-- Membres -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Membres ({{ group.members?.length || 0 }})</h2>
+            <h2 class="text-lg font-semibold text-gray-800">{{ $t('houseGroups.members') }} ({{ group.members?.length || 0 }})</h2>
             <button @click="showAddMember = true"
               class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-              + Ajouter
+              {{ $t('houseGroups.add_member') }}
             </button>
           </div>
 
           <div v-if="group.members?.length === 0" class="text-center py-6 text-gray-400">
-            Aucun membre pour le moment.
+            {{ $t('houseGroups.no_members') }}
           </div>
 
           <div v-else class="space-y-2">
@@ -57,15 +57,15 @@
         <!-- Réunions -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">Réunions</h2>
+            <h2 class="text-lg font-semibold text-gray-800">{{ $t('houseGroups.meetings') }}</h2>
             <button @click="showAddMeeting = true"
               class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
-              + Réunion
+              {{ $t('houseGroups.add_meeting') }}
             </button>
           </div>
 
           <div v-if="group.meetings?.length === 0" class="text-center py-6 text-gray-400">
-            Aucune réunion enregistrée.
+            {{ $t('houseGroups.no_meetings') }}
           </div>
 
           <div v-else class="space-y-2">
@@ -81,18 +81,18 @@
       <!-- Modal Modifier -->
       <div v-if="showEditForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showEditForm = false">
         <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
-          <h3 class="text-lg font-bold mb-4">Modifier le groupe</h3>
+          <h3 class="text-lg font-bold mb-4">{{ $t('houseGroups.edit_title') }}</h3>
           <form @submit.prevent="updateGroup" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.name') }}</label>
               <input v-model="editForm.name" required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Leader</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.leader') }}</label>
               <select v-model="editForm.leader_id"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                <option :value="null">Aucun</option>
+                <option :value="null">{{ $t('schedulePeople.add_person.none') }}</option>
                 <option v-for="m in members" :key="m.id" :value="m.id">
                   {{ m.first_name }} {{ m.last_name }}
                 </option>
@@ -100,41 +100,35 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Jour</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.meeting_day') }}</label>
                 <select v-model="editForm.meeting_day"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2">
                   <option value="">-</option>
-                  <option>Lundi</option>
-                  <option>Mardi</option>
-                  <option>Mercredi</option>
-                  <option>Jeudi</option>
-                  <option>Vendredi</option>
-                  <option>Samedi</option>
-                  <option>Dimanche</option>
+                  <option v-for="d in $t('dayNames')" :key="d">{{ d }}</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.meeting_time') }}</label>
                 <input v-model="editForm.meeting_time" type="time"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2">
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Lieu</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.location') }}</label>
               <input v-model="editForm.location"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.description') }}</label>
               <textarea v-model="editForm.description" rows="3"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
             </div>
             <div class="flex gap-3 justify-end pt-2">
               <button type="button" @click="showEditForm = false"
-                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('houseGroups.cancel') }}</button>
               <button type="submit"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-                Enregistrer
+                {{ $t('houseGroups.save') }}
               </button>
             </div>
           </form>
@@ -144,29 +138,29 @@
       <!-- Modal Ajouter membre -->
       <div v-if="showAddMember" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showAddMember = false">
         <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-          <h3 class="text-lg font-bold mb-4">Ajouter un membre</h3>
+          <h3 class="text-lg font-bold mb-4">{{ $t('houseGroups.add_member') }}</h3>
           <form @submit.prevent="addMember" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Membre</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('schedulePeople.add_person.member') }}</label>
               <select v-model="newMember.member_id" required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
-                <option value="">Sélectionner...</option>
+                <option value="">{{ $t('generic.choose') }}</option>
                 <option v-for="m in availableMembers" :key="m.id" :value="m.id">
                   {{ m.first_name }} {{ m.last_name }}
                 </option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
-              <input v-model="newMember.role" placeholder="member, leader, co-leader..."
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('schedulePeople.add_person.role') }}</label>
+              <input v-model="newMember.role" :placeholder="$t('schedulePeople.add_person.role_placeholder')"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div class="flex gap-3 justify-end pt-2">
               <button type="button" @click="showAddMember = false"
-                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('houseGroups.cancel') }}</button>
               <button type="submit"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-                Ajouter
+                {{ $t('schedulePeople.add_person.add') }}
               </button>
             </div>
           </form>
@@ -176,24 +170,24 @@
       <!-- Modal Ajouter réunion -->
       <div v-if="showAddMeeting" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showAddMeeting = false">
         <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-          <h3 class="text-lg font-bold mb-4">Nouvelle réunion</h3>
+          <h3 class="text-lg font-bold mb-4">{{ $t('houseGroups.add_meeting') }}</h3>
           <form @submit.prevent="addMeeting" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.meeting_date') }} *</label>
               <input v-model="newMeeting.date" type="date" required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('houseGroups.meeting_notes') }}</label>
               <textarea v-model="newMeeting.notes" rows="3"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
             </div>
             <div class="flex gap-3 justify-end pt-2">
               <button type="button" @click="showAddMeeting = false"
-                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">Annuler</button>
+                class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer">{{ $t('houseGroups.cancel') }}</button>
               <button type="submit"
                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
-                Enregistrer
+                {{ $t('houseGroups.save') }}
               </button>
             </div>
           </form>
@@ -206,10 +200,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'
 import { confirmDialog } from '../stores/confirm'
 
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const group = ref<any>(null)
@@ -226,7 +222,7 @@ const availableMembers = ref<any[]>([])
 
 const formatDate = (d: string) => {
   const date = new Date(d)
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return date.toLocaleDateString(locale.value === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 const loadData = async () => {
@@ -263,7 +259,7 @@ const updateGroup = async () => {
 }
 
 const deleteGroup = async () => {
-  if (!await confirmDialog('Supprimer ce groupe ?')) return
+  if (!await confirmDialog(t('houseGroups.confirm_delete'))) return
   try {
     await api.deleteHouseGroup(Number(route.params.id))
     router.push('/house-groups')
@@ -288,7 +284,7 @@ const addMember = async () => {
 }
 
 const removeMember = async (memberId: number) => {
-  if (!await confirmDialog('Retirer ce membre du groupe ?')) return
+  if (!await confirmDialog(t('team.confirm_remove'))) return
   try {
     await api.removeGroupMember(Number(route.params.id), memberId)
     loadData()

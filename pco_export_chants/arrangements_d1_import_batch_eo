@@ -1,0 +1,25 @@
+
+Dieu est là pour te bénir, te consoler, te guérir.
+Si tu crois en sa parole Dieu est là.
+
+Si tu crois, mon ami,
+Que cette histoire est pour toi
+C''est pour TOI qu''un jour Jésus est apparût,
+Et sais-tu que sans Jésus tu es perdu ? 
+Viens à Lui aujourd''hui, toi aussi.
+'
+  FROM songs WHERE title = 'Dieu est là - chantres' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+Des [Am]cieux Tu peux m''entendre
+Je [F]sais que Tu T''approches
+Quand je [C]T''adore[G]
+Ep[Am]ris par Ton amour
+Le [F]vent les vagues viendront
+Mais je de[C]meure [G]
+
+REFRAIN
+Je lève mes mains vers [C]les cieux
+Je Te donne [G]mon cœur
+Je dirai à mon [Am]âme, Tu es [G]Dieu de tout  [F]
+Même si les mers se dé[C]chaînent

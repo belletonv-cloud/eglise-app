@@ -1,0 +1,25 @@
+
+Pont: 
+[Ab]Personne n’a vu, ni [G7]entendu
+Per[Cm7]sonne n’a connu ce [Bbm7]que Dieu réserve
+Que les [Ab]cieux s’ouvrent
+Et que [G7]vienne la pluie
+Sur [Cm7]ton église et [Bbsus4]sur nos vies
+'
+  FROM songs WHERE title = 'Saint-Esprit descends' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+Couplet 1
+
+Sei[Am]gneur, ouvre les écluses des [F]cieux
+Reâche Ta [G]gloire,
+Relâche Ta [Am]gloire
+
+
+Refrain 1
+Relâche Ta [Dm]gloire, nous voulons Te [Am]voir
+Nous avons [G]soif de [Am]Toi
+Révèle [Dm]Toi faire entendre Ta [Am]voix
+Re[G]lâche Ta [E]Gloire
+
+

@@ -1,0 +1,25 @@
+Près de [Gm] toi [Dm] Seigneur, oui [F] je veux rester
+[Gm] Près de toi [F] Seigneur, j [Bb]''ai retrouvé l''espoir [G] 
+Près de [F] toi [C] Seigneur, je me sens si bien
+
+COUPLET 3
+[F] Oui _ _ _ _ [Am] _ [Bb] _ _ _ _ [F] _ je sais [Am] que désormais 
+Je [Bb] t''appartiens pour [F] toujours
+Par ton [Am] sacrifice à la croix [Bb] 
+Tu as payé le prix pour ma [A] liberté
+[F] Je veux t''obéir et te [Gm] servir [Cm] 
+Ne vivre que [F] pour toi
+'
+  FROM songs WHERE title = 'Prêt de toi' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET 1
+C 	Dm7 	Fsus2 
+ Issus du même créateur,
+                    C 	            Dm7 	Fsus2 
+Le même souffle nous a 	donné la vie.
+             C 	Dm7 	Fsus2 
+Tous aussi perdus, tous aussi pécheurs,
+                     C Dm7 	Fsus2 
+Nous avons eu la chance qu’il nous attire à lui.
+
+

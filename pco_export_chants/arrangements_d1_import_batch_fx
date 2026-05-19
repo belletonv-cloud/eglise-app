@@ -1,0 +1,25 @@
+viens renverser nos bar[CM7]rières,
+ Viens nous apprendre à aimer[Dsus].[D]
+
+[D/G]C’est [G]vrai, nos cœurs [G/C]sont [C]tort[D]ueux.
+[D/G]C’est [G]vrai, ils sont [Am7]durs et orgueuil[D]leux.
+Mais [D/E]par [Em7]toi, nous se[G/A]rons transfor[Am7]més.
+[C]Seigneur, ré[D]tablis l’uni[G]té.[Em7]
+[D/G]C’est [G]vrai, mais toi [G/C]tu [C]as pa[D]yé.
+[D/G]C’est [G]vrai, mais toi [Am7]tu as tout chan[D]gé.
+Et [D/E]par [Em7]toi nous se[G/A]rons transfor[Am7]més.
+[C]Seigneur, ré[D]tablis l’uni[G]té.[Em7]
+
+[C]Seigneur, nous [D]voulons l’uni[G]té.[Em7] (x2)'
+  FROM songs WHERE title = 'Pardon' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, ''
+  FROM songs WHERE title = 'Ruah' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[G]OhOhOh [Bm]ohohoh [D]OhOhOh [A]ohohoh
+
+
+COUPLET 1
+[G]Le péché m’a brisé, Tu m’as relevé 
+[D]Je suis en vie, Je suis en vie
+[G]Pour ma li-ber-té, Tu m’as racheté 

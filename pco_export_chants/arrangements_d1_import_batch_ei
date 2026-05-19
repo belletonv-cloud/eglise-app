@@ -1,0 +1,25 @@
+[Am]notre [G]bel aven[D/F#]ir.
+Et même [Em]si [D/F#]je suis fragi[G]le, 
+et même [Em]si [D/F#]c’est diffici[C/G]le,
+
+COLUMN_BREAK
+REFRAIN
+Je chanterai [G]gloire [D/F#]à l’Éterne[Em]l,
+Je chanterai [Am]lou[G]ange à son n[D/F#]om,
+Je chanterai [G]Dieu, [D/F#]mon essenti[Em]el,
+Je chanterai [Am]en l’hon[G]neur de son [D/F#]nom.
+
+
+PONT
+[Em]Toute ma vie, [D/F#]je redirai 
+[C]Que tu as donné ta vi[D]e,
+[Em]Toute ma vie, [D/F#]je redirai 
+[C]Que tu as payé le [D]prix,
+[Em]Toute ma vie, [D/F#]je redirai 
+[C]Que je ne vis que pour lu[D]i.'
+  FROM songs WHERE title = 'Je chanterai gloire' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'COUPLET
+[Em]Innonde ce lieu de Ta prés[C]ence
+Nous av[G]ons besoin de [D]Toi
+

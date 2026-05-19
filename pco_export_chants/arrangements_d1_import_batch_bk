@@ -1,0 +1,25 @@
+Refrain 1
+
+[A]Tu es [Bm]le créateur puissant
+L''a[F#m]gneau ressuscité
+Toi seul [G]a pu triompher
+De la [D]mort du péché
+
+
+Refrain 2
+
+[A]Tu as [Bm]délivré Ton peuple
+Pour [F#m]la vraie liberté
+Je veux sui[G]vre Tes pas
+Chaque [A]jour être avec [A]Toi
+
+
+
+'
+  FROM songs WHERE title = 'NOUS VENONS DANS TA PRESENCE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'NOUS VOULONS VOIR JESUS ELEVE', '', NULL, 'G                           D           Em                        C                        G
+Nous voulons voir Jésus élevé. Comme un étendard sur ce pays
+                           D            Em               C                 G
+Pour montrer à tous la vérité, Et le chemin vers le ciel
+

@@ -1,0 +1,25 @@
+Mon Papa est fidèle, il ne m''abandonne jamais
+Je n''ai plus rien à craindre car Yahwé m''a libéré 
+'
+  FROM songs WHERE title = 'Dans la joie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Co[C]mment ne pas te lou[F]er [G]
+Comment ne pas te lou[Em]er [Am]
+Comment ne pas te lou[Dm]er [G]
+Seigneur Jé[C]sus ! Comment ? Co[C]mment ?
+
+Qu[C]and je regarde autour de moi[F]
+Je vois ta glo[G]ire Seigneur Jé[C]sus, 
+je[Em] te bén[Am]is
+Comment ne pas te lou[Dm]er [G]
+Seigneur Jé[C]sus ! Comment ? Co[C]mment ?
+
+
+Qu[C]and je regarde autour de moi[F]
+Je vois mes frè[G]res Seigneur Jé[C]sus, 
+mer[Em]ci pour eux[Am]
+Comment ne pas te lou[Dm]er [G]
+Seigneur Jé[C]sus ! Comment ? Co[C]mment ?
+
+Co[C]mment ne pas t''accla[F]mer [G]
+Comment ne pas t''accla[Em]mer [Am]

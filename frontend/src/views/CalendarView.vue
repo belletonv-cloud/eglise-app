@@ -1,10 +1,10 @@
 <template>
   <div class="calendar">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Calendrier</h2>
+      <h2 class="text-2xl font-bold text-gray-800">{{ $t('calendar.title') }}</h2>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else>
@@ -29,7 +29,7 @@
             @click.stop="goToPlan(plan.id)"
             class="text-xs px-1.5 py-0.5 mb-0.5 rounded truncate cursor-pointer"
             :class="statusClass(plan.status)">
-            {{ plan.service_type_name || 'Service' }}
+            {{ plan.service_type_name || $t('calendar.service') }}
           </div>
         </div>
       </div>
@@ -42,10 +42,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import PlanForm from '../components/PlanForm.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const plans = ref<any[]>([])
 const loading = ref(true)
 const error = ref('')
@@ -54,8 +56,8 @@ const selectedDate = ref('')
 const currentMonth = ref(new Date().getMonth())
 const currentYear = ref(new Date().getFullYear())
 
-const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
-const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const monthNames = computed(() => t('monthFull') as unknown as string[])
+const dayNames = computed(() => t('dayNames') as unknown as string[])
 
 const statusClass = (s: string) =>
   s === 'completed' ? 'bg-green-100 text-green-700' :

@@ -1,39 +1,39 @@
 <template>
   <div class="teams-page">
-    <h2>Équipes ({{ teams.length }})</h2>
-    <button @click="showForm = true" class="add-btn">+ Créer une équipe</button>
+    <h2>{{ $t('menu.teams') }} ({{ teams.length }})</h2>
+    <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_team') }}</button>
 
-    <div v-if="loading" class="loading">Chargement...</div>
+    <div v-if="loading" class="loading">{{ $t('loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
       <div v-for="t in teams" :key="t.id" class="team-card" @click="$router.push(`/teams/${t.id}`)">
         <div class="team-name">{{ t.name }}</div>
-        <div class="team-meta">{{ t.member_count }} membre(s)</div>
+        <div class="team-meta">{{ t.member_count }} {{ $t('table.member') }}(s)</div>
         <div v-if="t.description" class="team-desc">{{ t.description }}</div>
       </div>
-      <div v-if="teams.length === 0" class="empty">Aucune équipe pour le moment.</div>
+      <div v-if="teams.length === 0" class="empty">{{ $t('members.no_members') }}</div>
     </div>
 
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
       <div class="modal">
-        <h3>Nouvelle équipe</h3>
+        <h3>{{ $t('teamsList.new_team') }}</h3>
         <form @submit.prevent="createTeam">
-          <label>Nom <input v-model="form.name" required /></label>
-          <label>Description <textarea v-model="form.description" rows="3"></textarea></label>
-          <label>Type de service
+          <label>{{ $t('houseGroups.name') }} <input v-model="form.name" required /></label>
+          <label>{{ $t('houseGroups.description') }} <textarea v-model="form.description" rows="3"></textarea></label>
+          <label>{{ $t('planTemplates.service_type') }}
             <select v-model="form.service_type">
               <option value="">—</option>
-              <option value="louange">Louange</option>
-              <option value="son">Son</option>
-              <option value="lumières">Lumières</option>
-              <option value="accueil">Accueil</option>
-              <option value="vidéo">Vidéo</option>
-              <option value="autres">Autres</option>
+              <option value="worship">{{ $t('teamsList.service_types.worship') }}</option>
+              <option value="sound">{{ $t('teamsList.service_types.sound') }}</option>
+              <option value="lights">{{ $t('teamsList.service_types.lights') }}</option>
+              <option value="welcome">{{ $t('teamsList.service_types.welcome') }}</option>
+              <option value="video">{{ $t('teamsList.service_types.video') }}</option>
+              <option value="other">{{ $t('teamsList.service_types.usher') }}</option>
             </select>
           </label>
           <div class="form-actions">
-            <button type="submit">Créer</button>
-            <button type="button" @click="showForm = false">Annuler</button>
+            <button type="submit">{{ $t('houseGroups.create') }}</button>
+            <button type="button" @click="showForm = false">{{ $t('houseGroups.cancel') }}</button>
           </div>
         </form>
       </div>

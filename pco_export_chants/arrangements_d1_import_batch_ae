@@ -1,0 +1,25 @@
+Il a [E]pris mon péché
+Il m''a [A]délivré
+Atta[E]ché à la [croix [B]pour [C#m]]moi ou [E]'
+  FROM songs WHERE title = 'ATTACHE A LA CROIX' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'AU CŒUR DE LA LOUANGE', '', NULL, 'D                     A                        Em7                              A           
+Le chant terminé, le rideau retombe, Je viens simplement
+D                         A                   Em7                             A   
+Porter mon offrande, car j''ai le désir De réjouir ton cœur
+
+
+Em7                                     A                                Em7                                     A
+J''apporte plus qu''un beau chant, chanter ne suffit pas Pour répondre à ton appel
+Em7                                       A                                Em7                                         A
+Les apparences sont trompeuses, tu vois bien au delà, O Dieu, tu sondes mon cœur
+
+
+D                                   A                                 Em7             G              A      D     
+Je reviens au cœur de la louange, Tout est centré sur toi, centré sur toi Jésus.
+
+D                                  A                                                Em7                 G              A     D
+Oui je renonce à tous mes faux semblants, Pour tout centrer sur toi, centrer sur toi Jésus.
+
+D                A                        Em7                          A       
+Roi d''éternité, qui peut exprimer Ce dont tu es digne?

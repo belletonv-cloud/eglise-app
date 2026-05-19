@@ -1,0 +1,25 @@
+[F#m]Oh oh oh oh, [A]oh oh oh oh
+
+couplet 2: [D]comme le soleil à l''aurore[F#m]
+comme la brise dans la nuit[A]
+Ta paix me restaure[Emsus4], Tu me donnes la vie[D]
+Il n''y a aucune hésitation[F#m]
+Dans Ton amour, Ton affection[A]
+Rien n''est comparable[Emsus4]
+
+Pont: A [A]Toi j''ouvre mon [D]coeur, Seigneur[E]
+A Toi j''ouvre mon [F#m]coeur, à ja[A]mais
+Donc fais ce que Toi [D][Bm7]Seul sait faire[E]
+Jésus viens ré[F#m]gner dans ma vie[A][C#m](x3)
+
+
+'
+  FROM songs WHERE title = 'Viens toucher ma vie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Sei[Am]gneur, ouvre les écluses des [F]cieux
+Relâche Ta [G]gloire
+Relâche Ta [Am]gloire
+
+                    
+Relâche Ta [Dm]gloire, nous voulons Te [Am]voir
+Nous avons [G]soif de [Am]Toi

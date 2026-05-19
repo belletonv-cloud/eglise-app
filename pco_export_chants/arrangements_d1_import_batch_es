@@ -1,0 +1,25 @@
+Si je cri[Em]ais devant les foules
+Mais que ma vo[D]ix était inco[Bm]nnue
+Dans ton pal[C]ais
+Les ge[Em]noux pliés devant toi,              
+Les mains lev[D]ées
+Tu sais reconn[Bm]aître le vrai du pa[C]raître
+
+Ce que tu cher[C]ches va bien au-delà des ti[D]tres
+Moi je veux danser comme D[Bm]avid
+Et paraître encore plus v[Am]il que cela
+M''abaisser à mes y[C]eux
+Sonde moi ô D[D]ieu
+Connais mon c[Bm]œur
+Et vois si tu peux [C]y trouver
+ 
+
+'
+  FROM songs WHERE title = 'Coeur d''adorateur' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, ''
+  FROM songs WHERE title = 'Un seul nom' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+
+

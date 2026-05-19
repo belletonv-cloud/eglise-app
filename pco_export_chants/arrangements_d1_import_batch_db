@@ -1,0 +1,25 @@
+Bénis le Sei[A]gneur ô mon â[D]me
+Il est ta force[E] à tout jamais[A]
+
+
+[A] Le Seigneur [D] te couronne [E], d’a[A]mour et de tendres[F#m]se
+Il bénit[D] et pardonne [E], [Bm]Il     [C#m]garde  [D]sa promesse [Esus4]
+
+
+[A] Le Seigneur [D] fait justice[E], Il [A]défend l’opprimé[F#m]
+Il él[D]ève les humbles[E], [Bm]bénis les [D]rejetés[Esus4]
+
+
+Son nom est [F#m]glorieux - [E]glorieux - [A]glorieux
+[A] Son nom est [F#m]glorieux - [E]glorieux - [D]glorieux     (x4)'
+  FROM songs WHERE title = 'Béni le Seigneur O mon âme' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'INTRO : Bb  C   F/A Dm  Bb  C   F/A Dm  C
+      
+
+
+COUPLET 1
+To[C]utes les générations, de[F]vant Lui proster[C]nées
+Ent[Am]onnent ensemble un [G]cantique à l''Ag[F]neau 
+Ceux [C]qui nous ont précédés, et [F]ceux qui nous suivront
+En[Am]tonneront ce [G]cantique à l''Ag[F]neau  

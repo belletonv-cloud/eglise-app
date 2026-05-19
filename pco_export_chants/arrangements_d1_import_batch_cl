@@ -1,0 +1,25 @@
+
+[Dm]  [Am]   [C]   [G]
+
+J’ouvre mon [Dm]coeur brise l’ar[Am]mure, Tu gué[C]ris, mon histoire, mes bles[G]sures
+J’ouvre mon [Dm]coeur à Ta me[Am]sure, Mon pas[C]sé, mon présent, mon fu[G]tur
+'
+  FROM songs WHERE title = 'J''ouvre mon coeur (Brise l''armure)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Em', '', NULL, ''
+  FROM songs WHERE title = 'J’ENTRE DANS LE LIEU TRES SAINT' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[Em]J''entre dans Le lieu [D]très saints,
+[C]J''entre par le [D]Sang de l''A[Em]gneau ;
+[Em]J''entre pour t''adorer Toi [D]seul,
+[C]J''entre pour ho[D]norer "Je [Em]suis"
+
+Seigneur [G]je t''a[D]dore, [Am]je t''a[Em]dore, Seigneur [G]je t''a[D]dore, [Am]je t''a[Em]dore,
+Car Ton Nom est [C]très saint, [D]Très saint, Sei[Em]gneur'
+  FROM songs WHERE title = 'J''ENTRE DANS LE LIEU TRES SAINT' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'INTRO [A] [F#m] [C#m] [B] 
+
+L’Es[A]prit du Seigneur est sur moi car Il [F#m]m’a envoyé[C#m] [B] 
+Annon[A]cer la délivrance à tous ceux [F#m]qui sont prisonniers [C#m] [B]
+Il fait [A]renaître l''espoir quand mes rêves [F#m]étaient morts

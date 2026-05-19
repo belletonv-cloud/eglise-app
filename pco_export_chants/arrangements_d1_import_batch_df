@@ -1,0 +1,25 @@
+G  D  Em   C
+Oh oh oh Dieu est ici </b>
+
+
+Il vit il est là, Il ne m’abandonne pas
+J’ai la foi qu’il prend soin de moi, même si je ne le vois pas
+
+Nous t’accueillons soit le bienvenue, nous nous prosternons, devant ta face
+Prend la place qui te revient, la première dans nos cœurs'
+  FROM songs WHERE title = 'Dieu vit' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en A', '', NULL, 'Refrain
+Tout est possi[A]ble, Tout est possi[F#m]ble, 
+[D]À celui qui cr[E]oit
+Au nom de Jé[A]sus, Rien d’impossi[F#m]ble, 
+[D]Oui je [E]crois en [A]Toi
+
+
+Couplet 1
+Ton Amour[A] (Ton Amour), Infini[F#m] (Infini)
+Nous ramène[Bm] (Nous ramène), [E]À la Vie 
+Pour que tombent[A] (Pour que tombent), 
+Nos obstacles[F#m]  (Nos obstacles) 
+Tu viens faire[Bm] (Tu viens faire), [E]Des miracles 
+

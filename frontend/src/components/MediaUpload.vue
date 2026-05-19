@@ -1,7 +1,7 @@
 <template>
   <div class="media-upload">
     <div class="modal-header">
-      <h3>Ajouter un média</h3>
+      <h3>{{$t('media.add')}}</h3>
       <button @click="$emit('close')" class="close-btn">✕</button>
     </div>
 
@@ -15,8 +15,8 @@
           class="hidden"
         />
         <div v-if="!selectedFile" class="dropzone-text">
-          <p>Glissez un fichier ici ou cliquez pour sélectionner</p>
-          <p class="hint">Audio, vidéo, image ou PDF</p>
+          <p>{{ $t('song.drop_or_select') || 'Glissez un fichier ici ou cliquez pour sélectionner' }}</p>
+          <p class="hint">{{ $t('song.accepted_types') || 'Audio, vidéo, image ou PDF' }}</p>
         </div>
         <div v-else class="selected-file">
           <span class="file-name">{{ selectedFile.name }}</span>
@@ -26,7 +26,7 @@
 
       <div v-if="uploading" class="progress-section">
         <div class="spinner"></div>
-        <span class="progress-text">Upload en cours...</span>
+        <span class="progress-text">{{ $t('song.uploading') || 'Upload en cours...' }}</span>
       </div>
 
       <div v-if="error" class="error-message">
@@ -34,40 +34,40 @@
       </div>
 
       <div v-if="downloadUrl" class="success-message">
-        ✓ Fichier uploadé avec succès!
+        {{ $t('song.upload_success') || '✓ Fichier uploadé avec succès!' }}
       </div>
 
       <div class="media-type">
-        <label>Type de média:</label>
+        <label>{{$t('media.type_label')}}</label>
         <select v-model="mediaType">
-          <option value="audio">Audio</option>
-          <option value="video">Vidéo</option>
-          <option value="image">Image</option>
-          <option value="pdf">PDF</option>
+          <option value="audio">{{$t('media.type_audio')}}</option>
+          <option value="video">{{$t('media.type_video')}}</option>
+          <option value="image">{{$t('media.type_image')}}</option>
+          <option value="pdf">{{$t('media.type_pdf')}}</option>
         </select>
       </div>
 
       <div class="media-title">
-        <label>Titre (optionnel):</label>
-        <input v-model="title" type="text" placeholder="Description du fichier" />
+        <label>{{$t('media.title_label')}}</label>
+        <input v-model="title" type="text" :placeholder="$t('media.file_desc')" />
       </div>
     </div>
 
     <div class="modal-footer">
-      <button @click="$emit('close')" class="cancel-btn">Annuler</button>
+      <button @click="$emit('close')" class="cancel-btn">{{$t('generic.cancel')}}</button>
       <button
         @click="upload"
         :disabled="!selectedFile || uploading"
         class="upload-btn"
       >
-        {{ uploading ? 'Upload...' : 'Uploader' }}
+        {{ uploading ? $t('media.uploading') : $t('media.upload') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { api, getApiBase } from '../utils/api';
 
 const props = defineProps<{
@@ -83,6 +83,10 @@ const downloadUrl = ref('');
 const error = ref('');
 const mediaType = ref('audio');
 const title = ref('');
+
+// i18n
+const { proxy } = getCurrentInstance() as any;
+const $t = proxy?.$t || ((k:string)=>k);
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
@@ -131,8 +135,14 @@ async function upload() {
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
-      throw new Error(err.error || `Erreur ${res.status}`);
+      let msg = '';
+      if(res.status === 401 || res.status === 403) {
+        msg = $t('song.upload_error_auth');
+      } else {
+        const err = await res.json().catch(() => ({ error: '' }));
+        msg = err.error ? (typeof err.error === 'string' ? err.error : $t('song.upload_error_generic')) : $t('song.upload_error_generic');
+      }
+      throw new Error(msg || $t('song.upload_error_generic'));
     }
 
     const attachment = await res.json();

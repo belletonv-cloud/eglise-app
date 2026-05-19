@@ -1,0 +1,25 @@
+
+
+Notre [G#m]Père, plein de bont[D#m]é, dieu de [F#]tendresse et de gr[C#]âce,
+Pour ce [G#m]monde que tu as t[F#/A#]ant aimé, fais bril[B]ler sur nous ta f[C#]ace.
+
+
+[B]Que ton règne v[F#/A#]ienne, ta volon[B]té [C#]soit [D#m]faite
+Sur la t[B]erre comme au c[F#/A#]iel, sur la t[B]erre [C#]comme au c[F#]iel.
+'
+  FROM songs WHERE title = 'ESPRIT DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ETERNITE', '', NULL, ''
+  FROM songs WHERE title = 'ETERNITE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'FAISONS MONTER', '', NULL, ''
+  FROM songs WHERE title = 'FAISONS MONTER' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'FEU DU FONDEUR', '', NULL, ''
+  FROM songs WHERE title = 'FEU DU FONDEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'FILS DE DIEU', '', NULL, ''
+  FROM songs WHERE title = 'FILS DE DIEU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'GLOIRE À DIEU, CAR IL EST BON', '', NULL, ''
+  FROM songs WHERE title = 'GLOIRE À DIEU, CAR IL EST BON' LIMIT 1;

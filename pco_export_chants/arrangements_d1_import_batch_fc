@@ -1,0 +1,25 @@
+
+
+
+[C]Il y a [Am]de la joie pour [F]toi pour [G]moi, [C]cette joie [Am]vient d''en haut, nul [F]ne peut l''expliquer
+[C]Je reçois [Am]cette joie Elle [F]vient du ciel elle [G]est pour moi, [C] Peu importe [Am]l''endroit, Je [F]me mets à danser'
+  FROM songs WHERE title = 'Je suis dans la joie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en Eb', '', NULL, '
+
+Saint-Es[Ab]prit des[Eb]cends sur [Db]nous
+Des[Db]cends sur [Ab]nous
+Consola[Fm7]teur, A[Eb]mi 
+A nou[Ab]veau touche nos [Bb]vies
+
+
+
+Saint-Es[Ab]prit des[Eb]cends sur [Db]nous
+Des[Db]cends sur [Ab]nous
+Que ta [Eb]puissance vienne
+Que ta [G7]voix résonne
+Viens et [Cm]change nos cours
+Accom[Abm6]plis Ta Parole
+Saint-Es[Eb]prit des[Bb]cends sur [Ab]nous
+
+

@@ -1,0 +1,25 @@
+  SELECT id, 'TU ES PUISSANT', '', NULL, ''
+  FROM songs WHERE title = 'TU ES PUISSANT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES SAINT (KADOSH)', '', NULL, ''
+  FROM songs WHERE title = 'TU ES SAINT (KADOSH)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU ES SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'TU ES SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU M''''AS CHOISI', '', NULL, ''
+  FROM songs WHERE title = 'TU M''AS CHOISI' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'TU TRACES UN CHEMIN', '', NULL, 'Couplet 1
+Tu es [C]là, présent parmi [G]nous, 
+Je T''a[D]dore, je T''a[Em]dore
+Tu es [C]là, agissant parmi [G]nous, 
+Je T''a[D]dore, je T''a[Em]dore
+
+
+Refrain
+[C]  Tu traces un chemin, opère des miracles
+[G]  Tu tiens Tes promesses, 
+Lumière dans les té[D]nèbres
+Mon Dieu, c''est ce que Tu [Em]es
+

@@ -1,0 +1,25 @@
+Tu es grand, Seigneur,
+Lam   Lam       Re  
+Tu es grand, Seigneur.
+Sol   Sol       Mim  
+Tu es grand, Seigneur,
+Lam   Lam       Re  
+Tu es grand, Seigneur.
+
+Refrain
+
+Do   Re     Sim         Mim  
+Magnifique, digne de louanges,
+Lam   Do        Re  
+Tu es grand, Seigneur.
+Do   Re     Sim         Mim  
+Magnifique, digne de louanges,
+Lam   Do        Re  
+Tu es grand, Seigneur.
+
+'
+  FROM songs WHERE title = 'Tu es grand Seigneur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '          
+Je [G]loue sur la montagne,[C] je Loue dans la [G]vallée, 
+Je [D]loue quand j''ai la foi,[C] quand je viens à [G]douter

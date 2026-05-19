@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU FIDELE (tu ne changes pas)', '', NULL, ''
+  FROM songs WHERE title = 'DIEU FIDELE (tu ne changes pas)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU FIDELE (tu suffis pleinement)', '', NULL, ''
+  FROM songs WHERE title = 'DIEU FIDELE (tu suffis pleinement)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU, TU ES GRAND ET DIGNE', '', NULL, ''
+  FROM songs WHERE title = 'DIEU, TU ES GRAND ET DIGNE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Arrangement par défaut', '', NULL, '1 -[D] Digne est l''Agneau[Am] sacrifié,[C] Il est saint, il est [G]saint
+[D] Un chant nouveau[Am] à celui qui siège[C] sur le trône de [G]grâce
+
+Ref :[D] Saint, oui saint, trois fois saint,[Am] Est le Seigneur tout-puissant,[C] Qui est, qui était et [G]qui vient !
+[D] Je chante avec la création :[Am] Louange au Roi des rois,[C] Oui, tu es tout pour moi, Et [G]je viens t''adorer
+
+2 -[D] Ceint des couleurs[Am] de arc-en-ciel,[C] Entouré d''éclairs et de [G]bruits de tonnerre,
+[D] Louange, honneur, Puissance,[Am] force et gloire,[C] sagesse au Roi des [G]rois
+
+3 -[D] Emerveillé,[Am] oui bouleversé,[C] à l’écho de ton [G]nom.
+[D] Jésus, ton nom est puissance,[Am] Souffle et source d''eau vive.[C] Quel mystère merveil[G]leux !'
+  FROM songs WHERE title = 'DIGNE EST L''AGNEAU' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ACCORDS D', '', NULL, ''
+  FROM songs WHERE title = 'DIGNE EST L''AGNEAU' LIMIT 1;

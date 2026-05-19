@@ -1,0 +1,25 @@
+        Bb
+Quand je suis là dans Ta présence 
+Fm         Ab
+Face à face 
+   Bb
+Devant Ta grâce 
+     Cm              Ab
+Le reste perd en importance 
+        Bb
+Quand je suis là dans Ta présence '
+  FROM songs WHERE title = 'Coeur à coeur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Venez [Am]louer le Seigneur, [C]vous les [E]nations.
+Venez [Am]célébrer son nom, vous les [C]peu[E7]ples.
+[Am]Car sa [Dm]bonté [E7]pour nous est [Am]grande,
+Sa [F]vérité [Em]dure à tou[Am]jours.
+
+
+[E]Allélu, [Am]alléluia, [E]allélu, [Am]alléluia,
+[E]Allélu, [Am]alléluia, [Dm]al[E]lélu[Am]ia.
+'
+  FROM songs WHERE title = 'Venez louer le Seigneur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+A                                                 E/A

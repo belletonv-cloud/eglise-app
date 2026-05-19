@@ -1,0 +1,25 @@
+
+G				  Em   G                           Em
+Quand je traverse la vallée de l’ombre, et que tout semble sans espoir
+C	                   D                          C                      D
+Par la foi je veux le proclamer, Il est celui qui délivre, qui sauve et restaure
+
+
+<i> 
+C                         G	
+ Juste un mot est suffisant, pour faire sortir du néant
+D                              C               G
+ Quelque chose de nouveau, de magnifique et grand
+C			       G
+ Sa parole est toute puissante, Oui elle peut tout créer
+            D 		    C	            D
+Alors je chante, en Lui je peux tout surmonter</i>C 
+'
+  FROM songs WHERE title = 'Ma foi est en Dieu' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'D', '', NULL, '1-[G] Couron[D]né,[A] rayonnant de ma[Bm]jesté, [G] Tout l’uni[D]vers proclame ta [A]grandeur.
+[G] Glori[D]fié [A] par les anges pros[Bm]ternés, [G] Tu es as[D]sis à la droite [A]du Père.
+
+Ref :
+[G]Jésus, merveilleux [D]nom, qui est sem[A]blable à toi, ô [Bm]Dieu ? [G]Jésus, ton précieux [D]nom est digne d’hom[A]mage.
+

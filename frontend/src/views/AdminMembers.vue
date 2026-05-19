@@ -1,23 +1,23 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-4">Administration des membres</h1>
+    <h1 class="text-2xl font-bold mb-4">{{$t('admin.members.headline')}}</h1>
 
     <div class="mb-6">
       <div class="flex gap-2 mb-4">
-        <button @click="tab = 'roles'" :class="tab === 'roles' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg cursor-pointer">Rôles & Permissions</button>
-        <button @click="tab = 'rbac'" :class="tab === 'rbac' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg cursor-pointer">Permissions par ressource</button>
+        <button @click="tab = 'roles'" :class="tab === 'roles' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg cursor-pointer">{{$t('admin.members.tabs.roles')}}</button>
+        <button @click="tab = 'rbac'" :class="tab === 'rbac' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'" class="px-4 py-2 rounded-lg cursor-pointer">{{$t('admin.members.tabs.rbac')}}</button>
       </div>
 
       <!-- Roles tab -->
       <div v-if="tab === 'roles'">
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-          <label class="text-sm sm:text-base">Rechercher :</label>
+          <label class="text-sm sm:text-base">{{$t('table.search')}}</label>
           <input v-model="q" placeholder="Nom" class="border px-2 py-1 rounded w-full sm:w-auto" />
         </div>
 
         <div class="overflow-x-auto">
         <table class="w-full bg-white rounded shadow">
-          <thead><tr><th class="p-2">Nom</th><th class="p-2">Email</th><th class="p-2">Rôle</th><th class="p-2">Exceptions</th></tr></thead>
+          <thead><tr><th class="p-2">{{$t('table.name')}}</th><th class="p-2">{{$t('table.email')}}</th><th class="p-2">{{$t('table.role')}}</th><th class="p-2">{{$t('admin.members.exceptions')}}</th></tr></thead>
           <tbody>
             <tr v-for="m in filtered" :key="m.id" class="border-b">
               <td class="p-2">{{ m.first_name }} {{ m.last_name }}</td>
@@ -35,12 +35,12 @@
               </td>
               <td class="p-2">
                 <ul>
-                  <li v-for="e in exceptionsByMember[m.id] || []" :key="e.id">{{ e.permission }} — {{ e.granted ? 'granted' : 'denied' }} <button @click="removeException(e.id)" class="text-red-500 cursor-pointer">x</button></li>
+                  <li v-for="e in exceptionsByMember[m.id] || []" :key="e.id">{{ e.permission }} — {{ e.granted ? $t('admin.members.granted') : $t('admin.members.denied') }} <button @click="removeException(e.id)" class="text-red-500 cursor-pointer">x</button></li>
                 </ul>
                 <div class="mt-2 flex flex-wrap gap-2">
                   <input v-model="newPermission[m.id]" placeholder="permission" class="border px-2 py-1 text-sm" />
                   <select v-model="newGranted[m.id]" class="border px-2 py-1 text-sm"><option :value="true">grant</option><option :value="false">deny</option></select>
-                  <button @click="addException(m.id)" class="px-2 py-1 bg-blue-500 text-white rounded text-sm cursor-pointer">Ajouter</button>
+                  <button @click="addException(m.id)" class="px-2 py-1 bg-blue-500 text-white rounded text-sm cursor-pointer">{{$t('action.add')}}</button>
                 </div>
               </td>
             </tr>
@@ -53,30 +53,30 @@
       <div v-if="tab === 'rbac'">
         <div class="mb-4 flex gap-2 items-center">
           <select v-model="rbacForm.resource_type" class="border px-3 py-2 rounded">
-            <option value="">Type de ressource...</option>
-            <option value="plan">Plan (service)</option>
-            <option value="song">Chant</option>
-            <option value="arrangement">Arrangement</option>
-            <option value="team">Équipe</option>
+            <option value="">{{$t('admin.rbac.resource_type_placeholder')}}</option>
+            <option value="plan">{{$t('admin.rbac.resource.plan')}}</option>
+            <option value="song">{{$t('admin.rbac.resource.song')}}</option>
+            <option value="arrangement">{{$t('admin.rbac.resource.arrangement')}}</option>
+            <option value="team">{{$t('admin.rbac.resource.team')}}</option>
           </select>
-          <input v-model="rbacForm.resource_id" type="number" placeholder="ID ressource" class="border px-3 py-2 rounded w-24" />
+          <input v-model="rbacForm.resource_id" type="number" placeholder="{{$t('admin.rbac.resource_id')}}" class="border px-3 py-2 rounded w-24" />
           <select v-model="rbacForm.member_id" class="border px-3 py-2 rounded">
-            <option value="">Membre...</option>
+            <option value="">{{$t('admin.rbac.member_placeholder')}}</option>
             <option v-for="m in members" :key="m.id" :value="m.id">{{ m.first_name }} {{ m.last_name }}</option>
           </select>
           <select v-model="rbacForm.permission" class="border px-3 py-2 rounded">
-            <option value="">Permission...</option>
+            <option value="">{{$t('admin.rbac.permission_placeholder')}}</option>
             <option value="view">Voir</option>
             <option value="edit">Modifier</option>
             <option value="schedule">Planifier</option>
             <option value="admin">Admin</option>
           </select>
-          <button @click="addResourcePermission" :disabled="!canAddRbac" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer">Ajouter</button>
+          <button @click="addResourcePermission" :disabled="!canAddRbac" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer">{{$t('action.add')}}</button>
         </div>
 
         <div class="overflow-x-auto">
         <table class="w-full bg-white rounded shadow">
-          <thead><tr><th class="p-2">Membre</th><th class="p-2">Ressource</th><th class="p-2">ID</th><th class="p-2">Permission</th><th class="p-2">Accès</th><th class="p-2"></th></tr></thead>
+          <thead><tr><th class="p-2">{{$t('table.member')}}</th><th class="p-2">{{$t('table.resource')}}</th><th class="p-2">{{$t('table.id')}}</th><th class="p-2">{{$t('table.permission')}}</th><th class="p-2">{{$t('table.access')}}</th><th class="p-2"></th></tr></thead>
           <tbody>
             <tr v-for="p in resourcePerms" :key="p.id" class="border-b">
               <td class="p-2">{{ memberName(p.member_id) }}</td>
@@ -84,10 +84,10 @@
               <td class="p-2">{{ p.resource_id }}</td>
               <td class="p-2">{{ p.permission }}</td>
               <td class="p-2">
-                <span :class="p.granted ? 'text-green-600' : 'text-red-600'">{{ p.granted ? 'Autorisé' : 'Refusé' }}</span>
+                <span :class="p.granted ? 'text-green-600' : 'text-red-600'">{{ p.granted ? $t('admin.members.granted') : $t('admin.members.denied') }}</span>
               </td>
               <td class="p-2">
-                <button @click="removeResourcePermission(p.id)" class="text-red-500 cursor-pointer">Supprimer</button>
+                <button @click="removeResourcePermission(p.id)" class="text-red-500 cursor-pointer">{{$t('action.delete')}}</button>
               </td>
             </tr>
           </tbody>

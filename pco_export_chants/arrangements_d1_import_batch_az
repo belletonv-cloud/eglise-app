@@ -1,0 +1,25 @@
+[D]Jésus, sois ma vision
+Sois mon che[A7sus4]min, sois mon [G/B]guide, Jé[D]sus
+'
+  FROM songs WHERE title = 'JESUS, SOIS LE CENTRE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JESUS, TU ES DIGNE', '', NULL, ''
+  FROM songs WHERE title = 'JESUS, TU ES DIGNE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE T''''AIME DE L''''AMOUR DU SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'JE T''AIME DE L''AMOUR DU SEIGNEUR' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JE TE DONNE MON CŒUR', '', NULL, ' G     D    Em7   C   G   D    
+Voici mon désir: t''honorer
+       Em7    D      Em   G   F   C  D
+Seigneur de tout mon cœur, Je t''adore
+
+G    D       Em        C     D  G 
+Avec tout mon être, je chanterai
+    Em    D       G          F  C  D
+Mon amour et ma joie devant toi
+
+G                 D                   Am
+Je te donne mon cœur, Je te donne mon âme, 
+C            D         G
+Je vis pour toi seigneur

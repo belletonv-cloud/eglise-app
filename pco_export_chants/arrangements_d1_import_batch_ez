@@ -1,0 +1,25 @@
+Que ta [F#m]vie jaillisse en abond[Gm]ance;
+Nous al[D]lons voir [A]ta puissa[D]nce.
+'
+  FROM songs WHERE title = 'Que ces lieux soient visités' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Couplet 1:  [D]Ô quelle paix dans ces moments
+Dans le [F#m]calme de Ta présence[A]
+Quand le bruit fai[Emsus4]blit,       
+ Et tu parles à mon [F#m]]âme
+[D]Tu as toute mon attention[F#m],     
+ Fais-moi entendre Ta [A]Voix
+Je ne veux rien manquer[Emsus4]
+
+Refrain :  Sei[A]gneur mon cœur [D]désire plus de Toi,
+Mon [F#m]cœur recherche Ta [A]Face, 
+alors, Je cède à [E]Toi
+Tout en [D]moi est ému par Ton a[Emsus4]mour, 
+captivé par qui Tu [F#m]es
+Conduis moi à Te con[C#m]naître plus en[D]core
+Je veux m''approcher de [Emsus4]Toi, 
+laisser mes peurs derrière [F#m]moi
+Seigneur viens toucher ma [C#m]vie à nouveau
+
+
+Refrain 2: [D]Oh oh oh oh, [Emsus4]oh oh oh oh

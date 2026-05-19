@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'LAISSE MOI VOIR TA VIE', '', NULL, ''
+  FROM songs WHERE title = 'LAISSE MOI VOIR TA VIE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc Em', '', NULL, '
+Refrain
+
+[Em]Là ou est l’Es[Am]prit du Seig[Em]neur
+[Em]Là ou est l’[Am]Esprit du Seig[Em]neur
+[Em]C’est la [A]liberté, [Em]c’est la [A]vie
+[Em]C’est la [A]liberté [B7]de l’Es[Em]prit.
+
+
+Couplet 1
+
+[Em]Il é[Bm]loigne [Em]nos limites
+[Em]Et trans[Bm]forme nos [Em]sentiments
+[Em]C’est [Bm]une vraie [Em]dynamite
+[Em]Bouscu[Bm]lant nos [Em]raison[D]ne[Em]ments
+
+
+
+
+
+Couplet 2

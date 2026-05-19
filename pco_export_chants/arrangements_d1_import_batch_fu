@@ -1,0 +1,25 @@
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc Dm', '', NULL, 'Refrain 
+
+[Cm]Je chanterai l''Éternel tant [Fm]que je vi[G]vrai
+[Cm]Je chanterai [Bb]l''Éter[Eb]nel
+[G#]Je célébre[Bb]rai mon Dieu [Gm]tant que j''e[Cm]xisterai
+[Fm]Je célébre[D]rai mon [G]Dieu.
+
+[G#]Que [Bb]mes pa[Eb]ro[Cm]les [Fm]lui soient [Bb]agré[Cm]ables
+[Fm]Lui soient [G]agré[Cm]ables.
+[Fm]Je veux me [D]réjouir en [G]l''Éternel
+
+
+[Cm]Allél[Bb]uia, [Ab]Gloire à notre [Bb]Roi
+[Cm]Allél[Bb]uia, [Ab]Gloire à notre [g]Roi (ter)'
+  FROM songs WHERE title = 'Je chanterai l''Eternel' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en A', '', NULL, 'Refrain
+Chantons [D]Alle[E]lui[F#m7]a
+Chantons [D]Alle[E]lui[A]a
+
+Couplet 1
+Assis sur son [D]trône
+[E]Jésus est [F#m]roi
+Au milieu des tem[D]pêtes

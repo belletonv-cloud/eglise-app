@@ -1,0 +1,25 @@
+Tu parles et Tu [G]les calmes
+Tu es mon rep[Am]os, Tu es au[G] contrôle [F] 
+
+COUPLET 2
+Dans [Am]la vallée je crois
+Ton [F]Saint-Esprit est là
+Et me [C]conduit [G]
+Tu [Am]guides chaque étape
+[F]Parle moi encore
+J''ai besoin de [C]toi [G]
+
+PONT
+Toi [C]seul est digne de confiance [G]
+Nul ne peut [Am] changer ta per[F]fection
+Tu es [F] Alpha et Oméga
+Plus grand que ce [G je comprends
+Il n''y a personne [Am] comme Toi, Jésus[F]
+
+
+
+'
+  FROM songs WHERE title = 'Au contrôle' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[Dm] [Bb] [F] [Am] [Dm] [Bb] [F] [Am]
+

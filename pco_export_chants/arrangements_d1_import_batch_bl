@@ -1,0 +1,25 @@
+                            D                         Em                         C             G
+Nous voulons voir, nous voulons voir, Nous voulons voir Jésus élevé (bis)
+
+            D                 Em                  D                           Em
+Pas à pas allons de l''avant, Peu à peu gagnons du terrain.
+         D                    Em                         C                           D
+La prière est notre puissance, Les murailles s''écroulent à terre,
+A terre, à terre, à terre.'
+  FROM songs WHERE title = 'NOUS VOULONS VOIR JESUS ELEVE' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'OCEAN', '', NULL, '[Bm] [A] [D] [A] [G]
+
+Couplet 1: 
+[Bm]Oui, Tu m’appelles par-[A]delà des [D]eaux 
+Dans l’inconn[A]ue, aucun app[G]ui
+[Bm]Et Tu te révèles [A]dans ce [D]mystère.
+Dans l''a[A]bîme, ma foi de[G]meure,
+
+Refrain;
+Et j''inv[D]oquerai Ton Saint [A]Nom  [G]
+Portant mes [D]yeux vers l’hori[A]zon dans la tem[G]pête.
+Tes bras a[D]briteront mon [A]âme
+Je t’appar[G]tiens, et [A]Tu es [Bm]mien.    [instru ] [A] [D] [A] [G]
+
+Couplet 2:

@@ -1,0 +1,25 @@
+[C]Oh [G]oh [Am]oh Il [F]fera ( Il [F]fera )
+
+Pont 5
+[C]Il fera ( Il fera ) [G]Il fera ( Il fera ) [Am]Il fera ( Il fera ) [F]Il fera ( Il fera )
+
+C1- R1 - P1 - P2 - R2 - instru - R2 2- P3 2 - P4 - P5
+
+
+
+
+
+'
+  FROM songs WHERE title = 'Il est capable ( il fera )' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+Couplet 
+
+[Em]Quand il descend, [C]oui tout s''arrête
+[G]Il y a transfert [D]entre ciel et terre
+[Em]Quand il descend, [C]l''atmosphère change
+[G]Il y a transfert [D]entre ciel et terre
+
+Refrain 1
+
+Le [Em]Saint Esprit est [C]là ah ah

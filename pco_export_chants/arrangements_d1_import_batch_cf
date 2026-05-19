@@ -1,0 +1,25 @@
+
+Couplet 2
+Tu es [C]là, transformant nos [G]vies, 
+Je T''adore, je T''a[Em]dore
+Tu es [C]là, guérissant nos [G]coeurs, 
+Je T''adore, je T''a[Em]dore
+Tu es [C]là, transformant nos [G]vies, 
+Je T''adore, je T''a[Em]dore
+Tu es [C]là, restaures les coeurs b[G]risés, 
+Je T''adore, je T''a[Em]dore
+
+
+
+Pont
+[C]  Et quand je ne le vois pas Tu es là
+[G]  Et quand je ne le sens pas Tu es là
+[D]  Tu agiras, Tu agiras encore, 
+[Em]Tu agiras , Tu agiras encore'
+  FROM songs WHERE title = 'TU TRACES UN CHEMIN' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'UNE CHOSE', '', NULL, ''
+  FROM songs WHERE title = 'UNE CHOSE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'UN JOUR DANS TES PARVIS', '', NULL, ''
+  FROM songs WHERE title = 'UN JOUR DANS TES PARVIS' LIMIT 1;

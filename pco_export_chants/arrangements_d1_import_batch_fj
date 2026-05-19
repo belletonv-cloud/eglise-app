@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'C''est toi que je choisis' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Couplet
+Apprends-[E]moi ô mon roi
+A de[C#m]meurer dans Tes voies
+A ne [Amaj7]jamais m''éloigner de [B]Toi
+Qu''à tra[E]vers mes erreurs
+Mes é[C#m]checs et mes douleurs
+Tu m''a[Amaj7]ttires au pied de la [B]croix
+
+Refrain
+Je viens de[E]vant Toi encore une fois[B]
+Au pied de [C#m]la croix ô mon roi[A]
+Prends ma vie [E]Seigneur, utilise-moi[B]
+Je m''aban[C#m]donne entre Tes [Amaj7]mains
+Sois mon rocher, sois mon [E]seul chemin
+[B]Sois mon rocher, sois [C#m]mon seul chemin   [A]
+
+
+[B]Dans mon coeur sois le numéro [C#m]un   [A]
+'
+  FROM songs WHERE title = 'apprends-moi (Fernanda petit)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'acc C#m', '', NULL, 'Couplet 1
+

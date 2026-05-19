@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isAuthenticated } from '../stores/auth'
+import { isDemoMode } from '../stores/demo'
 import HomePage from '../views/HomePage.vue'
 import SongDetail from '../components/SongDetail.vue'
 import PlansList from '../views/PlansList.vue'
@@ -29,10 +31,23 @@ import MemberProfile from '../views/MemberProfile.vue'
 import WebhooksView from '../views/WebhooksView.vue'
 import MessagesView from '../views/MessagesView.vue'
 import KioskView from '../views/KioskView.vue'
+import ChurchEvents from '../views/ChurchEvents.vue'
+import YoutubeView from '../views/YoutubeView.vue'
+import PcoSyncView from '../views/PcoSyncView.vue'
+import MusicStandView from '../views/MusicStandView.vue'
+import MusicStandListView from '../views/MusicStandListView.vue'
+import DemoTour from '../views/DemoTour.vue'
+
+const publicRoutes = ['invitation', 'demo-tour']
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/demo-tour',
+      name: 'demo-tour',
+      component: DemoTour,
+    },
     {
       path: '/dashboard',
       name: 'dashboard',
@@ -206,7 +221,41 @@ const router = createRouter({
       name: 'kiosk',
       component: KioskView,
     },
+    {
+      path: '/events',
+      name: 'church-events',
+      component: ChurchEvents,
+    },
+    {
+      path: '/youtube',
+      name: 'youtube',
+      component: YoutubeView,
+    },
+    {
+      path: '/pco-sync',
+      name: 'pco-sync',
+      component: PcoSyncView,
+    },
+    {
+      path: '/music-stand',
+      name: 'music-stand-list',
+      component: MusicStandListView,
+    },
+    {
+      path: '/music-stand/:songId/:arrangementId?',
+      name: 'music-stand',
+      component: MusicStandView,
+      props: true,
+    },
   ],
+})
+
+// Route guard: unauthenticated users see login via App.vue
+// Public routes (invitation) are accessible without auth
+router.beforeEach((to) => {
+  if (publicRoutes.includes(to.name as string)) return true
+  if (isAuthenticated.value || isDemoMode.value) return true
+  return true
 })
 
 export default router

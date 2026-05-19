@@ -1,0 +1,25 @@
+  SELECT id, 'QUE NOTRE LOUANGE (REJOUIS-TOI JESUS)', '', NULL, ''
+  FROM songs WHERE title = 'QUE NOTRE LOUANGE (REJOUIS-TOI JESUS)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE TA GLOIRE DESCENDE (EN CE LIEU)', '', NULL, ''
+  FROM songs WHERE title = 'QUE TA GLOIRE DESCENDE (EN CE LIEU)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QUE TON REGNE VIENNE (SEIGNEUR, TU APPELLES)', '', NULL, ''
+  FROM songs WHERE title = 'QUE TON REGNE VIENNE (SEIGNEUR, TU APPELLES)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en Am', '', NULL, '[A]Qui est sem[F]blable au lion
+A l''a[C]gneau, assis sur le [G]trône
+Les monts s''in[F]clinent, l''océan ru[C]git
+devant le Sei[G]gneur
+
+
+[F]Louez Ado[Am]naï, du [G]lever du soleil
+Et jus[Dm]qu''à la fin du jour
+[F]Louez Ado[Am]naï, 
+Toutes [G]les nations du monde
+Tous les [Dm]anges
+Et tous les saints te [Bb]louent'
+  FROM songs WHERE title = 'QUI EST SEMBLABLE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'QU’IL EN SOIT AINSI', '', NULL, ''
+  FROM songs WHERE title = 'QU’IL EN SOIT AINSI' LIMIT 1;

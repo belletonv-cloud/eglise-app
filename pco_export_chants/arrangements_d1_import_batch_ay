@@ -1,0 +1,25 @@
+[A]Jésus, c’est pour toi que je dan[Dm]se [A]de [Dm]joie.
+
+'
+  FROM songs WHERE title = 'JESUS A MIS UN CHANT' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JESUS EST ROI', '', NULL, ''
+  FROM songs WHERE title = 'JESUS EST ROI' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JESUS EST SEIGNEUR', '', NULL, ''
+  FROM songs WHERE title = 'JESUS EST SEIGNEUR' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JESUS, NOUS CELEBRONS (TOUS TA VICTOIRE)', '', NULL, ''
+  FROM songs WHERE title = 'JESUS, NOUS CELEBRONS (TOUS TA VICTOIRE)' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'JESUS, NOUS TE COURONNONS', '', NULL, ''
+  FROM songs WHERE title = 'JESUS, NOUS TE COURONNONS' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'ACC en D', '', NULL, '[D]Jésus, sois le centre
+Sois ma lu[A7sus4]mière, sois ma [G/B]source, [D]Jésus (bis)
+[D]Jésus, sois le centre
+Sois mon es[A7sus4]poir, sois mon [G/B]chant, 5D]Jésus
+
+Sois le [A7sus4]feu dans mon [D]cœur, Sois le [A7sus4]vent dans ces [D]voiles
+Sois la rai[A7sus4]son de ma [D]vie, [A7sus4]Jésus, [G/B]Jésus[D]
+

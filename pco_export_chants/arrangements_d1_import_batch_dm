@@ -1,0 +1,25 @@
+'
+  FROM songs WHERE title = 'Que ton nom résonne en ce lieu' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'acc Cm', '', NULL, '
+Mon [Cm]âme cherche ta pré[Gm]sence, elle [Fm]soupire après tes par[G7]vis,
+Te [Cm]voir, te connaître et en[Gm]tendre 
+La [Ab]dou[Fm]ce voix [Ddim]de ton Es[Cm]prit.
+
+Sou[Eb]dain plongé dans ta lumière imme[Bb]nse,
+I[Fm]nondé par la chaleur de ta v[Gsus4]ie,
+Clar[Ab]té incomparable, re[Cm]gard inoubliable,
+Je [Gbdim]suis renouvelé, gué[Gsus4]ri.
+Ta [Cm]paix a envahi mon [Gm]âme,
+Pros[Fm]terné, je [G7]reçois ta [Cm]vie.'
+  FROM songs WHERE title = 'Mon âme cherche ta présence' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Am / Em / Bm / Em
+
+                   Am 	                    Em	                  Bm                  Em
+Sauve ton peuple, accorde ta grâce, nous chanterons ta miséricorde !
+                   Am 	                   Em	     B         Em
+Sauve ton peuple, accorde ta grâce, allélu-alléluia ! (bis)
+  
+
+                B                                            Em                     Am                                          B

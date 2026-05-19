@@ -1,0 +1,25 @@
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Infiniment grand (Accords Do)', '', NULL, ''
+  FROM songs WHERE title = 'Infiniment grand' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Infiniment grand (Accords Do) Copy', '', NULL, ''
+  FROM songs WHERE title = 'Infiniment grand' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'mim', '', NULL, 'N''est-[Em]il point d''autre choix Devant la [C]coupe, Que [Em]celui de marcher sur cette [Am]route
+Ce [D]chemin de douleur[B7] De [Em]peine et de malheur, N''y [Am]a-t-il rien que ce chemin de [B4]croix[B]
+Mon [Em]âme est dans l''effroi Et dans le [C]doute, Mais [Em], je sais Que ton coeur de Père é[Am]coute
+Cha[D]cun de mes soupirs[B7] Mes [Em]peurs et mon désir, De [Am]satisfaire à ta prière en [B4]moi[B]
+
+Refrain : [E]Glorifie ton Nom sur cette [A]terre [A7M], [F#m]Manifeste en [F#m7]moi La sainte[B]té de ton pardon
+Je m''aban[Bm]donne entre tes [Bm7]mains Et puisque [A2]la vie t''appar[Am]tient, Qu''il en soit [C#m]fait de moi Selon les voies de [F#m]ton amour divin[B4]  [B]
+
+Com[Em]bien de fois pourtant J''ai vu ta [C]grâce, Lors[Em]que je demeurais devant ta [Am]face
+Mais [D]là dans ce jardin[B7] Il [Em]ne reste plus rien, Que [Am]le fardeau De tous les maux du [B4]monde[B]
+Au[Em]cun pour partager De ma souf[C]france, Le [Em]sang de l''agonie et de l''ab[Am]sence
+Voi[D]ci venue mon heure[B7] Viens [Em]soulager mon coeur, Mon [Am]Dieu Mon sort est en Toi mainte[B4]nant[B]
+
+Refrain2 : [E]Glorifie ton Nom sur cette [A]terre [A7M], [F#m]Manifeste en [F#m7]moi La sainte[B]té de ton pardon
+Je m''aban[Bm]donne entre tes [Bm7]mains Et puisque [[A2]]la vie t''appar[Am]tient, Qu''elle soit lu[E]mière en moi Un [G#]chant de joie Jus[C#m]qu''au-delà des temps[A#dim]
+
+Et que le [E]monde voie Bril[C#m]ler en moi La [E]gloire Que ta [B]grâce m''a don[E]née'
+  FROM songs WHERE title = 'Glorifie ton nom sur cette terre' LIMIT 1;

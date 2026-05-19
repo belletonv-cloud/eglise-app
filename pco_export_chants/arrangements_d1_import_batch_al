@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'DEVANT TON AUTEL' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU A UNE ARMEE', '', NULL, ''
+  FROM songs WHERE title = 'DIEU A UNE ARMEE' LIMIT 1;
+INSERT OR IGNORE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'DIEU EST BON (nous voulons le crier)', '', NULL, ''
+  FROM songs WHERE title = 'DIEU EST BON (nous voulons le crier)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en D', '', NULL, 'Refrain 1
+Dieu est [D]bon, en tout [Bm]temps, 
+Il a [G]mis ce chant de [A]louange en moi.
+Dieu est [D]bon, en tout [Bm]temps, 
+A tra[G]vers la nuit, sa [A]lumière jaillit.
+Dieu est [G]bon, Dieu est [A]bon,
+ en tout [D]temps ! [G]  [D]
+
+Coupet 1
+
+Si tu [A]marches dans les [Bm]ténèbres 
+et que [G]l’ombre t’enva[Bm]hit.
+Ne crains [F#m]pas, Il te [Bm]guide 
+et Il [G]te protége[A]ra.
+Il a [Em]promis d’être avec [A]toi,
+ jamais [Em]Il ne t’aban[Bm]donne[A]ra !
+

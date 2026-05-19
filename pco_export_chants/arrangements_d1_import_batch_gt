@@ -1,0 +1,4 @@
+Au [C]lieu du cha[Fm]grin,
+Je [B]leur donne[Em]rai la joie.
+'
+  FROM songs WHERE title = 'Jeunes et vieux' LIMIT 1;

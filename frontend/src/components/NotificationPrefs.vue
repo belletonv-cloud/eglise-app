@@ -1,17 +1,17 @@
 <template>
   <div class="notification-prefs">
     <div v-if="!isPushSupported" class="alert-info">
-      Les notifications push ne sont pas supportées par votre navigateur.
+      {{ $t('notificationPrefs.not_supported') }}
     </div>
 
     <div v-else class="prefs-content">
       <div class="permission-status">
-        <span class="status-label">Notifications push :</span>
+        <span class="status-label">{{ $t('notificationPrefs.label') }}</span>
         <span :class="['status-badge', permissionClass]">{{ permissionText }}</span>
       </div>
 
       <div class="vapid-warning" v-if="!vapidConfigured">
-        ⚠️ VITE_VAPID_PUBLIC_KEY non configurée. Les notifications push nécessitent une clé VAPID.
+        {{ $t('notificationPrefs.vapid_warning') }}
       </div>
 
       <div class="actions" v-if="vapidConfigured">
@@ -20,7 +20,7 @@
           @click="requestAndSubscribe"
           class="btn-primary"
         >
-          Activer les notifications
+          {{ $t('notificationPrefs.enable') }}
         </button>
 
         <button
@@ -29,7 +29,7 @@
           class="btn-primary"
           :disabled="subscribing"
         >
-          {{ subscribing ? 'Abonnement...' : "S'abonner aux notifications" }}
+          {{ subscribing ? $t('notificationPrefs.subscribing') : $t('notificationPrefs.subscribe') }}
         </button>
 
         <button
@@ -38,12 +38,12 @@
           class="btn-danger"
           :disabled="unsubscribing"
         >
-          {{ unsubscribing ? 'Désabonnement...' : 'Se désabonner' }}
+          {{ unsubscribing ? $t('notificationPrefs.unsubscribing') : $t('notificationPrefs.unsubscribe') }}
         </button>
       </div>
 
       <div v-if="subscribed" class="subscribed-info">
-        ✓ Notifications activées
+        {{ $t('notificationPrefs.active') }}
       </div>
     </div>
   </div>
@@ -51,7 +51,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { isPushSupported, getNotificationPermission, requestPermission, subscribeToPush, registerToken, unsubscribe, getExistingSubscription, extractFCMToken } from '../utils/notifications';
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   subscribed: [token: string]
@@ -80,9 +83,9 @@ const permissionClass = computed(() => ({
 
 const permissionText = computed(() => {
   const map: Record<NotificationPermission, string> = {
-    granted: 'Autorisé',
-    default: 'Pas encore demandé',
-    denied: 'Bloqué',
+    granted: t('notificationPrefs.granted'),
+    default: t('notificationPrefs.default'),
+    denied: t('notificationPrefs.denied'),
   };
   return map[permission.value] || 'Inconnu';
 });

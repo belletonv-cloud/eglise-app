@@ -1,5 +1,6 @@
 import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment, VolunteerPreferences, PlanTemplate, PlanTemplateItem } from './types'
 import { user } from '../stores/auth'
+import { isDemoMode, demoUser } from '../stores/demo'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
 
@@ -10,12 +11,18 @@ export function getApiBase() {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
-    if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+    const activeUser = isDemoMode.value ? demoUser.value : user.value
+    if (isDemoMode.value) {
+      // Demo mode: use x-demo-email header (server will create member on-the-fly)
+      headers['x-demo-email'] = activeUser.email
+    } else if (activeUser && activeUser.email) {
+      headers['x-user-email'] = activeUser.email
+    }
     // Dev auth secret for local development (bypasses Firebase)
     if (import.meta.env.VITE_DEV_AUTH_SECRET) headers['X-Auth-Secret'] = import.meta.env.VITE_DEV_AUTH_SECRET
     // Try to attach Firebase ID token for robust server-side auth
-    if (user.value && typeof user.value.getIdToken === 'function') {
-      const token = await user.value.getIdToken(true).catch(() => null)
+    if (activeUser && typeof activeUser.getIdToken === 'function') {
+      const token = await activeUser.getIdToken(true).catch(() => null)
       if (token) headers['Authorization'] = `Bearer ${token}`
     }
   } catch {}
@@ -311,6 +318,26 @@ export const api = {
     request<any>(`/announcements/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAnnouncement: (id: number) =>
     request<{ success: boolean }>(`/announcements/${id}`, { method: 'DELETE' }),
+
+  // Church Events (external scraped events)
+  getChurchEvents: (source?: string, includeExceptions?: boolean) => {
+    const params = new URLSearchParams()
+    if (source) params.set('source', source)
+    if (includeExceptions) params.set('include_exceptions', '1')
+    const qs = params.toString()
+    return request<any[]>(`/church-events${qs ? '?' + qs : ''}`)
+  },
+  getChurchEvent: (id: number) => request<any>(`/church-events/${id}`),
+  updateChurchEvent: (id: number, data: Partial<any>) =>
+    request<any>(`/church-events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getChurchEventExceptions: (id: number) => request<any[]>(`/church-events/${id}/exceptions`),
+  createChurchEventException: (id: number, data: { type: string; exception_date?: string; new_date?: string; new_repeat_period?: string; reason?: string }) =>
+    request<any>(`/church-events/${id}/exceptions`, { method: 'POST', body: JSON.stringify(data) }),
+  deleteChurchEventException: (id: number, exceptionId: number) =>
+    request<any>(`/church-events/${id}/exceptions/${exceptionId}`, { method: 'DELETE' }),
+
+  // PCO Sync
+  syncPCO: () => request<any>('/pco-sync', { method: 'POST' }),
 
   // Webhooks
   getWebhooks: () => request<any[]>('/webhooks'),

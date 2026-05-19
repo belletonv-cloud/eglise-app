@@ -1,0 +1,25 @@
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Arrangement par défaut', '', NULL, '[Bb]  Tu es celui qui ouvre les [F]yeux des aveugles
+[C]  Tu es celui qui change les [Gm]vies
+[Bb]  Tu prononces une parole et ce [F]qui était mort reprend [C]vie, [Gm]Jésus
+
+[Bb  ]Tu es celui qui a ins[F]piré cette œuvre
+[C]  Qui la mènera jusqu''au [Gm]bout
+[Bb]  Tu avais décidé d''é[F]crire cette histoire avec[C] nou[Gm]s
+
+
+[Bb]  Maintenant Seigneur, souffle sur nos [F]pays, envahis nos vill[C]ages, viens toucher nos fami[Gm]lles
+[Bb]  Maintenant Seigneur, fais connaître le [F]nom, qui peut guérir les nat[C]ions, le nom de Jésus [Gm]Christ
+
+
+
+[Bb]  Les défis sont grands, nous [F]en avons conscience
+[C]  Tu les connais mieux que [Gm]nous, Jésus
+[Bb]  Mais nous voulons croire que [F]rien n''est impossible
+[C]   Saint Esprit nous deman[Gm]dons que maintenant
+
+Fais tomber la pluie d''en haut
+Fais tomber la pluie du ciel'
+  FROM songs WHERE title = 'Maintenant Seigeur' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '1 - [G]Jésus Roi d’éternité, [Bm7]qui est comme Toi, Que tu es [Em]digne, que Tu es [C7M]digne

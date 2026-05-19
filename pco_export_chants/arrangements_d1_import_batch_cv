@@ -1,0 +1,25 @@
+[F]Dieu est capable de [C]faire, Tout ce qu’il [Dm]dit, il fe[Bb]ra
+[F]Il accompli[C]ra, toutes ses pro[Dm]messes, envers [Bb]toi
+
+[C]Garde ta foi en Dieu, Il ne [Dm]t’aban[C]donnera [Bb]pas, il f[F]era [C] [Dm] [Bb]
+
+[G] [D] [Em] [C]   [A] [E] [F#m] [D]   [B] [F#] [G#m] [E]   [C#] [G#] [A#m] [F#]'
+  FROM songs WHERE title = 'IL FERA (IL EST CAPABLE)' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'acc G majeur', '', NULL, '	       
+[Em7] Je viens dans [D]ta pré[G]sence  
+[Em7] Et ton a[D]mour imm[G]ense
+Couvre [Em7]mon être et mon co[D]eur veut t''[C]adorer Seign[G]eur          
+Veut t''[C]adorer Seign[G]eur, Jés[D]us
+
+
+[Em7] Je vis sous [D]ta puis[G]sance
+[Em7] Dans ton am[D]our imm[G]ense
+Tu me [Em7]remplis de ta [D]joie, Je m''[C]abandonne à [G]toi
+Je [C]abandonne à [G]toi, Jés[D]us
+
+
+Jés[Em7]us[D], Jés[G]us oh oh, Jés[Em7]us[D] oh oh oh, Jés[G]us oh oh
+Couvre [Em7]mon être et mon co[D]eur veut t''[C]adorer Seign[G]eur          
+Veut t''[C]adorer Seign[G]eur, Jés[D]us
+

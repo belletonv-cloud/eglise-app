@@ -1,0 +1,25 @@
+When Jesus washed (when Jesus washed)
+                                  C                          F
+He washed the sins away (Oh happy day)
+
+
+                        C                  F
+He taught me how …. to watch
+                     C                    G 
+Fight and pray Fight and pray
+                     C                  F
+And live rejoicing, Ev''ry day
+           C                 G 
+Ev''ry day, (everyday)'
+  FROM songs WHERE title = 'Oh happy day' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '               G                  D                Em		       C	
+Nous louons, Dieu est ici, le Seigneur est parmi nous
+                 G                   D                    Em		  C	 
+Nous entrons dans sa présence, pour acclamer le Dieu qui vit
+
+<b>        
+               G                     D          Em                       C
+Nous avons un Dieu vivant, présent à chaque instant
+        G        D       Em        C
+Oui Il vit Il règne il est ressuscité

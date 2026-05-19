@@ -1,0 +1,25 @@
+
+Couplet 3
+[C]Je veux proclamer le nom de Jésus
+[Am]Sur la peur et sur toute anxiété
+sur [F]toute âme tenue captive et abattue’ 
+J’invoque [C]Jésus
+
+
+Pont
+(Je crie) Jésus sur les montagnes et Jésus dans les rues
+[Am]Jésus dans les ténèbres et sur tous mes ennemis
+[F]Jésus sur ma famille
+J’invoque le saint nom [C]de Jésus'
+  FROM songs WHERE title = 'Je veux proclamer le nom de Jésus' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+
+
+
+
+
+                   DÎMES ET OFFRANDES'
+  FROM songs WHERE title = 'Dîmes et Offrandes' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'Refrain 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount } from './setup'
 
 vi.mock('../firebase', () => ({
   default: {},

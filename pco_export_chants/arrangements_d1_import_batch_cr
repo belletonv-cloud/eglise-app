@@ -1,0 +1,25 @@
+[G]Créateur de toutes choses, [Bm7]source de la vie, Que Tu es [Em]digne, que Tu es [C7M]digne
+[G]Revêtu de majesté, [Bm7]Tu T’es dépouillé, Que Tu es [Em]digne, que Tu es [C7M]digne, Oui Tu es [Am]digne [D]
+
+Ref : Je sais qu’un [Em7]jour tout genou [C]fléchira devant [D]Toi, Et toute [Em7]langue confesse[C]ra que Tu es [D]Seigneur
+Je sais qu’un [Em7]jour tout genou [C]fléchira devant [D]Toi [Am]Yeah[D]
+
+2 - [G]Tu nous as donné Ta vie, [Bm7]Toi le Dieu de gloire, Que Tu es [Em]digne, que Tu es [C7M]digne
+[G]Il n’y a pas d’ami comme Toi, [Bm7]Conseiller fidèle, Que Tu es [Em]digne, que Tu es [C7M]digne
+[G]Tous les jours je redirai [Bm7]combien Tu es bon, Et Tu es [Em]digne, que Tu es [C7M]digne, Oui Tu es [Am]digne [D]
+
+Car le [C]ciel est Ton trône, et la [Bm7]terre Ton marchepied, Oui le [C]ciel est Ton trône Et Tu [D]règnes à jamais...'
+  FROM songs WHERE title = 'Tu es digne' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '
+G			  Em    G				Em
+Rien est impossible à mon Dieu, rien est trop grand pour être surmonté
+G (C)		          Em (D)                      D (C)              C (D)
+Par la foi je veux le proclamer, Il est celui qui délivre, qui sauve et restaure
+	      	         
+<b>
+        G      Em        C		D
+En Dieu est ma foi, en Dieu est ma confiance
+G	   Em   C         D
+Sur lui repose, mon assurance </b>
+

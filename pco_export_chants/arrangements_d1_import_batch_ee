@@ -1,0 +1,25 @@
+Un chant d''amour sans fin 
+ 
+Qui te redis: Je t''aime ! 
+Adonaï, Adonaï'
+  FROM songs WHERE title = 'Je veux devenir louange' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, 'C              Dm/C        C
+Notre Père qui es aux cieux,
+C                  Dm/C      C
+Que ton nom soit sanctifié,
+F     C             G   Am
+Que ton règne vienne,
+F     C          G        Am
+Que ta volonté soit faite
+F        G                       C
+Sur la Terre comme au ciel.
+
+
+C         Dm/C         C
+Donne-nous aujourd''hui
+C       Dm/C       C
+Notre pain de ce jour.
+F   C                 G      Am
+Pardonne-nous nos offenses
+F          C                G          Am

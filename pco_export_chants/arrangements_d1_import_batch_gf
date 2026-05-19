@@ -1,0 +1,25 @@
+  FROM songs WHERE title = 'Saint-Esprit - Victoire Vie' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Default Arrangement', '', NULL, '[Intro]
+G G4 G    G G4 G
+ 
+C        D        G           C
+Me voici humblement devant toi
+C        D                G/B              C
+Accueillant ta grâce qui se déverse en moi
+C        D          G          C
+Car voici ce que j''ai à t''offrir
+C       D         G/B             C
+Un esprit brisé une terre délaissée
+C        D
+Un soupir
+ 
+         G             D             Em
+Tu seras la louange au cœur de mes épreuves
+         C            G              D
+Tu seras la réponse à tout ce que je vis
+         G                D            Em
+Tu seras la main qui viendra pour me relever
+         Am              D           G   G4   G G2 G
+Tu seras ma vie, mon chemin, ma vérité
+ 

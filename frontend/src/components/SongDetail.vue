@@ -1,19 +1,19 @@
 <template>
   <div class="song-detail" v-if="song">
     <div class="header">
-      <button @click="goBack" class="back-btn">← Retour</button>
+      <button @click="goBack" class="back-btn">{{t('song.back')}}</button>
       <h1>{{ song.title }}</h1>
       <p v-if="song.author" class="author">{{ song.author }}</p>
-      <p v-if="song.ccli_number" class="ccli">CCLI: {{ song.ccli_number }}</p>
+      <p v-if="song.ccli_number" class="ccli">{{t('song.ccli')}} {{ song.ccli_number }}</p>
     </div>
 
     <div class="song-info">
-      <p v-if="song.themes"><strong>Thèmes:</strong> {{ song.themes }}</p>
-      <p v-if="song.notes"><strong>Notes:</strong> {{ song.notes }}</p>
+      <p v-if="song.themes"><strong>{{t('song.themes')}}</strong> {{ song.themes }}</p>
+      <p v-if="song.notes"><strong>{{t('song.notes')}}</strong> {{ song.notes }}</p>
     </div>
 
     <div class="arrangements" v-if="song.arrangements && song.arrangements.length > 0">
-      <h3>Arrangements</h3>
+      <h3>{{t('song.arrangements')}}</h3>
       <div class="arrangement-controls">
         <select v-model="selectedArrangementId" @change="loadArrangement">
           <option v-for="arr in song.arrangements" :key="arr.id" :value="arr.id">
@@ -21,23 +21,26 @@
           </option>
         </select>
         <button @click="showEditor = true" class="edit-chart-btn">
-          ✏️ Éditer
+          ✏️ {{t('song.edit')}}
+        </button>
+        <button @click="exportPDF" class="pdf-btn" :disabled="!currentArrangement?.chord_chart">
+          📄 {{ exportingPdf ? t('pdfExport.exporting') : t('pdfExport.export') }}
         </button>
         <button v-if="!isOffline" @click="downloadForOffline" class="offline-btn">
-          📥 {{ downloading ? '...' : 'Offline' }}
+          📥 {{ downloading ? t('song.downloading') : t('song.offline') }}
         </button>
-        <span v-if="isOffline" class="offline-indicator">✓ Disponible offline</span>
+        <span v-if="isOffline" class="offline-indicator">{{t('song.available_offline')}}</span>
       </div>
     </div>
     <div v-else-if="song.arrangements && song.arrangements.length === 0" class="no-arrangements">
-      Aucun arrangement disponible pour ce chant.
+      {{t('song.no_arrangement')}}
     </div>
 
     <div class="transpose-controls" v-if="currentArrangement">
-      <h3>Transposition</h3>
+      <h3>{{t('song.transposition')}}</h3>
       <div class="controls">
         <label>
-          Tonalité originale: 
+          {{t('song.transpose.original')}} 
           <select v-model="originalKey" @change="onOriginalKeyChange">
             <option v-for="key in keyOptions" :key="key" :value="key">
               {{ key }}
@@ -45,25 +48,25 @@
           </select>
         </label>
         <label>
-          Transposer vers: 
+          {{t('song.transpose.target')}} 
           <select v-model="targetKey" @change="transpose">
             <option v-for="key in keyOptions" :key="key" :value="key">
               {{ key }}
             </option>
           </select>
         </label>
-        <span class="semitones">Demi-tons: {{ semitones }}</span>
+        <span class="semitones">{{t('song.transpose.semitones')}} {{ semitones }}</span>
       </div>
       <div class="actions">
-        <button @click="transposeUp">+ Demi-ton</button>
-        <button @click="transposeDown">- Demi-ton</button>
-        <button @click="resetTransposition">Réinitialiser</button>
+        <button @click="transposeUp">{{t('song.transpose.up')}}</button>
+        <button @click="transposeDown">{{t('song.transpose.down')}}</button>
+        <button @click="resetTransposition">{{t('song.transpose.reset')}}</button>
       </div>
     </div>
 
     <div v-if="!displayedChart && currentArrangement" class="no-chart-message p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-center">
-      ⚠️ Aucune grille d'accords disponible pour cet arrangement ({{ currentArrangement.name }}).
-      <br><span class="text-sm">Le champ "chord_chart" est vide dans la base de données.</span>
+      ⚠️ {{t('song.no_chart')}} ({{ currentArrangement.name }}).
+      <br><span class="text-sm">{{t('song.no_chart_explain')}}</span>
     </div>
 
     <div class="chord-chart" v-else-if="displayedChart">
@@ -80,25 +83,25 @@
     </div>
 
     <div v-if="currentArrangement" class="media-section">
-      <h3>Médias <span v-if="mediaItems.length" class="count">({{ mediaItems.length }})</span></h3>
+      <h3>{{t('song.media')}} <span v-if="mediaItems.length" class="count">({{ mediaItems.length }})</span></h3>
       <div class="media-list">
         <div v-if="!mediaItems.length" class="no-media">
-          Aucun média attaché.
+          {{t('song.no_media')}}
         </div>
         <div v-for="media in mediaItems" :key="media.id" class="media-item">
           <span class="media-icon">{{ getMediaIcon(media.file_type) }}</span>
           <a :href="media.file_url" target="_blank" class="media-link">{{ media.filename }}</a>
-          <span class="media-type-badge">{{ media.file_type || 'fichier' }}</span>
-          <button @click="deleteMedia(media.id)" class="media-delete-btn" title="Supprimer">✕</button>
+          <span class="media-type-badge">{{ media.file_type || t('song.file') }}</span>
+          <button @click="deleteMedia(media.id)" class="media-delete-btn" :title="t('song.delete_media')">✕</button>
         </div>
       </div>
       <button @click="showMediaUpload = true" class="add-media-btn">
-        + Ajouter un média
+        {{t('song.add_media')}}
       </button>
     </div>
 
     <div class="loading" v-if="loading">
-      Chargement...
+      {{t('song.loading')}}
     </div>
     <div class="error" v-if="error">
       {{ error }}
@@ -130,6 +133,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n'
 import { transposeChordChart, getKeyOptions, getSemitonesFromC } from '../utils/transpose';
 import { saveSongOffline, isSongOffline } from '../utils/offlineDb';
 import { api } from '../utils/api';
@@ -142,6 +146,7 @@ import ArrangementAnnotations from './ArrangementAnnotations.vue';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const song = ref<any>(null);
 const loading = ref(true);
@@ -157,6 +162,7 @@ const isOffline = ref(false);
 const downloading = ref(false);
 const showMediaUpload = ref(false);
 const mediaItems = ref<any[]>([]);
+const exportingPdf = ref(false);
 
 function getMediaIcon(type: string): string {
   const icons: Record<string, string> = { audio: '🎵', video: '🎬', image: '🖼️', pdf: '📄' };
@@ -177,13 +183,78 @@ function onMediaUploaded(media: { url: string; type: string; title: string }) {
   showMediaUpload.value = false;
 }
 
+async function exportPDF() {
+  if (!currentArrangement.value?.chord_chart) return;
+  exportingPdf.value = true;
+  try {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const chart = currentArrangement.value.chord_chart;
+    const lines = chart.split('\n');
+    const title = song.value?.title || 'Chant';
+    const arrName = currentArrangement.value.name || '';
+    const keyLabel = currentArrangement.value.key || '';
+
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(16);
+    doc.text(title, 10, 15);
+    doc.setFontSize(10);
+    doc.setFont('courier', 'normal');
+    doc.text(`${arrName}${keyLabel ? ' — Ton: ' + keyLabel : ''}`, 10, 22);
+
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(9);
+    let y = 30;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 10;
+
+    for (const line of lines) {
+      if (y > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+      const text = line.replace(/\[.*?\]/g, (match: string) => {
+        doc.setFont('courier', 'bold');
+        const result = match;
+        doc.setFont('courier', 'normal');
+        return result;
+      });
+      const isDirective = line.startsWith('[') || line.startsWith('{');
+      if (isDirective) {
+        doc.setFont('courier', 'bold');
+        doc.setTextColor(100, 100, 100);
+        doc.text(text.slice(0, 80), margin, y);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('courier', 'normal');
+      } else {
+        const hasChords = /\[.*?\]/.test(line);
+        if (hasChords) {
+          doc.setFont('courier', 'bold');
+          doc.text(text.slice(0, 80), margin, y);
+          doc.setFont('courier', 'normal');
+        } else {
+          doc.text(text.slice(0, 80), margin, y);
+        }
+      }
+      y += 5;
+    }
+
+    doc.save(`${title.replace(/[^a-zA-Z0-9]/g, '_')}_${arrName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+    showToast(t('pdfExport.exported'));
+  } catch (e: any) {
+    showToast(`${t('pdfExport.error')}: ${e.message}`, 'error');
+  } finally {
+    exportingPdf.value = false;
+  }
+}
+
 async function deleteMedia(id: number) {
-  if (!await confirmDialog('Supprimer ce média ?')) return;
+  if (!await confirmDialog(t('song.confirm_media_delete'))) return;
   try {
     await api.deleteAttachment(id);
     mediaItems.value = mediaItems.value.filter((m) => m.id !== id);
   } catch (e: any) {
-    showToast('Erreur: ' + e.message, 'error')
+    showToast(t('song.general_error') + e.message, 'error')
   }
 }
 
@@ -200,7 +271,7 @@ async function downloadForOffline() {
     await saveSongOffline(song.value);
     isOffline.value = true;
   } catch (e) {
-    showToast('Erreur lors du téléchargement: ' + (e as Error).message, 'error')
+    showToast(t('song.download_error') + (e as Error).message, 'error')
   } finally {
     downloading.value = false;
   }
@@ -255,7 +326,7 @@ const loadSong = async () => {
   try {
     loading.value = true;
     const id = Number(route.params.id);
-    if (isNaN(id)) throw new Error('ID invalide');
+    if (isNaN(id)) throw new Error(t('app.invalid_id'));
     song.value = await api.getSong(id);
 
     // Sélectionner le premier arrangement par défaut
@@ -498,6 +569,23 @@ h1 {
 }
 .edit-chart-btn:hover {
   background: #2980b9;
+}
+.pdf-btn {
+  padding: 8px 16px;
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.pdf-btn:hover {
+  background: #7c3aed;
+}
+.pdf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .modal-overlay {
   position: fixed;

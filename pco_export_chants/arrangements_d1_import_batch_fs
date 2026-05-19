@@ -1,0 +1,25 @@
+    Ab            Bb
+2. Il a montré au monde 
+   Eb              Cm
+Sa puissance éternelle, 
+D                      G7
+Son savoir et son pouvoir. 
+Ab                Bb     G7/B         Cm
+Tout ce qu’il a fait est merveilleux, 
+Eb       D         G
+Il n’a pas changé ! 
+
+   Ab                Bb
+3. La louange sur nos lèvres 
+   Eb                Cm
+Et l’épée dans nos mains, 
+D                         G7
+Poussons des cris de triomphe. 
+Ab             Bb    G7/B       Cm
+Acclamons le roi et proclamons : 
+Eb       D         G
+Il est le Dieu fort ! '
+  FROM songs WHERE title = 'Célébrez l''Eternel' LIMIT 1;
+INSERT OR REPLACE INTO arrangements (song_id, name, key, tempo, chord_chart)
+  SELECT id, 'Acc en F', '', NULL, 'Refrain
+                             
