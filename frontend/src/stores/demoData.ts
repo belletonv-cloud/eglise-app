@@ -780,3 +780,40 @@ export function getInteractivePlans() {
 export function getInteractiveStats() {
   return interactiveStats
 }
+
+export const demoAudioSegments = {
+  "segments": [
+    {"segment_index": 0, "start_seconds": 0.0, "end_seconds": 6.0, "segment_type": "introduction", "title": null, "text": "Allez, Louis, on est heureux de se retrouver ensemble.", "confidence": 0.8},
+    {"segment_index": 1, "start_seconds": 6.0, "end_seconds": 9.0, "segment_type": "introduction", "title": null, "text": "Approchez-vous si vous êtes un petit peu trop au fond.", "confidence": 0.7},
+    {"segment_index": 2, "start_seconds": 9.0, "end_seconds": 12.0, "segment_type": "introduction", "title": null, "text": "Approchez-vous, les d'autres personnes vont arriver pendant le culte.", "confidence": 0.7},
+    {"segment_index": 3, "start_seconds": 12.0, "end_seconds": 16.0, "segment_type": "introduction", "title": null, "text": "Comme on n'est pas nombreux, on va se recérer un petit peu.", "confidence": 0.8},
+    {"segment_index": 4, "start_seconds": 20.0, "end_seconds": 23.0, "segment_type": "introduction", "title": null, "text": "Merci, Samantha.", "confidence": 0.7},
+    {"segment_index": 5, "start_seconds": 23.0, "end_seconds": 27.0, "segment_type": "introduction", "title": null, "text": "Allez, Louis, est-ce que vous êtes en forme pour l'oeil notre Seigneur ce matin ?", "confidence": 0.7},
+    {"segment_index": 6, "start_seconds": 27.0, "end_seconds": 29.0, "segment_type": "transition", "title": null, "text": "Est-ce que tu peux te lever ?", "confidence": 0.5},
+    {"segment_index": 7, "start_seconds": 29.0, "end_seconds": 30.0, "segment_type": "transition", "title": null, "text": "Est-ce qu'on peut se lever ?", "confidence": 0.5},
+    {"segment_index": 8, "start_seconds": 30.0, "end_seconds": 33.0, "segment_type": "transition", "title": null, "text": "Je vais simplement vous lire un psem, quelques lignes du psem 66.", "confidence": 0.5},
+    {"segment_index": 9, "start_seconds": 33.0, "end_seconds": 35.0, "segment_type": "louange", "title": "L'ancien clameur vert Dieu !", "text": "L'ancien clameur vert Dieu !", "confidence": 0.75},
+    {"segment_index": 10, "start_seconds": 35.0, "end_seconds": 37.0, "segment_type": "transition", "title": null, "text": "Allez, Louis, là !", "confidence": 0.5},
+    {"segment_index": 11, "start_seconds": 37.0, "end_seconds": 41.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "Habitant de toute la terre, psa le moudier à la gloire de son nom,", "confidence": 0.95},
+    {"segment_index": 12, "start_seconds": 41.0, "end_seconds": 43.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "rendez-les gloire par la louange.", "confidence": 0.75},
+    {"segment_index": 13, "start_seconds": 43.0, "end_seconds": 46.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "Dites à Dieu que tes actes sont redoutables,", "confidence": 0.9},
+    {"segment_index": 14, "start_seconds": 46.0, "end_seconds": 49.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "à cause de la grandeur de tes forces, de ta force,", "confidence": 0.85},
+    {"segment_index": 15, "start_seconds": 49.0, "end_seconds": 51.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "tes ennemis, de flattes.", "confidence": 0.9},
+    {"segment_index": 16, "start_seconds": 51.0, "end_seconds": 53.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "Toutes la terre se prostère devant toi,", "confidence": 0.9},
+    {"segment_index": 17, "start_seconds": 53.0, "end_seconds": 55.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "et psa le moudier en ton honneur,", "confidence": 0.85},
+    {"segment_index": 18, "start_seconds": 55.0, "end_seconds": 57.0, "segment_type": "louange", "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "text": "de ton nom.", "confidence": 0.75},
+    {"segment_index": 19, "start_seconds": 57.0, "end_seconds": 59.0, "segment_type": "transition", "title": null, "text": "Allez, Louis, à ton temps d'artemoisin,", "confidence": 0.5},
+    {"segment_index": 20, "start_seconds": 59.0, "end_seconds": 63.0, "segment_type": "louange", "title": "Rend grâce", "text": "et dis, rend grâce à ton Dieu ce matin, car il est bon.", "confidence": 0.95},
+    {"segment_index": 21, "start_seconds": 63.0, "end_seconds": 67.0, "segment_type": "louange", "title": "Rend grâce", "text": "Rend grâce à ton Dieu, car il est bon.", "confidence": 0.95},
+    {"segment_index": 22, "start_seconds": 67.0, "end_seconds": 69.0, "segment_type": "transition", "title": null, "text": "Il est bon.", "confidence": 0.5},
+    {"segment_index": 23, "start_seconds": 69.0, "end_seconds": 79.0, "segment_type": "transition", "title": null, "text": "...", "confidence": 0.3},
+    {"segment_index": 24, "start_seconds": 79.0, "end_seconds": 81.0, "segment_type": "transition", "title": null, "text": "...", "confidence": 0.3},
+    {"segment_index": 25, "start_seconds": 81.0, "end_seconds": 96.0, "segment_type": "transition", "title": null, "text": "...", "confidence": 0.3},
+    {"segment_index": 26, "start_seconds": 96.0, "end_seconds": 120.0, "segment_type": "transition", "title": null, "text": "...", "confidence": 0.3}
+  ],
+  "songs": [
+    {"song_index": 0, "title": "L'ancien clameur vert Dieu !", "start_seconds": 33.0, "end_seconds": 35.0},
+    {"song_index": 1, "title": "Habitant de toute la terre, psa le moudier à la gloire de...", "start_seconds": 37.0, "end_seconds": 57.0},
+    {"song_index": 2, "title": "Rend grâce", "start_seconds": 59.0, "end_seconds": 67.0}
+  ]
+}

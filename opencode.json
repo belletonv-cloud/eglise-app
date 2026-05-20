@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+
+  "command": {
+    "dev": {
+      "template": "Démarre l'environnement de développement complet (frontend + backend). Ouvre deux terminaux : un pour le frontend (cd frontend && npm run dev) et un pour le backend (wrangler dev).",
+      "description": "Démarre frontend + backend"
+    },
+    "dev:frontend": {
+      "template": "Démarre le serveur de développement frontend Vue 3/Vite",
+      "description": "Frontend dev server"
+    },
+    "dev:backend": {
+      "template": "Démarre le serveur de développement backend Cloudflare Worker",
+      "description": "Backend dev server"
+    },
+    "build": {
+      "template": "Build le frontend pour production (type-check + build)",
+      "description": "Build frontend production"
+    },
+    "test": {
+      "template": "Lance les tests backend Vitest",
+      "description": "Tests backend"
+    },
+    "test:frontend": {
+      "template": "Lance les tests frontend Vitest",
+      "description": "Tests frontend"
+    },
+    "test:e2e": {
+      "template": "Lance les tests E2E Playwright du frontend",
+      "description": "Tests E2E Playwright"
+    },
+    "typecheck": {
+      "template": "Lance le type-checking Vue/TypeScript (vue-tsc --build) dans frontend/",
+      "description": "Type-check Vue/TypeScript"
+    },
+    "lint": {
+      "template": "Linte le code frontend (disponible si ESLint configuré)",
+      "description": "Lint frontend"
+    },
+    "deploy": {
+      "template": "Déploie le worker Cloudflare avec wrangler deploy",
+      "description": "Déploiement Cloudflare Worker"
+    },
+    "migrate": {
+      "template": "Applique les migrations D1 via wrangler",
+      "description": "Migration D1"
+    }
+  },
+
+  "agent": {
+    "api-dev": {
+      "description": "Expert du backend API Cloudflare Workers + D1",
+      "mode": "subagent"
+    },
+    "frontend-dev": {
+      "description": "Expert du frontend Vue 3/TailwindCSS/Vite",
+      "mode": "subagent"
+    }
+  },
+
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": true
+    }
+  }
+}

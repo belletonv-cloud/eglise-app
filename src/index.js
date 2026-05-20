@@ -62,6 +62,20 @@ async function getBody(request) {
   }
 }
 
+function validate(rules, data) {
+  for (const [field, rule] of Object.entries(rules)) {
+    const val = data[field];
+    if (rule.required) {
+      if (val === undefined || val === null || val === '') return `${field} est requis`;
+    }
+    if (val !== undefined && val !== null && val !== '') {
+      if (rule.maxLength && String(val).length > rule.maxLength) return `${field} ne doit pas dépasser ${rule.maxLength} caractères`;
+      if (rule.type === 'int' && !Number.isInteger(Number(val))) return `${field} doit être un nombre entier`;
+    }
+  }
+  return null;
+}
+
 // Authorization helpers (lightweight)
 const ROLE_PERMISSIONS = {
   admin: ['*'],
@@ -228,7 +242,7 @@ async function signOneClickToken(payloadJson, secret) {
       return btoa(payloadJson) + '.' + b64;
     } else {
       const hmac = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
-      return Buffer.from(payloadJson).toString('base64') + '.' + hmac;
+      return btoa(payloadJson) + '.' + hmac;
     }
 }
 
@@ -270,7 +284,7 @@ function generateSecureToken(bytes = 32) {
 async function verifyOneClickToken(token, secret) {
   try {
     const [b64payload, b64sig] = token.split('.')
-    const payloadJson = Buffer.from(b64payload, 'base64').toString('utf8')
+    const payloadJson = atob(b64payload)
     if (crypto.subtle) {
       const enc = new TextEncoder();
       const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
@@ -283,6 +297,40 @@ async function verifyOneClickToken(token, secret) {
     if (expected !== b64sig) return null
     return JSON.parse(payloadJson)
   } catch (e) { return null }
+}
+
+async function callAudioSplitter(env, file, planId) {
+  const url = env.AUDIO_SPLITTER_URL || 'http://localhost:8765';
+  const buffer = typeof file.arrayBuffer === 'function'
+    ? await file.arrayBuffer()
+    : file;
+  const boundary = '----FormBoundary' + Math.random().toString(36).slice(2);
+  const encoder = new TextEncoder();
+  const parts = [];
+  parts.push(encoder.encode(
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${file.name || 'audio.mp3'}"\r\nContent-Type: audio/mpeg\r\n\r\n`
+  ));
+  parts.push(buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer);
+  parts.push(encoder.encode(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\nfr\r\n`));
+  parts.push(encoder.encode(`--${boundary}\r\nContent-Disposition: form-data; name="min_silence"\r\n\r\n5.0\r\n`));
+  parts.push(encoder.encode(`--${boundary}--\r\n`));
+  const totalLen = parts.reduce((s, p) => s + p.byteLength, 0);
+  const body = new Uint8Array(totalLen);
+  let offset = 0;
+  for (const p of parts) {
+    body.set(p, offset);
+    offset += p.byteLength;
+  }
+  const res = await fetch(`${url}/api/process`, {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+    body,
+  });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => 'Erreur audio-splitter');
+    throw new Error(`Audio splitter error: ${errText}`);
+  }
+  return await res.json();
 }
 
 const route = (method, path, handler) => {
@@ -2315,24 +2363,53 @@ const routes3 = [
 
     if (!file) return badRequest('file required');
 
-    let kdriveFile;
-    try {
-      kdriveFile = await kdriveUpload(env, file, `sermon-${planId}-${file.name}`);
-    } catch (e) {
-      return json({ error: e.message }, 500);
+    let fileUrl;
+    if (env.INFOMANIAK_TOKEN && env.INFOMANIAK_TOKEN !== 'changeme') {
+      try {
+        const kdriveFile = await kdriveUpload(env, file, `sermon-${planId}-${file.name}`);
+        fileUrl = `kdrive:${kdriveFile.id}`;
+      } catch (e) {
+        return json({ error: e.message }, 500);
+      }
+    } else {
+      fileUrl = `local:${file.name}`;
     }
 
-    const fileUrl = `kdrive:${kdriveFile.id}`;
-
     // Store in attachments table
-    await env.DB.prepare('INSERT INTO attachments (entity_type, entity_id, filename, file_url, file_type) VALUES (?, ?, ?, ?, ?)')
-      .bind('plan', planId, file.name, fileUrl, 'audio').run();
+    if (fileUrl.startsWith('kdrive:')) {
+      await env.DB.prepare('INSERT INTO attachments (entity_type, entity_id, filename, file_url, file_type) VALUES (?, ?, ?, ?, ?)')
+        .bind('plan', planId, file.name, fileUrl, 'audio').run();
+    }
 
     // Also set audio_url on plans for convenience
     await env.DB.prepare('UPDATE plans SET audio_url = ?, audio_title = ? WHERE id = ?')
       .bind(fileUrl, title, planId).run();
 
-    return json({ success: true, file_url: fileUrl, title }, 201);
+    let segmentsResult = null;
+    try {
+      const splitterResult = await callAudioSplitter(env, file, planId);
+      if (splitterResult && splitterResult.segments) {
+        const s = splitterResult.segments;
+        const songs = splitterResult.summary?.chants || [];
+        await env.DB.prepare('DELETE FROM plan_audio_segments WHERE plan_id = ?').bind(planId).run();
+        await env.DB.prepare('DELETE FROM plan_audio_songs WHERE plan_id = ?').bind(planId).run();
+        for (let i = 0; i < s.length; i++) {
+          const seg = s[i];
+          await env.DB.prepare('INSERT INTO plan_audio_segments (plan_id, segment_index, start_seconds, end_seconds, segment_type, title, text, confidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+            .bind(planId, i, seg.start, seg.end, seg.type, seg.title || null, seg.text || null, seg.confidence || null).run();
+        }
+        for (let i = 0; i < songs.length; i++) {
+          const c = songs[i];
+          await env.DB.prepare('INSERT INTO plan_audio_songs (plan_id, song_index, title, start_seconds, end_seconds) VALUES (?, ?, ?, ?, ?)')
+            .bind(planId, i, c.title || null, c.start, c.end).run();
+        }
+        segmentsResult = { segments: s.length, songs: songs.length };
+      }
+    } catch (e) {
+      segmentsResult = { error: e.message };
+    }
+
+    return json({ success: true, file_url: fileUrl, title, audio_splitter: segmentsResult }, 201);
   }),
 
   route('GET', '/api/plans/:id/audio', async (request, env, params) => {
@@ -2371,6 +2448,45 @@ const routes3 = [
       await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(a.id).run();
     }
     await env.DB.prepare('UPDATE plans SET audio_url = NULL, audio_title = NULL WHERE id = ?').bind(planId).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
+  // AUDIO SEGMENTS (audio-splitter integration)
+  // ========================================
+  route('GET', '/api/plans/:id/audio-segments', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: 'Not authenticated' }, 401);
+    const segments = await env.DB.prepare('SELECT * FROM plan_audio_segments WHERE plan_id = ? ORDER BY segment_index').bind(planId).all();
+    const songs = await env.DB.prepare('SELECT * FROM plan_audio_songs WHERE plan_id = ? ORDER BY song_index').bind(planId).all();
+    return json({ segments: segments.results, songs: songs.results });
+  }),
+
+  route('POST', '/api/plans/:id/audio-segments', async (request, env, params) => {
+    const planId = requireId(params);
+    if (!planId) return badRequest('ID plan invalide');
+    const body = await getBody(request).catch(() => null);
+    if (!body || !body.segments) return badRequest('segments requis');
+    const token = request.headers.get('x-audio-token');
+    if (token !== env.AUDIO_SPLITTER_TOKEN) return json({ error: 'Invalid token' }, 401);
+    const plan = await env.DB.prepare('SELECT id FROM plans WHERE id = ?').bind(planId).first();
+    if (!plan) return notFound('Plan non trouvé');
+    await env.DB.prepare('DELETE FROM plan_audio_segments WHERE plan_id = ?').bind(planId).run();
+    await env.DB.prepare('DELETE FROM plan_audio_songs WHERE plan_id = ?').bind(planId).run();
+    for (let i = 0; i < body.segments.length; i++) {
+      const s = body.segments[i];
+      await env.DB.prepare('INSERT INTO plan_audio_segments (plan_id, segment_index, start_seconds, end_seconds, segment_type, title, text, confidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(planId, i, s.start, s.end, s.type, s.title || null, s.text || null, s.confidence || null).run();
+    }
+    if (body.songs) {
+      for (let i = 0; i < body.songs.length; i++) {
+        const s = body.songs[i];
+        await env.DB.prepare('INSERT INTO plan_audio_songs (plan_id, song_index, title, start_seconds, end_seconds) VALUES (?, ?, ?, ?, ?)')
+          .bind(planId, i, s.title || null, s.start, s.end).run();
+      }
+    }
     return json({ success: true });
   }),
 
@@ -2880,7 +2996,7 @@ const routes3 = [
     const token_secret = env.PCO_TOKEN_SECRET;
     if (!token_id || !token_secret) return json({ error: 'PCO credentials not configured' }, 500);
 
-    const auth = Buffer.from(`${token_id}:${token_secret}`).toString('base64');
+    const auth = btoa(`${token_id}:${token_secret}`);
     const PCO_API = 'https://api.planningcenteronline.com';
 
     const results = { services: 0, people: 0, songs: 0, arrangements: 0, errors: [] };

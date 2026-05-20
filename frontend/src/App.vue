@@ -1,13 +1,14 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
     <Login v-if="!isAuthenticated && !isInteractiveView" />
-    <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
+  <div v-if="isInteractiveView || isAuthenticated" class="flex h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen bg-gray-100 dark:bg-gray-900">
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
         :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div>
             <h1 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ $t('app.title') }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🎸 Essai sans compte' : (user?.email || '') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🕊️ Démo Cieux Ouverts' : (user?.email || '') }}</p>
           </div>
           <button @click="mobileSidebarOpen = false" class="lg:hidden p-1 text-gray-500 hover:text-gray-700 cursor-pointer">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -24,7 +25,7 @@
             <span>📊</span> {{$t('menu.dashboard')}}
           </router-link>
           <router-link to="/interactive" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>🚀</span> {{$t('menu.demo_tour')}}
+            <span>🚀</span> {{ $t("menu.demo_tour") }}
           </router-link>
           <router-link to="/calendar" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📅</span> {{$t('menu.calendar')}}

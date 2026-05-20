@@ -28,6 +28,4 @@ CREATE TABLE IF NOT EXISTS plan_checklists (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
--- Add audio columns to plans if not exist
-ALTER TABLE plans ADD COLUMN audio_url TEXT;
-ALTER TABLE plans ADD COLUMN audio_title TEXT;
+

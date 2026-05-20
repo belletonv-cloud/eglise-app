@@ -2,25 +2,23 @@ import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, Sche
 import { user } from '../stores/auth'
 import { isInteractiveView, interactiveUser } from '../stores/demo'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:8787/api' : 'https://eglise-app.belletonv.workers.dev/api')
 
 export function getApiBase() {
   return API_BASE
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // In demo mode, always hit the real API — the backend auto-creates users via x-demo-email
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
     const activeUser = isInteractiveView.value ? interactiveUser.value : user.value
     if (isInteractiveView.value) {
-      // Demo mode: use x-demo-email header (server will create member on-the-fly)
       headers['x-demo-email'] = activeUser.email
     } else if (activeUser && activeUser.email) {
       headers['x-user-email'] = activeUser.email
     }
-    // Dev auth secret for local development (bypasses Firebase)
     if (import.meta.env.VITE_DEV_AUTH_SECRET) headers['X-Auth-Secret'] = import.meta.env.VITE_DEV_AUTH_SECRET
-    // Try to attach Firebase ID token for robust server-side auth
     if (activeUser && typeof activeUser.getIdToken === 'function') {
       const token = await activeUser.getIdToken(true).catch(() => null)
       if (token) headers['Authorization'] = `Bearer ${token}`
@@ -288,6 +286,8 @@ export const api = {
     return res.json()
   },
   deletePlanAudio: (planId: number) => request<{ success: boolean }>(`/plans/${planId}/audio`, { method: 'DELETE' }),
+
+  getAudioSegments: (planId: number) => request<{ segments: any[]; songs: any[] }>(`/plans/${planId}/audio-segments`),
 
   // Replacements
   getReplacements: (planId: number, scheduledId: number) =>

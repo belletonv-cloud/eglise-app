@@ -50,6 +50,8 @@ CREATE TABLE plans (
     status TEXT DEFAULT 'planned', -- planned, completed, cancelled
     reminder_j2_sent INTEGER DEFAULT 0,
     reminder_j1_sent INTEGER DEFAULT 0,
+    audio_url TEXT,
+    audio_title TEXT,
     created_at TEXT DEFAULT (datetime('now'))
 );
 

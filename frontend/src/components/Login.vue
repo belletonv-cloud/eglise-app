@@ -8,7 +8,7 @@
       <button @click="handleGoogleLogin" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer">{{ $t('login.google_button') }}</button>
       <div class="divider my-4 text-center text-gray-400 text-sm">ou</div>
       <button @click="enterDemo" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 cursor-pointer font-medium">
-        🎸 Essayer sans compte
+        🕊️ Démo connectée
       </button>
       <div class="divider my-4 text-center text-gray-400 text-sm">ou</div>
       <button @click="goToTour" class="px-4 py-2 bg-transparent border-2 border-purple-500 text-purple-400 rounded-lg hover:bg-purple-500/10 cursor-pointer font-medium">
