@@ -6,10 +6,6 @@
       <input v-model="password" type="password" :placeholder="$t('login.password')" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" />
       <button @click="handleEmailLogin" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">{{ $t('login.email_button') }}</button>
       <button @click="handleGoogleLogin" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer">{{ $t('login.google_button') }}</button>
-      <div class="divider my-4 text-center text-gray-400 text-sm">ou</div>
-      <button @click="enterDemo" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 cursor-pointer font-medium">
-        🕊️ Démo connectée
-      </button>
 
       <p v-if="error" class="error text-red-500 text-sm text-center">{{ error }}</p>
     </div>
@@ -20,7 +16,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { loginWithEmail, loginWithGoogle } from '../stores/auth';
-import { enableInteractiveView } from '../stores/demo';
 
 const router = useRouter();
 const email = ref('');
@@ -41,11 +36,6 @@ const handleGoogleLogin = async () => {
   } catch (err: any) {
     error.value = err.message;
   }
-};
-
-const enterDemo = () => {
-  enableInteractiveView();
-  router.push('/interactive');
 };
 
 </script>
