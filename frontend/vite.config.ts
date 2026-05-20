@@ -17,6 +17,8 @@ export default defineConfig({
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: ['**/logo-hero.png', '**/logo-c.png', '**/logo.png'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigationPreload: true,
         skipWaiting: true,
         runtimeCaching: [
