@@ -10,10 +10,7 @@
       <button @click="enterDemo" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 cursor-pointer font-medium">
         🕊️ Démo connectée
       </button>
-      <div class="divider my-4 text-center text-gray-400 text-sm">ou</div>
-      <button @click="goToTour" class="px-4 py-2 bg-transparent border-2 border-purple-500 text-purple-400 rounded-lg hover:bg-purple-500/10 cursor-pointer font-medium">
-        🎯 Découvrir les fonctionnalités
-      </button>
+
       <p v-if="error" class="error text-red-500 text-sm text-center">{{ error }}</p>
     </div>
   </div>
@@ -51,9 +48,6 @@ const enterDemo = () => {
   router.push('/interactive');
 };
 
-const goToTour = () => {
-  router.push('/demo-tour');
-};
 </script>
 
 <style scoped>

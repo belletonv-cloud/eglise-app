@@ -6,13 +6,22 @@
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
         :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <div>
+          <div class="min-w-0">
             <h1 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ $t('app.title') }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🕊️ Démo Cieux Ouverts' : (user?.email || '') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🕊️ Démo' : (user?.email || '') }}</p>
           </div>
-          <button @click="mobileSidebarOpen = false" class="lg:hidden p-1 text-gray-500 hover:text-gray-700 cursor-pointer">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
+          <div class="flex items-center gap-1 ml-2 shrink-0">
+            <button @click="toggleDarkMode" class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="isDark ? $t('app.light_mode') : $t('app.dark_mode')">
+              <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </button>
+            <button @click="toggleLang" class="p-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="lang === 'fr' ? 'English' : 'Français'">
+              {{ lang === 'fr' ? 'EN' : 'FR' }}
+            </button>
+            <button @click="mobileSidebarOpen = false" class="lg:hidden p-1 text-gray-500 hover:text-gray-700 cursor-pointer">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
         </div>
         <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
           <div class="px-1 pb-2">
@@ -88,17 +97,12 @@
                <span>🎵</span> {{$t('menu.music_stand')}}
              </router-link>
         </nav>
-        <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
-          <button @click="toggleDarkMode" class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">
-            {{ isDark ? $t('app.light_mode') : $t('app.dark_mode') }}
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
+          <button v-if="isInteractiveView" @click="disableInteractiveView" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer transition-colors">
+            <span>🚪</span> Quitter la démo
           </button>
-          <button @click="toggleLang" class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">
-            {{ lang === 'fr' ? $t('app.lang_en') : $t('app.lang_fr') }}
-          </button>
-          <button v-if="isInteractiveView" @click="disableInteractiveView" class="w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer">
-            Quitter l'accueil interactif
-          </button>
-          <button v-else @click="logout" class="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer">
+          <button v-else @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
           </button>
         </div>

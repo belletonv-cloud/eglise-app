@@ -20,7 +20,7 @@ Déployée sur Cloudflare Workers + Pages.
 - **Production** : https://eglise-app.pages.dev
 - **API Worker** : https://eglise-app.belletonv.workers.dev
 - **Site public** : https://eglise-cieux-ouverts.pages.dev
-- **GitHub** : https://github.com/vicforafrique/eglise-app
+- **GitHub** : https://github.com/belletonv-cloud/eglise-app
 
 ## Déploiement (CI/CD)
 
