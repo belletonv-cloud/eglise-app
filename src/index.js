@@ -2387,11 +2387,13 @@ const routes3 = [
       .bind(fileUrl, title, planId).run();
 
     let segmentsResult = null;
+    const audioDuration = null;
     try {
       const splitterResult = await callAudioSplitter(env, file, planId);
       if (splitterResult && splitterResult.segments) {
         const s = splitterResult.segments;
         const songs = splitterResult.summary?.chants || [];
+        const duration = splitterResult.duration_seconds;
         await env.DB.prepare('DELETE FROM plan_audio_segments WHERE plan_id = ?').bind(planId).run();
         await env.DB.prepare('DELETE FROM plan_audio_songs WHERE plan_id = ?').bind(planId).run();
         for (let i = 0; i < s.length; i++) {
@@ -2404,7 +2406,10 @@ const routes3 = [
           await env.DB.prepare('INSERT INTO plan_audio_songs (plan_id, song_index, title, start_seconds, end_seconds) VALUES (?, ?, ?, ?, ?)')
             .bind(planId, i, c.title || null, c.start, c.end).run();
         }
-        segmentsResult = { segments: s.length, songs: songs.length };
+        if (duration != null) {
+          await env.DB.prepare('UPDATE plans SET audio_duration_seconds = ? WHERE id = ?').bind(duration, planId).run();
+        }
+        segmentsResult = { segments: s.length, songs: songs.length, duration_seconds: duration };
       }
     } catch (e) {
       segmentsResult = { error: e.message };
@@ -2416,11 +2421,11 @@ const routes3 = [
   route('GET', '/api/plans/:id/audio', async (request, env, params) => {
     const planId = requireId(params);
     if (!planId) return badRequest('ID plan invalide');
-    const plan = await env.DB.prepare('SELECT audio_url, audio_title FROM plans WHERE id = ?').bind(planId).first();
+    const plan = await env.DB.prepare('SELECT audio_url, audio_title, audio_duration_seconds FROM plans WHERE id = ?').bind(planId).first();
     if (!plan) return notFound();
     const attachments = await env.DB.prepare("SELECT * FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio' ORDER BY created_at DESC")
       .bind(planId).all();
-    return json({ audio_url: plan.audio_url, audio_title: plan.audio_title, attachments: attachments.results });
+    return json({ audio_url: plan.audio_url, audio_title: plan.audio_title, audio_duration_seconds: plan.audio_duration_seconds, attachments: attachments.results });
   }),
 
   route('GET', '/api/plans/:id/audio/stream', async (request, env, params) => {
@@ -2448,7 +2453,7 @@ const routes3 = [
       if (fileId) await kdriveDelete(env, fileId).catch(() => {});
       await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(a.id).run();
     }
-    await env.DB.prepare('UPDATE plans SET audio_url = NULL, audio_title = NULL WHERE id = ?').bind(planId).run();
+    await env.DB.prepare('UPDATE plans SET audio_url = NULL, audio_title = NULL, audio_duration_seconds = NULL WHERE id = ?').bind(planId).run();
     return json({ success: true });
   }),
 
@@ -2460,9 +2465,10 @@ const routes3 = [
     if (!planId) return badRequest('ID plan invalide');
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: 'Not authenticated' }, 401);
+    const plan = await env.DB.prepare('SELECT audio_duration_seconds FROM plans WHERE id = ?').bind(planId).first();
     const segments = await env.DB.prepare('SELECT * FROM plan_audio_segments WHERE plan_id = ? ORDER BY segment_index').bind(planId).all();
     const songs = await env.DB.prepare('SELECT * FROM plan_audio_songs WHERE plan_id = ? ORDER BY song_index').bind(planId).all();
-    return json({ segments: segments.results, songs: songs.results });
+    return json({ segments: segments.results, songs: songs.results, duration_seconds: plan?.audio_duration_seconds || null });
   }),
 
   route('POST', '/api/plans/:id/audio-segments', async (request, env, params) => {

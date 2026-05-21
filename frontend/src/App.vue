@@ -23,28 +23,35 @@
             </button>
           </div>
         </div>
-        <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
+        <nav class="flex-1 p-2 space-y-0.5 overflow-y-auto">
           <div class="px-1 pb-2">
             <GlobalSearch />
           </div>
-          <router-link to="/mon-compte" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>👤</span> {{$t('menu.account')}}
-          </router-link>
+
+          <!-- Principal -->
           <router-link to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.dashboard')}}
           </router-link>
-          <button @click="enterInteractive" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400 cursor-pointer" :class="{ 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium': route.path === '/interactive' }">
-            <span>🚀</span> {{ $t("menu.demo_tour") }}
-          </button>
           <router-link to="/calendar" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📅</span> {{$t('menu.calendar')}}
           </router-link>
+
+          <div class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Services</p>
+          </div>
           <router-link to="/plans" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📋</span> {{$t('menu.services')}}
           </router-link>
           <router-link to="/plan-templates" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📋</span> {{$t('menu.templates')}}
+            <span>📄</span> {{$t('menu.templates')}}
           </router-link>
+          <router-link to="/checkin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>✅</span> {{$t('menu.checkin')}}
+          </router-link>
+
+          <div class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Personnes</p>
+          </div>
           <router-link to="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>👥</span> {{$t('menu.members')}}
           </router-link>

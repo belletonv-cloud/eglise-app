@@ -689,6 +689,8 @@ export default {
     delete: 'Suppr.',
     upload_error: 'Erreur upload: ',
     upload_title: 'Enregistrement',
+    uploading: 'Upload en cours...',
+    estimated: 'Temps estimé',
     process: 'Analyser avec audio-splitter',
     processing: 'Analyse en cours...',
     segments: 'Segments audio',
