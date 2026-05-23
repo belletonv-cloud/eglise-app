@@ -1,8 +1,11 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
-    <Login v-if="!isAuthenticated && !isInteractiveView" />
-  <div v-if="isInteractiveView || isAuthenticated" class="flex h-screen bg-gray-100 dark:bg-gray-900">
-    <div class="flex h-screen bg-gray-100 dark:bg-gray-900">
+
+    <router-view v-if="route?.path === '/demo-tour' || route?.path === '/interactive'" />
+
+    <Login v-else-if="!isAuthenticated && !isInteractiveView" />
+
+    <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
         :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -27,15 +30,12 @@
           <div class="px-1 pb-2">
             <GlobalSearch />
           </div>
-
-          <!-- Principal -->
           <router-link to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.dashboard')}}
           </router-link>
           <router-link to="/calendar" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📅</span> {{$t('menu.calendar')}}
           </router-link>
-
           <div class="pt-2 pb-1">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Services</p>
           </div>
@@ -48,7 +48,6 @@
           <router-link to="/checkin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>✅</span> {{$t('menu.checkin')}}
           </router-link>
-
           <div class="pt-2 pb-1">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Personnes</p>
           </div>
@@ -61,18 +60,15 @@
           <router-link to="/songs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🎵</span> {{$t('menu.songs')}}
           </router-link>
-          <router-link to="/checkin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>✅</span> {{$t('menu.checkin')}}
-          </router-link>
           <router-link to="/house-groups" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🏠</span> {{$t('menu.groups')}}
           </router-link>
           <router-link to="/historique" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📜</span> {{$t('menu.history')}}
           </router-link>
-           <router-link to="/email" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-             <span>📧</span> {{$t('menu.emails')}}
-           </router-link>
+          <router-link to="/email" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📧</span> {{$t('menu.emails')}}
+          </router-link>
           <router-link to="/sondages" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.polls')}}
           </router-link>
@@ -83,26 +79,26 @@
             <span>🔗</span> {{$t('menu.webhooks')}}
           </router-link>
           <router-link to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-             <span>⚠️</span> {{$t('menu.conflicts')}}
+            <span>⚠️</span> {{$t('menu.conflicts')}}
           </router-link>
-           <router-link to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-             <span>📋</span> {{$t('menu.logs')}}
-           </router-link>
-           <router-link to="/annuaire" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-              <span>📖</span> {{$t('menu.directory')}}
-            </router-link>
-           <router-link to="/events" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-              <span>📅</span> {{$t('menu.events')}}
-            </router-link>
-           <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-              <span>▶️</span> {{$t('menu.youtube')}}
-            </router-link>
-           <router-link to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-              <span>🔄</span> {{$t('menu.pco_sync')}}
-            </router-link>
-<router-link to="/music-stand" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-               <span>🎵</span> {{$t('menu.music_stand')}}
-             </router-link>
+          <router-link to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📋</span> {{$t('menu.logs')}}
+          </router-link>
+          <router-link to="/annuaire" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📖</span> {{$t('menu.directory')}}
+          </router-link>
+          <router-link to="/events" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📅</span> {{$t('menu.events')}}
+          </router-link>
+          <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>▶️</span> {{$t('menu.youtube')}}
+          </router-link>
+          <router-link to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>🔄</span> {{$t('menu.pco_sync')}}
+          </router-link>
+          <router-link to="/music-stand" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>🎵</span> {{$t('menu.music_stand')}}
+          </router-link>
         </nav>
         <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
           <button v-if="isInteractiveView" @click="disableInteractiveView" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer transition-colors">
@@ -132,10 +128,11 @@
           <router-view />
         </div>
       </main>
+      <Toasts />
+      <ConfirmDialog />
     </div>
-    <Toasts />
-    <ConfirmDialog />
-  </div>
+
+    <DemoGuide />
   </div>
 </template>
 
@@ -150,6 +147,7 @@ import { api } from './utils/api';
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
+import DemoGuide from './components/DemoGuide.vue'
 
 const { locale } = useI18n()
 const lang = ref(locale.value)
@@ -184,8 +182,6 @@ onMounted(async () => {
 
   const permission = await Notification.requestPermission().catch(() => 'denied')
   if (permission !== 'granted') return
-
-  // Service worker is registered by api.ts registerForPush() — avoid duplicate registration
 })
 
 function enterInteractive() {
