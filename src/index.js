@@ -3046,8 +3046,17 @@ const routes3 = [
     const PCO_API = 'https://api.planningcenteronline.com';
     // Diagnostic: count all fetch() calls in this invocation to measure subrequests
     let fetchCount = 0;
+    const fetchUrls = [];
     const _origFetch = globalThis.fetch;
-    globalThis.fetch = async (...args) => { fetchCount++; return _origFetch(...args); };
+    globalThis.fetch = async (...args) => {
+      fetchCount++;
+      try {
+        const first = args[0];
+        const url = typeof first === 'string' ? first : (first && first.url) ? first.url : String(first);
+        if (fetchUrls.length < 200) fetchUrls.push(url);
+      } catch (e) { /* ignore */ }
+      return _origFetch(...args);
+    };
     const results = { service_types: 0, plans: 0, plan_items: 0, people: 0, songs: 0, arrangements: 0, deleted: 0, errors: [] };
 
     // 1. Acquire mutex
@@ -3379,7 +3388,7 @@ const routes3 = [
     }
 
     // attach diagnostic info
-    results.debug = { fetchCount };
+    results.debug = { fetchCount, fetchUrls };
     return json({ success: true, results });
   }),
 
