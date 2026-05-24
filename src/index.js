@@ -3268,7 +3268,7 @@ const routes3 = [
         // Chunk songs processing to avoid Worker subrequest limits
         const songOffsetRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
         let offset = songOffsetRow && songOffsetRow.value ? parseInt(songOffsetRow.value, 10) : 0;
-        const perPage = 5; // process 5 songs per run
+        const perPage = 1; // process 1 song per run (safe under Worker subrequest limits)
         const params = { per_page: String(perPage) };
         if (lastSyncAt) { params['filter[updated_at][since]'] = lastSyncAt; }
         // songs list to update for pass2
@@ -3288,7 +3288,7 @@ const routes3 = [
           let arrFetches = 0;
           let stopForLimits = false;
           for (const s of songsList) {
-            if (songFetches >= 5) { stopForLimits = true; break; }
+            if (songFetches >= 1) { stopForLimits = true; break; }
             songFetches++;
             const pcoSongId = s.id;
             const title = s.attributes && s.attributes.title;
