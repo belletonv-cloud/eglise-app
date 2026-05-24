@@ -3256,6 +3256,14 @@ const routes3 = [
       } catch (e) { results.errors.push(`Plans: ${e.message}`); }
 
       // 5. Sync songs + arrangements (incremental if lastSyncAt exists)
+      // Patch 1: determine sync phase (pass1 = songs-only, pass2 = arrangements-only)
+      const phaseRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_sync_phase'").first();
+      const phase = phaseRow && phaseRow.value ? phaseRow.value : 'pass1';
+      const songsToUpdateRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'songs_to_update'").first();
+      const songsToUpdate = songsToUpdateRow && songsToUpdateRow.value ? JSON.parse(songsToUpdateRow.value) : null;
+      const isPass2 = phase === 'pass2' || (Array.isArray(songsToUpdate) && songsToUpdate.length > 0);
+
+      if (!isPass2) {
       try {
         // Chunk songs processing to avoid Worker subrequest limits
         const songOffsetRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
@@ -3263,6 +3271,8 @@ const routes3 = [
         const perPage = 5; // process 5 songs per run
         const params = { per_page: String(perPage) };
         if (lastSyncAt) { params['filter[updated_at][since]'] = lastSyncAt; }
+        // songs list to update for pass2
+        let songsToUpdateList = Array.isArray(songsToUpdate) ? songsToUpdate : [];
         while (true) {
           const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
           await new Promise(r => setTimeout(r, 100));
@@ -3310,71 +3320,34 @@ const routes3 = [
               }
             }
 
-            // Fetch arrangements (limit to 20 arrangement fetches per run)
+            // Pass1: mark song for arrangements update if new or updated (no arrangements fetched here)
             try {
-              if (arrFetches >= 5) { stopForLimits = true; break; }
-              await new Promise(r => setTimeout(r, 50));
-              const arrRes = await fetch(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements`, {
-                headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
-              });
-              arrFetches++;
-              if (!arrRes.ok) continue;
-              const arrData = await arrRes.json();
-              for (const arr of arrData.data || []) {
-                const attrs = arr.attributes || {};
-                const pcoArrId = arr.id;
-                const arrName = attrs.name || 'default';
-                const arrKey = attrs.key || null;
-                const arrTempo = attrs.tempo || null;
-                const chordChart = attrs.chord_chart || null;
-
-                let arrRow = await env.DB.prepare('SELECT id, pco_id, chord_chart FROM arrangements WHERE pco_id = ?').bind(pcoArrId).first();
-                if (!arrRow) {
-                  arrRow = await env.DB.prepare(
-                    'SELECT id, pco_id, chord_chart FROM arrangements WHERE song_id = ? AND name = ? AND pco_id IS NULL'
-                  ).bind(songId, arrName).first();
-                }
-
-                if (!arrRow && chordChart) {
-                  await env.DB.prepare(
-                    'INSERT INTO arrangements (song_id, name, key, tempo, chord_chart, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-                  ).bind(songId, arrName, arrKey, arrTempo, chordChart, pcoArrId, attrs.updated_at || null).run();
-                  results.arrangements++;
-                } else if (arrRow) {
-                  // Always update metadata; chord chart only if provided
-                  if (chordChart) {
-                    await env.DB.prepare(
-                      'UPDATE arrangements SET name = ?, key = COALESCE(?, key), tempo = COALESCE(?, tempo), chord_chart = ?, pco_id = ?, pco_updated_at = ?, pco_deleted_at = NULL WHERE id = ?'
-                    ).bind(arrName, arrKey, arrTempo, chordChart, pcoArrId, attrs.updated_at || null, arrRow.id).run();
-                  } else {
-                    await env.DB.prepare(
-                      'UPDATE arrangements SET name = ?, key = COALESCE(?, key), tempo = COALESCE(?, tempo), pco_id = ?, pco_updated_at = ?, pco_deleted_at = NULL WHERE id = ?'
-                    ).bind(arrName, arrKey, arrTempo, pcoArrId, attrs.updated_at || null, arrRow.id).run();
-                  }
-                  if (!arrRow.pco_id) {
-                    await env.DB.prepare('UPDATE arrangements SET pco_id = ? WHERE id = ?').bind(pcoArrId, arrRow.id).run();
-                  }
-                }
+              const meta = await env.DB.prepare('SELECT pco_updated_at FROM songs WHERE id = ?').bind(songId).first();
+              const existingUpdated = meta && meta.pco_updated_at ? meta.pco_updated_at : null;
+              if (!existingUpdated || (updatedAt && updatedAt !== existingUpdated)) {
+                songsToUpdateList.push(pcoSongId);
               }
-            } catch (e) { results.errors.push(`Arr ${pcoSongId}: ${e.message}`); }
+            } catch (e) { results.errors.push(`Songs mark ${pcoSongId}: ${e.message}`); }
           }
 
           offset += perPage;
-          // persist offset for next run
+          // persist offset and songsToUpdateList for next run
           await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_song_offset', ?)").bind(String(offset)).run();
-          if (stopForLimits) {
-            // stopped early due to limits; keep offset at current value so next run resumes here
-            break;
-          }
+          await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('songs_to_update', ?)").bind(JSON.stringify(songsToUpdateList)).run();
+          if (stopForLimits) { break; }
           if (songsList.length < perPage) {
-            // reset offset when done
+            // switch to pass2 when done collecting
+            await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'pass2')").run();
+            // reset offset
             await env.DB.prepare("DELETE FROM sync_state WHERE key = 'pco_song_offset'").run();
             break;
           }
         }
       } catch (e) { results.errors.push(`Songs: ${e.message}`); }
 
-      // 6. Save last sync time
+       }
+
+       // 6. Save last sync time
       const now = new Date().toISOString();
       await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
 
