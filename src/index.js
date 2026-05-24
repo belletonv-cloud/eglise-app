@@ -3443,6 +3443,20 @@ const routes3 = [
     return json({ success: true, results });
   }),
 
+  // Debug route: inspect sync_state keys (non-destructive)
+  route('GET', '/api/debug-sync-state', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const keys = ['pco_song_offset','songs_to_update','pco_sync_phase','pco_last_sync_at'];
+    const stmt = await env.DB.prepare(`SELECT key, value FROM sync_state WHERE key IN (${keys.map(()=>'?').join(',')})`).bind(...keys).all();
+    const map = {};
+    for (const r of stmt.results) map[r.key] = r.value;
+    // parse songs_to_update if present
+    if (map.songs_to_update) {
+      try { map.songs_to_update = JSON.parse(map.songs_to_update); } catch (e) { /* keep raw */ }
+    }
+    return json(map);
+  }),
+
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
