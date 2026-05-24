@@ -3369,14 +3369,65 @@ const routes3 = [
 
        }
 
-       // 6. Save last sync time
-      const now = new Date().toISOString();
-      await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
-
-      // If we have more songs to process, trigger another run (internal) to continue chunked sync.
-      const moreRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
-      if (moreRow && moreRow.value && !request.headers.get('x-internal-sync')) {
-        try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+        // 6. Pass2: process songs_to_update (arrangements-only)
+      if (isPass2) {
+        try {
+          const songsRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'songs_to_update'").first();
+          let queue = songsRow && songsRow.value ? JSON.parse(songsRow.value) : [];
+          if (Array.isArray(queue) && queue.length > 0) {
+            const batchSize = 1;
+            const toProcess = queue.slice(0, batchSize);
+            const remaining = queue.slice(batchSize);
+            for (const pcoSongId of toProcess) {
+              // fetch arrangements for the song
+              const arrRes = await fetch(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements?per_page=100`, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
+              if (!arrRes.ok) { results.errors.push(`Arrangements ${pcoSongId}: ${arrRes.status}`); continue; }
+              const arrJson = await arrRes.json();
+              const arrData = arrJson.data || [];
+              const songRow = await env.DB.prepare('SELECT id FROM songs WHERE pco_id = ?').bind(pcoSongId).first();
+              if (!songRow) { results.errors.push(`Arrangements skip ${pcoSongId}: local song not found`); continue; }
+              const songId = songRow.id;
+              // naive sync: delete and re-insert arrangements for now
+              await env.DB.prepare('DELETE FROM arrangements WHERE song_id = ?').bind(songId).run();
+              for (const a of arrData) {
+                const aId = a.id;
+                const title = a.attributes && a.attributes.title || null;
+                const content = a.attributes && a.attributes.body || null;
+                const updatedAt = a.attributes && a.attributes.updated_at || null;
+                await env.DB.prepare('INSERT INTO arrangements (song_id, pco_id, title, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?)')
+                  .bind(songId, aId, title, content, updatedAt).run();
+                results.arrangements++;
+              }
+            }
+            // persist remaining queue
+            await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('songs_to_update', ?)").bind(JSON.stringify(remaining)).run();
+            if (remaining.length > 0) {
+              await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'pass2')").run();
+              if (!request.headers.get('x-internal-sync')) {
+                try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+              }
+            } else {
+              // finished
+              await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'idle')").run();
+              const now = new Date().toISOString();
+              await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
+            }
+          } else {
+            // nothing to do, mark idle
+            await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'idle')").run();
+            const now = new Date().toISOString();
+            await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
+          }
+        } catch (e) { results.errors.push(`Pass2: ${e.message}`); }
+      } else {
+        // 6. Save last sync time (no pass2 running)
+        const now = new Date().toISOString();
+        await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
+        // If we have more songs to process, trigger another run (internal) to continue chunked sync.
+        const moreRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
+        if (moreRow && moreRow.value && !request.headers.get('x-internal-sync')) {
+          try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+        }
       }
 
     } catch (e) {
