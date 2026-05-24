@@ -93,11 +93,12 @@ test.describe('Demo Tour', () => {
     await guide.waitFor({ state: 'visible', timeout: 10000 })
 
     // Réduire → le corps du guide doit être masqué
-    await guide.locator('.guide-btn').first().click()
+    // Le 2ème bouton est celui qui bascule minimized (le 1er est l'autoplay)
+    await guide.locator('.guide-btn').nth(1).click()
     await expect(guide.locator('.guide-body')).not.toBeVisible({ timeout: 5000 })
 
     // Agrandir → le corps du guide doit réapparaître
-    await guide.locator('.guide-btn').first().click()
+    await guide.locator('.guide-btn').nth(1).click()
     await expect(guide.locator('.guide-body')).toBeVisible({ timeout: 5000 })
   })
 
