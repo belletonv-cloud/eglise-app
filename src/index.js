@@ -3271,10 +3271,7 @@ const routes3 = [
 
       // 5. Sync songs + arrangements (incremental if lastSyncAt exists)
       // Patch 1: determine sync phase (pass1 = songs-only, pass2 = arrangements-only)
-      const phaseRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_sync_phase'").first();
-      const phase = phaseRow && phaseRow.value ? phaseRow.value : 'pass1';
-      const songsToUpdateRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'songs_to_update'").first();
-      const songsToUpdate = songsToUpdateRow && songsToUpdateRow.value ? JSON.parse(songsToUpdateRow.value) : null;
+      // phase and songsToUpdate were already read earlier (earlyPhaseRow / songsToUpdateRowEarly)
       const isPass2 = phase === 'pass2' || (Array.isArray(songsToUpdate) && songsToUpdate.length > 0);
 
       if (!isPass2) {
