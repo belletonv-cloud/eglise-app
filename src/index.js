@@ -3044,6 +3044,10 @@ const routes3 = [
 
     const auth = btoa(`${token_id}:${token_secret}`);
     const PCO_API = 'https://api.planningcenteronline.com';
+    // Diagnostic: count all fetch() calls in this invocation to measure subrequests
+    let fetchCount = 0;
+    const _origFetch = globalThis.fetch;
+    globalThis.fetch = async (...args) => { fetchCount++; return _origFetch(...args); };
     const results = { service_types: 0, plans: 0, plan_items: 0, people: 0, songs: 0, arrangements: 0, deleted: 0, errors: [] };
 
     // 1. Acquire mutex
@@ -3360,9 +3364,13 @@ const routes3 = [
     } catch (e) {
       return json({ error: e.message, results }, 500);
     } finally {
+      // restore global fetch and release DB lock
+      try { globalThis.fetch = _origFetch; } catch (e) { /* ignore */ }
       await releaseSyncLock(env);
     }
 
+    // attach diagnostic info
+    results.debug = { fetchCount };
     return json({ success: true, results });
   }),
 
