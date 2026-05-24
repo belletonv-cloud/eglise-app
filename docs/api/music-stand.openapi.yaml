@@ -1,0 +1,268 @@
+openapi: 3.0.3
+info:
+  title: Music Stand API (sketch)
+  version: 1.0.0
+  description: "Subset OpenAPI spec for the Music Stand service (GET songs, arrangements, annotations, media, update arrangement)"
+
+servers:
+  - url: /api
+
+paths:
+  /songs:
+    get:
+      summary: List songs
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: service_type_id
+          in: query
+          schema: { type: integer }
+        - name: plan_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSongsResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /songs/{id}:
+    get:
+      summary: Get a song with arrangements
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSongResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /arrangements/{id}:
+    get:
+      summary: Get an arrangement detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetArrangementResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    put:
+      summary: Update an arrangement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArrangementBody'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateArrangementResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /arrangements/{id}/media:
+    get:
+      summary: List media attachments for an arrangement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetArrangementMediaResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /arrangements/{id}/annotations:
+    get:
+      summary: List annotations for an arrangement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAnnotationsResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+    post:
+      summary: Create an annotation for the current user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnnotationBody'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAnnotationResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+components:
+  schemas:
+    SongSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        author: { type: string, nullable: true }
+        ccli_number: { type: string, nullable: true }
+        arrangement_count: { type: integer }
+
+    GetSongsResponse:
+      type: object
+      properties:
+        songs:
+          type: array
+          items: { $ref: '#/components/schemas/SongSummary' }
+
+    ArrangementSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        song_id: { type: integer }
+        name: { type: string, nullable: true }
+
+    GetSongResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        arrangements:
+          type: array
+          items: { $ref: '#/components/schemas/ArrangementSummary' }
+
+    Attachment:
+      type: object
+      properties:
+        id: { type: integer }
+        filename: { type: string }
+        file_url: { type: string }
+        file_type: { type: string }
+
+    GetArrangementResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        song_id: { type: integer }
+        key: { type: string, nullable: true }
+        tempo: { type: number, nullable: true }
+        chord_chart: { type: string, nullable: true }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/Attachment' }
+
+    UpdateArrangementBody:
+      type: object
+      properties:
+        name: { type: string }
+        key: { type: string, nullable: true }
+        tempo: { type: number, nullable: true }
+        meter: { type: string, nullable: true }
+        chord_chart: { type: string, nullable: true }
+
+    UpdateArrangementResponse:
+      $ref: '#/components/schemas/GetArrangementResponse'
+
+    GetArrangementMediaResponse:
+      type: object
+      properties:
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/Attachment' }
+
+    Annotation:
+      type: object
+      properties:
+        id: { type: integer }
+        arrangement_id: { type: integer }
+        member_id: { type: integer }
+        content: { type: string }
+        is_shared: { type: boolean }
+
+    GetAnnotationsResponse:
+      type: object
+      properties:
+        annotations:
+          type: array
+          items: { $ref: '#/components/schemas/Annotation' }
+
+    CreateAnnotationBody:
+      type: object
+      required: [ content ]
+      properties:
+        content: { type: string }
+        is_shared: { type: boolean }
+
+    CreateAnnotationResponse:
+      $ref: '#/components/schemas/Annotation'
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        details: {}

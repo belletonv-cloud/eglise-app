@@ -1,0 +1,26 @@
+{
+  "songs": [
+    {
+      "id": 101,
+      "title": "Amazing Grace",
+      "author": "John Newton",
+      "ccli_number": "1223",
+      "copyright": "Public Domain",
+      "notes": "Standard hymn; use simple arrangement",
+      "pco_id": "song_987",
+      "pco_updated_at": "2024-11-02T12:34:56Z",
+      "arrangement_count": 2
+    },
+    {
+      "id": 202,
+      "title": "Great Are You Lord",
+      "author": "All Sons & Daughters",
+      "ccli_number": "712345",
+      "copyright": "2013",
+      "notes": null,
+      "pco_id": null,
+      "pco_updated_at": null,
+      "arrangement_count": 1
+    }
+  ]
+}

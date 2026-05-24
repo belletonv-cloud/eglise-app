@@ -1,0 +1,18 @@
+{
+  "id": 11,
+  "song_id": 101,
+  "name": "Simple Lead",
+  "key": "C",
+  "tempo": 72,
+  "meter": "4/4",
+  "lyrics": null,
+  "chord_chart": "[Intro]\nC | G | Am | F\n[Verse]\nC G Am F",
+  "attachments": [
+    { "id": 501, "entity_type": "arrangement", "entity_id": 11, "filename": "lead_sheet.pdf", "file_url": "kdrive:123456", "file_type": "pdf", "created_at": "2025-01-10T10:00:00Z" },
+    { "id": 502, "entity_type": "arrangement", "entity_id": 11, "filename": "backing.mp3", "file_url": "kdrive:abcdef", "file_type": "audio", "created_at": "2025-01-10T10:01:00Z" }
+  ],
+  "pco_id": null,
+  "pco_updated_at": null,
+  "created_at": "2024-12-01T09:00:00Z",
+  "updated_at": "2024-12-03T12:00:00Z"
+}

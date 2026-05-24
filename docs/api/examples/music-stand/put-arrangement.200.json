@@ -1,0 +1,13 @@
+{
+  "id": 11,
+  "song_id": 101,
+  "name": "Simple Lead (updated)",
+  "key": "C",
+  "tempo": 74,
+  "meter": "4/4",
+  "chord_chart": "[Intro]\nC | G | Am | F\n[Verse]\nC G Am F",
+  "attachments": [
+    { "id": 501, "entity_type": "arrangement", "entity_id": 11, "filename": "lead_sheet.pdf", "file_url": "kdrive:123456", "file_type": "pdf" }
+  ],
+  "updated_at": "2025-02-01T08:00:00Z"
+}

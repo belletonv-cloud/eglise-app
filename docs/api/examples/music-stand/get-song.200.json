@@ -1,0 +1,14 @@
+{
+  "id": 101,
+  "title": "Amazing Grace",
+  "author": "John Newton",
+  "ccli_number": "1223",
+  "copyright": "Public Domain",
+  "notes": "Standard hymn; use simple arrangement",
+  "pco_id": "song_987",
+  "pco_updated_at": "2024-11-02T12:34:56Z",
+  "arrangements": [
+    { "id": 11, "song_id": 101, "name": "Simple Lead", "key": "C", "tempo": 72 },
+    { "id": 12, "song_id": 101, "name": "Full Band", "key": "D", "tempo": 76 }
+  ]
+}
