@@ -3394,7 +3394,8 @@ const routes3 = [
                 const title = a.attributes && a.attributes.title || null;
                 const content = a.attributes && a.attributes.body || null;
                 const updatedAt = a.attributes && a.attributes.updated_at || null;
-                await env.DB.prepare('INSERT INTO arrangements (song_id, pco_id, title, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?)')
+                // use correct columns: name instead of title
+                await env.DB.prepare('INSERT INTO arrangements (song_id, pco_id, name, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?)')
                   .bind(songId, aId, title, content, updatedAt).run();
                 results.arrangements++;
               }
