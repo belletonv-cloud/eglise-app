@@ -472,7 +472,9 @@ const routes0 = [
       body.baptism_date || null, body.notes || null
     ).run();
     const newMember = await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(result.meta.last_row_id).first();
-    triggerWebhooks(env, 'member.created', newMember).catch(() => {});
+    triggerWebhooks(env, 'member.created', newMember).catch((err) => {
+      console.error('triggerWebhooks member.created failed', err, { event: 'member.created', payload: newMember });
+    });
     return json(newMember, 201);
   }),
 
@@ -678,7 +680,9 @@ const routes0 = [
       FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id
       WHERE p.id = ?
     `).bind(result.meta.last_row_id).first();
-    triggerWebhooks(env, 'plan.created', newPlan).catch(() => {});
+    triggerWebhooks(env, 'plan.created', newPlan).catch((err) => {
+      console.error('triggerWebhooks plan.created failed', err, { event: 'plan.created', payload: newPlan });
+    });
     return json(newPlan, 201);
   }),
 
@@ -705,7 +709,9 @@ const routes0 = [
       FROM plans p LEFT JOIN service_types st ON st.id = p.service_type_id
       WHERE p.id = ?
     `).bind(id).first();
-    if (updated) triggerWebhooks(env, 'plan.updated', updated).catch(() => {});
+    if (updated) triggerWebhooks(env, 'plan.updated', updated).catch((err) => {
+      console.error('triggerWebhooks plan.updated failed', err, { event: 'plan.updated', payload: updated });
+    });
     return json(updated);
   }),
 
@@ -713,7 +719,9 @@ const routes0 = [
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM plans WHERE id = ?').bind(id).run();
-    triggerWebhooks(env, 'plan.deleted', { id }).catch(() => {});
+    triggerWebhooks(env, 'plan.deleted', { id }).catch((err) => {
+      console.error('triggerWebhooks plan.deleted failed', err, { event: 'plan.deleted', payload: { id } });
+    });
     return new Response(null, { status: 204, headers: CORS });
   }),
 
@@ -909,15 +917,7 @@ const routes0 = [
           // Prefer to create a one-time DB token if possible; otherwise fallback to HMAC
           let oneclickLinkHtml = '';
           try {
-            // create table if not exists (idempotent)
-            await env.DB.prepare(`CREATE TABLE IF NOT EXISTS email_oneclicks (
-              id INTEGER PRIMARY KEY,
-              token TEXT UNIQUE,
-              payload_json TEXT,
-              used INTEGER DEFAULT 0,
-              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-              used_at DATETIME
-            )`).run();
+            // email_oneclicks table created by migrations
 
             const payload = { action: 'revert_assignment', existing_scheduled_id: conflict.id, plan_id: planId, member_id: body.member_id, exp: Math.floor(Date.now()/1000) + 60*60*24 };
             const payloadJson = JSON.stringify(payload);
@@ -958,15 +958,13 @@ const routes0 = [
           });
           const text = await res.text();
           let remote = null;
-          try { remote = JSON.parse(text); } catch { remote = text }
+      try { remote = JSON.parse(text); } catch { remote = text }
           const status = res.ok ? 'sent' : 'failed';
           await env.DB.prepare('INSERT INTO email_logs (template_id, subject, body, recipient_email, recipient_member_id, status, error_message) VALUES (?, ?, ?, ?, ?, ?, ?)')
-            .bind(null, subject, html, admin, null, status, res.ok ? null : JSON.stringify(remote)).run();
+           .bind(null, subject, html, admin, null, status, res.ok ? null : JSON.stringify(remote)).run();
         }
       }
-    } catch (e) {
-      // ignore notification errors
-    }
+    } catch (e) { console.error('notification error while forcing assignment emails/push', e); }
     // Send push notification to the scheduled member
     try {
       const planForNotif = await env.DB.prepare('SELECT date, time, theme FROM plans WHERE id = ?').bind(planId).first();
@@ -979,12 +977,14 @@ const routes0 = [
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `key=${env.FCM_SERVER_KEY}` },
             body: JSON.stringify({ to: t.token, notification: { title, body: msg }, data: { plan_id: String(planId), action: 'view_plan' } }),
-          }).catch(() => {});
+          }).catch((err) => { console.error('Internal fetch retry failed', err); });
         }
       }
-    } catch (e) { /* ignore push errors */ }
+    } catch (e) { console.error('push notification error', e); }
 
-    triggerWebhooks(env, 'schedule.created', newEntry).catch(() => {});
+    triggerWebhooks(env, 'schedule.created', newEntry).catch((err) => {
+      console.error('triggerWebhooks schedule.created failed', err, { event: 'schedule.created', payload: newEntry });
+    });
     return json(newEntry, 201);
   }),
 
@@ -2206,7 +2206,7 @@ const routes2 = [
     if (!existing) return notFound();
 
     const fileId = parseKdriveFileId(existing.file_url);
-    if (fileId) await kdriveDelete(env, fileId).catch(() => {});
+    if (fileId) await kdriveDelete(env, fileId).catch((err) => { console.error('kdriveDelete failed', err, { fileId }); });
 
     await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(id).run();
     return json({ success: true });
@@ -2489,7 +2489,7 @@ const routes3 = [
     const attachments = await env.DB.prepare("SELECT * FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio'").bind(planId).all();
     for (const a of attachments.results) {
       const fileId = parseKdriveFileId(a.file_url);
-      if (fileId) await kdriveDelete(env, fileId).catch(() => {});
+      if (fileId) await kdriveDelete(env, fileId).catch((err) => { console.error('kdriveDelete failed', err, { fileId }); });
       await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(a.id).run();
     }
     await env.DB.prepare('UPDATE plans SET audio_url = NULL, audio_title = NULL, audio_duration_seconds = NULL WHERE id = ?').bind(planId).run();
@@ -2592,7 +2592,7 @@ const routes3 = [
           body: JSON.stringify({ from, to: newMember.email, subject: `Remplacement — Service ${plan.date}`, html }),
         });
       }
-    } catch (e) { /* ignore notification errors */ }
+    } catch (e) { console.error('replacement notification send failed', e); }
 
     const updated = await env.DB.prepare(`
       SELECT sp.*, m.first_name, m.last_name, m.email, t.name as team_name
@@ -2658,7 +2658,7 @@ const routes3 = [
     const token = generateSecureToken(48);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
-    await env.DB.prepare('CREATE TABLE IF NOT EXISTS invitation_tokens (id INTEGER PRIMARY KEY AUTOINCREMENT, member_id INTEGER REFERENCES members(id), token TEXT UNIQUE, expires_at TEXT, used INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime(\'now\')))').run();
+    // invitation_tokens table created by migrations
     await env.DB.prepare('INSERT INTO invitation_tokens (member_id, token, expires_at) VALUES (?, ?, ?)').bind(member.id, token, expires_at).run();
 
     // Send email
@@ -2678,7 +2678,7 @@ const routes3 = [
           body: JSON.stringify({ from, to: body.email, subject: 'Invitation à rejoindre Église App', html }),
         });
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.error('invitation send failed', e); }
 
     return json({ success: true, email: body.email }, 201);
   }),
@@ -2703,7 +2703,7 @@ const routes3 = [
     if (row.expires_at < new Date().toISOString()) return badRequest('Token expiré');
 
     // Check no other member has this firebase_uid
-    await env.DB.prepare('CREATE TABLE IF NOT EXISTS member_firebase (id INTEGER PRIMARY KEY AUTOINCREMENT, member_id INTEGER UNIQUE REFERENCES members(id), firebase_uid TEXT UNIQUE, created_at TEXT DEFAULT (datetime(\'now\')))').run();
+    // member_firebase table created by migrations
     const existing = await env.DB.prepare('SELECT member_id FROM member_firebase WHERE firebase_uid = ?').bind(body.firebase_uid).first();
     if (existing) return badRequest('Ce compte Firebase est déjà lié à un membre');
 
@@ -3054,7 +3054,7 @@ const routes3 = [
         const first = args[0];
         const url = typeof first === 'string' ? first : (first && first.url) ? first.url : String(first);
         if (fetchUrls.length < 200) fetchUrls.push(url);
-      } catch (e) { /* ignore */ }
+      } catch (e) { console.error('fetch wrapper internal URL capture failed', e); }
       return _origFetch(...args);
     };
     const results = { service_types: 0, plans: 0, plan_items: 0, people: 0, songs: 0, arrangements: 0, deleted: 0, errors: [] };
@@ -3405,7 +3405,7 @@ const routes3 = [
             if (remaining.length > 0) {
               await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'pass2')").run();
               if (!request.headers.get('x-internal-sync')) {
-                try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+                try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { console.error('internal sync trigger failed (pass2)', e); }
               }
             } else {
               // finished
@@ -3427,7 +3427,7 @@ const routes3 = [
         // If we have more songs to process, trigger another run (internal) to continue chunked sync.
         const moreRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
         if (moreRow && moreRow.value && !request.headers.get('x-internal-sync')) {
-          try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+          try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { console.error('internal sync trigger failed (more songs)', e); }
         }
       }
 
@@ -3435,7 +3435,7 @@ const routes3 = [
       return json({ error: e.message, results }, 500);
     } finally {
       // restore global fetch and release DB lock
-      try { globalThis.fetch = _origFetch; } catch (e) { /* ignore */ }
+      try { globalThis.fetch = _origFetch; } catch (e) { console.error('restore global fetch failed', e); }
       await releaseSyncLock(env);
     }
 
@@ -3674,12 +3674,7 @@ const routes3 = [
     let body;
     try { body = await request.json(); } catch { body = await request.text().catch(() => ''); }
 
-    // Log the incoming webhook
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhook_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      webhook_id INTEGER, event TEXT, status INTEGER, response TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    )`).run();
+    // webhook_logs table created by migrations
     await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response) VALUES (?, ?, ?, ?)')
       .bind(wh.id, 'incoming', 200, typeof body === 'string' ? body.slice(0, 500) : JSON.stringify(body).slice(0, 500)).run();
 
@@ -3715,34 +3710,18 @@ function rateLimit(request) {
 }
 
 async function logApiCall(request, env, response, duration, error) {
-  try {
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS api_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      method TEXT, path TEXT, status INTEGER, duration INTEGER,
-      error TEXT, created_at TEXT DEFAULT (datetime('now'))
-    )`).run();
-    const status = response ? response.status : 500;
-    const errMsg = error ? error.message : (response && response.status >= 400 ? await response.clone().text().catch(() => '') : null);
-    await env.DB.prepare('INSERT INTO api_logs (method, path, status, duration, error) VALUES (?, ?, ?, ?, ?)')
-      .bind(request.method, new URL(request.url).pathname, status, duration, errMsg)
-      .run();
-  } catch (e) { /* ignore */ }
+    try {
+      const status = response ? response.status : 500;
+      const errMsg = error ? error.message : (response && response.status >= 400 ? await response.clone().text().catch(() => '') : null);
+      await env.DB.prepare('INSERT INTO api_logs (method, path, status, duration, error) VALUES (?, ?, ?, ?, ?)')
+        .bind(request.method, new URL(request.url).pathname, status, duration, errMsg)
+        .run();
+    } catch (e) { console.error('api log insert failed', e); }
 }
 
 async function triggerWebhooks(env, event, payload) {
-  try {
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhooks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      url TEXT NOT NULL, events TEXT, secret TEXT, label TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    )`).run();
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS webhook_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      webhook_id INTEGER, event TEXT, status INTEGER, response TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
-    )`).run();
-
-    const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
+    try {
+      const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
     for (const wh of webhooks.results) {
       let events;
       try { events = JSON.parse(wh.events || '[]'); } catch { events = []; }
@@ -3774,7 +3753,7 @@ async function triggerWebhooks(env, event, payload) {
           .bind(wh.id, event, 0, e.message, nextRetry).run();
       }
     }
-  } catch (e) { /* ignore webhook errors */ }
+  } catch (e) { console.error('triggerWebhooks failed', e); }
 }
 
 async function processWebhookRetries(env) {
@@ -3820,7 +3799,7 @@ async function processWebhookRetries(env) {
           .bind(e.message, nextRetry, log.id).run();
       }
     }
-  } catch (e) { /* ignore retry errors */ }
+  } catch (e) { console.error('processWebhookRetries failed', e); }
 }
 
 export default {
@@ -3884,7 +3863,7 @@ export default {
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
               body: JSON.stringify({ from, to: p.email, subject: `Rappel: Service ${plan.date}`, html }),
             });
-          } catch (e) { /* ignore */ }
+          } catch (e) { console.error('send reminder failed', e); }
         }
 
         await env.DB.prepare(`UPDATE plans SET ${columnFlag} = 1 WHERE id = ?`).bind(plan.id).run();
