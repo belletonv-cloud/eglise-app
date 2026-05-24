@@ -3274,7 +3274,12 @@ const routes3 = [
           const songsList = songsData.data || [];
           if (songsList.length === 0) break;
 
+          let songFetches = 0;
+          let arrFetches = 0;
+          let stopForLimits = false;
           for (const s of songsList) {
+            if (songFetches >= 20) { stopForLimits = true; break; }
+            songFetches++;
             const pcoSongId = s.id;
             const title = s.attributes && s.attributes.title;
             if (!title) continue;
@@ -3305,12 +3310,14 @@ const routes3 = [
               }
             }
 
-            // Fetch arrangements
+            // Fetch arrangements (limit to 20 arrangement fetches per run)
             try {
+              if (arrFetches >= 20) { stopForLimits = true; break; }
               await new Promise(r => setTimeout(r, 50));
               const arrRes = await fetch(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements`, {
                 headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
               });
+              arrFetches++;
               if (!arrRes.ok) continue;
               const arrData = await arrRes.json();
               for (const arr of arrData.data || []) {
@@ -3355,6 +3362,10 @@ const routes3 = [
           offset += perPage;
           // persist offset for next run
           await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_song_offset', ?)").bind(String(offset)).run();
+          if (stopForLimits) {
+            // stopped early due to limits; keep offset at current value so next run resumes here
+            break;
+          }
           if (songsList.length < perPage) {
             // reset offset when done
             await env.DB.prepare("DELETE FROM sync_state WHERE key = 'pco_song_offset'").run();
