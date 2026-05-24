@@ -3444,47 +3444,7 @@ const routes3 = [
     return json({ success: true, results });
   }),
 
-  // Debug route: inspect sync_state keys (non-destructive)
-  route('GET', '/api/debug-sync-state', async (request, env) => {
-    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
-    const keys = ['pco_song_offset','songs_to_update','pco_sync_phase','pco_last_sync_at'];
-    const stmt = await env.DB.prepare(`SELECT key, value FROM sync_state WHERE key IN (${keys.map(()=>'?').join(',')})`).bind(...keys).all();
-    const map = {};
-    for (const r of stmt.results) map[r.key] = r.value;
-    // parse songs_to_update if present
-    if (map.songs_to_update) {
-      try { map.songs_to_update = JSON.parse(map.songs_to_update); } catch (e) { /* keep raw */ }
-    }
-    return json(map);
-  }),
-
-  // Debug route: list songs with pco_id for inspection (temporary)
-  route('GET', '/api/debug-songs', async (request, env) => {
-    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
-    const rows = await env.DB.prepare('SELECT id, pco_id, pco_updated_at FROM songs WHERE pco_id IS NOT NULL ORDER BY pco_id LIMIT 200').all();
-    return json({ count: rows.results.length, rows: rows.results });
-  }),
-
-  // Debug: fetch arrangements for a single PCO song id
-  route('GET', '/api/debug-song-arrangements/:pcoId', async (request, env, params) => {
-    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
-    const pcoId = params.pcoId;
-    const token_id = env.PCO_TOKEN_ID; const token_secret = env.PCO_TOKEN_SECRET;
-    if (!token_id || !token_secret) return json({ error: 'PCO credentials not configured' }, 500);
-    const auth = btoa(`${token_id}:${token_secret}`);
-    const res = await fetch(`https://api.planningcenteronline.com/services/v2/songs/${pcoId}/arrangements?per_page=100`, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
-    if (!res.ok) return json({ error: `PCO ${res.status}` }, res.status);
-    const j = await res.json();
-    const data = j.data || [];
-    return json({ pcoId, count: data.length, sample: data.slice(0,5).map(a => ({ id: a.id, title: a.attributes && a.attributes.title })) });
-  }),
-
-  // Debug: list newly inserted arrangements (last 10)
-  route('GET', '/api/debug-arrangements', async (request, env) => {
-    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
-    const rows = await env.DB.prepare('SELECT id, song_id, pco_id, name, pco_updated_at FROM arrangements ORDER BY id DESC LIMIT 20').all();
-    return json({ count: rows.results.length, rows: rows.results });
-  }),
+  
 
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
