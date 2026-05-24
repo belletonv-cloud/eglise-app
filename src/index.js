@@ -3391,7 +3391,7 @@ const routes3 = [
               await env.DB.prepare('DELETE FROM arrangements WHERE song_id = ?').bind(songId).run();
               for (const a of arrData) {
                 const aId = a.id;
-                const title = a.attributes && a.attributes.title || null;
+                const title = a.attributes && a.attributes.title ? a.attributes.title : `arr-${aId}`;
                 const content = a.attributes && a.attributes.body || null;
                 const updatedAt = a.attributes && a.attributes.updated_at || null;
                 // use correct columns: name instead of title
