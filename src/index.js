@@ -3457,6 +3457,13 @@ const routes3 = [
     return json(map);
   }),
 
+  // Debug route: list songs with pco_id for inspection (temporary)
+  route('GET', '/api/debug-songs', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const rows = await env.DB.prepare('SELECT id, pco_id, pco_updated_at FROM songs WHERE pco_id IS NOT NULL ORDER BY pco_id LIMIT 200').all();
+    return json({ count: rows.results.length, rows: rows.results });
+  }),
+
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
