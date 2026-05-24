@@ -3059,8 +3059,15 @@ const routes3 = [
       // 2. Get last sync time (for incremental sync)
       const lastSyncRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_last_sync_at'").first();
       const lastSyncAt = lastSyncRow && lastSyncRow.value && lastSyncRow.value.length >= 10 ? lastSyncRow.value : '';
+      // Determine sync phase early so Pass1 can be strictly minimal (skip other fetches)
+      const earlyPhaseRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_sync_phase'").first();
+      const phase = earlyPhaseRow && earlyPhaseRow.value ? earlyPhaseRow.value : 'pass1';
+      const songsToUpdateRowEarly = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'songs_to_update'").first();
+      const songsToUpdate = songsToUpdateRowEarly && songsToUpdateRowEarly.value ? JSON.parse(songsToUpdateRowEarly.value) : null;
+      const isPass1Only = phase === 'pass1';
 
       // 3. Sync service types (full — rare modifications)
+      if (!isPass1Only) {
       try {
         const stData = await pcoFetchAll(`${PCO_API}/services/v2/service_types`, auth);
         const stmts = [];
@@ -3086,9 +3093,11 @@ const routes3 = [
           results.service_types++;
         }
         if (stmts.length > 0) await env.DB.batch(stmts);
-      } catch (e) { results.errors.push(`Service types: ${e.message}`); }
+        } catch (e) { results.errors.push(`Service types: ${e.message}`); }
+      }
 
       // 4. Sync plans (upcoming 4 weeks) + plan_items + people
+      if (!isPass1Only) {
       try {
         const today = new Date().toISOString().slice(0, 10);
         const fourWeeks = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
@@ -3257,7 +3266,8 @@ const routes3 = [
             if (delRes.meta.changes > 0) results.deleted += delRes.meta.changes;
           }
         }
-      } catch (e) { results.errors.push(`Plans: ${e.message}`); }
+       } catch (e) { results.errors.push(`Plans: ${e.message}`); }
+      }
 
       // 5. Sync songs + arrangements (incremental if lastSyncAt exists)
       // Patch 1: determine sync phase (pass1 = songs-only, pass2 = arrangements-only)
@@ -3269,10 +3279,11 @@ const routes3 = [
 
       if (!isPass2) {
       try {
-        // Chunk songs processing to avoid Worker subrequest limits
+        // Pass1 minimal: single minimal fetch per invocation (no expansions, no follow-ups)
         const songOffsetRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
         let offset = songOffsetRow && songOffsetRow.value ? parseInt(songOffsetRow.value, 10) : 0;
-        const perPage = 1; // process 1 song per run (safe under Worker subrequest limits)
+        const perPage = 1; // strictly one song per run
+        // Request minimal fields if supported by PCO to avoid expansions (fields param optional)
         const params = { per_page: String(perPage) };
         if (lastSyncAt) { params['filter[updated_at][since]'] = lastSyncAt; }
         // songs list to update for pass2
@@ -3280,6 +3291,7 @@ const routes3 = [
         while (true) {
           const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
           await new Promise(r => setTimeout(r, 100));
+          // Minimal fetch: avoid includes/expansions, get only essentials (id, updated_at)
           const songsRes = await fetch(`${PCO_API}/services/v2/songs?${sp.toString()}`, {
             headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
           });
