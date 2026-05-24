@@ -3479,6 +3479,13 @@ const routes3 = [
     return json({ pcoId, count: data.length, sample: data.slice(0,5).map(a => ({ id: a.id, title: a.attributes && a.attributes.title })) });
   }),
 
+  // Debug: list newly inserted arrangements (last 10)
+  route('GET', '/api/debug-arrangements', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const rows = await env.DB.prepare('SELECT id, song_id, pco_id, name, pco_updated_at FROM arrangements ORDER BY id DESC LIMIT 20').all();
+    return json({ count: rows.results.length, rows: rows.results });
+  }),
+
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
