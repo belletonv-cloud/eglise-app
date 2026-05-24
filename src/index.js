@@ -3464,6 +3464,20 @@ const routes3 = [
     return json({ count: rows.results.length, rows: rows.results });
   }),
 
+  // Debug: fetch arrangements for a single PCO song id
+  route('GET', '/api/debug-song-arrangements/:pcoId', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
+    const pcoId = params.pcoId;
+    const token_id = env.PCO_TOKEN_ID; const token_secret = env.PCO_TOKEN_SECRET;
+    if (!token_id || !token_secret) return json({ error: 'PCO credentials not configured' }, 500);
+    const auth = btoa(`${token_id}:${token_secret}`);
+    const res = await fetch(`https://api.planningcenteronline.com/services/v2/songs/${pcoId}/arrangements?per_page=100`, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
+    if (!res.ok) return json({ error: `PCO ${res.status}` }, res.status);
+    const j = await res.json();
+    const data = j.data || [];
+    return json({ pcoId, count: data.length, sample: data.slice(0,5).map(a => ({ id: a.id, title: a.attributes && a.attributes.title })) });
+  }),
+
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
