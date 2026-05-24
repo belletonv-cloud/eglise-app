@@ -3378,6 +3378,12 @@ const routes3 = [
       const now = new Date().toISOString();
       await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
 
+      // If we have more songs to process, trigger another run (internal) to continue chunked sync.
+      const moreRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
+      if (moreRow && moreRow.value && !request.headers.get('x-internal-sync')) {
+        try { await fetch(request.url, { method: 'POST', headers: { 'x-internal-sync': '1', 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) { /* ignore */ }
+      }
+
     } catch (e) {
       return json({ error: e.message, results }, 500);
     } finally {
