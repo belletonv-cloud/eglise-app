@@ -2,22 +2,19 @@
   <div class="demo-tour">
     <section class="hero">
       <div class="hero-content">
-        <h1>🚀 Église App</h1>
-        <p class="hero-sub">
-          Découvrez toutes les fonctionnalités de l'application de gestion d'église.
-          <br />Inspiré de <strong>Planning Center</strong>, <strong>Music Stand</strong> et plus encore.
-        </p>
+        <h1>{{ $t('demo_tour.hero_title') }}</h1>
+        <p class="hero-sub" v-html="$t('demo_tour.hero_sub')"></p>
         <button @click="startTour" class="btn-primary">
-          ▶ Commencer la visite guidée
+          {{ $t('demo_tour.start_tour') }}
         </button>
         <button @click="enterDemo" class="btn-secondary">
-          🚀 Accéder directement au Dashboard
+          {{ $t('demo_tour.enter_demo') }}
         </button>
       </div>
     </section>
 
     <section class="features">
-      <h2>Tout ce que vous pouvez faire</h2>
+      <h2>{{ $t('demo_tour.features_title') }}</h2>
       <div class="feature-grid">
         <div v-for="f in features" :key="f.title" class="feature-card">
           <div class="feature-icon">{{ f.icon }}</div>
@@ -28,7 +25,7 @@
     </section>
 
     <section class="comparison">
-      <h2>Comparaison avec Planning Center</h2>
+      <h2>{{ $t('demo_tour.comparison_title') }}</h2>
       <div class="comparison-table">
         <table>
           <thead>
@@ -90,7 +87,8 @@ const comparison = [
 
 function startTour() {
   startDemoTour()
-  router.push(tourSteps[0].route)
+  const firstStep = tourSteps[0]
+  if (firstStep) router.push(firstStep.route)
 }
 
 function enterDemo() {

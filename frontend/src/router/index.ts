@@ -50,8 +50,7 @@ const router = createRouter({
     },
     {
       path: '/interactive',
-      name: 'interactive',
-      component: DemoTour,
+      redirect: '/demo-tour',
     },
     {
       path: '/dashboard',

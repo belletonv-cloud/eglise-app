@@ -35,7 +35,12 @@ Déployée sur Cloudflare Workers + Pages.
 - **Mode démo** : accessible via `/demo-tour` ou bouton "🕊️ Démo connectée"
 - **Connecté à l'API réelle** : le mode démo appelle l'API via `x-demo-email: admin@cieuxouverts.bzh`
 - **Le backend auto-crée l'utilisateur** (admin) au premier appel
-- Plus de données mockées — tout passe par l'API / D1
+- **Phase 2** : Intercepteur GET dans `api.ts` → mock data de `demoData.ts` (20+ patterns)
+- **Phase 3** : Demo Guide interactif (highlight pulse, action buttons, auto-demo play)
+  - `useDemoHighlighter.ts` — overlay animé + scrollIntoView
+  - `DemoGuide.vue` — stepper visuel, actions "Essayez", auto-play 5s
+  - i18n : guide_auto, guide_pause, action_member/plan/song
+  - CSS : `@keyframes demo-pulse` dans main.css
 
 ## Structure
 

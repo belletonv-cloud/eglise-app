@@ -17,9 +17,56 @@
         </div>
       </div>
 
-      <div v-if="syncResult" class="mt-4 p-4 rounded-lg" :class="syncResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'">
-        <p class="font-medium">{{ syncResult.success ? $t('pcoSync.synced') : $t('pcoSync.error') }}</p>
-        <pre class="text-xs mt-2 whitespace-pre-wrap overflow-auto max-h-60">{{ syncResult.message }}</pre>
+      <div v-if="syncResult" class="mt-4 p-4 rounded-lg"
+        :class="syncResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-lg">{{ syncResult.success ? '✅' : '⚠️' }}</span>
+          <span class="font-medium">{{ syncResult.success ? $t('pcoSync.synced') : $t('pcoSync.error') }}</span>
+        </div>
+
+        <div v-if="syncResult.results" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.service_types ?? 0 }}</div>
+            <div class="text-xs opacity-75">Types</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.plans ?? 0 }}</div>
+            <div class="text-xs opacity-75">Plans</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.plan_items ?? 0 }}</div>
+            <div class="text-xs opacity-75">Items</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.people ?? 0 }}</div>
+            <div class="text-xs opacity-75">Bénévoles</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.songs ?? 0 }}</div>
+            <div class="text-xs opacity-75">Chants</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.arrangements ?? 0 }}</div>
+            <div class="text-xs opacity-75">Arrangements</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.deleted ?? 0 }}</div>
+            <div class="text-xs opacity-75">Supprimés</div>
+          </div>
+          <div class="bg-black/10 dark:bg-white/10 rounded-lg p-2 text-center">
+            <div class="text-lg font-bold">{{ syncResult.results.errors?.length ?? 0 }}</div>
+            <div class="text-xs opacity-75">Erreurs</div>
+          </div>
+        </div>
+
+        <div v-if="syncResult.results?.errors?.length" class="mt-3">
+          <details class="text-xs">
+            <summary class="cursor-pointer font-medium">Détail des erreurs ({{ syncResult.results.errors.length }})</summary>
+            <ul class="mt-1 space-y-0.5 list-disc list-inside">
+              <li v-for="(err, i) in syncResult.results.errors" :key="i">{{ err }}</li>
+            </ul>
+          </details>
+        </div>
       </div>
 
       <div class="mt-6 space-y-3">
@@ -28,7 +75,7 @@
           <li>• {{ $t('pcoSync.plans') }}</li>
           <li>• {{ $t('pcoSync.assignments') }}</li>
           <li>• {{ $t('pcoSync.songs') }}</li>
-          <li>• {{ $t('menu.services') }}</li>
+          <li>• Ordre du culte (items / chants)</li>
         </ul>
       </div>
     </div>
@@ -52,11 +99,14 @@ const sync = async () => {
   syncResult.value = null
   try {
     const result = await api.syncPCO()
-    syncResult.value = { success: true, message: JSON.stringify(result, null, 2) }
+    syncResult.value = { success: true, results: result.results }
     showToast(t('pcoSync.synced'))
     lastSync.value = new Date().toLocaleString()
+    localStorage.setItem('pco_last_sync', lastSync.value)
   } catch (e: any) {
-    syncResult.value = { success: false, message: e.message }
+    let data = { results: null }
+    try { data = JSON.parse(e.message) } catch {}
+    syncResult.value = { success: false, results: data.results, message: e.message }
     showToast(t('pcoSync.error'), 'error')
   } finally {
     syncing.value = false

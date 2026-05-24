@@ -1,6 +1,12 @@
 import type { Song, Arrangement, Member, Team, Plan, PlanItem, ServiceType, ScheduledPerson, Attendance, HouseGroup, EmailTemplate, EmailLog, Attachment, VolunteerPreferences, PlanTemplate, PlanTemplateItem } from './types'
 import { user } from '../stores/auth'
 import { isInteractiveView, interactiveUser } from '../stores/demo'
+import {
+  interactiveSongs, interactiveMembers, interactiveTeams,
+  interactivePlans, interactiveHouseGroups, demoAnnouncements,
+  demoPolls, demoServiceTypes, demoPlanTemplates, demoEmailTemplates,
+  interactiveStats, demoTeamMembers,
+} from '../stores/demoData'
 
 const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:8787/api' : 'https://eglise-app.belletonv.workers.dev/api')
 
@@ -8,8 +14,94 @@ export function getApiBase() {
   return API_BASE
 }
 
+// Demo fallback: map API paths to curated demo data when in interactive demo mode
+const demoFallbacks: [RegExp, (...args: string[]) => any][] = [
+  [/^\/songs$/, () => interactiveSongs],
+  [/^\/members$/, () => interactiveMembers.map(m => ({
+    ...m, membership_type: (m as any).member_type || 'regular',
+  }))],
+  [/^\/teams$/, () => interactiveTeams],
+  [/^\/plans$/, () => interactivePlans.map(p => {
+    const { items, ...plan } = p
+    return { ...plan, item_count: items.length }
+  })],
+  [/^\/house-groups$/, () => interactiveHouseGroups],
+  [/^\/announcements$/, () => demoAnnouncements],
+  [/^\/polls$/, () => demoPolls],
+  [/^\/service-types$/, () => demoServiceTypes],
+  [/^\/email-templates$/, () => demoEmailTemplates],
+  [/^\/plan-templates$/, () => demoPlanTemplates.map(t => {
+    const { items, ...rest } = t
+    return { ...rest, item_count: items?.length || 0 }
+  })],
+  [/^\/directory$/, () => interactiveMembers.map(m => ({
+    ...m, membership_type: (m as any).member_type || 'regular',
+  }))],
+  [/^\/stats$/, () => interactiveStats],
+  [/^\/attendance-stats/, () => ({
+    total: 0, perMember: [], perMonth: [], recent: [],
+  })],
+
+  // Single items
+  [/^\/songs\/(\d+)$/, (id) => interactiveSongs.find(s => s.id === Number(id)) || interactiveSongs[0]],
+  [/^\/members\/(\d+)$/, (id) => {
+    const m = interactiveMembers.find(mm => mm.id === Number(id))
+    const fallback = m || interactiveMembers[0]
+    return { ...fallback, membership_type: (fallback as any).member_type || 'regular' }
+  }],
+  [/^\/teams\/(\d+)$/, (id) => interactiveTeams.find(t => t.id === Number(id)) || interactiveTeams[0]],
+  [/^\/plans\/(\d+)$/, (id) => {
+    const plan = interactivePlans.find(p => p.id === Number(id))
+    if (!plan) return interactivePlans[0]
+    const { items, ...planData } = plan
+    return planData
+  }],
+  [/^\/plans\/(\d+)\/items$/, (id) => {
+    const plan = interactivePlans.find(p => p.id === Number(id))
+    return plan ? plan.items : []
+  }],
+  [/^\/plans\/(\d+)\/scheduled-people$/, () => demoTeamMembers],
+  [/^\/house-groups\/(\d+)$/, (id) => interactiveHouseGroups.find(g => g.id === Number(id)) || interactiveHouseGroups[0]],
+  [/^\/teams\/(\d+)\/members$/, (id) => demoTeamMembers.filter(tm => tm.team_id === Number(id))],
+  [/^\/email-templates\/(\d+)$/, (id) => demoEmailTemplates.find(t => t.id === Number(id)) || demoEmailTemplates[0]],
+  [/^\/plan-templates\/(\d+)$/, (id) => {
+    const t = demoPlanTemplates.find(pt => pt.id === Number(id))
+    return t || demoPlanTemplates[0]
+  }],
+  [/^\/plan-templates\/(\d+)\/items$/, (id) => {
+    const t = demoPlanTemplates.find(pt => pt.id === Number(id))
+    return t ? t.items : []
+  }],
+  [/^\/me$/, () => ({
+    id: 999, first_name: 'Admin', last_name: 'Démo',
+    email: 'admin@cieuxouverts.bzh', role: 'admin',
+    membership_type: 'staff',
+  })],
+]
+
+function getDemoFallback(path: string): any {
+  const qIdx = path.indexOf('?')
+  const cleanPath = qIdx >= 0 ? path.slice(0, qIdx) : path
+  for (const [regex, handler] of demoFallbacks) {
+    const match = cleanPath.match(regex)
+    if (match) {
+      return handler(...match.slice(1))
+    }
+  }
+  return null
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  // In demo mode, always hit the real API — the backend auto-creates users via x-demo-email
+  const method = (options.method || 'GET').toUpperCase()
+
+  // Demo mode: serve curated demo data for GET requests instead of hitting empty API
+  if (isInteractiveView.value && method === 'GET') {
+    const fallback = getDemoFallback(path)
+    if (fallback !== null) {
+      return fallback as T
+    }
+  }
+
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
   try {
     const activeUser = isInteractiveView.value ? interactiveUser.value : user.value

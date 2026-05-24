@@ -343,6 +343,45 @@ const route = (method, path, handler) => {
   return { method, pattern: new RegExp(`^${patternStr}$`), names, handler };
 };
 
+// ========================================
+// PCO SYNC HELPERS
+// ========================================
+
+const pcoFetch = async (url, auth) => {
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
+  });
+  if (!res.ok) throw new Error(`PCO ${url}: ${res.status}`);
+  return await res.json();
+};
+
+const pcoFetchAll = async (baseUrl, auth, params = {}) => {
+  const allData = [];
+  let offset = 0;
+  const perPage = 100;
+  while (true) {
+    const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
+    const json = await pcoFetch(`${baseUrl}?${sp.toString()}`, auth);
+    const items = json.data || [];
+    allData.push(...items);
+    if (items.length < perPage) break;
+    offset += perPage;
+  }
+  return allData;
+};
+
+const acquireSyncLock = async (env) => {
+  await env.DB.prepare("DELETE FROM sync_locks WHERE expires_at < datetime('now')").run();
+  const r = await env.DB.prepare(
+    "INSERT INTO sync_locks (lock_name, locked_at, expires_at) VALUES (?, datetime('now'), datetime('now', '+10 minutes'))"
+  ).bind('pco_sync').run();
+  return r.meta.changes > 0;
+};
+
+const releaseSyncLock = async (env) => {
+  await env.DB.prepare("DELETE FROM sync_locks WHERE lock_name = ?").bind('pco_sync').run();
+};
+
 const routes0 = [
   // ========================================
   // SONGS
@@ -3005,166 +3044,333 @@ const routes3 = [
 
     const auth = btoa(`${token_id}:${token_secret}`);
     const PCO_API = 'https://api.planningcenteronline.com';
+    const results = { service_types: 0, plans: 0, plan_items: 0, people: 0, songs: 0, arrangements: 0, deleted: 0, errors: [] };
 
-    const results = { services: 0, people: 0, songs: 0, arrangements: 0, errors: [] };
+    // 1. Acquire mutex
+    if (!await acquireSyncLock(env)) {
+      return json({ error: 'Sync already in progress', results }, 409);
+    }
 
     try {
-      // Fetch upcoming services (next 4 weeks)
-      const today = new Date().toISOString().slice(0, 10);
-      const fourWeeks = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
-      const servicesRes = await fetch(`${PCO_API}/services/v2/service_types`, {
-        headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
-      });
-      if (!servicesRes.ok) throw new Error(`PCO service_types failed: ${servicesRes.status}`);
-      const serviceTypesData = await servicesRes.json();
+      // 2. Get last sync time (for incremental sync)
+      const lastSyncRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_last_sync_at'").first();
+      const lastSyncAt = lastSyncRow && lastSyncRow.value && lastSyncRow.value.length >= 10 ? lastSyncRow.value : '';
 
-      // Sync service types
-      for (const st of serviceTypesData.data || []) {
-        const existing = await env.DB.prepare('SELECT id FROM service_types WHERE name = ?').bind(st.attributes.name).first();
-        if (!existing) {
-          await env.DB.prepare('INSERT INTO service_types (name) VALUES (?)').bind(st.attributes.name).run();
+      // 3. Sync service types (full — rare modifications)
+      try {
+        const stData = await pcoFetchAll(`${PCO_API}/services/v2/service_types`, auth);
+        const stmts = [];
+        for (const st of stData) {
+          const pcoId = st.id;
+          const name = st.attributes && st.attributes.name;
+          if (!name) continue;
+
+          const existing = await env.DB.prepare('SELECT id, pco_id FROM service_types WHERE pco_id = ?').bind(pcoId).first();
+          if (existing) {
+            stmts.push(env.DB.prepare('UPDATE service_types SET pco_updated_at = ? WHERE id = ?')
+              .bind(st.attributes.updated_at || null, existing.id));
+          } else {
+            const byName = await env.DB.prepare('SELECT id FROM service_types WHERE name = ? AND pco_id IS NULL').bind(name).first();
+            if (byName) {
+              stmts.push(env.DB.prepare('UPDATE service_types SET pco_id = ?, pco_updated_at = ? WHERE id = ?')
+                .bind(pcoId, st.attributes.updated_at || null, byName.id));
+            } else {
+              stmts.push(env.DB.prepare('INSERT INTO service_types (name, pco_id, pco_updated_at) VALUES (?, ?, ?)')
+                .bind(name, pcoId, st.attributes.updated_at || null));
+            }
+          }
+          results.service_types++;
         }
-      }
+        if (stmts.length > 0) await env.DB.batch(stmts);
+      } catch (e) { results.errors.push(`Service types: ${e.message}`); }
 
-      // Fetch plans for each service type
-      for (const st of serviceTypesData.data || []) {
-        const plansRes = await fetch(`${PCO_API}/services/v2/service_types/${st.id}/plan_times?filter[starts_at]=${today}..${fourWeeks}`, {
-          headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
-        });
-        if (!plansRes.ok) continue;
-        const plansData = await plansRes.json();
+      // 4. Sync plans (upcoming 4 weeks) + plan_items + people
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const fourWeeks = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
+        const stList = (await env.DB.prepare('SELECT id, pco_id FROM service_types WHERE pco_id IS NOT NULL').all()).results || [];
 
-        for (const pt of plansData.data || []) {
-          const startsAt = pt.attributes.starts_at;
-          if (!startsAt) continue;
-          const date = startsAt.slice(0, 10);
-          const time = startsAt.slice(11, 16);
-          const title = pt.attributes.title || '';
+        for (const stLocal of stList) {
+          // Fetch plan_times for this service type with plan included
+          const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
+          let ptData;
+          try {
+            ptData = await pcoFetchAll(ptUrl, auth, { 'filter[starts_at]': `${today}..${fourWeeks}` });
+          } catch { continue; }
 
-          // Check if plan already exists
-          const existing = await env.DB.prepare('SELECT id FROM plans WHERE date = ? AND time = ?').bind(date, time).first();
-          if (existing) continue;
+          const pcoPlanIdsInWindow = new Set();
 
-          // Find matching service_type
-          const stLocal = await env.DB.prepare('SELECT id FROM service_types WHERE name = ?').bind(st.attributes.name).first();
+          for (const pt of ptData) {
+            await new Promise(r => setTimeout(r, 50));
+            const planRel = pt.relationships && pt.relationships.plan && pt.relationships.plan.data;
+            if (!planRel) continue;
+            const pcoPlanId = planRel.id;
+            pcoPlanIdsInWindow.add(pcoPlanId);
 
-          await env.DB.prepare('INSERT INTO plans (service_type_id, date, time, theme, status) VALUES (?, ?, ?, ?, ?)')
-            .bind(stLocal ? stLocal.id : null, date, time, title || null, 'planned').run();
-          results.services++;
+            const startsAt = pt.attributes && pt.attributes.starts_at;
+            if (!startsAt) continue;
+            const date = startsAt.slice(0, 10);
+            const time = startsAt.slice(11, 16);
 
-          // Fetch plan people
-          const planId = (await env.DB.prepare('SELECT id FROM plans WHERE date = ? AND time = ? ORDER BY id DESC LIMIT 1').bind(date, time).first())?.id;
-          if (planId) {
+            // Fetch full plan data for title/updated_at
+            let planAttrs = { title: '', updated_at: null };
             try {
-              const peopleRes = await fetch(`${PCO_API}/services/v2/plans/${pt.id}/people`, {
-                headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
-              });
-              if (peopleRes.ok) {
-                const peopleData = await peopleRes.json();
-                for (const p of peopleData.data || []) {
-                  const personName = p.attributes.name || '';
-                  const [firstName, ...lastNameParts] = personName.split(' ');
-                  const lastName = lastNameParts.join(' ') || '';
-                  const status = p.attributes.status || 'pending';
-                  const teamName = p.attributes.team || '';
+              const planJson = await pcoFetch(`${PCO_API}/services/v2/plans/${pcoPlanId}`, auth);
+              if (planJson.data && planJson.data.attributes) {
+                planAttrs = planJson.data.attributes;
+              }
+            } catch {}
 
-                  // Find or create member
-                  let member = await env.DB.prepare('SELECT id FROM members WHERE first_name = ? AND last_name = ?').bind(firstName, lastName).first();
-                  if (!member && firstName) {
-                    await env.DB.prepare('INSERT INTO members (first_name, last_name) VALUES (?, ?)').bind(firstName, lastName).run();
-                    member = await env.DB.prepare('SELECT id FROM members WHERE first_name = ? AND last_name = ?').bind(firstName, lastName).first();
-                  }
+            // Find plan by pco_id
+            let planRow = await env.DB.prepare('SELECT id, pco_id FROM plans WHERE pco_id = ?').bind(pcoPlanId).first();
 
-                  if (member) {
-                    // Find or create team
-                    let team = null;
-                    if (teamName) {
-                      team = await env.DB.prepare('SELECT id FROM teams WHERE name = ?').bind(teamName).first();
-                      if (!team) {
-                        await env.DB.prepare('INSERT INTO teams (name) VALUES (?)').bind(teamName).run();
-                        team = await env.DB.prepare('SELECT id FROM teams WHERE name = ?').bind(teamName).first();
-                      }
+            if (!planRow) {
+              // Fallback: date + time + service_type
+              planRow = await env.DB.prepare(
+                'SELECT id, pco_id FROM plans WHERE date = ? AND time = ? AND service_type_id = ? AND pco_id IS NULL'
+              ).bind(date, time, stLocal.id).first();
+            }
+
+            const theme = planAttrs.title || '';
+
+            if (planRow) {
+              await env.DB.prepare(
+                'UPDATE plans SET service_type_id = ?, date = ?, time = ?, theme = ?, pco_id = ?, pco_updated_at = ?, pco_deleted_at = NULL WHERE id = ?'
+              ).bind(stLocal.id, date, time, theme, pcoPlanId, planAttrs.updated_at || null, planRow.id).run();
+            } else {
+              const ins = await env.DB.prepare(
+                'INSERT INTO plans (service_type_id, date, time, theme, status, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+              ).bind(stLocal.id, date, time, theme, 'planned', pcoPlanId, planAttrs.updated_at || null).run();
+              planRow = { id: ins.meta.last_row_id };
+              results.plans++;
+            }
+
+            const planId = planRow.id;
+
+            // 4a. Sync plan_items — delete & re-insert for this plan
+            try {
+              await new Promise(r => setTimeout(r, 100));
+              const itemsData = await pcoFetchAll(`${PCO_API}/services/v2/plans/${pcoPlanId}/items`, auth);
+
+              await env.DB.prepare('DELETE FROM plan_items WHERE plan_id = ?').bind(planId).run();
+
+              for (const item of itemsData) {
+                const attrs = item.attributes || {};
+                if (attrs.item_type === 'break') continue;
+
+                const typeMap = { song: 'song', header: 'header', media: 'media', announcement: 'announcement' };
+                const itemType = typeMap[attrs.item_type] || 'header';
+
+                const ins = await env.DB.prepare(
+                  'INSERT INTO plan_items (plan_id, type, title, description, position, length_minutes, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                ).bind(planId, itemType, attrs.title || '', attrs.description || '', attrs.position || 0,
+                  attrs.length_minutes || null, item.id, attrs.updated_at || null).run();
+                results.plan_items++;
+
+                // Link song items to arrangements via plan_songs
+                if (attrs.item_type === 'song') {
+                  const arrRel = item.relationships && item.relationships.arrangement && item.relationships.arrangement.data;
+                  if (arrRel) {
+                    const arrRow = await env.DB.prepare('SELECT id FROM arrangements WHERE pco_id = ?').bind(arrRel.id).first();
+                    if (arrRow) {
+                      await env.DB.prepare(
+                        'INSERT OR IGNORE INTO plan_songs (plan_item_id, arrangement_id, transposed_key) VALUES (?, ?, ?)'
+                      ).bind(ins.meta.last_row_id, arrRow.id, attrs.key || null).run();
                     }
-
-                    // Schedule the person
-                    const position = p.attributes.role || '';
-                    await env.DB.prepare('INSERT OR IGNORE INTO scheduled_people (plan_id, member_id, team_id, position, status) VALUES (?, ?, ?, ?, ?)')
-                      .bind(planId, member.id, team ? team.id : null, position, status).run();
-                    results.people++;
                   }
                 }
               }
-            } catch (e) { results.errors.push(`Plan ${pt.id} people: ${e.message}`); }
+            } catch (e) { results.errors.push(`Plan items ${pcoPlanId}: ${e.message}`); }
+
+            // 4b. Sync people for this plan
+            try {
+              await new Promise(r => setTimeout(r, 100));
+              const peopleData = await pcoFetchAll(`${PCO_API}/services/v2/plans/${pcoPlanId}/people`, auth);
+
+              for (const p of peopleData) {
+                const pAttrs = p.attributes || {};
+                const personName = pAttrs.name || '';
+                const status = pAttrs.status || 'pending';
+                const teamName = pAttrs.team || '';
+                const role = pAttrs.role || '';
+                const pcoPersonRel = p.relationships && p.relationships.person && p.relationships.person.data;
+                const pcoPersonId = pcoPersonRel && pcoPersonRel.id;
+                if (!pcoPersonId) continue;
+
+                // Find or create member by pco_id, fallback name
+                let memberRow = await env.DB.prepare('SELECT id, pco_id FROM members WHERE pco_id = ?').bind(pcoPersonId).first();
+                if (!memberRow && personName) {
+                  const [firstName, ...lastNameParts] = personName.split(' ');
+                  const lastName = lastNameParts.join(' ') || '';
+                  memberRow = await env.DB.prepare(
+                    'SELECT id FROM members WHERE first_name = ? AND last_name = ? AND pco_id IS NULL'
+                  ).bind(firstName, lastName).first();
+                  if (!memberRow && firstName) {
+                    const ins = await env.DB.prepare(
+                      'INSERT INTO members (first_name, last_name, pco_id) VALUES (?, ?, ?)'
+                    ).bind(firstName, lastName, pcoPersonId).run();
+                    memberRow = { id: ins.meta.last_row_id };
+                  }
+                }
+
+                if (memberRow) {
+                  if (!memberRow.pco_id) {
+                    await env.DB.prepare('UPDATE members SET pco_id = ? WHERE id = ?').bind(pcoPersonId, memberRow.id).run();
+                  }
+
+                  // Find or create team by pco_id, fallback name
+                  let teamRow = null;
+                  if (teamName) {
+                    const pcoTeamRel = p.relationships && p.relationships.team && p.relationships.team.data;
+                    const pcoTeamId = pcoTeamRel && pcoTeamRel.id;
+                    if (pcoTeamId) {
+                      teamRow = await env.DB.prepare('SELECT id FROM teams WHERE pco_id = ?').bind(pcoTeamId).first();
+                    }
+                    if (!teamRow) {
+                      teamRow = await env.DB.prepare('SELECT id FROM teams WHERE name = ? AND pco_id IS NULL').bind(teamName).first();
+                    }
+                    if (!teamRow) {
+                      const ins = await env.DB.prepare('INSERT INTO teams (name, pco_id) VALUES (?, ?)').bind(teamName, pcoTeamId || null).run();
+                      teamRow = { id: ins.meta.last_row_id };
+                    }
+                  }
+
+                  await env.DB.prepare(
+                    'INSERT OR IGNORE INTO scheduled_people (plan_id, member_id, team_id, position, status, pco_id) VALUES (?, ?, ?, ?, ?, ?)'
+                  ).bind(planId, memberRow.id, teamRow ? teamRow.id : null, role, status, pcoPersonId).run();
+                  results.people++;
+                }
+              }
+            } catch (e) { results.errors.push(`People ${pcoPlanId}: ${e.message}`); }
+          }
+
+          // 4c. Soft-delete plans with pco_id not in PCO window (planned/future only)
+          if (pcoPlanIdsInWindow.size > 0) {
+            const placeholders = [...pcoPlanIdsInWindow].map(() => '?').join(',');
+            const delRes = await env.DB.prepare(
+              `UPDATE plans SET pco_deleted_at = datetime('now') WHERE service_type_id = ? AND pco_id IS NOT NULL AND pco_id NOT IN (${placeholders}) AND status = 'planned' AND pco_deleted_at IS NULL`
+            ).bind(stLocal.id, ...pcoPlanIdsInWindow).run();
+            if (delRes.meta.changes > 0) results.deleted += delRes.meta.changes;
           }
         }
-      }
+      } catch (e) { results.errors.push(`Plans: ${e.message}`); }
 
-      // Fetch songs + arrangements (with chord_chart)
+      // 5. Sync songs + arrangements (incremental if lastSyncAt exists)
       try {
-        let offset = 0;
-        const perPage = 100;
+        // Chunk songs processing to avoid Worker subrequest limits
+        const songOffsetRow = await env.DB.prepare("SELECT value FROM sync_state WHERE key = 'pco_song_offset'").first();
+        let offset = songOffsetRow && songOffsetRow.value ? parseInt(songOffsetRow.value, 10) : 0;
+        const perPage = 20; // process 20 songs per run
+        const params = { per_page: String(perPage) };
+        if (lastSyncAt) { params['filter[updated_at][since]'] = lastSyncAt; }
         while (true) {
-          const songsRes = await fetch(`${PCO_API}/services/v2/songs?per_page=${perPage}&offset=${offset}`, {
+          const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
+          await new Promise(r => setTimeout(r, 100));
+          const songsRes = await fetch(`${PCO_API}/services/v2/songs?${sp.toString()}`, {
             headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
           });
-          if (!songsRes.ok) { results.errors.push(`Songs page offset ${offset}: ${songsRes.status}`); break; }
+          if (!songsRes.ok) { results.errors.push(`Songs offset ${offset}: ${songsRes.status}`); break; }
           const songsData = await songsRes.json();
           const songsList = songsData.data || [];
           if (songsList.length === 0) break;
 
           for (const s of songsList) {
-            const title = s.attributes.title;
+            const pcoSongId = s.id;
+            const title = s.attributes && s.attributes.title;
             if (!title) continue;
 
+            let songRow = await env.DB.prepare('SELECT id, pco_id FROM songs WHERE pco_id = ?').bind(pcoSongId).first();
+            if (!songRow) {
+              songRow = await env.DB.prepare('SELECT id, pco_id FROM songs WHERE title = ? AND pco_id IS NULL').bind(title).first();
+            }
+
+            const author = s.attributes ? s.attributes.author || null : null;
+            const ccli = s.attributes ? s.attributes.ccli_number || null : null;
+            const updatedAt = s.attributes ? s.attributes.updated_at || null : null;
+
             let songId;
-            const existing = await env.DB.prepare('SELECT id FROM songs WHERE title = ?').bind(title).first();
-            if (!existing) {
-              const ins = await env.DB.prepare('INSERT INTO songs (title, author, ccli_number) VALUES (?, ?, ?)')
-                .bind(title, s.attributes.author || null, s.attributes.ccli_number || null).run();
+            if (!songRow) {
+              const ins = await env.DB.prepare(
+                'INSERT INTO songs (title, author, ccli_number, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?)'
+              ).bind(title, author, ccli, pcoSongId, updatedAt).run();
               songId = ins.meta.last_row_id;
               results.songs++;
             } else {
-              songId = existing.id;
+              songId = songRow.id;
+              if (!songRow.pco_id) {
+                await env.DB.prepare('UPDATE songs SET pco_id = ?, pco_updated_at = ? WHERE id = ?')
+                  .bind(pcoSongId, updatedAt, songId).run();
+              } else {
+                await env.DB.prepare('UPDATE songs SET pco_updated_at = ? WHERE id = ?').bind(updatedAt, songId).run();
+              }
             }
 
-            // Fetch arrangements for this song (includes chord_chart)
+            // Fetch arrangements
             try {
-              await new Promise(r => setTimeout(r, 50)); // small throttle
-              const arrRes = await fetch(`${PCO_API}/services/v2/songs/${s.id}/arrangements`, {
+              await new Promise(r => setTimeout(r, 50));
+              const arrRes = await fetch(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements`, {
                 headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
               });
-              if (arrRes.ok) {
-                const arrData = await arrRes.json();
-                for (const arr of arrData.data || []) {
-                  const attrs = arr.attributes;
-                  if (!attrs.chord_chart) continue;
-                  // Check if this arrangement already exists (by name for this song)
-                  const existingArr = await env.DB.prepare(
-                    'SELECT id FROM arrangements WHERE song_id = ? AND name = ?'
-                  ).bind(songId, attrs.name || 'default').first();
-                  if (!existingArr) {
+              if (!arrRes.ok) continue;
+              const arrData = await arrRes.json();
+              for (const arr of arrData.data || []) {
+                const attrs = arr.attributes || {};
+                const pcoArrId = arr.id;
+                const arrName = attrs.name || 'default';
+                const arrKey = attrs.key || null;
+                const arrTempo = attrs.tempo || null;
+                const chordChart = attrs.chord_chart || null;
+
+                let arrRow = await env.DB.prepare('SELECT id, pco_id, chord_chart FROM arrangements WHERE pco_id = ?').bind(pcoArrId).first();
+                if (!arrRow) {
+                  arrRow = await env.DB.prepare(
+                    'SELECT id, pco_id, chord_chart FROM arrangements WHERE song_id = ? AND name = ? AND pco_id IS NULL'
+                  ).bind(songId, arrName).first();
+                }
+
+                if (!arrRow && chordChart) {
+                  await env.DB.prepare(
+                    'INSERT INTO arrangements (song_id, name, key, tempo, chord_chart, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                  ).bind(songId, arrName, arrKey, arrTempo, chordChart, pcoArrId, attrs.updated_at || null).run();
+                  results.arrangements++;
+                } else if (arrRow) {
+                  // Always update metadata; chord chart only if provided
+                  if (chordChart) {
                     await env.DB.prepare(
-                      'INSERT INTO arrangements (song_id, name, key, tempo, chord_chart) VALUES (?, ?, ?, ?, ?)'
-                    ).bind(songId, attrs.name || 'default', attrs.key || null, attrs.tempo || null, attrs.chord_chart).run();
-                    results.arrangements++;
-                  } else if (attrs.chord_chart && (!existingArr.chord_chart || existingArr.chord_chart === '')) {
-                    // Update if existing arrangement has no chord_chart
+                      'UPDATE arrangements SET name = ?, key = COALESCE(?, key), tempo = COALESCE(?, tempo), chord_chart = ?, pco_id = ?, pco_updated_at = ?, pco_deleted_at = NULL WHERE id = ?'
+                    ).bind(arrName, arrKey, arrTempo, chordChart, pcoArrId, attrs.updated_at || null, arrRow.id).run();
+                  } else {
                     await env.DB.prepare(
-                      'UPDATE arrangements SET name = COALESCE(?, name), key = COALESCE(?, key), tempo = COALESCE(?, tempo), chord_chart = COALESCE(?, chord_chart) WHERE id = ?'
-                    ).bind(attrs.name || 'default', attrs.key || null, attrs.tempo || null, attrs.chord_chart, existingArr.id).run();
+                      'UPDATE arrangements SET name = ?, key = COALESCE(?, key), tempo = COALESCE(?, tempo), pco_id = ?, pco_updated_at = ?, pco_deleted_at = NULL WHERE id = ?'
+                    ).bind(arrName, arrKey, arrTempo, pcoArrId, attrs.updated_at || null, arrRow.id).run();
+                  }
+                  if (!arrRow.pco_id) {
+                    await env.DB.prepare('UPDATE arrangements SET pco_id = ? WHERE id = ?').bind(pcoArrId, arrRow.id).run();
                   }
                 }
               }
-            } catch (e) { results.errors.push(`Arrangements for song ${s.id}: ${e.message}`); }
+            } catch (e) { results.errors.push(`Arr ${pcoSongId}: ${e.message}`); }
           }
 
           offset += perPage;
-          if (songsList.length < perPage) break;
+          // persist offset for next run
+          await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_song_offset', ?)").bind(String(offset)).run();
+          if (songsList.length < perPage) {
+            // reset offset when done
+            await env.DB.prepare("DELETE FROM sync_state WHERE key = 'pco_song_offset'").run();
+            break;
+          }
         }
-      } catch (e) { results.errors.push(`Songs sync: ${e.message}`); }
+      } catch (e) { results.errors.push(`Songs: ${e.message}`); }
+
+      // 6. Save last sync time
+      const now = new Date().toISOString();
+      await env.DB.prepare("INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_last_sync_at', ?)").bind(now).run();
 
     } catch (e) {
       return json({ error: e.message, results }, 500);
+    } finally {
+      await releaseSyncLock(env);
     }
 
     return json({ success: true, results });

@@ -45,7 +45,7 @@ const handleGoogleLogin = async () => {
 
 const enterDemo = () => {
   enableInteractiveView();
-  router.push('/interactive');
+  router.push('/demo-tour');
 };
 
 </script>

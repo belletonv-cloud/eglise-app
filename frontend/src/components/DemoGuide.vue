@@ -1,14 +1,17 @@
 <template>
   <div class="demo-guide" v-if="isDemoTourActive">
-    <div class="demo-guide-backdrop" @click="minimize = !minimize" />
+    <div class="demo-guide-backdrop" />
     <div class="demo-guide-card" :class="{ minimized }">
       <div class="guide-header">
         <span class="guide-badge">🎯 {{ currentStep + 1 }}/{{ totalSteps }}</span>
         <div class="guide-header-actions">
-          <button @click="minimize = !minimize" class="guide-btn" :title="minimize ? 'Agrandir' : 'Réduire'">
+          <button @click="toggleAutoPlay" class="guide-btn" :class="{ active: isAutoPlaying }" :title="isAutoPlaying ? $t('demo_tour.guide_pause') : $t('demo_tour.guide_auto')">
+            {{ isAutoPlaying ? '⏸' : '▶' }}
+          </button>
+          <button @click="minimized = !minimized" class="guide-btn" :title="minimized ? $t('demo_tour.guide_expand') : $t('demo_tour.guide_collapse')">
             {{ minimized ? '▲' : '▼' }}
           </button>
-          <button @click="stop" class="guide-btn guide-close" title="Fermer">✕</button>
+          <button @click="stop" class="guide-btn guide-close" :title="$t('demo_tour.guide_close')">✕</button>
         </div>
       </div>
 
@@ -18,19 +21,22 @@
           <h3 class="guide-title">{{ step.title }}</h3>
           <p class="guide-desc">{{ step.desc }}</p>
           <p class="guide-hint">{{ step.hint }}</p>
+          <button v-if="step.actionLabel" @click="runAction" class="guide-action-btn">
+            {{ step.actionLabel }} →
+          </button>
         </div>
 
         <div class="guide-footer">
           <div class="guide-dots">
-            <span v-for="(_, i) in tourSteps" :key="i" class="guide-dot" :class="{ active: i === currentStep }" @click="goTo(i)" />
+            <span v-for="(s, i) in tourSteps" :key="i" class="guide-dot" :class="{ active: i === currentStep }" @click="goTo(i)" />
           </div>
           <div class="guide-nav">
             <button @click="prev" :disabled="currentStep === 0" class="guide-nav-btn">←</button>
             <button v-if="currentStep < totalSteps - 1" @click="next" class="guide-nav-btn guide-nav-next">
-              Suivant →
+              {{ $t('demo_tour.guide_next') }}
             </button>
             <button v-else @click="finish" class="guide-nav-btn guide-nav-finish">
-              🚀 Explorer
+              {{ $t('demo_tour.guide_finish') }}
             </button>
           </div>
         </div>
@@ -40,25 +46,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
-  isDemoTourActive, demoTourStep, tourSteps,
+  isDemoTourActive, demoTourStep, tourSteps, type TourStep,
   stopDemoTour, nextTourStep, prevTourStep,
+  isAutoPlaying, toggleAutoPlay,
 } from '../stores/demo'
+import { useDemoHighlighter } from '../composables/useDemoHighlighter'
 
 const router = useRouter()
-const minimize = ref(false)
+const { t } = useI18n()
+const { highlight, clear: clearHighlight } = useDemoHighlighter()
+const minimized = ref(false)
 
 const currentStep = demoTourStep
-const step = computed(() => tourSteps[currentStep.value] ?? tourSteps[0])
+const step = computed(() => {
+  const s: TourStep | undefined = tourSteps[currentStep.value]
+  if (!s) return { icon: '', title: '', desc: '', hint: '', actionLabel: '' }
+  return {
+    icon: s.icon,
+    title: t(s.title),
+    desc: t(s.desc),
+    hint: t(s.hint),
+    actionLabel: s.actionLabelKey ? t(s.actionLabelKey) : '',
+    action: s.action || '',
+  }
+})
 const totalSteps = tourSteps.length
 
-watch(currentStep, (step) => {
-  minimize.value = false
-  const route = tourSteps[step]?.route
-  if (route) router.push(route)
+watch(currentStep, async (step) => {
+  minimized.value = false
+  const s = tourSteps[step]
+  if (!s) return
+  if (s.route) router.push(s.route)
+  await nextTick()
+  await nextTick()
+  if (s.highlight) {
+    highlight(s.highlight)
+  }
 })
+
+function runAction() {
+  const s = tourSteps[currentStep.value]
+  if (!s?.action) return
+  const [type, ...rest] = s.action.split(':')
+  const value = rest.join(':')
+  if (type === 'route') {
+    router.push(value)
+  } else if (type === 'click') {
+    const el = document.querySelector(value) as HTMLElement | null
+    el?.click()
+  } else if (type === 'focus') {
+    const el = document.querySelector(value) as HTMLElement | null
+    el?.focus()
+  }
+}
 
 function next() {
   if (currentStep.value < totalSteps - 1) {
@@ -76,14 +120,19 @@ function goTo(i: number) {
 
 function stop() {
   stopDemoTour()
+  clearHighlight()
 }
 
 function finish() {
   if (currentStep.value < totalSteps - 1) {
     currentStep.value = totalSteps - 1
   }
-  minimize.value = true
+  minimized.value = true
 }
+
+onUnmounted(() => {
+  clearHighlight()
+})
 </script>
 
 <style scoped>
@@ -155,6 +204,10 @@ function finish() {
   color: #e2e8f0;
 }
 
+.guide-btn.active {
+  color: #4ade80;
+}
+
 .guide-close:hover {
   color: #f87171;
 }
@@ -186,7 +239,26 @@ function finish() {
   font-size: 0.8rem;
   color: #6366f1;
   font-style: italic;
-  margin: 0;
+  margin: 0 0 12px;
+}
+
+.guide-action-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guide-action-btn:hover {
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
 }
 
 .guide-footer {
@@ -213,6 +285,10 @@ function finish() {
 .guide-dot.active {
   background: #6366f1;
   transform: scale(1.3);
+}
+
+.guide-dot:hover {
+  background: rgba(99, 102, 241, 0.5);
 }
 
 .guide-nav {

@@ -73,7 +73,7 @@
             </div>
             <span v-if="item.type === 'song' && item.arrangement_id" class="setlist-play">▶</span>
           </div>
-          <div v-if="planItems.length === 0" class="setlist-empty">Aucun élément dans le plan</div>
+          <div v-if="planItems.length === 0" class="setlist-empty">{{ $t('setlist.empty') }}</div>
         </div>
       </div>
     </div>
@@ -123,8 +123,13 @@
       </div>
     </div>
 
+    <!-- Loading state -->
+    <div v-if="loading" class="chart-loading">
+      <p class="text-gray-400 text-lg">{{ $t('musicStand.loading') }}</p>
+    </div>
+
     <!-- Chord chart content -->
-    <div ref="chartContainer" v-if="parsedLines.length > 0" class="chart-container overflow-x-auto" :style="{ fontSize: fontSize + 'px' }">
+    <div ref="chartContainer" v-else-if="parsedLines.length > 0" class="chart-container overflow-x-auto" :style="{ fontSize: fontSize + 'px' }">
       <div v-for="(line, idx) in parsedLines" :key="idx" class="chart-line" :class="line.type">
         <template v-if="line.type === 'section'">
           <span class="section-label">{{ line.label }}</span>
@@ -132,7 +137,7 @@
         <template v-else-if="line.type === 'chord-lyric'">
           <span v-for="(part, pIdx) in line.parts" :key="pIdx" class="chord-lyric-part">
             <span v-if="part.chord" class="chord">{{ part.chord }}</span>
-            <span class="lyric">{{ part.lyric }}</span>
+            <span v-if="part.lyric" class="lyric">{{ part.lyric }}</span>
           </span>
         </template>
         <template v-else>
@@ -176,6 +181,7 @@ const router = useRouter()
 
 const song = ref<any>(null)
 const arrangement = ref<any>(null)
+const loading = ref(true)
 const showToolbar = ref(true)
 const showKeyPicker = ref(false)
 const showSettings = ref(false)
@@ -301,7 +307,8 @@ async function loadSetlist() {
         }]
       }))
     setlistSongs.value = songs
-  } catch {
+  } catch (e: any) {
+    showToast(e.message || 'Erreur chargement plan', 'error')
     planItems.value = []
     setlistSongs.value = []
   }
@@ -373,6 +380,9 @@ const parsedLines = computed<ParsedLine[]>(() => {
 
     // ChordPro line with chords: text[Chord]text
     if (/\[.*?\]/.test(trimmed)) {
+      if (!showChords.value && !showLyrics.value) {
+        continue
+      }
       const parts: { chord: string; lyric: string }[] = []
       let remaining = trimmed
       let lastLyric = ''
@@ -380,7 +390,7 @@ const parsedLines = computed<ParsedLine[]>(() => {
       while (remaining.length > 0) {
         const chordIdx = remaining.indexOf('[')
         if (chordIdx === -1) {
-          if (remaining) parts.push({ chord: '', lyric: transposeText(remaining) })
+          if (remaining) parts.push({ chord: '', lyric: showLyrics.value ? transposeText(remaining) : '' })
           break
         }
 
@@ -400,7 +410,7 @@ const parsedLines = computed<ParsedLine[]>(() => {
         const nextChordIdx = afterChord.indexOf('[')
         const lyric = nextChordIdx === -1 ? afterChord : afterChord.slice(0, nextChordIdx)
 
-        parts.push({ chord: transposedChord, lyric: transposeText(lyric) })
+        parts.push({ chord: showChords.value ? transposedChord : '', lyric: showLyrics.value ? transposeText(lyric) : '' })
         remaining = nextChordIdx === -1 ? '' : afterChord.slice(nextChordIdx)
       }
 
@@ -575,13 +585,15 @@ async function loadSongData(songId: number, arrId: number | null) {
 
 // Load song data
 onMounted(async () => {
-  const songId = parseInt(route.params.songId as string, 10)
-  const arrId = route.params.arrangementId ? parseInt(route.params.arrangementId as string, 10) : null
+  loading.value = true
+  try {
+    const songId = parseInt(route.params.songId as string, 10)
+    const arrId = route.params.arrangementId ? parseInt(route.params.arrangementId as string, 10) : null
 
-  // Load setlist from plan if ?plan= query param
-  await loadSetlist()
+    // Load setlist from plan if ?plan= query param
+    await loadSetlist()
 
-  // Load browser songs (all songs with charts) for Song Browser
+    // Load browser songs (all songs with charts) for Song Browser
   if (isInteractiveView.value) {
     demoSongs.value = interactiveSongsData
     if (!planId.value) setlistSongs.value = interactiveSongsData
@@ -597,20 +609,25 @@ onMounted(async () => {
       )
       demoSongs.value = haveCharts
       if (!planId.value) setlistSongs.value = haveCharts
-    } catch {
-      // silently ignore
+    } catch (e: any) {
+      showToast(e.message || 'Erreur chargement chants', 'error')
     }
   }
 
-  await loadSongData(songId, arrId)
+    await loadSongData(songId, arrId)
+  } finally {
+    loading.value = false
+  }
 })
 
 // Reload song data when navigating between songs (route params change)
 watch(() => [route.params.songId, route.params.arrangementId], async ([newSongId, newArrId]) => {
   if (newSongId) {
+    loading.value = true
     const sid = parseInt(newSongId as string, 10)
     const aid = newArrId ? parseInt(newArrId as string, 10) : null
     await loadSongData(sid, aid)
+    loading.value = false
   }
 })
 
@@ -800,6 +817,13 @@ onUnmounted(() => {
 .plain-text {
   color: #a0a0b0;
   font-style: italic;
+}
+
+.chart-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .no-chart {

@@ -1,7 +1,7 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
 
-    <router-view v-if="route?.path === '/demo-tour' || route?.path === '/interactive'" />
+    <router-view v-if="route?.path === '/demo-tour'" />
 
     <Login v-else-if="!isAuthenticated && !isInteractiveView" />
 
@@ -186,6 +186,6 @@ onMounted(async () => {
 
 function enterInteractive() {
   enableInteractiveView()
-  router.push('/interactive')
+  router.push('/demo-tour')
 }
 </script>
