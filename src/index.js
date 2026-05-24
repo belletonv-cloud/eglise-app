@@ -58,7 +58,8 @@ function unauthorized(msg = 'Unauthorized') {
 async function getBody(request) {
   try {
     return await request.json();
-  } catch {
+  } catch (e) {
+    console.error('getBody: failed to parse JSON body', e);
     return null;
   }
 }
@@ -100,7 +101,7 @@ async function getMemberFromRequest(request, env) {
         'INSERT OR IGNORE INTO members (first_name, last_name, email, role, membership_type) VALUES (?, ?, ?, ?, ?)'
       ).bind('Démo', 'Cieux Ouverts', demoEmail, 'admin', 'member').run();
       return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first();
-    } catch { return null; }
+    } catch (e) { console.error('getMemberFromRequest demo insert/select failed', e); return null; }
   }
 
   const auth = request.headers.get('authorization') || request.headers.get('Authorization')
@@ -958,7 +959,7 @@ const routes0 = [
           });
           const text = await res.text();
           let remote = null;
-      try { remote = JSON.parse(text); } catch { remote = text }
+      try { remote = JSON.parse(text); } catch (e) { console.error('parse remote resend response failed', e); remote = text }
           const status = res.ok ? 'sent' : 'failed';
           await env.DB.prepare('INSERT INTO email_logs (template_id, subject, body, recipient_email, recipient_member_id, status, error_message) VALUES (?, ?, ?, ?, ?, ?, ?)')
            .bind(null, subject, html, admin, null, status, res.ok ? null : JSON.stringify(remote)).run();
@@ -1824,7 +1825,7 @@ const routes0 = [
         });
 
         const text = await res.text();
-        try { remoteResponse = JSON.parse(text); } catch { remoteResponse = text; }
+        try { remoteResponse = JSON.parse(text); } catch (e) { console.error('parse resend send-email response failed', e); remoteResponse = text; }
 
         if (!res.ok) {
           sendStatus = 'failed';
@@ -2152,7 +2153,8 @@ const routes2 = [
     let formData;
     try {
       formData = await request.formData();
-    } catch {
+    } catch (e) {
+      console.error('upload: invalid multipart form data', e);
       return badRequest('Invalid multipart form data');
     }
 
@@ -2394,7 +2396,8 @@ const routes3 = [
     let formData;
     try {
       formData = await request.formData();
-    } catch {
+    } catch (e) {
+      console.error('plans/:id/audio: invalid multipart form data', e);
       return badRequest('Invalid multipart form data');
     }
 
@@ -2728,9 +2731,13 @@ const routes3 = [
     const plan = await env.DB.prepare('SELECT id, date FROM plans WHERE id = ?').bind(planId).first();
     if (!plan) return notFound();
     // Generate a short-lived token for check-in
+    // Require ONECLICK_SECRET to be configured — do not fall back to an insecure default.
+    if (!env.ONECLICK_SECRET) {
+      return json({ error: 'ONECLICK_SECRET not configured' }, 500);
+    }
     const token = generateSecureToken(16);
     const payload = JSON.stringify({ action: 'qr_checkin', plan_id: planId, exp: Math.floor(Date.now()/1000) + 3600 });
-    const signed = await signOneClickToken(payload, env.ONECLICK_SECRET || 'default-secret');
+    const signed = await signOneClickToken(payload, env.ONECLICK_SECRET);
     return json({ checkin_url: `${env.FRONTEND_URL || 'https://eglise-app.pages.dev'}/checkin?plan=${planId}&token=${encodeURIComponent(signed)}`, plan_id: planId, date: plan.date });
   }),
 
@@ -2979,9 +2986,7 @@ const routes3 = [
     let body;
     try {
       body = await request.text();
-    } catch {
-      return badRequest('Corps requis');
-    }
+    } catch (e) { console.error('import: failed to read request body', e); return badRequest('Corps requis'); }
     const lines = body.split('\n').filter(l => l.trim());
     if (lines.length < 2) return badRequest('CSV doit avoir un en-tête et au moins une ligne');
 
@@ -3044,19 +3049,41 @@ const routes3 = [
 
     const auth = btoa(`${token_id}:${token_secret}`);
     const PCO_API = 'https://api.planningcenteronline.com';
-    // Diagnostic: count all fetch() calls in this invocation to measure subrequests
+    // Diagnostic: collect stats for outbound subrequests (without overriding global fetch)
     let fetchCount = 0;
     const fetchUrls = [];
-    const _origFetch = globalThis.fetch;
-    globalThis.fetch = async (...args) => {
+
+    async function fetchWithDiagnostics(input, init) {
       fetchCount++;
       try {
-        const first = args[0];
-        const url = typeof first === 'string' ? first : (first && first.url) ? first.url : String(first);
+        const url = typeof input === 'string' ? input : (input && input.url) ? input.url : String(input);
         if (fetchUrls.length < 200) fetchUrls.push(url);
-      } catch (e) { console.error('fetch wrapper internal URL capture failed', e); }
-      return _origFetch(...args);
+      } catch (e) { console.error('fetchWithDiagnostics URL capture failed', e); }
+      return await globalThis.fetch(input, init);
+    }
+
+    // Local PCO fetch wrappers that use fetchWithDiagnostics to preserve diagnostics
+    const pcoFetchLocal = async (url, auth) => {
+      const res = await fetchWithDiagnostics(url, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
+      if (!res.ok) throw new Error(`PCO ${url}: ${res.status}`);
+      return await res.json();
     };
+
+    const pcoFetchAllLocal = async (baseUrl, auth, params = {}) => {
+      const allData = [];
+      let offset = 0;
+      const perPage = 100;
+      while (true) {
+        const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
+        const json = await pcoFetchLocal(`${baseUrl}?${sp.toString()}`, auth);
+        const items = json.data || [];
+        allData.push(...items);
+        if (items.length < perPage) break;
+        offset += perPage;
+      }
+      return allData;
+    };
+
     const results = { service_types: 0, plans: 0, plan_items: 0, people: 0, songs: 0, arrangements: 0, deleted: 0, errors: [] };
 
     // 1. Acquire mutex
@@ -3077,8 +3104,8 @@ const routes3 = [
 
       // 3. Sync service types (full — rare modifications)
       if (!isPass1Only) {
-      try {
-        const stData = await pcoFetchAll(`${PCO_API}/services/v2/service_types`, auth);
+        try {
+        const stData = await pcoFetchAllLocal(`${PCO_API}/services/v2/service_types`, auth);
         const stmts = [];
         for (const st of stData) {
           const pcoId = st.id;
@@ -3117,8 +3144,8 @@ const routes3 = [
           const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
           let ptData;
           try {
-            ptData = await pcoFetchAll(ptUrl, auth, { 'filter[starts_at]': `${today}..${fourWeeks}` });
-          } catch { continue; }
+               ptData = await pcoFetchAllLocal(ptUrl, auth, { 'filter[starts_at]': `${today}..${fourWeeks}` });
+            } catch (e) { console.error('pco-sync: fetch plan items failed, continuing', e); continue; }
 
           const pcoPlanIdsInWindow = new Set();
 
@@ -3136,12 +3163,12 @@ const routes3 = [
 
             // Fetch full plan data for title/updated_at
             let planAttrs = { title: '', updated_at: null };
-            try {
-              const planJson = await pcoFetch(`${PCO_API}/services/v2/plans/${pcoPlanId}`, auth);
-              if (planJson.data && planJson.data.attributes) {
-                planAttrs = planJson.data.attributes;
-              }
-            } catch {}
+              try {
+                const planJson = await pcoFetchLocal(`${PCO_API}/services/v2/plans/${pcoPlanId}`, auth);
+                if (planJson.data && planJson.data.attributes) {
+                  planAttrs = planJson.data.attributes;
+                }
+              } catch (e) { console.error('pco-sync: fetch plan data failed', e); }
 
             // Find plan by pco_id
             let planRow = await env.DB.prepare('SELECT id, pco_id FROM plans WHERE pco_id = ?').bind(pcoPlanId).first();
@@ -3172,7 +3199,7 @@ const routes3 = [
             // 4a. Sync plan_items — delete & re-insert for this plan
             try {
               await new Promise(r => setTimeout(r, 100));
-              const itemsData = await pcoFetchAll(`${PCO_API}/services/v2/plans/${pcoPlanId}/items`, auth);
+               const itemsData = await pcoFetchAllLocal(`${PCO_API}/services/v2/plans/${pcoPlanId}/items`, auth);
 
               await env.DB.prepare('DELETE FROM plan_items WHERE plan_id = ?').bind(planId).run();
 
@@ -3207,7 +3234,7 @@ const routes3 = [
             // 4b. Sync people for this plan
             try {
               await new Promise(r => setTimeout(r, 100));
-              const peopleData = await pcoFetchAll(`${PCO_API}/services/v2/plans/${pcoPlanId}/people`, auth);
+               const peopleData = await pcoFetchAllLocal(`${PCO_API}/services/v2/plans/${pcoPlanId}/people`, auth);
 
               for (const p of peopleData) {
                 const pAttrs = p.attributes || {};
@@ -3298,9 +3325,9 @@ const routes3 = [
           const sp = new URLSearchParams({ per_page: String(perPage), ...params, offset: String(offset) });
           await new Promise(r => setTimeout(r, 100));
           // Minimal fetch: avoid includes/expansions, get only essentials (id, updated_at)
-          const songsRes = await fetch(`${PCO_API}/services/v2/songs?${sp.toString()}`, {
-            headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
-          });
+           const songsRes = await fetchWithDiagnostics(`${PCO_API}/services/v2/songs?${sp.toString()}`, {
+             headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' },
+           });
           if (!songsRes.ok) { results.errors.push(`Songs offset ${offset}: ${songsRes.status}`); break; }
           const songsData = await songsRes.json();
           const songsList = songsData.data || [];
@@ -3380,9 +3407,9 @@ const routes3 = [
             const remaining = queue.slice(batchSize);
             for (const pcoSongId of toProcess) {
               // fetch arrangements for the song
-              const arrRes = await fetch(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements?per_page=100`, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
-              if (!arrRes.ok) { results.errors.push(`Arrangements ${pcoSongId}: ${arrRes.status}`); continue; }
-              const arrJson = await arrRes.json();
+               const arrRes = await fetchWithDiagnostics(`${PCO_API}/services/v2/songs/${pcoSongId}/arrangements?per_page=100`, { headers: { 'Authorization': `Basic ${auth}`, 'User-Agent': 'EgliseApp/1.0' } });
+               if (!arrRes.ok) { results.errors.push(`Arrangements ${pcoSongId}: ${arrRes.status}`); continue; }
+               const arrJson = await arrRes.json();
               const arrData = arrJson.data || [];
               const songRow = await env.DB.prepare('SELECT id FROM songs WHERE pco_id = ?').bind(pcoSongId).first();
               if (!songRow) { results.errors.push(`Arrangements skip ${pcoSongId}: local song not found`); continue; }
@@ -3434,8 +3461,7 @@ const routes3 = [
     } catch (e) {
       return json({ error: e.message, results }, 500);
     } finally {
-      // restore global fetch and release DB lock
-      try { globalThis.fetch = _origFetch; } catch (e) { console.error('restore global fetch failed', e); }
+      // release DB lock — we do not modify global fetch anymore
       await releaseSyncLock(env);
     }
 
@@ -3672,7 +3698,7 @@ const routes3 = [
     if (!wh) return json({ error: 'Invalid token' }, 401);
 
     let body;
-    try { body = await request.json(); } catch { body = await request.text().catch(() => ''); }
+    try { body = await request.json(); } catch (e) { try { body = await request.text(); } catch (ee) { console.error('webhook incoming: failed to parse body', e, ee); body = ''; } }
 
     // webhook_logs table created by migrations
     await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response) VALUES (?, ?, ?, ?)')
@@ -3724,7 +3750,7 @@ async function triggerWebhooks(env, event, payload) {
       const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
     for (const wh of webhooks.results) {
       let events;
-      try { events = JSON.parse(wh.events || '[]'); } catch { events = []; }
+      try { events = JSON.parse(wh.events || '[]'); } catch (e) { console.error('triggerWebhooks: failed to parse webhook events', e); events = []; }
       if (!events.includes(event) && !events.includes('*')) continue;
 
       try {

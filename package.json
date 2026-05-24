@@ -1,5 +1,13 @@
 {
   "type": "module",
+  
+  "wrangler": {
+    "deploy:staging": "npx wrangler publish --env staging"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.71",
+    "vitest": "^3.2.4"
+  },
   "scripts": {
     "install-hooks": "git config core.hooksPath .githooks || true",
     "scan-secrets": "rg -n --hidden --no-ignore -S '\\b(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|pco_pat_[A-Za-z0-9_-]{10,}|[A-Za-z0-9_-]{40,})\\b' || true",
@@ -10,11 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:run": "vitest run",
-    "test:api": "vitest run test/api.test.js"
-  },
-  "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.8.71",
-    "vitest": "^3.2.4"
+    "test:api": "vitest run test/api.test.js",
+    "dev:music": "npx wrangler dev music-service/worker.ts --local",
+    "build": "echo 'skip build'"
   },
   "dependencies": {
     "wrangler": "^4.88.0"
