@@ -74,7 +74,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 
-const { t } = useI18n()
+const { t, tm } = useI18n()
 
 const stats = ref({
   members: 0, activeMembers: 0, upcomingPlans: 0,
@@ -88,7 +88,7 @@ const statsYear = ref(String(new Date().getFullYear()))
 
 const maxMonth = computed(() => Math.max(1, ...attendanceStats.value.perMonth.map((m: any) => m.count)))
 
-const monthNames = computed(() => t('month', 0) !== undefined ? (t('month') as unknown as string[]) : ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'])
+const monthNames = computed(() => tm('month') as unknown as string[])
 
 onMounted(async () => {
   try {

@@ -157,7 +157,7 @@ import { api } from '../utils/api'
 import PlanForm from '../components/PlanForm.vue'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, tm } = useI18n()
 const plans = ref<any[]>([])
 const events = ref<any[]>([])
 const isLoading = ref(true)
@@ -174,8 +174,8 @@ const views = [
   { key: 'agenda', label: 'Ordre du jour' },
 ]
 
-const dayNames = computed(() => t('dayNames') as unknown as string[])
-const monthNames = computed(() => t('monthFull') as unknown as string[])
+const dayNames = computed(() => tm('dayNames') as unknown as string[])
+const monthNames = computed(() => tm('monthFull') as unknown as string[])
 
 const monthLabel = computed(() => {
   const d = currentDate.value
