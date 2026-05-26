@@ -264,7 +264,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.name && publicRoutes.includes(to.name as string)) return next();
   if (!isAuthenticated.value) {
-    return next('/login');
+    return next();
   }
   return next();
 });
