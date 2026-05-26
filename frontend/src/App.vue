@@ -40,12 +40,12 @@
           <router-link to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.dashboard')}}
           </router-link>
+          <div class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_planning')}}</p>
+          </div>
           <router-link to="/calendar" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📅</span> {{$t('menu.calendar')}}
           </router-link>
-          <div class="pt-2 pb-1">
-            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Services</p>
-          </div>
           <router-link to="/plans" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📋</span> {{$t('menu.services')}}
           </router-link>
@@ -55,8 +55,11 @@
           <router-link to="/checkin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>✅</span> {{$t('menu.checkin')}}
           </router-link>
+          <router-link to="/historique" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📜</span> {{$t('menu.history')}}
+          </router-link>
           <div class="pt-2 pb-1">
-            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Personnes</p>
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_people')}}</p>
           </div>
           <router-link to="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>👥</span> {{$t('menu.members')}}
@@ -64,14 +67,29 @@
           <router-link to="/teams" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🎪</span> {{$t('menu.teams')}}
           </router-link>
-          <router-link to="/songs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>🎵</span> {{$t('menu.songs')}}
+          <router-link to="/annuaire" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📖</span> {{$t('menu.directory')}}
           </router-link>
           <router-link to="/house-groups" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🏠</span> {{$t('menu.groups')}}
           </router-link>
-          <router-link to="/historique" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📜</span> {{$t('menu.history')}}
+          <div class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_music')}}</p>
+          </div>
+          <router-link to="/songs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>🎵</span> {{$t('menu.songs')}}
+          </router-link>
+          <router-link to="/music-stand" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>🎼</span> {{$t('menu.music_stand')}}
+          </router-link>
+          <div class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_communication')}}</p>
+          </div>
+          <router-link to="/annonces" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📢</span> {{$t('menu.announcements')}}
+          </router-link>
+          <router-link to="/events" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📅</span> {{$t('menu.events')}}
           </router-link>
           <router-link to="/email" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📧</span> {{$t('menu.emails')}}
@@ -79,11 +97,14 @@
           <router-link to="/sondages" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.polls')}}
           </router-link>
+          <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>▶️</span> {{$t('menu.youtube')}}
+          </router-link>
+          <div v-if="isAdmin" class="pt-2 pb-1">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_admin')}}</p>
+          </div>
           <router-link v-if="isAdmin" to="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>⚙️</span> {{$t('menu.admin')}}
-          </router-link>
-          <router-link to="/annonces" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📢</span> {{$t('menu.announcements')}}
           </router-link>
           <router-link v-if="isAdmin" to="/webhooks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔗</span> {{$t('menu.webhooks')}}
@@ -94,23 +115,14 @@
           <router-link v-if="isAdmin" to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📋</span> {{$t('menu.logs')}}
           </router-link>
-          <router-link to="/annuaire" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📖</span> {{$t('menu.directory')}}
-          </router-link>
-          <router-link to="/events" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📅</span> {{$t('menu.events')}}
-          </router-link>
-          <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>▶️</span> {{$t('menu.youtube')}}
-          </router-link>
           <router-link v-if="isAdmin" to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
-          <router-link to="/music-stand" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>🎵</span> {{$t('menu.music_stand')}}
-          </router-link>
         </nav>
         <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
+          <button @click="isInteractiveView ? disableInteractiveView() : enableInteractiveView()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg cursor-pointer transition-colors" :class="isInteractiveView && 'bg-amber-50 dark:bg-amber-900/20 font-medium'">
+            <span>🕊️</span> {{ isInteractiveView ? $t('menu.exit_demo') : $t('menu.enter_demo') }}
+          </button>
           <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
@@ -147,10 +159,11 @@
 import { ref, onMounted, watch } from 'vue'
 import { publicRoutes } from './router/index'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
 import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as memberLoading } from './stores/member';
+import { isInteractiveView, enableInteractiveView, disableInteractiveView } from './stores/demo';
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
@@ -167,7 +180,6 @@ const toggleLang = () => {
 
 const mobileSidebarOpen = ref(false)
 const route = useRoute()
-const router = useRouter()
 watch(() => route.path, () => { mobileSidebarOpen.value = false })
 
 const isDark = ref(localStorage.getItem('dark-mode') === 'true')
