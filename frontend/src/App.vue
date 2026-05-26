@@ -119,7 +119,7 @@
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
         </nav>
-        <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
+        <div v-if="isAuthenticated" class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
           <button @click="isInteractiveView ? disableInteractiveView() : enableInteractiveView()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg cursor-pointer transition-colors" :class="isInteractiveView && 'bg-amber-50 dark:bg-amber-900/20 font-medium'">
             <span>🕊️</span> {{ isInteractiveView ? $t('menu.exit_demo') : $t('menu.enter_demo') }}
           </button>
