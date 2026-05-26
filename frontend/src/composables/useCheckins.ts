@@ -3,32 +3,30 @@ import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 
 // Types stricts
-type Plan = {
+export type Plan = {
   id: number
   date: string
+  time?: string
   service_type_id?: number
   service_type_name?: string
-  time?: string
-  attendance_count?: number
-  theme?: string
+  status?: string
 }
 
-// À affiner selon structure réelle
-type Member = {
+export type Member = {
   id: number
   first_name: string
   last_name: string
   email?: string
   phone?: string
+  membership_type?: string
 }
 
-type Presence = {
+export type Presence = {
   id: number
   plan_id: number
   member_id: number
-  check_in_time: string
-  first_name?: string
-  last_name?: string
+  checked_in_at: string
+  member: { first_name: string; last_name: string }
 }
 
 type CheckinPayload = { plan_id: number; member_id: number }
