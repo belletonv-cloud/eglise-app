@@ -54,6 +54,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import { user } from '../stores/auth'
+import { showToast } from '../stores/toast'
 
 const { t } = useI18n()
 
@@ -113,7 +114,7 @@ async function saveAnnotation() {
     form.value = { content: '', is_shared: false }
     await loadAnnotations()
   } catch (e: any) {
-    alert(t('arrangementAnnotation.error', { msg: e.message }))
+    showToast(t('arrangementAnnotation.error', { msg: e.message }), 'error')
   }
 }
 
@@ -123,7 +124,7 @@ async function removeAnnotation(id: number) {
     await api.deleteAnnotation(id)
     annotations.value = annotations.value.filter(a => a.id !== id)
   } catch (e: any) {
-    alert(t('arrangementAnnotation.error', { msg: e.message }))
+    showToast(t('arrangementAnnotation.error', { msg: e.message }), 'error')
   }
 }
 

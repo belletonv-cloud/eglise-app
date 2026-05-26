@@ -18,7 +18,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:run": "vitest run",
-    "test:api": "vitest run test/api.test.js",
+    "test:api": "vitest run --config vitest.config.js test/api.test.ts",
     "dev:music": "npx wrangler dev music-service/worker.ts --local",
     "build": "echo 'skip build'"
   },

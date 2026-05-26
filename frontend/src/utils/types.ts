@@ -184,3 +184,107 @@ export interface Attachment {
   file_type?: string
   created_at?: string
 }
+
+export interface Poll {
+  id: number
+  question: string
+  max_votes?: number
+  created_by?: number
+  created_at?: string
+  options?: PollOption[]
+  user_votes?: number[]
+}
+
+export interface PollOption {
+  id: number
+  poll_id: number
+  label: string
+  vote_count?: number
+}
+
+export interface Announcement {
+  id: number
+  type: string
+  content: string
+  plan_id?: number
+  created_by?: number
+  created_at?: string
+}
+
+export interface Webhook {
+  id: number
+  url: string
+  events: string[]
+  label?: string
+  secret?: string
+  active?: boolean
+  created_at?: string
+}
+
+export interface WebhookLog {
+  id: number
+  webhook_id: number
+  event: string
+  status: string
+  response?: string
+  created_at?: string
+}
+
+export interface Message {
+  id: number
+  subject?: string
+  content: string
+  sender_id?: number
+  sender_name?: string
+  created_at?: string
+  recipients?: MessageRecipient[]
+}
+
+export interface MessageRecipient {
+  id: number
+  message_id: number
+  member_id: number
+  read_at?: string
+}
+
+export interface ChecklistItem {
+  id: number
+  plan_id?: number
+  checklist_template_id?: number
+  position: string
+  label: string
+  done?: boolean
+  member_id?: number
+  sort_order?: number
+}
+
+export interface ChurchEvent {
+  id: number
+  title: string
+  description?: string
+  location?: string
+  start_date: string
+  start_time?: string
+  end_date?: string
+  end_time?: string
+  color?: string
+  repeat_period?: string
+  image_url?: string
+  rsvp_enabled?: boolean
+  source?: string
+  status?: string
+  link?: string
+  ticket_url?: string
+  emoji?: string
+  exceptions?: ChurchEventException[]
+}
+
+export interface ChurchEventException {
+  id: number
+  event_id: number
+  exception_date: string
+  type: 'cancelled' | 'moved' | 'periodicity_changed'
+  new_date?: string
+  new_repeat_period?: string
+  reason?: string
+}

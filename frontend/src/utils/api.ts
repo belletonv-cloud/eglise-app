@@ -103,31 +103,39 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) }
+  const activeUser = isInteractiveView.value ? interactiveUser.value : user.value
+  if (isInteractiveView.value) {
+    headers['x-demo-email'] = activeUser?.email || 'admin@cieuxouverts.bzh'
+  } else if (activeUser && activeUser.email) {
+    headers['x-user-email'] = activeUser.email
+  }
+  if (import.meta.env.VITE_DEV_AUTH_SECRET) headers['X-Auth-Secret'] = import.meta.env.VITE_DEV_AUTH_SECRET
+  if (activeUser && typeof activeUser.getIdToken === 'function') {
+    const token = await activeUser.getIdToken(true).catch(() => null)
+    if (token) headers['Authorization'] = `Bearer ${token}`
+  }
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30000)
   try {
-    const activeUser = isInteractiveView.value ? interactiveUser.value : user.value
-    if (isInteractiveView.value) {
-      headers['x-demo-email'] = activeUser.email
-    } else if (activeUser && activeUser.email) {
-      headers['x-user-email'] = activeUser.email
+    const res = await fetch(`${API_BASE}${path}`, {
+      headers,
+      signal: controller.signal,
+      ...options,
+    })
+    clearTimeout(timeout)
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ error: res.statusText }))
+      const e = new Error(body.error || res.statusText)
+      ;(e as any).status = res.status
+      ;(e as any).errorBody = body
+      throw e
     }
-    if (import.meta.env.VITE_DEV_AUTH_SECRET) headers['X-Auth-Secret'] = import.meta.env.VITE_DEV_AUTH_SECRET
-    if (activeUser && typeof activeUser.getIdToken === 'function') {
-      const token = await activeUser.getIdToken(true).catch(() => null)
-      if (token) headers['Authorization'] = `Bearer ${token}`
-    }
-  } catch {}
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers,
-    ...options,
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ error: res.statusText }))
-    const e = new Error(body.error || res.statusText)
-    ;(e as any).status = res.status
-    ;(e as any).errorBody = body
+    return res.json()
+  } catch (e: any) {
+    clearTimeout(timeout)
+    if (e.name === 'AbortError') throw new Error('Requête expirée (30s)')
     throw e
   }
-  return res.json()
 }
 
 export const api = {
@@ -366,13 +374,11 @@ export const api = {
     formData.append('file', file)
     formData.append('title', title)
     const headers: Record<string, string> = {}
-    try {
-      if (user.value && user.value.email) headers['x-user-email'] = user.value.email
-      if (user.value && typeof user.value.getIdToken === 'function') {
-        const token = await user.value.getIdToken(true).catch(() => null)
-        if (token) headers['Authorization'] = `Bearer ${token}`
-      }
-    } catch {}
+    if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+    if (user.value && typeof user.value.getIdToken === 'function') {
+      const token = await user.value.getIdToken(true).catch(() => null)
+      if (token) headers['Authorization'] = `Bearer ${token}`
+    }
     const res = await fetch(`${API_BASE}/plans/${planId}/audio`, { method: 'POST', headers, body: formData })
     if (!res.ok) { const e = new Error((await res.json().catch(() => ({ error: res.statusText }))).error); throw e }
     return res.json()
@@ -412,16 +418,22 @@ export const api = {
     request<{ success: boolean }>(`/announcements/${id}`, { method: 'DELETE' }),
 
   // Church Events (external scraped events)
-  getChurchEvents: (source?: string, includeExceptions?: boolean) => {
+  getChurchEvents: (source?: string, includeExceptions?: boolean, from?: string, to?: string) => {
     const params = new URLSearchParams()
     if (source) params.set('source', source)
     if (includeExceptions) params.set('include_exceptions', '1')
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
     const qs = params.toString()
     return request<any[]>(`/church-events${qs ? '?' + qs : ''}`)
   },
   getChurchEvent: (id: number) => request<any>(`/church-events/${id}`),
+  createChurchEvent: (data: Partial<any>) =>
+    request<any>('/church-events', { method: 'POST', body: JSON.stringify(data) }),
   updateChurchEvent: (id: number, data: Partial<any>) =>
     request<any>(`/church-events/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteChurchEvent: (id: number) =>
+    request<{ success: boolean }>(`/church-events/${id}`, { method: 'DELETE' }),
   getChurchEventExceptions: (id: number) => request<any[]>(`/church-events/${id}/exceptions`),
   createChurchEventException: (id: number, data: { type: string; exception_date?: string; new_date?: string; new_repeat_period?: string; reason?: string }) =>
     request<any>(`/church-events/${id}/exceptions`, { method: 'POST', body: JSON.stringify(data) }),
@@ -447,10 +459,8 @@ export const api = {
   },
   importCsv: async (entity: string, csvContent: string) => {
     const headers: Record<string, string> = { 'Content-Type': 'text/csv' }
-    try {
-      const { user } = await import('../stores/auth')
-      if (user.value && user.value.email) headers['x-user-email'] = user.value.email
-    } catch {}
+    const { user: authUser } = await import('../stores/auth')
+    if (authUser.value && authUser.value.email) headers['x-user-email'] = authUser.value.email
     const base = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
     const res = await fetch(`${base}/import/${entity}`, { method: 'POST', headers, body: csvContent })
     if (!res.ok) { const e = new Error((await res.json().catch(() => ({ error: res.statusText }))).error); throw e }

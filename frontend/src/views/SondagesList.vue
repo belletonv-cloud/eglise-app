@@ -92,9 +92,13 @@ const vote = async (poll: any, opt: any) => {
     return
   }
   if (poll.my_votes?.includes(opt.id)) {
-    await api.deleteVote(poll.id, opt.id)
-    poll.my_votes = poll.my_votes.filter((v: number) => v !== opt.id)
-    showToast(t('polls.vote_removed'))
+    try {
+      await api.deleteVote(poll.id, opt.id)
+      poll.my_votes = poll.my_votes.filter((v: number) => v !== opt.id)
+      showToast(t('polls.vote_removed'))
+    } catch (e: any) {
+      showToast(e.message, 'error')
+    }
   } else {
     try {
       await api.createVote(poll.id, opt.id)

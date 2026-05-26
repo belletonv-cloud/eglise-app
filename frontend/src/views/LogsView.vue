@@ -75,6 +75,8 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { showToast } from '../stores/toast'
+import { user } from '../stores/auth'
+import { getApiBase } from '../utils/api'
 
 const { t, locale } = useI18n()
 
@@ -97,24 +99,23 @@ const loadLogs = async () => {
   finally { loading.value = false }
 }
 
+const authHeaders = () => {
+  const headers: Record<string, string> = {}
+  if (user.value && user.value.email) headers['x-user-email'] = user.value.email
+  return headers
+}
+
 const getLogs = async () => {
   const params = new URLSearchParams()
   params.set('page', String(page.value))
-  const base = (import.meta as any).env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
-  const headers: Record<string, string> = {}
-  const { user } = await import('../stores/auth')
-  if (user.value && user.value.email) headers['x-user-email'] = user.value.email
-  const res = await fetch(`${base}/logs?${params}`, { headers })
+  const url = `${getApiBase()}/logs?${params}`
+  const res = await fetch(url, { headers: authHeaders() })
   return res.json()
 }
 
 const clearLogs = async () => {
   try {
-    const base = (import.meta as any).env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
-    const headers: Record<string, string> = {}
-    const { user } = await import('../stores/auth')
-    if (user.value && user.value.email) headers['x-user-email'] = user.value.email
-    await fetch(`${base}/logs`, { method: 'DELETE', headers })
+    await fetch(`${getApiBase()}/logs`, { method: 'DELETE', headers: authHeaders() })
     showToast(t('logs.cleaned'))
     await loadLogs()
   } catch (e: any) {

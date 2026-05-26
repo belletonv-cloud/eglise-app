@@ -5,10 +5,10 @@
 
     <div class="card">
       <h3>{{ $t('memberDetail.info') }}</h3>
-      <p><strong>{{ $t('memberDetail.email') }} :</strong> {{ member.email || '-' }}</p>
-      <p><strong>{{ $t('memberDetail.phone') }} :</strong> {{ member.phone || '-' }}</p>
-      <p><strong>{{ $t('memberDetail.status') }} :</strong> <span class="badge" :class="member.membership_type">{{ typeLabel(member.membership_type) }}</span></p>
-      <p><strong>{{ $t('memberDetail.notes') }} :</strong> {{ member.notes || '-' }}</p>
+      <p><strong>{{ $t('memberDetail.email') }} :</strong> {{ member.email ?? '-' }}</p>
+      <p><strong>{{ $t('memberDetail.phone') }} :</strong> {{ member.phone ?? '-' }}</p>
+      <p><strong>{{ $t('memberDetail.status') }} :</strong> <span class="badge" :class="member.membership_type ?? 'guest'">{{ typeLabel(member.membership_type ?? 'guest') }}</span></p>
+      <p><strong>{{ $t('memberDetail.notes') }} :</strong> {{ member.notes ?? '-' }}</p>
       <button @click="editing = !editing" class="edit-btn">{{ editing ? $t('memberDetail.cancel') : $t('memberDetail.edit') }}</button>
     </div>
 
@@ -32,9 +32,9 @@
     </div>
 
     <div class="card" v-if="member.teams && member.teams.length > 0">
-      <h3>{{ $t('memberDetail.teams_title', { count: member.teams.length }) }}</h3>
+      <h3>{{ $t('memberDetail.ministries_title', { count: member.teams.length }) }}</h3>
       <ul>
-        <li v-for="t in member.teams" :key="t.id">
+        <li v-for="t in member.teams as MemberTeam[]" :key="t.id">
           <router-link :to="`/teams/${t.id}`">{{ t.name }}</router-link>
           <span v-if="t.position" class="position">— {{ t.position }}</span>
           <button @click="leaveTeam(t.id)" class="ml-3 text-sm text-red-600">{{ $t('memberDetail.leave') }}</button>
@@ -43,12 +43,12 @@
     </div>
 
     <div class="card">
-      <h3>{{ $t('memberDetail.join_title') }}</h3>
+      <h3>{{ $t('memberDetail.join_ministry_title') }}</h3>
       <div class="flex gap-2 items-center">
         <select v-model="joinTeamId" class="px-2 py-1 border rounded">
-          <option :value="null">{{ $t('memberDetail.join_select') }}</option>
+          <option :value="null">{{ $t('memberDetail.join_ministry_select') }}</option>
           <template v-for="t in teams" :key="t.id">
-            <option :value="t.id" v-if="!member.teams?.find((x: any) => x.id === t.id)">{{ t.name }}</option>
+            <option :value="t.id" v-if="!member.teams?.find((x: MemberTeam) => x.id === t.id)">{{ t.name }}</option>
           </template>
         </select>
         <input v-model="joinPosition" :placeholder="$t('memberDetail.join_position')" class="px-2 py-1 border rounded" />
@@ -71,7 +71,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useTeams } from '../composables/useTeams'
 import { api } from '../utils/api'
+import type { Member, Team } from '../utils/types'
+type MemberTeam = Team & { position?: string }
 import NotificationPrefs from '../components/NotificationPrefs.vue'
 import VolunteerPreferences from '../components/VolunteerPreferences.vue'
 import { useToast } from '../stores/toast'
@@ -79,12 +82,12 @@ import { useToast } from '../stores/toast'
 const { t } = useI18n()
 
 const route = useRoute()
-const member = ref<any>(null)
+const member = ref<Member | null>(null)
 const loading = ref(true)
 const error = ref('')
 const editing = ref(false)
-const form = ref<any>({})
-const teams = ref<any[]>([])
+const form = ref<Partial<Member>>({})
+const { teams, loadTeams } = useTeams()
 const joinTeamId = ref<number | null>(null)
 const joinPosition = ref('')
 
@@ -100,7 +103,7 @@ async function load() {
     const id = Number(route.params.id)
     if (isNaN(id)) throw new Error(t('app.invalid_id'))
     member.value = await api.getMember(id)
-    teams.value = await api.getTeams()
+    await loadTeams()
     form.value = { ...member.value }
   } catch (e: any) {
     error.value = e.message
@@ -112,9 +115,13 @@ async function load() {
 async function saveMember() {
   const id = Number(route.params.id)
   if (isNaN(id)) return
-  await api.updateMember(id, form.value)
-  editing.value = false
-  load()
+  try {
+    await api.updateMember(id, form.value)
+    editing.value = false
+    load()
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 onMounted(load)
@@ -125,19 +132,33 @@ const leaveTeam = async (teamId: number) => {
   try {
     const id = Number(route.params.id)
     await api.removeTeamMember(teamId, id)
-    show(t('memberDetail.removed'), 'success')
+    show(t('memberDetail.removed_from_ministry'), 'success')
     await load()
   } catch (e: any) {
     show(e.message || t('memberDetail.error'), 'error')
   }
 }
 
+function validateAssignment() {
+  if (!joinTeamId.value) {
+    return t('memberAssignment.no_ministry_selected')
+  }
+  if (member.value && member.value.teams && member.value.teams.find((x: MemberTeam) => x.id === joinTeamId.value)) {
+    return t('memberAssignment.already_assigned')
+  }
+  return null
+}
+
 const joinTeam = async () => {
+  const validationError = validateAssignment()
+  if (validationError) {
+    show(validationError, 'error')
+    return
+  }
   try {
-    if (!joinTeamId.value) return
     const id = Number(route.params.id)
     await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
-    show(t('memberDetail.joined'), 'success')
+    show(t('memberDetail.joined_ministry'), 'success')
     joinTeamId.value = null
     joinPosition.value = ''
     await load()

@@ -1,304 +1,31 @@
-const KDRIVE_API = 'https://api.infomaniak.com'
-
-async function getKdriveToken(env) {
-  if (!env.INFOMANIAK_TOKEN) {
-    throw new Error('INFOMANIAK_TOKEN not configured');
-  }
-  return env.INFOMANIAK_TOKEN;
-}
+// Église App — Cloudflare Worker (API)
+import { CORS, json, notFound, badRequest, unauthorized, getBody, validate, requireId, dbFirst, dbAll, csvEscape, toCsv, generateSecureToken } from './lib.js'
+import { getMemberFromRequest, hasPermission, requirePermission } from './auth.js'
+import { rateLimit } from './rate-limit.js'
+import { signOneClickToken, verifyOneClickToken } from './oneclick.js'
+import { getKdriveToken, kdriveUpload, kdriveGet, kdriveDelete, kdriveParseId } from './kdrive.js'
+import { triggerWebhooks, processWebhookRetries } from './webhooks.js'
+import { logApiCall } from './logger.js'
+import { route } from './routes.js'
 
 function createRouter(routes) {
   return function (request, env) {
     const url = new URL(request.url);
     const method = request.method;
-
-    for (const route of routes) {
-      const match = route.pattern.exec(url.pathname);
-      if (route.method === method && match) {
+    for (const rt of routes) {
+      const match = rt.pattern.exec(url.pathname);
+      if (rt.method === method && match) {
         const params = {};
-        if (route.names) {
-          for (let i = 0; i < route.names.length; i++) {
-            params[route.names[i]] = match[i + 1];
+        if (rt.names) {
+          for (let i = 0; i < rt.names.length; i++) {
+            params[rt.names[i]] = match[i + 1];
           }
         }
-        return route.handler(request, env, params, url);
+        return rt.handler(request, env, params, url);
       }
     }
-
     return new Response('Not Found', { status: 404, headers: CORS });
   };
-}
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-user-email, x-demo-email, X-Auth-Secret',
-  'Access-Control-Max-Age': '86400',
-};
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...CORS, 'Content-Type': 'application/json' },
-  });
-}
-
-function notFound(msg = 'Not Found') {
-  return new Response(msg, { status: 404, headers: CORS });
-}
-
-function badRequest(msg = 'Bad Request') {
-  return json({ error: msg }, 400);
-}
-
-function unauthorized(msg = 'Unauthorized') {
-  return json({ error: msg }, 403);
-}
-
-async function getBody(request) {
-  try {
-    return await request.json();
-  } catch (e) {
-    console.error('getBody: failed to parse JSON body', e);
-    return null;
-  }
-}
-
-function validate(rules, data) {
-  for (const [field, rule] of Object.entries(rules)) {
-    const val = data[field];
-    if (rule.required) {
-      if (val === undefined || val === null || val === '') return `${field} est requis`;
-    }
-    if (val !== undefined && val !== null && val !== '') {
-      if (rule.maxLength && String(val).length > rule.maxLength) return `${field} ne doit pas dépasser ${rule.maxLength} caractères`;
-      if (rule.type === 'int' && !Number.isInteger(Number(val))) return `${field} doit être un nombre entier`;
-    }
-  }
-  return null;
-}
-
-// Authorization helpers (lightweight)
-const ROLE_PERMISSIONS = {
-  admin: ['*'],
-  scheduler: ['schedule', 'view_conflicts', 'force_schedule'],
-  editor: ['edit_members', 'edit_teams', 'manage_members'],
-  music_director: ['schedule', 'edit_music', 'view_conflicts'],
-  tech_director: ['schedule', 'view_conflicts', 'edit_tech'],
-  volunteer: [],
-  viewer: [],
-};
-
-async function getMemberFromRequest(request, env) {
-  // Prefer Firebase ID token in Authorization header (Bearer)
-  // Demo mode: allow demo email header (bypasses Firebase token validation)
-  const demoEmail = request.headers.get('x-demo-email') || request.headers.get('X-Demo-Email');
-  if (demoEmail) {
-    const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first();
-    if (m) return m;
-    try {
-      await env.DB.prepare(
-        'INSERT OR IGNORE INTO members (first_name, last_name, email, role, membership_type) VALUES (?, ?, ?, ?, ?)'
-      ).bind('Démo', 'Cieux Ouverts', demoEmail, 'admin', 'member').run();
-      return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first();
-    } catch (e) { console.error('getMemberFromRequest demo insert/select failed', e); return null; }
-  }
-
-  const auth = request.headers.get('authorization') || request.headers.get('Authorization')
-  if (auth && auth.toLowerCase().startsWith('bearer ')) {
-    const token = auth.split(' ')[1]
-    try {
-      // Simple, robust check via Google's tokeninfo endpoint with caching.
-      // This avoids implementing full JWT verification here while still validating audience/issuer/exp.
-      if (!getMemberFromRequest._tokenCache) getMemberFromRequest._tokenCache = new Map();
-      const cache = getMemberFromRequest._tokenCache;
-      const now = Date.now() / 1000;
-      let info = cache.get(token);
-      if (!info || (info.exp && info.exp < now)) {
-      if (!env.FIREBASE_PROJECT_ID) throw new Error('FIREBASE_PROJECT_ID not set');
-      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`)
-      if (!res.ok) throw new Error('Invalid token')
-      info = await res.json()
-        // store with expiry if present or short TTL
-        cache.set(token, info);
-        // prune cache occasionally
-        if (cache.size > 500) {
-          for (const k of cache.keys()) { cache.delete(k); if (cache.size <= 250) break }
-        }
-      }
-      const expectedIss = `https://securetoken.google.com/${env.FIREBASE_PROJECT_ID}`
-      if (info.iss !== expectedIss || info.aud !== env.FIREBASE_PROJECT_ID) throw new Error('Invalid token audience/issuer')
-      // check expiry
-      if (info.exp && info.exp < now) throw new Error('Token expired')
-      const email = info.email
-      if (!email) return null
-      const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
-      return m || null
-    } catch (e) {
-      // don't fallback here if project id is set; just return null
-      return null
-    }
-  }
-  // Dev fallback: x-user-email + X-Auth-Secret (disabled if DEV_AUTH_SECRET not set)
-  const authSecret = request.headers.get('X-Auth-Secret') || request.headers.get('x-auth-secret')
-  if (!env.DEV_AUTH_SECRET) return null
-  if (authSecret !== env.DEV_AUTH_SECRET) return null
-  const email = request.headers.get('x-user-email') || request.headers.get('X-User-Email')
-  if (!email) return null
-  const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(email).first()
-  return m || null
-}
-
-async function hasPermission(request, env, permission) {
-  // wildcard permission
-  if (!permission) return false
-  const member = await getMemberFromRequest(request, env)
-  if (!member) return false
-  if (member.role === 'admin') return true
-
-  const rolePerms = ROLE_PERMISSIONS[member.role] || []
-  let allowed = rolePerms.includes('*') || rolePerms.includes(permission)
-
-  // check exceptions table (most recent entry wins)
-  const ex = await env.DB.prepare('SELECT granted FROM member_exceptions WHERE member_id = ? AND permission = ? ORDER BY created_at DESC LIMIT 1').bind(member.id, permission).first()
-  if (ex) {
-    allowed = !!ex.granted
-  }
-
-  return !!allowed
-}
-
-async function kdriveUpload(env, file, filename) {
-  const token = await getKdriveToken(env);
-  const driveId = env.KDRIVE_DRIVE_ID || '3066287';
-  const parentId = env.KDRIVE_PARENT_ID || '9';
-  const size = file.size;
-  const buf = await file.arrayBuffer();
-  const url = `${KDRIVE_API}/3/drive/${driveId}/upload?directory_id=${parentId}&total_size=${size}&file_name=${encodeURIComponent(filename)}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/octet-stream',
-    },
-    body: buf,
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`kDrive upload failed: ${err}`);
-  }
-  const data = await res.json();
-  return data.data || data;
-}
-
-async function kdriveGetFile(env, fileId) {
-  const token = await getKdriveToken(env);
-  const driveId = env.KDRIVE_DRIVE_ID || '3066287';
-  const res = await fetch(`${KDRIVE_API}/2/drive/${driveId}/files/${fileId}/download`, {
-    headers: { Authorization: `Bearer ${token}` },
-    redirect: 'follow',
-  });
-  if (!res.ok) return null;
-  return res;
-}
-
-async function kdriveDelete(env, fileId) {
-  const token = await getKdriveToken(env);
-  const driveId = env.KDRIVE_DRIVE_ID || '3066287';
-  await fetch(`${KDRIVE_API}/2/drive/${driveId}/files/${fileId}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-}
-
-function parseKdriveFileId(fileUrl) {
-  if (!fileUrl) return null;
-  if (fileUrl.startsWith('kdrive:')) return fileUrl.slice(7);
-  const parts = fileUrl.split('/');
-  return parts.pop() || null;
-}
-
-function requireId(params) {
-  const id = parseInt(params.id, 10);
-  return isNaN(id) ? null : id;
-}
-
-async function dbFirst(db, sql, ...params) {
-  return await db.prepare(sql).bind(...params).first();
-}
-
-async function dbAll(db, sql, ...params) {
-  return await db.prepare(sql).bind(...params).all();
-}
-
-  // Utility: create a HMAC token for one-click actions (very small, base64)
-  const crypto = globalThis.crypto || require('node:crypto')
-async function signOneClickToken(payloadJson, secret) {
-  // secret is a string; use HMAC SHA256
-    if (crypto.subtle && crypto.getRandomValues) {
-      const enc = new TextEncoder();
-      const keyData = enc.encode(secret);
-      const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-      const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payloadJson));
-      const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
-      return btoa(payloadJson) + '.' + b64;
-    } else {
-      const hmac = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64');
-      return btoa(payloadJson) + '.' + hmac;
-    }
-}
-
-function csvEscape(val) {
-  if (val === null || val === undefined) return '';
-  const s = String(val);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-    return '"' + s.replace(/"/g, '""') + '"';
-  }
-  return s;
-}
-
-function toCsv(rows, columns) {
-  const header = columns.join(',') + '\n';
-  const body = rows.map(row => columns.map(col => csvEscape(row[col])).join(',')).join('\n');
-  return header + body;
-}
-
-function generateSecureToken(bytes = 32) {
-  // base64url token
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    const arr = new Uint8Array(bytes);
-    crypto.getRandomValues(arr);
-    let s = '';
-    for (let i = 0; i < arr.length; i++) s += String.fromCharCode(arr[i]);
-    const b64 = btoa(s);
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
-  // Node fallback
-  try {
-    const buf = require('node:crypto').randomBytes(bytes);
-    return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  } catch (e) {
-    // last fallback
-    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-  }
-}
-
-async function verifyOneClickToken(token, secret) {
-  try {
-    const [b64payload, b64sig] = token.split('.')
-    const payloadJson = atob(b64payload)
-    if (crypto.subtle) {
-      const enc = new TextEncoder();
-      const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
-      const sig = Uint8Array.from(atob(b64sig), c=>c.charCodeAt(0));
-      const ok = await crypto.subtle.verify('HMAC', key, sig, enc.encode(payloadJson));
-      if (!ok) return null
-      return JSON.parse(payloadJson)
-    }
-    const expected = require('node:crypto').createHmac('sha256', secret).update(payloadJson).digest('base64')
-    if (expected !== b64sig) return null
-    return JSON.parse(payloadJson)
-  } catch (e) { return null }
 }
 
 async function callAudioSplitter(env, file, planId) {
@@ -334,15 +61,6 @@ async function callAudioSplitter(env, file, planId) {
   }
   return await res.json();
 }
-
-const route = (method, path, handler) => {
-  const names = [];
-  const patternStr = path.replace(/:([^/]+)/g, (_, name) => {
-    names.push(name);
-    return '([^/]+)';
-  });
-  return { method, pattern: new RegExp(`^${patternStr}$`), names, handler };
-};
 
 // ========================================
 // PCO SYNC HELPERS
@@ -1502,6 +1220,13 @@ const routes0 = [
     route('PUT', '/api/volunteer-preferences/:memberId', async (request, env, params) => {
       const memberId = parseInt(params.memberId, 10);
       if (!memberId) return badRequest('Invalid member ID');
+      const member = await getMemberFromRequest(request, env);
+      // Allow self-service (member editing own preferences) or users with edit_members permission
+      if (!member) return unauthorized();
+      if (member.id !== memberId) {
+        const guard = await requirePermission(request, env, 'edit_members');
+        if (guard) return guard;
+      }
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON');
       const existing = await env.DB.prepare('SELECT id FROM volunteer_preferences WHERE member_id = ?').bind(memberId).first();
@@ -1949,6 +1674,10 @@ const routes2 = [
     const body = await getBody(request);
     if (!body) return badRequest('Invalid JSON body');
     if (!body.member_id || !body.token) return badRequest('member_id and token are required');
+    // Only allow members to register their own push token
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return unauthorized();
+    if (member.id !== body.member_id && member.role !== 'admin') return unauthorized();
 
     await env.DB.prepare(`
       INSERT OR REPLACE INTO notification_tokens (member_id, token, device_type, created_at)
@@ -1960,6 +1689,8 @@ const routes2 = [
 
   // Send push notification to a member (or to a plan's scheduled people)
   route('POST', '/api/fcm/send', async (request, env) => {
+    const guard = await requirePermission(request, env, 'manage_members');
+    if (guard) return guard;
     const body = await getBody(request);
     if (!body) return badRequest('Invalid JSON body');
 
@@ -2189,10 +1920,10 @@ const routes2 = [
     const attachment = await dbFirst(env.DB, 'SELECT * FROM attachments WHERE id = ?', id);
     if (!attachment) return notFound();
 
-    const fileId = parseKdriveFileId(attachment.file_url);
+    const fileId = kdriveParseId(attachment.file_url);
     if (!fileId) return notFound();
 
-    const kdriveResp = await kdriveGetFile(env, fileId);
+    const kdriveResp = await kdriveGet(env, fileId);
     if (!kdriveResp) return notFound();
 
     const headers = new Headers(kdriveResp.headers);
@@ -2207,7 +1938,7 @@ const routes2 = [
     const existing = await dbFirst(env.DB, 'SELECT id, file_url FROM attachments WHERE id = ?', id);
     if (!existing) return notFound();
 
-    const fileId = parseKdriveFileId(existing.file_url);
+    const fileId = kdriveParseId(existing.file_url);
     if (fileId) await kdriveDelete(env, fileId).catch((err) => { console.error('kdriveDelete failed', err, { fileId }); });
 
     await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(id).run();
@@ -2475,11 +2206,11 @@ const routes3 = [
     if (!planId) return badRequest('ID plan invalide');
     const plan = await env.DB.prepare('SELECT audio_url FROM plans WHERE id = ?').bind(planId).first();
     if (!plan || !plan.audio_url) return notFound('Aucun audio');
-    const fileId = parseKdriveFileId(plan.audio_url);
+    const fileId = kdriveParseId(plan.audio_url);
     if (!fileId) return notFound();
     const attachment = await dbFirst(env.DB, "SELECT id FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio' ORDER BY created_at DESC LIMIT 1", planId);
     if (!attachment) return notFound();
-    const resp = await kdriveGetFile(env, fileId);
+    const resp = await kdriveGet(env, fileId);
     if (!resp) return notFound();
     const headers = new Headers(resp.headers);
     headers.set('Cache-Control', 'public, max-age=31536000');
@@ -2491,7 +2222,7 @@ const routes3 = [
     if (!planId) return badRequest('ID plan invalide');
     const attachments = await env.DB.prepare("SELECT * FROM attachments WHERE entity_type = 'plan' AND entity_id = ? AND file_type = 'audio'").bind(planId).all();
     for (const a of attachments.results) {
-      const fileId = parseKdriveFileId(a.file_url);
+      const fileId = kdriveParseId(a.file_url);
       if (fileId) await kdriveDelete(env, fileId).catch((err) => { console.error('kdriveDelete failed', err, { fileId }); });
       await env.DB.prepare('DELETE FROM attachments WHERE id = ?').bind(a.id).run();
     }
@@ -3479,11 +3210,18 @@ const routes3 = [
     const backup = {};
     for (const table of tables) {
       try {
-        const rows = await env.DB.prepare(`SELECT * FROM ${table}`).all();
+        const rows = await env.DB.prepare(`SELECT * FROM ${table} LIMIT 5000`).all();
         backup[table] = rows.results;
+        if (backup[table].length >= 5000) {
+          backup[table] = backup[table].concat([{ _truncated: true, message: `Tronqué à 5000 lignes — utilisez l\'export CSV pour les données complètes` }]);
+        }
       } catch (e) { backup[table] = []; }
     }
-    return new Response(JSON.stringify(backup, null, 2), {
+    const jsonStr = JSON.stringify(backup);
+    if (jsonStr.length > 10 * 1024 * 1024) {
+      return json({ error: 'Backup trop volumineux (>10MB). Utilisez les exports CSV par module.' }, 413);
+    }
+    return new Response(jsonStr, {
       headers: {
         ...CORS,
         'Content-Type': 'application/json',
@@ -3495,9 +3233,29 @@ const routes3 = [
   // ========================================
   // CHURCH EVENTS (external scraped events)
   // ========================================
+  route('POST', '/api/church-events', async (request, env, params) => {
+    const body = await getBody(request);
+    if (!body || !body.title || !body.start_date) return badRequest('title et start_date requis');
+    const result = await env.DB.prepare(
+      `INSERT INTO church_events (title, description, location, start_date, start_time, end_date, end_time, color, repeat_period, image_url, rsvp_enabled, source, status, link, ticket_url, emoji)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(
+      body.title, body.description || null, body.location || null,
+      body.start_date, body.start_time || null, body.end_date || null, body.end_time || null,
+      body.color || '', body.repeat_period || null, body.image_url || null,
+      body.rsvp_enabled ? 1 : 0, body.source || null, body.status || 'active',
+      body.link || null, body.ticket_url || null, body.emoji || null
+    ).run();
+    const id = result.meta?.last_row_id;
+    const created = await env.DB.prepare('SELECT * FROM church_events WHERE id = ?').bind(id).first();
+    return json(created, 201);
+  }),
+
   route('GET', '/api/church-events', async (request, env, params, url) => {
     const source = url.searchParams.get('source');
     const includeExceptions = url.searchParams.get('include_exceptions') === '1';
+    const fromDate = url.searchParams.get('from');
+    const toDate = url.searchParams.get('to');
     let query = `SELECT ce.*, 
       (SELECT COUNT(*) FROM church_event_exceptions cee WHERE cee.event_id = ce.id) as exception_count
       FROM church_events ce`;
@@ -3506,6 +3264,14 @@ const routes3 = [
     if (source) {
       conditions.push('ce.source = ?');
       binds.push(source);
+    }
+    if (fromDate) {
+      conditions.push('ce.start_date >= ?');
+      binds.push(fromDate);
+    }
+    if (toDate) {
+      conditions.push('ce.start_date <= ?');
+      binds.push(toDate);
     }
     if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
     query += ' ORDER BY ce.start_date ASC, ce.start_time ASC';
@@ -3566,14 +3332,31 @@ const routes3 = [
     if (body.title !== undefined) { updates.push('title = ?'); values.push(body.title); }
     if (body.description !== undefined) { updates.push('description = ?'); values.push(body.description || null); }
     if (body.location !== undefined) { updates.push('location = ?'); values.push(body.location || null); }
+    if (body.start_date !== undefined) { updates.push('start_date = ?'); values.push(body.start_date); }
     if (body.start_time !== undefined) { updates.push('start_time = ?'); values.push(body.start_time || null); }
+    if (body.end_date !== undefined) { updates.push('end_date = ?'); values.push(body.end_date || null); }
     if (body.end_time !== undefined) { updates.push('end_time = ?'); values.push(body.end_time || null); }
+    if (body.image_url !== undefined) { updates.push('image_url = ?'); values.push(body.image_url || null); }
+    if (body.emoji !== undefined) { updates.push('emoji = ?'); values.push(body.emoji || null); }
+    if (body.link !== undefined) { updates.push('link = ?'); values.push(body.link || null); }
+    if (body.ticket_url !== undefined) { updates.push('ticket_url = ?'); values.push(body.ticket_url || null); }
+    if (body.source !== undefined) { updates.push('source = ?'); values.push(body.source || null); }
+    if (body.rsvp_enabled !== undefined) { updates.push('rsvp_enabled = ?'); values.push(body.rsvp_enabled ? 1 : 0); }
+    if (body.color !== undefined) { updates.push('color = ?'); values.push(body.color || ''); }
 
     if (updates.length === 0) return badRequest('Aucun champ à mettre à jour');
     values.push(id);
     await env.DB.prepare(`UPDATE church_events SET ${updates.join(', ')} WHERE id = ?`).bind(...values).run();
     const updated = await env.DB.prepare('SELECT * FROM church_events WHERE id = ?').bind(id).first();
     return json(updated);
+  }),
+
+  route('DELETE', '/api/church-events/:id', async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest('ID invalide');
+    await env.DB.prepare('DELETE FROM church_event_exceptions WHERE event_id = ?').bind(id).run();
+    await env.DB.prepare('DELETE FROM church_events WHERE id = ?').bind(id).run();
+    return new Response(null, { status: 204 });
   }),
 
   route('POST', '/api/church-events/:id/exceptions', async (request, env, params) => {
@@ -3712,39 +3495,6 @@ const routes3 = [
 const allRoutes = [...routes0, ...routes2, ...routes3];
 const router2 = createRouter(allRoutes);
 
-// Simple in-memory rate limiter
-const rateLimitMap = new Map();
-function rateLimit(request) {
-  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
-  const key = ip + ':' + request.url;
-  const now = Date.now();
-  const windowMs = 60 * 1000;
-  const maxReqs = 100;
-  let entry = rateLimitMap.get(key);
-  if (!entry || entry.reset < now) {
-    entry = { count: 0, reset: now + windowMs };
-    rateLimitMap.set(key, entry);
-  }
-  entry.count++;
-  if (entry.count > maxReqs) return true;
-  if (rateLimitMap.size > 10000) {
-    for (const [k, v] of rateLimitMap) {
-      if (v.reset < now) rateLimitMap.delete(k);
-    }
-  }
-  return false;
-}
-
-async function logApiCall(request, env, response, duration, error) {
-    try {
-      const status = response ? response.status : 500;
-      const errMsg = error ? error.message : (response && response.status >= 400 ? await response.clone().text().catch(() => '') : null);
-      await env.DB.prepare('INSERT INTO api_logs (method, path, status, duration, error) VALUES (?, ?, ?, ?, ?)')
-        .bind(request.method, new URL(request.url).pathname, status, duration, errMsg)
-        .run();
-    } catch (e) { console.error('api log insert failed', e); }
-}
-
 async function triggerWebhooks(env, event, payload) {
     try {
       const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
@@ -3782,50 +3532,42 @@ async function triggerWebhooks(env, event, payload) {
   } catch (e) { console.error('triggerWebhooks failed', e); }
 }
 
-async function processWebhookRetries(env) {
-  try {
-    const due = await env.DB.prepare(`
-      SELECT wl.*, w.url, w.secret
-      FROM webhook_logs wl
-      JOIN webhooks w ON w.id = wl.webhook_id
-      WHERE wl.next_retry_at IS NOT NULL
-        AND wl.next_retry_at <= datetime('now')
-        AND wl.retry_count < wl.max_retries
-      ORDER BY wl.next_retry_at ASC
-      LIMIT 20
-    `).all();
+// RBAC path-based permission map for mutations (POST/PUT/DELETE)
+const RBAC_GUARDS = [
+  { prefix: '/api/members', perm: 'edit_members' },
+  { prefix: '/api/teams', perm: 'edit_teams' },
+  { prefix: '/api/arrangements', perm: 'edit_music' },
+  { prefix: '/api/songs', perm: 'edit_music' },
+  { prefix: '/api/plans', perm: 'schedule' },
+  { prefix: '/api/plan-items', perm: 'schedule' },
+  { prefix: '/api/house-groups', perm: 'edit_members' },
+  { prefix: '/api/email-templates', perm: 'manage_members' },
+  { prefix: '/api/plan-templates', perm: 'schedule' },
+  { prefix: '/api/announcements', perm: 'edit_members' },
+  { prefix: '/api/polls', perm: 'edit_members' },
+  { prefix: '/api/church-events', perm: 'edit_members' },
+  { prefix: '/api/attendances', perm: 'edit_members' },
+  { prefix: '/api/plan-template-items', perm: 'schedule' },
+  { prefix: '/api/send-bulk-email', perm: 'manage_members' },
+  { prefix: '/api/send-email', perm: 'manage_members' },
+  { prefix: '/api/email-logs', perm: 'manage_members' },
+  { prefix: '/api/attachments', perm: 'edit_members' },
+  { prefix: '/api/checklist-templates', perm: 'schedule' },
+  { prefix: '/api/checklist-template-items', perm: 'schedule' },
+  { prefix: '/api/plan-checklists', perm: 'schedule' },
+  { prefix: '/api/messages', perm: 'edit_members' },
+  { prefix: '/api/member-exceptions', perm: 'manage_members' },
+  { prefix: '/api/communication-preferences', perm: 'edit_members' },
+]
 
-    for (const log of due.results) {
-      try {
-        const body = JSON.stringify({ event: JSON.parse(log.event || '{}') });
-        const res = await fetch(log.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(log.secret ? { 'X-Webhook-Secret': log.secret } : {}),
-          },
-          body,
-        });
-        const resText = await res.text().catch(() => '').then(t => t.slice(0, 500));
-        if (res.ok) {
-          await env.DB.prepare('UPDATE webhook_logs SET status = ?, response = ?, next_retry_at = NULL, retry_count = retry_count + 1 WHERE id = ?')
-            .bind(res.status, resText, log.id).run();
-        } else {
-          const backoff = [5, 15, 45, 120, 360, 1080];
-          const nextDelay = (backoff[log.retry_count + 1] || 1080) * 60 * 1000;
-          const nextRetry = new Date(Date.now() + nextDelay).toISOString();
-          await env.DB.prepare('UPDATE webhook_logs SET status = ?, response = ?, next_retry_at = ?, retry_count = retry_count + 1 WHERE id = ?')
-            .bind(res.status, resText, nextRetry, log.id).run();
-        }
-      } catch (e) {
-        const backoff = [5, 15, 45, 120, 360, 1080];
-        const nextDelay = (backoff[log.retry_count + 1] || 1080) * 60 * 1000;
-        const nextRetry = new Date(Date.now() + nextDelay).toISOString();
-        await env.DB.prepare('UPDATE webhook_logs SET status = 0, response = ?, next_retry_at = ?, retry_count = retry_count + 1 WHERE id = ?')
-          .bind(e.message, nextRetry, log.id).run();
-      }
+function checkRbacGuard(path, method) {
+  if (method === 'GET' || method === 'OPTIONS') return null
+  for (const g of RBAC_GUARDS) {
+    if (path === g.prefix || path.startsWith(g.prefix + '/') || path.startsWith(g.prefix + '?')) {
+      return g.perm
     }
-  } catch (e) { console.error('processWebhookRetries failed', e); }
+  }
+  return null
 }
 
 export default {
@@ -3833,9 +3575,18 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS });
     }
-    if (rateLimit(request)) {
+    if (await rateLimit(request, env)) {
       return new Response('Too Many Requests', { status: 429, headers: CORS });
     }
+
+    // Global RBAC check for mutations on sensitive resources
+    const path = new URL(request.url).pathname
+    const requiredPerm = checkRbacGuard(path, request.method)
+    if (requiredPerm) {
+      const guard = await requirePermission(request, env, requiredPerm)
+      if (guard) return guard
+    }
+
     const startTime = Date.now();
     try {
       const response = await router2(request, env);

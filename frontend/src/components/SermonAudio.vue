@@ -74,6 +74,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api, getApiBase } from '../utils/api'
+import { showToast } from '../stores/toast'
 
 const props = defineProps<{ planId: number }>()
 const { t } = useI18n()
@@ -168,7 +169,7 @@ const upload = async () => {
       progressPercent.value = 100
     }
   } catch (e: any) {
-    alert(t('sermonAudio.upload_error') + e.message)
+    showToast(t('sermonAudio.upload_error') + e.message, 'error')
   } finally {
     if (progressTimer) { clearInterval(progressTimer); progressTimer = null }
     setTimeout(() => { processing.value = false; progressPercent.value = 0 }, 1500)

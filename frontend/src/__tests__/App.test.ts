@@ -6,6 +6,8 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
   useRoute: () => ({ params: {}, query: {} }),
   RouterLink: { template: '<a><slot /></a>' },
+  createRouter: () => ({ push: vi.fn(), beforeEach: vi.fn() }),
+  createWebHistory: () => ({}),
 }))
 
 // Mock firebase

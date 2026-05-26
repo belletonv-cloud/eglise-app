@@ -8,7 +8,13 @@
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
+  <div class="w-80 h-8 bg-gray-200 rounded"></div>
+  <div class="w-72 h-5 bg-gray-100 rounded"></div>
+  <div class="w-[340px] h-16 bg-gray-100 rounded"></div>
+  <div class="w-80 h-12 bg-gray-200 rounded"></div>
+  <span class="text-gray-400 mt-4">{{ $t('loading') }}</span>
+</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -30,8 +36,20 @@
         </p>
       </div>
 
-      <div v-if="groups.length === 0" class="col-span-full text-center py-12 text-gray-400">
-        {{ $t('houseGroups.title') }} {{ $t('members.no_members') }}
+      <div v-if="groups.length === 0 && !isLoading" class="col-span-full text-center py-12 text-gray-400">
+        Aucun groupe trouvé.
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination flex items-center gap-2 justify-center py-4 col-span-full" v-if="total > pageSize">
+        <button type="button" @click="goPrev" :disabled="page === 1"
+          class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Précédent</button>
+        <button v-for="p in totalPages" :key="p" type="button"
+          @click="goToPage(p)" :class="['px-3 py-1 rounded', { 'bg-blue-600 text-white': p === page, 'bg-gray-100': p !== page } ]">
+          {{ p }}
+        </button>
+        <button type="button" @click="goNext" :disabled="page === totalPages"
+          class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Suivant</button>
       </div>
     </div>
 
@@ -95,18 +113,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { getHouseGroups } from '../api/houseGroups'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'
 
 const { t } = useI18n()
 const router = useRouter()
+// Pagination state
+const page = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
 const groups = ref<any[]>([])
+const isLoading = ref(false) // switched from loading
+const error = ref<string | null>(null)
 const members = ref<any[]>([])
-const loading = ref(true)
-const error = ref('')
 const showForm = ref(false)
 const form = ref({
   name: '',
@@ -117,20 +140,51 @@ const form = ref({
   description: ''
 })
 
-const loadData = async () => {
+const totalPages = computed(() => total.value > 0 ? Math.max(1, Math.ceil(total.value / pageSize.value)) : 1)
+
+async function fetchGroups() {
+  isLoading.value = true
+  error.value = null
   try {
-    const [groupsData, membersData] = await Promise.all([
-      api.getHouseGroups(),
-      api.getMembers()
-    ])
-    groups.value = groupsData
-    members.value = membersData
+    const res = await getHouseGroups({ page: page.value, limit: pageSize.value })
+    groups.value = res.groups ?? []
+    total.value = res.total ?? groups.value.length
+    // Correction UX : rollback page si out-of-bounds
+    if (page.value > totalPages.value) {
+      page.value = totalPages.value
+      await fetchGroups()
+    }
   } catch (e: any) {
-    error.value = e.message
+    error.value = 'Impossible de charger les groupes.'
+    groups.value = []
+    total.value = 0
   } finally {
-    loading.value = false
+    isLoading.value = false // replaced loading -> isLoading
   }
 }
+
+watch([page, pageSize], () => { fetchGroups() }, { immediate: true })
+
+function goToPage(p: number) {
+  if (p < 1 || p > totalPages.value || p === page.value) return
+  page.value = p
+}
+function goPrev() {
+  if (page.value > 1) page.value--
+}
+function goNext() {
+  if (page.value < totalPages.value) page.value++
+}
+
+const loadMembers = async () => {
+  try {
+    members.value = await api.getMembers()
+  } catch {}
+}
+onMounted(() => {
+  fetchGroups()
+  loadMembers()
+})
 
 const createGroup = async () => {
   if (!form.value.name) return
@@ -138,7 +192,7 @@ const createGroup = async () => {
     await api.createHouseGroup(form.value)
     showForm.value = false
     form.value = { name: '', leader_id: undefined, meeting_day: '', meeting_time: '', location: '', description: '' }
-    loadData()
+    fetchGroups()
   } catch (e: any) {
     showToast(e.message, 'error')
   }
@@ -147,6 +201,4 @@ const createGroup = async () => {
 const goToGroup = (id: number) => {
   router.push({ name: 'house-group-detail', params: { id: id.toString() } })
 }
-
-onMounted(loadData)
 </script>

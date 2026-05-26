@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { api } from '../utils/api'
+import { showToast } from '../stores/toast'
 
 const templates = ref<any[]>([])
 const serviceTypes = ref<any[]>([])
@@ -92,14 +93,18 @@ async function load() {
 }
 
 async function createTemplate() {
-  await api.createPlanTemplate({
-    name: form.value.name,
-    description: form.value.description || undefined,
-    service_type_id: form.value.service_type_id || undefined,
-  })
-  showForm.value = false
-  form.value = { name: '', description: '', service_type_id: null }
-  load()
+  try {
+    await api.createPlanTemplate({
+      name: form.value.name,
+      description: form.value.description || undefined,
+      service_type_id: form.value.service_type_id || undefined,
+    })
+    showForm.value = false
+    form.value = { name: '', description: '', service_type_id: null }
+    load()
+  } catch (e: any) {
+    showToast(e.message || 'Error', 'error')
+  }
 }
 
 onMounted(load)

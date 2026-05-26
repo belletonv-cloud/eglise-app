@@ -44,11 +44,13 @@ export function transposeChord(chord: string, semitones: number): string {
 }
 
 export function transposeLine(line: string, semitones: number): string {
-  return line.replace(/\[([^\]]+)\]|([A-Ga-g][#b]?[^\s]*)/g, (match: string, inBrackets: string, alone: string) => {
-    const chord: string = inBrackets || alone;
-    const transposed = transposeChord(chord, semitones);
-    return inBrackets ? `[${transposed}]` : transposed;
-  });
+  return line.replace(/\[([^\]]+)\]|(?<!\w)([A-Ga-g][#b]?(?:m|min|dim|aug|sus[24]?|maj7?|7|9|11|13|add\d+|sus|dim7|aug7)?(?:\/[A-Ga-g][#b]?)?)(?!\w)/g,
+    (match: string, inBrackets: string, alone: string) => {
+      const chord: string = inBrackets || alone;
+      const transposed = transposeChord(chord, semitones);
+      return inBrackets ? `[${transposed}]` : transposed;
+    }
+  );
 }
 
 export function transposeChordChart(chart: string, fromKey: string, toKey: string): string {

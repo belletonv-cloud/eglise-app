@@ -101,6 +101,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { api } from '../utils/api'
+import { showToast } from '../stores/toast'
 
 const tab = ref('roles')
 const q = ref('')
@@ -142,7 +143,7 @@ const exceptionsByMember = computed(() => {
 async function addException(memberId) {
   const perm = newPermission.value[memberId]
   const granted = newGranted.value[memberId]
-  if (!perm) return alert('permission required')
+  if (!perm) return showToast('permission required', 'warning')
   await api.createMemberException({ member_id: memberId, permission: perm, granted: granted === true || granted === 'true' })
   await load()
 }

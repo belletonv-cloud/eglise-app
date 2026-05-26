@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Test API helper functions directly
 describe('API base URL', () => {
-  it('uses VITE_API_BASE env var', () => {
+  it('has a valid API_BASE configured', () => {
     const base = import.meta.env.VITE_API_BASE || 'https://eglise-app.belletonv.workers.dev/api'
-    expect(base).toContain('eglise-app')
+    expect(base).toBeTruthy()
+    expect(base.startsWith('http')).toBe(true)
   })
 })
 

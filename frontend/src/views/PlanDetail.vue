@@ -117,6 +117,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { api, getApiBase } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
+import { showToast } from '../stores/toast'
 import PlanForm from '../components/PlanForm.vue'
 import PlanSongSelector from '../components/PlanSongSelector.vue'
 import SchedulePeople from '../components/SchedulePeople.vue'
@@ -178,8 +179,12 @@ const loadData = async () => {
 
 const deletePlan = async () => {
   if (!await confirmDialog(t('plan.confirm_delete'))) return
-  await api.deletePlan(plan.value.id)
-  router.push('/calendar')
+  try {
+    await api.deletePlan(plan.value.id)
+    router.push('/calendar')
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const onEditSaved = () => {
@@ -189,17 +194,25 @@ const onEditSaved = () => {
 
 const addItem = async (type: string) => {
   const titles: Record<string, string> = { header: t('plan.type.new_header'), announcement: t('plan.type.announcement'), media: t('plan.type.media') }
-  const item = await api.createPlanItem(plan.value.id, {
-    type,
-    title: titles[type] || t('plan.type.new_item'),
-  })
-  items.value.push({ ...item, song_title: null, arrangement_name: null, transposed_key: null })
+  try {
+    const item = await api.createPlanItem(plan.value.id, {
+      type,
+      title: titles[type] || t('plan.type.new_item'),
+    })
+    items.value.push({ ...item, song_title: null, arrangement_name: null, transposed_key: null })
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const deleteItem = async (item: any) => {
   if (!await confirmDialog(t('plan.confirm_item_delete'))) return
-  await api.deletePlanItem(item.id)
-  items.value = items.value.filter((i: any) => i.id !== item.id)
+  try {
+    await api.deletePlanItem(item.id)
+    items.value = items.value.filter((i: any) => i.id !== item.id)
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const moveItem = async (idx: number, dir: number) => {
@@ -209,27 +222,35 @@ const moveItem = async (idx: number, dir: number) => {
   const b = items.value[newIdx]
   items.value[idx] = b
   items.value[newIdx] = a
-  await Promise.all([
-    api.updatePlanItem(a.id, { position: newIdx + 1 }),
-    api.updatePlanItem(b.id, { position: idx + 1 }),
-  ])
+  try {
+    await Promise.all([
+      api.updatePlanItem(a.id, { position: newIdx + 1 }),
+      api.updatePlanItem(b.id, { position: idx + 1 }),
+    ])
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const onSongSelect = async (songId: number, arrangementId: number, transposedKey: string | null) => {
   showSongSelector.value = false
-  const item = await api.createPlanItem(plan.value.id, {
-    type: 'song',
-    title: t('plan.type.song'),
-    arrangement_id: arrangementId,
-    transposed_key: transposedKey,
-  })
-  const song = await api.getSong(songId)
-  items.value.push({
-    ...item,
-    song_title: song.title,
-    arrangement_name: song.arrangements?.find((a: any) => a.id === arrangementId)?.name || null,
-    transposed_key: transposedKey,
-  })
+  try {
+    const item = await api.createPlanItem(plan.value.id, {
+      type: 'song',
+      title: t('plan.type.song'),
+      arrangement_id: arrangementId,
+      transposed_key: transposedKey,
+    })
+    const song = await api.getSong(songId)
+    items.value.push({
+      ...item,
+      song_title: song.title,
+      arrangement_name: song.arrangements?.find((a: any) => a.id === arrangementId)?.name || null,
+      transposed_key: transposedKey,
+    })
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const changeSong = (item: any) => {
@@ -240,13 +261,17 @@ const changeSong = (item: any) => {
 const onSongChange = async (songId: number, arrangementId: number, transposedKey: string | null) => {
   showChangeSong.value = false
   const song = await api.getSong(songId)
-  await api.updatePlanItem(changingItemId.value!, {
-    arrangement_id: arrangementId,
-    transposed_key: transposedKey,
-    title: song.title,
-  })
-  changingItemId.value = null
-  loadData()
+  try {
+    await api.updatePlanItem(changingItemId.value!, {
+      arrangement_id: arrangementId,
+      transposed_key: transposedKey,
+      title: song.title,
+    })
+    changingItemId.value = null
+    loadData()
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 const dragIndex = ref<number | null>(null)
@@ -262,10 +287,14 @@ const onDrop = async (idx: number) => {
   const [moved] = items.value.splice(from, 1)
   items.value.splice(to, 0, moved)
   
-  const updates = items.value.map((item: any, i: number) =>
-    api.updatePlanItem(item.id, { position: i + 1 })
-  )
-  await Promise.all(updates)
+  try {
+    const updates = items.value.map((item: any, i: number) =>
+      api.updatePlanItem(item.id, { position: i + 1 })
+    )
+    await Promise.all(updates)
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
 }
 
 onMounted(loadData)

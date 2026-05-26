@@ -1,7 +1,7 @@
 <template>
   <div class="teams-page">
-    <h2>{{ $t('menu.teams') }} ({{ teams.length }})</h2>
-    <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_team') }}</button>
+    <h2>{{ $t('menu.ministries') }} ({{ teams.length }})</h2>
+    <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_ministry') }}</button>
 
     <div v-if="loading" class="loading">{{ $t('loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
@@ -16,19 +16,19 @@
 
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
       <div class="modal">
-        <h3>{{ $t('teamsList.new_team') }}</h3>
+        <h3>{{ $t('teamsList.new_ministry') }}</h3>
         <form @submit.prevent="createTeam">
           <label>{{ $t('houseGroups.name') }} <input v-model="form.name" required /></label>
           <label>{{ $t('houseGroups.description') }} <textarea v-model="form.description" rows="3"></textarea></label>
           <label>{{ $t('planTemplates.service_type') }}
             <select v-model="form.service_type">
               <option value="">—</option>
-              <option value="worship">{{ $t('teamsList.service_types.worship') }}</option>
-              <option value="sound">{{ $t('teamsList.service_types.sound') }}</option>
-              <option value="lights">{{ $t('teamsList.service_types.lights') }}</option>
-              <option value="welcome">{{ $t('teamsList.service_types.welcome') }}</option>
-              <option value="video">{{ $t('teamsList.service_types.video') }}</option>
-              <option value="other">{{ $t('teamsList.service_types.usher') }}</option>
+              <option value="worship">{{ $t('teamsList.service_types_ministry.worship') }}</option>
+              <option value="sound">{{ $t('teamsList.service_types_ministry.sound') }}</option>
+              <option value="lights">{{ $t('teamsList.service_types_ministry.lights') }}</option>
+              <option value="welcome">{{ $t('teamsList.service_types_ministry.welcome') }}</option>
+              <option value="video">{{ $t('teamsList.service_types_ministry.video') }}</option>
+              <option value="other">{{ $t('teamsList.service_types_ministry.usher') }}</option>
             </select>
           </label>
           <div class="form-actions">
@@ -43,30 +43,49 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api } from '../utils/api'
+import type { Team } from '../utils/types'
+import { useTeams } from '../composables/useTeams'
+import { showToast } from '../stores/toast'
+import { useI18n } from 'vue-i18n'
 
-const teams = ref<any[]>([])
-const loading = ref(true)
-const error = ref('')
+const { t } = useI18n()
+const { teams, loading, error, loadTeams, createTeam: createTeamComposable } = useTeams()
 const showForm = ref(false)
-const form = ref({ name: '', description: '', service_type: '' })
+const form = ref<Partial<Team>>({ name: '', description: '', service_type: '' })
+
 
 async function load() {
-  try {
-    loading.value = true
-    teams.value = await api.getTeams()
-  } catch (e: any) {
-    error.value = e.message
-  } finally {
-    loading.value = false
-  }
+  await loadTeams()
+}
+
+function validateForm(): { valid: boolean, message?: string } {
+  // Nom obligatoire, min 3, pas de doublon (case-insensitive)
+  const name = (form.value.name || '').trim()
+  if (!name)
+    return { valid: false, message: t('teamsList.validation_name_required') }
+  if (name.length < 3)
+    return { valid: false, message: t('teamsList.validation_name_short') }
+  if (teams.value.some(ti => ti.name.trim().toLowerCase() === name.toLowerCase()))
+    return { valid: false, message: t('teamsList.validation_name_duplicate') }
+  // Ajout description si obligatoire ici ; actuellement optionnelle
+  return { valid: true }
 }
 
 async function createTeam() {
-  await api.createTeam(form.value)
-  showForm.value = false
-  form.value = { name: '', description: '', service_type: '' }
-  load()
+  const v = validateForm()
+  if (!v.valid) {
+    showToast(v.message || t('teamsList.validation_error'), 'error')
+    return
+  }
+  try {
+    await createTeamComposable(form.value)
+    showToast(t('teamsList.create_ministry_success'), 'success')
+    showForm.value = false
+    form.value = { name: '', description: '', service_type: '' }
+    load()
+  } catch (e: any) {
+    showToast(e.message || t('teamsList.create_ministry_error'), 'error')
+  }
 }
 
 onMounted(load)

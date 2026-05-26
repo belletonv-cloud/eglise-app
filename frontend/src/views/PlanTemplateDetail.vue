@@ -165,17 +165,25 @@ async function loadData() {
 
 async function saveTemplate() {
   const id = parseInt(route.params.id as string)
-  await api.updatePlanTemplate(id, {
-    name: editName.value,
-    description: editDescription.value || undefined,
-  })
-  useToast().show(t('planTemplateDetail.updated'), 'success')
+  try {
+    await api.updatePlanTemplate(id, {
+      name: editName.value,
+      description: editDescription.value || undefined,
+    })
+    useToast().show(t('planTemplateDetail.updated'), 'success')
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function deleteTemplate() {
   if (!await confirmDialog(t('planTemplateDetail.confirm_delete'))) return
-  await api.deletePlanTemplate(parseInt(route.params.id as string))
-  router.push('/plan-templates')
+  try {
+    await api.deletePlanTemplate(parseInt(route.params.id as string))
+    router.push('/plan-templates')
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function addItem(type: string) {
@@ -186,26 +194,38 @@ async function addItem(type: string) {
     announcement: t('planTemplateDetail.types.announcement'),
     media: t('planTemplateDetail.types.media'),
   }
-  const item = await api.createPlanTemplateItem(id, {
-    type,
-    title: titles[type] || t('planTemplateDetail.types.new_item'),
-    position: items.value.length + 1,
-  })
-  items.value.push(item)
+  try {
+    const item = await api.createPlanTemplateItem(id, {
+      type,
+      title: titles[type] || t('planTemplateDetail.types.new_item'),
+      position: items.value.length + 1,
+    })
+    items.value.push(item)
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function updateItem(item: any) {
-  await api.updatePlanTemplateItem(item.id, {
-    type: item.type,
-    title: item.title,
-    arrangement_id: item.arrangement_id || null,
-  })
+  try {
+    await api.updatePlanTemplateItem(item.id, {
+      type: item.type,
+      title: item.title,
+      arrangement_id: item.arrangement_id || null,
+    })
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function deleteItem(item: any) {
   if (!await confirmDialog(t('planTemplateDetail.confirm_item_delete'))) return
-  await api.deletePlanTemplateItem(item.id)
-  items.value = items.value.filter((i: any) => i.id !== item.id)
+  try {
+    await api.deletePlanTemplateItem(item.id)
+    items.value = items.value.filter((i: any) => i.id !== item.id)
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function moveItem(idx: number, dir: number) {
@@ -215,22 +235,30 @@ async function moveItem(idx: number, dir: number) {
   const b = items.value[newIdx]
   items.value[idx] = b
   items.value[newIdx] = a
-  await Promise.all([
-    api.updatePlanTemplateItem(a.id, { position: newIdx + 1 }),
-    api.updatePlanTemplateItem(b.id, { position: idx + 1 }),
-  ])
+  try {
+    await Promise.all([
+      api.updatePlanTemplateItem(a.id, { position: newIdx + 1 }),
+      api.updatePlanTemplateItem(b.id, { position: idx + 1 }),
+    ])
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 async function applyTemplate() {
   const id = parseInt(route.params.id as string)
-  const plan = await api.applyPlanTemplate(id, {
-    date: applyForm.value.date,
-    time: applyForm.value.time || undefined,
-    theme: applyForm.value.theme || undefined,
-  })
-  showApply.value = false
-  useToast().show(t('planTemplateDetail.plan_created'), 'success')
-  router.push(`/plans/${plan.id}`)
+  try {
+    const plan = await api.applyPlanTemplate(id, {
+      date: applyForm.value.date,
+      time: applyForm.value.time || undefined,
+      theme: applyForm.value.theme || undefined,
+    })
+    showApply.value = false
+    useToast().show(t('planTemplateDetail.plan_created'), 'success')
+    router.push(`/plans/${plan.id}`)
+  } catch (e: any) {
+    useToast().show(e.message || 'Error', 'error')
+  }
 }
 
 onMounted(loadData)

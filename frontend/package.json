@@ -10,12 +10,14 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "test": "vitest run",
+    "test:unit": "vitest run --coverage",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@nuxt/kit": "^4.4.6",
     "@tailwindcss/vite": "^4.2.4",
     "firebase": "^12.12.1",
     "jspdf": "^4.2.1",

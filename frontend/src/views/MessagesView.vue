@@ -66,6 +66,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
+import { showToast } from '../stores/toast'
 
 const { t } = useI18n()
 
@@ -113,16 +114,20 @@ async function select(m: any) {
 
 async function send() {
   if (selectedMemberIds.value.length === 0) return
-  await api.sendMessage({
-    subject: form.value.subject,
-    content: form.value.content,
-    recipients: selectedMemberIds.value,
-  })
-  form.value.subject = ''
-  form.value.content = ''
-  selectedMemberIds.value = []
-  searchQuery.value = ''
-  await loadInbox()
+  try {
+    await api.sendMessage({
+      subject: form.value.subject,
+      content: form.value.content,
+      recipients: selectedMemberIds.value,
+    })
+    form.value.subject = ''
+    form.value.content = ''
+    selectedMemberIds.value = []
+    searchQuery.value = ''
+    await loadInbox()
+  } catch (e: any) {
+    showToast(e.message || 'Error', 'error')
+  }
 }
 
 // Close picker when clicking outside

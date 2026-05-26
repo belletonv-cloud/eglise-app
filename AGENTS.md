@@ -5,14 +5,15 @@ Déployée sur Cloudflare Workers + Pages.
 
 ## Stack
 
-- **Frontend** : Vue 3 + TypeScript + Vite + TailwindCSS v4
+- **Frontend** : Vue 3 + TypeScript + Vite v6 + TailwindCSS v4
 - **Router** : Vue Router
 - **i18n** : Vue i18n (FR/EN)
-- **Backend** : Cloudflare Workers (API router, fichier unique `src/index.js`)
+- **Backend** : Cloudflare Workers (API router modulaire : `src/index.js` + `lib.js` + `auth.js` + `rate-limit.js` + `oneclick.js` + `kdrive.js` + `webhooks.js` + `logger.js` + `routes.js`)
 - **Database** : Cloudflare D1 (SQL)
-- **Auth** : Firebase Auth (token Google vérifié via `oauth2.googleapis.com/tokeninfo`)
+- **Auth** : Firebase Auth + RBAC (7 rôles, guard global POST/PUT/DELETE)
+- **Rate limiter** : D1-based (table `api_rate_limits`)
 - **Déploiement** : Wrangler → Cloudflare Workers + Pages
-- **Tests** : Vitest (backend) + Playwright (E2E frontend)
+- **Tests** : Vitest backend (84 tests) + Vitest frontend (62 tests ✅) + Playwright E2E (checkin-guest ✅, 13 autres à vérifier)
 - **PWA** : vite-plugin-pwa
 
 ## URLs
@@ -48,7 +49,15 @@ Déployée sur Cloudflare Workers + Pages.
   - `src/` — Composants, vues, stores, router, locales
   - `public/` — Assets statiques (favicons, logos, manifest)
   - `e2e/` — Tests Playwright
-- `src/` — API Cloudflare Worker (`index.js`, ~3600 lignes)
+- `src/` — API Cloudflare Worker (`index.js`, ~3628 lignes)
+  - `lib.js` — Utilitaires partagés (CORS, json, getBody, csv, etc.)
+  - `auth.js` — Firebase Auth + RBAC (ROLE_PERMISSIONS, hasPermission, requirePermission)
+  - `rate-limit.js` — Rate limiter D1 (table api_rate_limits)
+  - `oneclick.js` — OneClick tokens (Web Crypto HMAC SHA-256)
+  - `kdrive.js` — kDrive file operations
+  - `webhooks.js` — Webhook triggers + retries
+  - `logger.js` — API call logging
+  - `routes.js` — `route()` helper
 - `migrations/` — Migrations D1
 - `scripts/` — Scripts d'import, export PCO, génération SQL
 - `docs/` — Documentation technique

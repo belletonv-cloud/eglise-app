@@ -1,5 +1,8 @@
 # 🏛️ Eglise App - Système de Gestion d'Église
 
+✏️ **Documentation complète du module “Ministères / Teams” : voir `/docs/ministeres-teams.md`**
+
+
 Système complet de gestion d'église développé avec Vue 3, TypeScript et Cloudflare Workers, inspiré de Planning Center Online.
 
 ## 🎯 Fonctionnalités Principales
