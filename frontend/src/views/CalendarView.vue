@@ -254,9 +254,8 @@ const allItems = computed<CalendarItem[]>(() => {
     })
   }
   for (const e of events.value) {
-    if (e.status === 'cancelled') continue
     items.push({
-      id: `event-${e.id}`,
+      id: `event-${e.id}-${e._occurrenceKey || e.start_date}`,
       title: e.title,
       date: e.start_date,
       time: e.start_time || '',
@@ -406,6 +405,44 @@ function formatDateLabelFull(date: Date): string {
   return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
+function expandRecurring(ev: any, now: Date, maxCount: number): any[] {
+  const start = new Date(ev.start_date + 'T00:00:00')
+  const results: any[] = []
+  let d = new Date(start)
+
+  if (d < now) {
+    if (ev.repeat_period === 'week') {
+      while (d < now) d.setDate(d.getDate() + 7)
+    } else if (ev.repeat_period === 'month') {
+      while (d < now) d.setMonth(d.getMonth() + 1)
+    }
+  }
+
+  let count = 0
+  while (count < maxCount) {
+    const dateStr = d.toISOString().slice(0, 10)
+
+    const cancelled = ev.exceptions?.some((ex: any) => ex.exception_date === dateStr && ex.type === 'cancelled')
+    const moved = ev.exceptions?.find((ex: any) => ex.exception_date === dateStr && ex.type === 'moved')
+
+    if (!cancelled) {
+      const targetDate = moved ? moved.new_date : dateStr
+      results.push({ ...ev, start_date: targetDate, start_time: ev.start_time || '', _occurrenceKey: dateStr })
+      count++
+    }
+
+    if (ev.repeat_period === 'week') {
+      d.setDate(d.getDate() + 7)
+    } else if (ev.repeat_period === 'month') {
+      d.setMonth(d.getMonth() + 1)
+    } else {
+      break
+    }
+  }
+
+  return results
+}
+
 const loadData = async () => {
   try {
     isLoading.value = true
@@ -413,10 +450,25 @@ const loadData = async () => {
     const year = currentDate.value.getFullYear()
     const [plansData, eventsData] = await Promise.all([
       api.getPlans(month, year),
-      api.getChurchEvents('include_exceptions=1').catch(() => []),
+      api.getChurchEvents(undefined, true).catch(() => []),
     ])
     plans.value = plansData
-    events.value = eventsData
+
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    const expanded: any[] = []
+    for (const ev of eventsData) {
+      if (ev.status === 'cancelled') continue
+      if (ev.repeat_period) {
+        const occurrences = expandRecurring(ev, now, 12)
+        expanded.push(...occurrences)
+      } else {
+        const evtDate = new Date(ev.start_date + 'T00:00:00')
+        if (evtDate < now) continue
+        expanded.push(ev)
+      }
+    }
+    events.value = expanded
   } catch (e: any) {
     error.value = e.message
   } finally {
