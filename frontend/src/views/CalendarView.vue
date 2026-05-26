@@ -317,7 +317,7 @@ const calendarDays = computed(() => {
 
 const groupedByDate = computed(() => {
   const map: Record<string, { key: string; label: string; items: CalendarItem[] }> = {}
-  for (const item of sortedItems) {
+  for (const item of sortedItems.value) {
     const date = new Date(item.date + 'T00:00:00')
     const key = date.toDateString()
     if (!map[key]) {
