@@ -1,4 +1,20 @@
 <template>
+  <MusicStandMetronome
+    :visible="metronomeVisible"
+    :playing="metronomePlaying"
+    :bpm="bpm"
+    :meter="meter"
+    :editBpm="editBpm"
+    :autoScrollActive="autoScrollActive"
+    :currentBeat="currentBeat"
+    @close="() => { metronomeVisible = false; metronomePlaying = false }"
+    @toggle-play="metronomePlaying = !metronomePlaying"
+    @toggle-edit-bpm="editBpm = !editBpm"
+    @change-meter="val => meter = val"
+    @toggle-auto-scroll="toggleAutoScroll()"
+    @bpm-change="val => { if (val >= 30 && val <= 300) bpm = val }"
+    style="display:none;"
+  />
   <div class="music-stand" :class="{ 'stage-mode': stageMode }" @click="toggleToolbar" @keydown="onKeydown" tabindex="0">
     <!-- Toolbar (toggles on tap) -->
     <div v-if="showToolbar" class="toolbar" @click.stop>
@@ -44,39 +60,16 @@
       </div>
     </div>
 
-    <!-- Setlist Sidebar (Plan Order of Service) -->
-    <div v-if="showSetlist" class="setlist-overlay" @click="showSetlist = false">
-      <div class="setlist-panel" @click.stop>
-        <div class="setlist-header">
-          <h3 class="setlist-title-heading">{{ $t('setlist.back_to_plan') }}</h3>
-          <button @click="showSetlist = false" class="setlist-close">✕</button>
-        </div>
-        <div class="setlist-list">
-          <div v-for="(item, idx) in planItems" :key="item.id"
-               class="setlist-item"
-               :class="{
-                 'current': item.type === 'song' && item.arrangement_id && item.song_id === currentSongId,
-                 'song-item': item.type === 'song',
-                 'non-song': item.type !== 'song'
-               }"
-               @click="selectPlanItem(item)">
-            <span class="setlist-num">{{ idx + 1 }}</span>
-            <div class="setlist-info">
-              <span v-if="item.type !== 'song'" class="setlist-type">{{ item.title }}</span>
-              <template v-else>
-                <span class="setlist-title">{{ item.song_title || item.title }}</span>
-                <span class="setlist-detail">
-                  {{ item.arrangement_key || item.transposed_key || '' }}
-                  <span v-if="item.tempo"> · {{ item.tempo }} BPM</span>
-                </span>
-              </template>
-            </div>
-            <span v-if="item.type === 'song' && item.arrangement_id" class="setlist-play">▶</span>
-          </div>
-          <div v-if="planItems.length === 0" class="setlist-empty">{{ $t('setlist.empty') }}</div>
-        </div>
-      </div>
-    </div>
+    <!-- Setlist Sidebar (refacto component) -->
+    <MusicStandSetlist
+      :visible="showSetlist"
+      :planItems="planItems"
+      :currentSongId="currentSongId"
+      :title="$t('setlist.back_to_plan')"
+      :emptyLabel="$t('setlist.empty')"
+      @close="showSetlist = false"
+      @select-item="selectPlanItem"
+    />
 
     <!-- Key picker dropdown -->
     <div v-if="showKeyPicker" class="key-picker" @click.stop>
@@ -84,25 +77,21 @@
     </div>
 
     <!-- Metronome -->
-    <div v-if="metronomeVisible" class="metronome" @click.stop>
-      <div class="metronome-controls">
-        <button @click="metronomePlaying = !metronomePlaying" class="metro-btn">
-          {{ metronomePlaying ? '⏸' : '▶' }}
-        </button>
-        <span class="bpm-display" @click="editBpm = !editBpm">
-          <input v-if="editBpm" v-model.number="bpm" type="number" class="bpm-input" @blur="editBpm = false" @keyup.enter="editBpm = false" min="30" max="300" />
-          <span v-else>{{ bpm }} BPM</span>
-        </span>
-        <button @click="meter = meter === 4 ? 3 : 4" class="metro-btn">{{ meter }}/4</button>
-        <label class="metro-btn auto-scroll-toggle">
-          <input type="checkbox" v-model="autoScrollActive" @click.stop /> Auto-scroll
-        </label>
-        <button @click="metronomeVisible = false" class="metro-btn">✕</button>
-      </div>
-      <div class="beat-indicators">
-        <div v-for="i in meter" :key="i" class="beat-dot" :class="{ active: currentBeat === i - 1 && metronomePlaying }"></div>
-      </div>
-    </div>
+    <MusicStandMetronome
+      :visible="metronomeVisible"
+      :playing="metronomePlaying"
+      :bpm="bpm"
+      :meter="meter"
+      :editBpm="editBpm"
+      :autoScrollActive="autoScrollActive"
+      :currentBeat="currentBeat"
+      @close="() => { metronomeVisible = false; metronomePlaying = false }"
+      @toggle-play="metronomePlaying = !metronomePlaying"
+      @toggle-edit-bpm="editBpm = !editBpm"
+      @change-meter="val => meter = val"
+      @toggle-auto-scroll="toggleAutoScroll()"
+      @bpm-change="val => { if (val >= 30 && val <= 300) bpm = val }"
+    />
 
     <!-- Settings panel -->
     <div v-if="showSettings" class="settings-panel" @click.stop>
@@ -123,41 +112,15 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="loading" class="chart-loading">
-      <p class="text-gray-400 text-lg">{{ $t('musicStand.loading') }}</p>
-    </div>
+    <!-- Chart Viewer Component (refacto) -->
+<MusicStandChartViewer
+      :lines="parsedLines"
+    />
 
-    <!-- Chord chart content -->
-    <div ref="chartContainer" v-else-if="parsedLines.length > 0" class="chart-container overflow-x-auto" :style="{ fontSize: fontSize + 'px' }">
-      <div v-for="(line, idx) in parsedLines" :key="idx" class="chart-line" :class="line.type">
-        <template v-if="line.type === 'section'">
-          <span class="section-label">{{ line.label }}</span>
-        </template>
-        <template v-else-if="line.type === 'chord-lyric'">
-          <span v-for="(part, pIdx) in line.parts" :key="pIdx" class="chord-lyric-part">
-            <span v-if="part.chord" class="chord">{{ part.chord }}</span>
-            <span v-if="part.lyric" class="lyric">{{ part.lyric }}</span>
-          </span>
-        </template>
-        <template v-else>
-          <span class="plain-text">{{ line.text }}</span>
-        </template>
-      </div>
-    </div>
+function onChartMounted() {
+  // If there is any chart-mounted/auto-scroll-resume logic, do it here (noop by default)
+}
 
-    <!-- No chart fallback -->
-    <div v-else class="no-chart">
-      <p class="text-gray-400 text-lg">{{ $t('song.no_chart') }}</p>
-      <p class="text-gray-500 text-sm mt-2">Le format ChordPro n'est pas disponible pour ce chant.</p>
-    </div>
-
-    <!-- Page navigation arrows -->
-    <div class="page-nav" @click.stop>
-      <button @click="prevPage" class="nav-arrow" :disabled="currentPage <= 0">‹</button>
-      <span class="page-num">{{ currentPage + 1 }} / {{ totalPages }}</span>
-      <button @click="nextPage" class="nav-arrow" :disabled="currentPage >= totalPages - 1">›</button>
-    </div>
 
     <!-- Bottom song nav -->
     <div v-if="prevSongId || nextSongId" class="song-nav-bottom" @click.stop>
@@ -169,6 +132,9 @@
 </template>
 
 <script setup lang="ts">
+import MusicStandMetronome from '../components/musicstand/MusicStandMetronome.vue'
+import MusicStandSetlist from '../components/musicstand/MusicStandSetlist.vue'
+import MusicStandChartViewer from '../components/musicstand/MusicStandChartViewer.vue'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../utils/api'
@@ -219,7 +185,8 @@ let metroInterval: any = null
 // Auto-scroll
 const autoScrollActive = ref(false)
 const autoScrollInterval = ref<any>(null)
-const chartContainer = ref<HTMLElement | null>(null)
+// chartContainer no longer needed (managed in ChartViewer)
+// const chartContainer = ref<HTMLElement | null>(null)
 const currentScrollLine = ref(0)
 
 // Song browser / setlist navigation
@@ -346,12 +313,7 @@ function stopAutoScroll() {
 
 const keyOptions = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-interface ParsedLine {
-  type: 'section' | 'chord-lyric' | 'plain'
-  label?: string
-  parts?: { chord: string; lyric: string }[]
-  text?: string
-}
+import type { ParsedLine } from '../types/ParsedLine'
 
 const parsedLines = computed<ParsedLine[]>(() => {
   if (!arrangement.value?.chord_chart) return []
@@ -366,14 +328,17 @@ const parsedLines = computed<ParsedLine[]>(() => {
     // Section header: {section: Verse} or {chorus}, {verse}, etc.
     const sectionMatch = trimmed.match(/^\{([^}]+)\}/)
     if (sectionMatch && showSections.value) {
-      result.push({ type: 'section', label: sectionMatch[1] })
+      // Edge case: normalise label by collapsing multiple spaces
+      let label = sectionMatch[1].replace(/\s{2,}/g, ' ').trim()
+      result.push({ type: 'section', label })
       continue
     }
 
     // Comment/directive: skip or show as plain
     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
       if (showSections.value) {
-        result.push({ type: 'section', label: trimmed.slice(1, -1) })
+        let label = trimmed.slice(1, -1).replace(/\s{2,}/g, ' ').trim()
+        result.push({ type: 'section', label })
       }
       continue
     }
@@ -385,37 +350,43 @@ const parsedLines = computed<ParsedLine[]>(() => {
       }
       const parts: { chord: string; lyric: string }[] = []
       let remaining = trimmed
-      let lastLyric = ''
-
+      let lastEnd = 0
+      let prevCloseIdx = 0
+      let foundAny = false
       while (remaining.length > 0) {
         const chordIdx = remaining.indexOf('[')
-        if (chordIdx === -1) {
-          if (remaining) parts.push({ chord: '', lyric: showLyrics.value ? transposeText(remaining) : '' })
+        const closeIdx = chordIdx !== -1 ? remaining.indexOf(']', chordIdx) : -1
+
+        if (chordIdx === -1 || closeIdx === -1) {
+          // Plus de crochets : prendre tout le résiduel comme lyric seule
+          if (remaining) {
+            parts.push({ chord: '', lyric: showLyrics.value ? transposeText(remaining) : '' })
+          }
           break
         }
 
-        // Text before chord
+        // 1. Text avant le 1er accord de la ligne : lyrics seules
         if (chordIdx > 0) {
-          lastLyric = remaining.slice(0, chordIdx)
+          const lyric = remaining.slice(0, chordIdx)
+          if (lyric) parts.push({ chord: '', lyric: showLyrics.value ? transposeText(lyric) : '' })
         }
-
-        const closeIdx = remaining.indexOf(']', chordIdx)
-        if (closeIdx === -1) break
-
+        // 2. Accord courant
         const chord = remaining.slice(chordIdx + 1, closeIdx)
         const transposedChord = transposeChord(chord)
-
-        // Text after chord until next chord or end
-        const afterChord = remaining.slice(closeIdx + 1)
-        const nextChordIdx = afterChord.indexOf('[')
-        const lyric = nextChordIdx === -1 ? afterChord : afterChord.slice(0, nextChordIdx)
-
+        // 3. Texte qui suit l’accord (jusqu’au prochain accord ou la fin)
+        let afterChord = remaining.slice(closeIdx + 1)
+        let nextChordIdx = afterChord.indexOf('[')
+        let lyric = nextChordIdx === -1 ? afterChord : afterChord.slice(0, nextChordIdx)
+        // Push un bloc même si lyric==="" (edge-case : deux accords accolés sans paroles)
         parts.push({ chord: showChords.value ? transposedChord : '', lyric: showLyrics.value ? transposeText(lyric) : '' })
+        // Avance
         remaining = nextChordIdx === -1 ? '' : afterChord.slice(nextChordIdx)
       }
-
+      // Garde tous les blocs, même lyrics vides consécutives + coupe lignes trop longues pour éviter poluer l’UI
       if (parts.length > 0) {
-        result.push({ type: 'chord-lyric', parts })
+        // Edge-case : limite trop longue pour forcer passage à la ligne côté viewer
+        let MAX_PARTS = 100
+        result.push({ type: 'chord-lyric', parts: parts.slice(0, MAX_PARTS) })
       }
       continue
     }
@@ -428,14 +399,11 @@ const parsedLines = computed<ParsedLine[]>(() => {
 })
 
 // Pagination (split into pages by line count)
-const linesPerPage = computed(() => Math.max(8, Math.floor(600 / (fontSize.value * 1.5))))
-const totalPages = computed(() => Math.max(1, Math.ceil(parsedLines.value.length / linesPerPage.value)))
 const currentPage = ref(0)
-
-const pageLines = computed(() => {
-  const start = currentPage.value * linesPerPage.value
-  return parsedLines.value.slice(start, start + linesPerPage.value)
-})
+// Pagination and slicing handled by ChartViewer now
+// const linesPerPage = ...
+// const totalPages = ...
+// const pageLines = ...
 
 function transposeChord(chord: string): string {
   if (semitones.value === 0) return chord
@@ -521,13 +489,9 @@ watch(bpm, () => {
 })
 
 // Navigation
-function prevPage() {
-  if (currentPage.value > 0) currentPage.value--
-}
-
-function nextPage() {
-  if (currentPage.value < totalPages.value - 1) currentPage.value++
-}
+// Pagination now handled by ChartViewer
+// function prevPage() { ... }
+// function nextPage() { ... }
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowRight' || e.key === ' ') { nextPage(); e.preventDefault() }
@@ -641,6 +605,7 @@ onUnmounted(() => {
 .music-stand {
   position: fixed;
   inset: 0;
+  z-index: 50;
   background: #1a1a2e;
   color: #e0e0e0;
   display: flex;
@@ -797,20 +762,23 @@ onUnmounted(() => {
   letter-spacing: 0.05em;
 }
 
-.chord-lyric-part {
-  display: inline;
-  position: relative;
+.chord-lyric-block {
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
 }
 
 .chord {
+  display: block;
   color: #f59e0b;
   font-weight: bold;
   font-size: 0.85em;
-  position: relative;
-  top: -0.1em;
+  line-height: 1.2;
+  margin-bottom: -0.15em;
 }
 
 .lyric {
+  display: block;
   color: #e0e0e0;
 }
 
