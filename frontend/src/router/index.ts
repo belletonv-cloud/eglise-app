@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { isAuthenticated } from '../stores/auth'
-import { isInteractiveView } from '../stores/demo'
 import HomePage from '../views/HomePage.vue'
 import SongDetail from '../components/SongDetail.vue'
 import PlansList from '../views/PlansList.vue'
@@ -38,7 +37,9 @@ import MusicStandView from '../views/MusicStandView.vue'
 import MusicStandListView from '../views/MusicStandListView.vue'
 import DemoTour from '../views/DemoTour.vue'
 
-const publicRoutes = ['invitation', 'demo-tour', 'interactive']
+export const publicRoutes: string[] = ['invitation', 'not-found', 'checkin']
+
+const NotFound = { template: '<div class="flex items-center justify-center h-full"><div class="text-center"><h1 class="text-6xl font-bold text-gray-300 dark:text-gray-600">404</h1><p class="mt-2 text-gray-500 dark:text-gray-400">Page introuvable</p><router-link to="/" class="mt-4 inline-block text-blue-600 hover:underline">Retour à l\'accueil</router-link></div></div>' }
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -251,15 +252,21 @@ const router = createRouter({
       component: MusicStandView,
       props: true,
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFound,
+    },
   ],
 })
 
-// Route guard: unauthenticated users see login via App.vue
-// Public routes (invitation) are accessible without auth
-router.beforeEach((to) => {
-  if (publicRoutes.includes(to.name as string)) return true
-  if (isAuthenticated.value || isInteractiveView.value) return true
-  return true
-})
+// Guard global : authentification obligatoire sur toutes les routes sauf routes publiques
+router.beforeEach((to, from, next) => {
+  if (to.name && publicRoutes.includes(to.name as string)) return next();
+  if (!isAuthenticated.value) {
+    return next('/login');
+  }
+  return next();
+});
 
 export default router

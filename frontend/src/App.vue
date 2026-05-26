@@ -1,9 +1,16 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
 
-    <router-view v-if="route?.path === '/demo-tour'" />
+    <div v-if="!isAuthenticated && publicRoutes.indexOf(route?.name as string) === -1" class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Login />
+    </div>
 
-    <Login v-else-if="!isAuthenticated && !isInteractiveView" />
+    <div v-else-if="memberLoading" class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-500 dark:text-gray-400">Chargement...</p>
+      </div>
+    </div>
 
     <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
       <aside class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
@@ -11,7 +18,7 @@
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div class="min-w-0">
             <h1 class="text-lg font-bold text-gray-800 dark:text-gray-100">{{ $t('app.title') }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ isInteractiveView ? '🕊️ Démo' : (user?.email || '') }}</p>
+             <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ user?.email || '' }}</p>
           </div>
           <div class="flex items-center gap-1 ml-2 shrink-0">
             <button @click="toggleDarkMode" class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="isDark ? $t('app.light_mode') : $t('app.dark_mode')">
@@ -72,16 +79,19 @@
           <router-link to="/sondages" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📊</span> {{$t('menu.polls')}}
           </router-link>
+          <router-link v-if="isAdmin" to="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>⚙️</span> {{$t('menu.admin')}}
+          </router-link>
           <router-link to="/annonces" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📢</span> {{$t('menu.announcements')}}
           </router-link>
-          <router-link to="/webhooks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="isAdmin" to="/webhooks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔗</span> {{$t('menu.webhooks')}}
           </router-link>
-          <router-link to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="isScheduler" to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>⚠️</span> {{$t('menu.conflicts')}}
           </router-link>
-          <router-link to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="isAdmin" to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📋</span> {{$t('menu.logs')}}
           </router-link>
           <router-link to="/annuaire" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
@@ -93,7 +103,7 @@
           <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>▶️</span> {{$t('menu.youtube')}}
           </router-link>
-          <router-link to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="isAdmin" to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
           <router-link to="/music-stand" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
@@ -101,10 +111,7 @@
           </router-link>
         </nav>
         <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
-          <button v-if="isInteractiveView" @click="disableInteractiveView" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg cursor-pointer transition-colors">
-            <span>🚪</span> Quitter la démo
-          </button>
-          <button v-else @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
+          <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
           </button>
@@ -138,12 +145,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { publicRoutes } from './router/index'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
-import { isInteractiveView, interactiveUser, initInteractiveView, disableInteractiveView, enableInteractiveView } from './stores/demo';
-import { api } from './utils/api';
+import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as memberLoading } from './stores/member';
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
@@ -176,16 +183,16 @@ window.addEventListener('online', () => { online.value = true })
 window.addEventListener('offline', () => { online.value = false })
 
 onMounted(async () => {
-  initInteractiveView()
-  if (!isAuthenticated.value && !isInteractiveView.value) return
+  if (!isAuthenticated.value) return
   if (!('Notification' in window)) return
 
   const permission = await Notification.requestPermission().catch(() => 'denied')
   if (permission !== 'granted') return
 })
 
-function enterInteractive() {
-  enableInteractiveView()
-  router.push('/demo-tour')
-}
+watch(user, (val) => {
+  if (val) loadCurrentMember()
+  else member.value = null
+}, { immediate: true })
+
 </script>
