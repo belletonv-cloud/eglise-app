@@ -353,6 +353,7 @@ function prev() {
   if (currentView.value === 'week') d.setDate(d.getDate() - 7)
   else d.setMonth(d.getMonth() - 1)
   currentDate.value = d
+  loadData()
 }
 
 function next() {
@@ -360,6 +361,7 @@ function next() {
   if (currentView.value === 'week') d.setDate(d.getDate() + 7)
   else d.setMonth(d.getMonth() + 1)
   currentDate.value = d
+  loadData()
 }
 
 function createPlan(day: any) {
