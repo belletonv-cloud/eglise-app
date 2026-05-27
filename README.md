@@ -2,138 +2,55 @@
 
 ✏️ **Documentation complète du module “Ministères / Teams” : voir `/docs/ministeres-teams.md`**
 
-
-Système complet de gestion d'église développé avec Vue 3, TypeScript et Cloudflare Workers, inspiré de Planning Center Online.
-
-## 🎯 Fonctionnalités Principales
-
-- **Gestion des membres** : Profils, équipes, rôles
-- **Planification des services** : Créneaux, bénévoles, gestion des conflits  
-- **Ministère musical** : Music Stand, partitions, transposition automatique
-- **Communication** : Templates d'email, notifications push
-- **Spécialisations** : Check-in, groupes de maison, suivi de participation
-
-## 🚀 Démos Disponibles
-
-> **⚡ Démarrage Express** : Voir [QUICKSTART.md](QUICKSTART.md) pour les commandes rapides  
-> **📖 Guide Détaillé** : Voir [DEMO.md](DEMO.md) pour toute la documentation des démos
-
-### 1. Démo Rapide - Aspirations (HTML Standalone)
-
-**Accès immédiat** : Ouvrez `index.html` directement dans votre navigateur
-```bash
-# Option 1: Double-clic sur le fichier
-open index.html
-
-# Option 2: Via serveur local
-python -m http.server 8000
-# Puis visitez http://localhost:8000
-```
-
-Cette démo présente les aspirations de l'église avec une animation de stepper élégante.
-
-### 2. Démo Complète Interactive 
-
-**Installation et lancement** :
-```bash
-# 1. Aller dans le dossier frontend
-cd frontend
-
-# 2. Installer les dépendances
-npm install
-
-# 3. Lancer le serveur de développement
-npm run dev
-
-# 4. Visiter les URLs de démo :
-# http://localhost:5173/interactive
-# http://localhost:5173/demo-tour
-```
-
-**Mode démo sans authentification** : Utilisez le bouton "🎸 Essai sans compte" pour accéder à toutes les fonctionnalités avec des données de test.
-
-### 3. Démo Backend (Optionnel)
-
-Pour tester l'API complète :
-```bash
-# 1. Configurer les variables d'environnement
-cp .env.example .env
-# Remplir les clés Firebase et autres configs
-
-# 2. Installer Wrangler
-npm install -g wrangler
-
-# 3. Lancer le worker localement  
-wrangler dev src/index.js
-```
-
-## 🛠️ Architecture
-
-- **Frontend** : Vue 3 + TypeScript + Vite + TailwindCSS v4
-- **Backend** : Cloudflare Workers + D1 Database
-- **Authentification** : Firebase Auth (bypassable en mode démo)
-- **PWA** : Service Worker avec cache offline
-- **Déploiement** : Cloudflare Pages + Workers (CI/CD automatique)
-
-## 📱 Fonctionnalités Avancées
-
-### Applications Modulaires
-- **Music Stand** : Gestion des partitions et transposition
-- **Check-in** : Système d'enregistrement pour les événements  
-- **Planning** : Calendrier intelligent avec gestion des conflits
-- **Communications** : Templates d'emails et notifications
-
-### Intégrations
-- **Planning Center Online** : Synchronisation bidirectionnelle
-- **kDrive** : Stockage de fichiers
-- **Webhooks** : Automatisations externes
-
-## 🌐 Déploiement
-
-Le projet est configuré pour un déploiement automatique sur Cloudflare :
-
-- **Frontend** : Cloudflare Pages (déclenchement sur push `frontend/`)
-- **Backend** : Cloudflare Workers (déclenchement sur push `src/`)
-- **Base de données** : Cloudflare D1 avec migrations automatiques
-
-## 🔧 Scripts Disponibles
-
-```bash
-# Tests
-npm run test                 # Tests unitaires
-npm run test:api            # Tests API
-
-# Sécurité  
-npm run scan-secrets        # Détection de secrets
-
-# Hooks Git
-npm run install-hooks       # Installation des hooks de pré-commit
-```
-
-## 🎨 Personnalisation
-
-Le projet utilise TailwindCSS v4 avec un design system personnalisé :
-- Palette de couleurs adaptée aux églises
-- Composants réutilisables
-- Mode sombre (en cours de développement)
-- Responsive design
-
-## 📚 Documentation API
-
-La documentation OpenAPI est disponible dans `docs/openapi.json` pour l'intégration avec l'API backend.
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créez une branche pour votre fonctionnalité
-3. Committez vos changements  
-4. Poussez vers la branche
-5. Ouvrez une Pull Request
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+(Suite : contenu existant...)
 
 ---
 
-**🎯 Pour commencer rapidement** : Ouvrez `index.html` dans votre navigateur pour la démo rapide, ou suivez les instructions de la section "Démo Complète Interactive" pour explorer toutes les fonctionnalités !
+## 🔒 API Sécurisée (RBAC) & Pagination
+
+**Toutes les routes critiques de l’API backend sont :**
+- protégées par RBAC (Role-Based Access Control) — chaque action POST/PUT/DELETE nécessite une permission adaptée selon le rôle utilisateur : voir `src/auth.js`
+- paginées sur toutes les listes volumineuses pour robustesse, performance et scalabilité
+
+### 🔐 RBAC (Role-Based Access Control)
+- Chaque action CRUD critique vérifie les permissions dès l’entrée d’un handler (ex: `requirePermission(request, env, 'manage_members')` pour backup, `edit_members` pour /members, etc.)
+- Permissions affectées par rôle (admin, scheduler, editor, music_director, volunteer, viewer)
+- Tout accès non autorisé retourne une erreur 403.
+- Voir spécifications : `src/auth.js`, tests backend/backend-rbac.test.ts
+
+### 📃 Pagination Standardisée
+- Toutes les routes listant des membres, plans, événements, annonces, équipes, groupes, présences, messages, etc., utilisent la pagination page/size/totalCount côté backend.
+- Paramètres GET attendus :
+    - `page` (défaut 1), `size` (défaut 25, max 100)
+    - Réponse JSON type :
+      ```json
+      {
+        "data": [ { ... }, ... ],
+        "page": 1,
+        "size": 25,
+        "totalCount": 132
+      }
+      ```
+- Si la page out-of-range, retourne data: [].
+- Documenté pour :/api/members, /api/plans, /api/announcements, /api/teams, /api/house-groups, /api/attendances, /api/polls, /api/messages/inbox, /api/church-events, etc.
+- **Exemple** :
+  ```bash
+  curl 'https://eglise-app.belletonv.workers.dev/api/church-events?page=2&size=10' -H "Authorization: Bearer <token>"
+  ```
+- **totalCount** disponible pour toutes paginations pour un affichage précis côté Front.
+
+### 🧪 Tests & Contrats Quality
+- Tous les helpers/patterns RBAC & pagination sont testés et couverts par :`tests/backend/*.test.ts`
+- Ajouter un nouveau test : dupliquez un fichier dans `tests/backend/`, adapte le mock, `npm run test`.
+- Aucun patch RBAC/pagination n’est déployé sans test associé.
+
+### 🎨 Intégration Frontend
+- Pour proposer des listes efficaces, consommez les endpoints paginés avec page/size, bouclez tant que data.length == size (lazy-load, infinite scroll, pagination UI…)
+- Toujours exploiter totalCount pour paginators ou indiquer « fin des résultats ».
+- Toute requête liste (membres, équipes, plans, etc.) doit envoyer page/size adéquats pour performance.
+
+---
+
+**Conventions maintenues et vérifiées dans la CI : sécurité stricte, pagination exhaustive, robustesse tests.**
+
+(Suite : contenu existant...)

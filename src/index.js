@@ -153,28 +153,44 @@ const routes0 = [
   // ========================================
   // MEMBERS
   // ========================================
-  route('GET', '/api/members', async (request, env) => {
-    // Get all members
-    const membersRes = await env.DB.prepare('SELECT * FROM members ORDER BY last_name ASC, first_name ASC').all();
+  route('GET', '/api/members', async (request, env, params, url) => {
+    // Pagination params
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+
+    // Count total members
+    const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM members').first();
+    const totalCount = countRes?.count || 0;
+
+    // Get paginated members
+    const membersRes = await env.DB.prepare('SELECT * FROM members ORDER BY last_name ASC, first_name ASC LIMIT ? OFFSET ?').bind(size, offset).all();
     const members = membersRes.results;
 
-    // Get team memberships for all members and build a map member_id -> teams[]
-    const tmRes = await env.DB.prepare(`
-      SELECT tm.member_id as member_id, t.id as team_id, t.name as team_name, t.description as team_description, tm.position as position
-      FROM team_members tm JOIN teams t ON t.id = tm.team_id
-    `).all();
-    const map = {};
-    for (const row of tmRes.results) {
-      if (!map[row.member_id]) map[row.member_id] = [];
-      map[row.member_id].push({ id: row.team_id, name: row.team_name, description: row.team_description, position: row.position });
+    // Get team memberships for all these members only
+    const ids = members.map(m => m.id);
+    let map = {};
+    if (ids.length) {
+      const queryMark = ids.map(() => '?').join(',');
+      const tmRes = await env.DB.prepare(`
+        SELECT tm.member_id as member_id, t.id as team_id, t.name as team_name, t.description as team_description, tm.position as position
+        FROM team_members tm JOIN teams t ON t.id = tm.team_id
+        WHERE tm.member_id IN (${queryMark})
+      `).bind(...ids).all();
+      map = {};
+      for (const row of tmRes.results) {
+        if (!map[row.member_id]) map[row.member_id] = [];
+        map[row.member_id].push({ id: row.team_id, name: row.team_name, description: row.team_description, position: row.position });
+      }
     }
 
     // Attach teams array to each member
     const withTeams = members.map(m => ({ ...m, teams: map[m.id] || [] }));
-    return json(withTeams);
+    return json({ data: withTeams, page, size, totalCount });
   }),
 
   route('POST', '/api/members', async (request, env) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const body = await getBody(request);
     if (!body) return badRequest('Corps JSON invalide');
     const err = validate({
@@ -211,6 +227,7 @@ const routes0 = [
   }),
 
   route('PUT', '/api/members/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     const body = await getBody(request);
@@ -227,6 +244,7 @@ const routes0 = [
   }),
 
   route('DELETE', '/api/members/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM members WHERE id = ?').bind(id).run();
@@ -236,16 +254,25 @@ const routes0 = [
   // ========================================
   // TEAMS
   // ========================================
-  route('GET', '/api/teams', async (request, env) => {
+  route('GET', '/api/teams', async (request, env, params, url) => {
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+    // Get total count
+    const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM teams').first();
+    const totalCount = countRes?.count || 0;
+    // Paginated fetch
     const result = await env.DB.prepare(`
       SELECT t.*, COUNT(tm.id) as member_count
       FROM teams t LEFT JOIN team_members tm ON tm.team_id = t.id
       GROUP BY t.id ORDER BY t.name ASC
-    `).all();
-    return json(result.results);
+      LIMIT ? OFFSET ?
+    `).bind(size, offset).all();
+    return json({ data: result.results, page, size, totalCount });
   }),
 
   route('POST', '/api/teams', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const body = await getBody(request);
     if (!body) return badRequest('Corps JSON invalide');
     const err = validate({ name: { required: true, maxLength: 100 } }, body);
@@ -270,6 +297,7 @@ const routes0 = [
   }),
 
   route('PUT', '/api/teams/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     const body = await getBody(request);
@@ -281,6 +309,7 @@ const routes0 = [
   }),
 
   route('DELETE', '/api/teams/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM teams WHERE id = ?').bind(id).run();
@@ -336,7 +365,25 @@ const routes0 = [
   route('GET', '/api/plans', async (request, env, params, url) => {
     const month = url.searchParams.get('month');
     const year = url.searchParams.get('year');
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
 
+    let where = '';
+    const binds = [];
+    if (month && year) {
+      where = "WHERE strftime('%m', p.date) = ? AND strftime('%Y', p.date) = ?";
+      binds.push(month.padStart(2, '0'), year);
+    } else if (year) {
+      where = "WHERE strftime('%Y', p.date) = ?";
+      binds.push(year);
+    }
+
+    // Count total plans
+    const countRes = await env.DB.prepare(`SELECT COUNT(*) as count FROM plans p ${where}`).bind(...binds).first();
+    const totalCount = countRes?.count || 0;
+
+    // Main paginated query
     let query = `
       SELECT p.*, st.name as service_type_name,
         COUNT(pi.id) as items_count,
@@ -345,26 +392,12 @@ const routes0 = [
       LEFT JOIN service_types st ON st.id = p.service_type_id
       LEFT JOIN plan_items pi ON pi.plan_id = p.id
       LEFT JOIN scheduled_people sp ON sp.plan_id = p.id
+      ${where}
+      GROUP BY p.id ORDER BY p.date ASC
+      LIMIT ? OFFSET ?
     `;
-    const binds = [];
-    const conditions = [];
-
-    if (month && year) {
-      conditions.push("strftime('%m', p.date) = ? AND strftime('%Y', p.date) = ?");
-      binds.push(month.padStart(2, '0'), year);
-    } else if (year) {
-      conditions.push("strftime('%Y', p.date) = ?");
-      binds.push(year);
-    }
-
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    query += ' GROUP BY p.id ORDER BY p.date ASC';
-
-    const result = await env.DB.prepare(query).bind(...binds).all();
-    return json(result.results);
+    const result = await env.DB.prepare(query).bind(...binds, size, offset).all();
+    return json({ data: result.results, page, size, totalCount });
   }),
 
   route('GET', '/api/plans/:id', async (request, env, params) => {
@@ -381,6 +414,7 @@ const routes0 = [
   }),
 
   route('POST', '/api/plans', async (request, env) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const body = await getBody(request);
     if (!body) return badRequest('Corps JSON invalide');
     const err = validate({
@@ -406,6 +440,7 @@ const routes0 = [
   }),
 
   route('PUT', '/api/plans/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     const body = await getBody(request);
@@ -435,6 +470,7 @@ const routes0 = [
   }),
 
   route('DELETE', '/api/plans/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM plans WHERE id = ?').bind(id).run();
@@ -467,6 +503,7 @@ const routes0 = [
   }),
 
   route('POST', '/api/plans/:id/items', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const planId = requireId(params);
     if (!planId) return badRequest('ID plan invalide');
     const plan = await env.DB.prepare('SELECT id FROM plans WHERE id = ?').bind(planId).first();
@@ -504,6 +541,7 @@ const routes0 = [
   }),
 
   route('PUT', '/api/plan-items/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     const existing = await env.DB.prepare('SELECT * FROM plan_items WHERE id = ?').bind(id).first();
@@ -552,6 +590,7 @@ const routes0 = [
   }),
 
   route('DELETE', '/api/plan-items/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
     await env.DB.prepare('DELETE FROM plan_items WHERE id = ?').bind(id).run();
@@ -741,18 +780,27 @@ const routes0 = [
     }),
 
     // Attendance endpoints
-    route('GET', '/api/attendances', async (request, env) => {
+    route('GET', '/api/attendances', async (request, env, params, url) => {
+      const page = parseInt(url.searchParams.get('page') || '1', 10);
+      const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+      const offset = (page - 1) * size;
+      // Total count
+      const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM attendances').first();
+      const totalCount = countRes?.count || 0;
+      // Paginated fetch
       const attendances = await env.DB.prepare(`
         SELECT a.*, m.first_name, m.last_name, p.date as plan_date, p.time as plan_time
         FROM attendances a
         JOIN members m ON m.id = a.member_id
         JOIN plans p ON p.id = a.plan_id
         ORDER BY a.check_in_time DESC
-      `).all();
-      return json(attendances.results);
+        LIMIT ? OFFSET ?
+      `).bind(size, offset).all();
+      return json({ data: attendances.results, page, size, totalCount });
     }),
 
     route('POST', '/api/attendances', async (request, env) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       
@@ -806,6 +854,7 @@ const routes0 = [
     }),
 
     route('PUT', '/api/attendances/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const attendanceId = requireId({ id: params.id });
       if (!attendanceId) return badRequest('Invalid ID');
       
@@ -831,6 +880,7 @@ const routes0 = [
     }),
 
     route('DELETE', '/api/attendances/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const attendanceId = requireId({ id: params.id });
       if (!attendanceId) return badRequest('Invalid ID');
       
@@ -854,7 +904,14 @@ const routes0 = [
     }),
 
     // House Groups endpoints
-    route('GET', '/api/house-groups', async (request, env) => {
+    route('GET', '/api/house-groups', async (request, env, params, url) => {
+      const page = parseInt(url.searchParams.get('page') || '1', 10);
+      const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+      const offset = (page - 1) * size;
+      // Get total count
+      const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM house_groups').first();
+      const totalCount = countRes?.count || 0;
+      // Main paginated fetch
       const groups = await env.DB.prepare(`
         SELECT hg.*, m.first_name as leader_first, m.last_name as leader_last,
           COUNT(gm.id) as member_count
@@ -863,11 +920,13 @@ const routes0 = [
         LEFT JOIN members m ON m.id = hg.leader_id
         GROUP BY hg.id
         ORDER BY hg.name ASC
-      `).all();
-      return json(groups.results);
+        LIMIT ? OFFSET ?
+      `).bind(size, offset).all();
+      return json({ data: groups.results, page, size, totalCount });
     }),
 
     route('POST', '/api/house-groups', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       if (!body.name) return badRequest('Name is required');
@@ -927,6 +986,7 @@ const routes0 = [
     }),
 
     route('PUT', '/api/house-groups/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.id });
       if (!groupId) return badRequest('Invalid ID');
       
@@ -960,6 +1020,7 @@ const routes0 = [
     }),
 
     route('DELETE', '/api/house-groups/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.id });
       if (!groupId) return badRequest('Invalid ID');
       
@@ -969,6 +1030,7 @@ const routes0 = [
 
     // Group members
     route('POST', '/api/house-groups/:gid/members', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.gid });
       if (!groupId) return badRequest('Invalid group ID');
       
@@ -985,6 +1047,7 @@ const routes0 = [
     }),
 
     route('DELETE', '/api/house-groups/:gid/members/:mid', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.gid });
       const memberId = requireId({ id: params.mid });
       if (!groupId || !memberId) return badRequest('Invalid ID');
@@ -1008,6 +1071,7 @@ const routes0 = [
     }),
 
     route('POST', '/api/house-groups/:gid/meetings', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.gid });
       if (!groupId) return badRequest('Invalid group ID');
       
@@ -1303,6 +1367,7 @@ const routes0 = [
     }),
 
     route('POST', '/api/plan-templates/:id/items', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const templateId = requireId(params);
       if (!templateId) return badRequest('Invalid template ID');
       const body = await getBody(request);
@@ -1315,6 +1380,7 @@ const routes0 = [
     }),
 
     route('PUT', '/api/plan-template-items/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const id = requireId(params);
       if (!id) return badRequest('Invalid ID');
       const body = await getBody(request);
@@ -1330,6 +1396,7 @@ const routes0 = [
     }),
 
     route('DELETE', '/api/plan-template-items/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const id = requireId(params);
       if (!id) return badRequest('Invalid ID');
       await env.DB.prepare('DELETE FROM plan_template_items WHERE id = ?').bind(id).run();
@@ -1782,6 +1849,7 @@ const routes2 = [
   }),
 
   route('POST', '/api/arrangements/:id/annotations', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const arrId = requireId(params);
     if (!arrId) return badRequest('Invalid arrangement ID');
     const member = await getMemberFromRequest(request, env);
@@ -1801,6 +1869,7 @@ const routes2 = [
   }),
 
   route('PUT', '/api/annotations/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('Invalid annotation ID');
     const member = await getMemberFromRequest(request, env);
@@ -1828,6 +1897,7 @@ const routes2 = [
   }),
 
   route('DELETE', '/api/annotations/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('Invalid annotation ID');
     const member = await getMemberFromRequest(request, env);
@@ -1879,6 +1949,7 @@ const routes2 = [
   }),
 
   route('POST', '/api/upload', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const member = await getMemberFromRequest(request, env);
     if (!member) return unauthorized();
     let formData;
@@ -1933,6 +2004,7 @@ const routes2 = [
   }),
 
   route('DELETE', '/api/attachments/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('Invalid attachment ID');
     const existing = await dbFirst(env.DB, 'SELECT id, file_url FROM attachments WHERE id = ?', id);
@@ -2475,24 +2547,33 @@ const routes3 = [
   // ========================================
   // SONDAGES (Polls)
   // ========================================
-  route('GET', '/api/polls', async (request, env) => {
+  route('GET', '/api/polls', async (request, env, params, url) => {
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+    // Get total count
+    const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM polls').first();
+    const totalCount = countRes?.count || 0;
+    // Paginated fetch
     const rows = await env.DB.prepare(`
       SELECT p.*, (SELECT COUNT(*) FROM poll_votes pv WHERE pv.poll_id = p.id) as vote_count
       FROM polls p ORDER BY p.created_at DESC
-    `).all();
+      LIMIT ? OFFSET ?
+    `).bind(size, offset).all();
     const polls = rows.results;
+    const member = await getMemberFromRequest(request, env);
     for (const poll of polls) {
       poll.options = (await env.DB.prepare('SELECT * FROM poll_options WHERE poll_id = ? ORDER BY position ASC').bind(poll.id).all()).results;
-      const member = await getMemberFromRequest(request, env);
       if (member) {
         const myVotes = await env.DB.prepare('SELECT poll_option_id FROM poll_votes WHERE poll_id = ? AND member_id = ?').bind(poll.id, member.id).all();
         poll.my_votes = myVotes.results.map(v => v.poll_option_id);
       }
     }
-    return json(polls);
+    return json({ data: polls, page, size, totalCount });
   }),
 
   route('POST', '/api/polls', async (request, env) => {
+    if (!await hasPermission(request, env, 'edit_announcements')) return json({ error: 'Forbidden' }, 403);
     if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const body = await getBody(request);
     if (!body || !body.question) return badRequest('question required');
@@ -2504,6 +2585,7 @@ const routes3 = [
   }),
 
   route('DELETE', '/api/polls/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_announcements')) return json({ error: 'Forbidden' }, 403);
     if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
@@ -2569,19 +2651,30 @@ const routes3 = [
   // ========================================
   route('GET', '/api/announcements', async (request, env, params, url) => {
     const type = url.searchParams.get('type');
-    let query = 'SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id';
-    const binds = [];
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+    let where = '', whereCount = '', binds = [];
     if (type === 'prayer') {
-      query += " WHERE a.type = 'prayer'";
+      where = "WHERE a.type = 'prayer' ";
+      whereCount = "WHERE type = 'prayer' ";
     } else if (type === 'announcement') {
-      query += " WHERE a.type = 'announcement'";
+      where = "WHERE a.type = 'announcement' ";
+      whereCount = "WHERE type = 'announcement' ";
     }
-    query += ' ORDER BY a.created_at DESC LIMIT 50';
-    const rows = await env.DB.prepare(query).bind(...binds).all();
-    return json(rows.results);
+
+    // Get total count
+    const countRes = await env.DB.prepare(`SELECT COUNT(*) as count FROM announcements ${whereCount}`).all();
+    const totalCount = countRes.results[0]?.count || 0;
+
+    // Get paginated list
+    let query = `SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id ${where} ORDER BY a.created_at DESC LIMIT ? OFFSET ?`;
+    const rows = await env.DB.prepare(query).bind(size, offset).all();
+    return json({ data: rows.results, page, size, totalCount });
   }),
 
   route('POST', '/api/announcements', async (request, env) => {
+    if (!await hasPermission(request, env, 'edit_announcements')) return json({ error: 'Forbidden' }, 403);
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: 'Not authenticated' }, 401);
     const body = await getBody(request);
@@ -2595,6 +2688,7 @@ const routes3 = [
   }),
 
   route('PUT', '/api/announcements/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_announcements')) return json({ error: 'Forbidden' }, 403);
     if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
@@ -2607,6 +2701,7 @@ const routes3 = [
   }),
 
   route('DELETE', '/api/announcements/:id', async (request, env, params) => {
+    if (!await hasPermission(request, env, 'edit_announcements')) return json({ error: 'Forbidden' }, 403);
     if (!await hasPermission(request, env, 'edit_members')) return json({ error: 'Forbidden' }, 403);
     const id = requireId(params);
     if (!id) return badRequest('ID invalide');
@@ -2618,6 +2713,7 @@ const routes3 = [
   // MESSAGERIE INTERNE
   // ========================================
   route('POST', '/api/messages', async (request, env) => {
+    if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: 'Not authenticated' }, 401);
     const body = await getBody(request);
@@ -2635,9 +2731,16 @@ const routes3 = [
     return json(created, 201);
   }),
 
-  route('GET', '/api/messages/inbox', async (request, env) => {
+  route('GET', '/api/messages/inbox', async (request, env, params, url) => {
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: 'Not authenticated' }, 401);
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+    // Count total
+    const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM message_recipients WHERE recipient_id = ?').bind(member.id).first();
+    const totalCount = countRes?.count || 0;
+    // Paginated fetch
     const rows = await env.DB.prepare(`
       SELECT m.id, m.sender_id, m.subject, m.content, m.created_at, mr.read_at, mem.first_name as sender_first, mem.last_name as sender_last
       FROM message_recipients mr
@@ -2645,8 +2748,9 @@ const routes3 = [
       LEFT JOIN members mem ON mem.id = m.sender_id
       WHERE mr.recipient_id = ?
       ORDER BY m.created_at DESC
-    `).bind(member.id).all();
-    return json(rows.results);
+      LIMIT ? OFFSET ?
+    `).bind(member.id, size, offset).all();
+    return json({ data: rows.results, page, size, totalCount });
   }),
 
   route('GET', '/api/messages/:id', async (request, env, params) => {
@@ -3256,11 +3360,10 @@ const routes3 = [
     const includeExceptions = url.searchParams.get('include_exceptions') === '1';
     const fromDate = url.searchParams.get('from');
     const toDate = url.searchParams.get('to');
-    let query = `SELECT ce.*, 
-      (SELECT COUNT(*) FROM church_event_exceptions cee WHERE cee.event_id = ce.id) as exception_count
-      FROM church_events ce`;
-    const binds = [];
-    const conditions = [];
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const size = Math.min(parseInt(url.searchParams.get('size') || '25', 10), 100);
+    const offset = (page - 1) * size;
+    let where = '', binds = [], conditions = [];
     if (source) {
       conditions.push('ce.source = ?');
       binds.push(source);
@@ -3273,9 +3376,16 @@ const routes3 = [
       conditions.push('ce.start_date <= ?');
       binds.push(toDate);
     }
-    if (conditions.length > 0) query += ' WHERE ' + conditions.join(' AND ');
-    query += ' ORDER BY ce.start_date ASC, ce.start_time ASC';
-    const rows = await env.DB.prepare(query).bind(...binds).all();
+    if (conditions.length > 0) where = 'WHERE ' + conditions.join(' AND ');
+    // Count total
+    const countRes = await env.DB.prepare(`SELECT COUNT(*) as count FROM church_events ce ${where}`).bind(...binds).first();
+    const totalCount = countRes?.count || 0;
+    // Paginated fetch
+    let query = `SELECT ce.*, 
+      (SELECT COUNT(*) FROM church_event_exceptions cee WHERE cee.event_id = ce.id) as exception_count
+      FROM church_events ce ${where} ORDER BY ce.start_date ASC, ce.start_time ASC
+      LIMIT ? OFFSET ?`;
+    const rows = await env.DB.prepare(query).bind(...binds, size, offset).all();
 
     if (includeExceptions) {
       // Fetch all exceptions in a single query and attach to events
