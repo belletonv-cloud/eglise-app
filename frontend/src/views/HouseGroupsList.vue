@@ -2,9 +2,9 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('houseGroups.title') }}</h2>
-        <PageHelp page="housegroups" :helpText="$t('help.housegroups')" />
+        <PageHelp page="housegroups" :helpText="$t('help.housegroups')" :steps="stepsByPage(t).housegroups" />
       <button @click="showForm = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer add-housegroup-btn">
         {{ $t('houseGroups.add') }}
       </button>
     </div>
@@ -21,7 +21,7 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div v-for="group in groups" :key="group.id"
         @click="goToGroup(group.id)"
-        class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md hover:border-blue-300 cursor-pointer transition-all">
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md hover:border-blue-300 cursor-pointer transition-all house-groups-list">
         <h3 class="text-lg font-semibold text-gray-800">{{ group.name }}</h3>
         <p v-if="group.leader_first" class="text-sm text-gray-500 mt-1">
           {{ $t('houseGroups.leader') }}: {{ group.leader_first }} {{ group.leader_last }}
@@ -115,6 +115,7 @@
 
 <script setup lang="ts">
 import PageHelp from '../components/PageHelp.vue'
+import { stepsByPage } from '../page-help-steps'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

@@ -5,13 +5,14 @@
       @click="openModal"
       aria-label="Aide/explications de la page"
       title="Aide/explications de la page"
+      ref="btnRef"
     >
       <span>?</span>
     </button>
 
     <Teleport to="body">
       <div v-if="visible" class="page-help-modal fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div class="page-help-content bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 max-w-lg w-full relative">
+        <div class="page-help-content bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 max-w-lg w-full relative" ref="modalContentRef" tabindex="0">
           <button class="absolute top-4 right-6 text-gray-500 hover:text-blue-600" @click="closeModal" aria-label="Fermer">✕</button>
           <div v-if="steps.length === 0">
             <slot name="default">
@@ -34,7 +35,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, defineProps } from 'vue';
+import { ref, computed, watch, defineProps, onMounted, onUnmounted, nextTick } from 'vue';
 const props = defineProps({
   page: { type: String, required: true },
   steps: { type: Array, default: () => [] },
@@ -44,20 +45,82 @@ const props = defineProps({
 const visible = ref(false);
 const stepIndex = ref(0);
 const steps = computed(() => props.steps || []);
+const btnRef = ref<null | HTMLButtonElement>(null);
+const modalContentRef = ref<null | HTMLElement>(null);
+let lastActiveElement: HTMLElement | null = null;
+
+// Highlight state for current selector
+const highlightedEl = ref<HTMLElement | null>(null);
+function applyHighlight() {
+  // Remove old highlight
+  if (highlightedEl.value) highlightedEl.value.classList.remove('page-help-step-highlight');
+  highlightedEl.value = null;
+  const s = steps.value[stepIndex.value]?.selector;
+  if (s) {
+    const el = document.querySelector(s) as HTMLElement | null;
+    if (el) {
+      el.classList.add('page-help-step-highlight');
+      highlightedEl.value = el;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+}
+function cleanupHighlight() {
+  if (highlightedEl.value) highlightedEl.value.classList.remove('page-help-step-highlight');
+  highlightedEl.value = null;
+}
 
 function openModal() {
   visible.value = true;
   stepIndex.value = 0;
+  lastActiveElement = document.activeElement as HTMLElement;
+  nextTick(() => {
+    modalContentRef.value?.focus();
+    applyHighlight();
+  });
 }
 function closeModal() {
   visible.value = false;
+  cleanupHighlight();
+  nextTick(() => {
+    if (lastActiveElement) lastActiveElement.focus?.();
+  });
 }
 function nextStep() {
-  if (stepIndex.value < steps.value.length - 1) stepIndex.value++;
+  if (stepIndex.value < steps.value.length - 1) {
+    stepIndex.value++;
+    nextTick(applyHighlight);
+  }
 }
 function prevStep() {
-  if (stepIndex.value > 0) stepIndex.value--;
+  if (stepIndex.value > 0) {
+    stepIndex.value--;
+    nextTick(applyHighlight);
+  }
 }
+
+// Gestes clavier (modal ouverte uniquement)
+function onKeydown(e: KeyboardEvent) {
+  if (!visible.value) return;
+  if (e.key === 'Escape') { closeModal(); }
+  else if (e.key === 'ArrowRight') { nextStep(); }
+  else if (e.key === 'ArrowLeft') { prevStep(); }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown);
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+  cleanupHighlight();
+});
+
+watch(visible, (v) => {
+  if (!v) cleanupHighlight();
+});
+watch(stepIndex, () => {
+  if (visible.value) nextTick(applyHighlight);
+});
 </script>
 
 <style scoped>
@@ -92,5 +155,14 @@ function prevStep() {
 .page-help-content {
   min-height: 180px;
   min-width: 320px;
+  outline: none;
+}
+
+.page-help-step-highlight {
+  box-shadow: 0 0 0 3px #3b82f6 !important;
+  border-radius: 6px !important;
+  transition: box-shadow .2s;
+  position: relative;
+  z-index: 90;
 }
 </style>

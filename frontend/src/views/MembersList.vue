@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('members.title', { count: members.length }) }}</h2>
-        <PageHelp page="members" :helpText="$t('help.members')" :steps="helpSteps" />
+        <PageHelp page="members" :helpText="$t('help.members')" :steps="stepsByPage(t).members" />
       <button @click="showForm = true"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
         {{ $t('members.add') }}
@@ -146,22 +146,10 @@ type MemberTeam = Team & { position?: string }
 import { confirmDialog } from '../stores/confirm'
 import { showToast } from '../stores/toast'
 import PageHelp from '../components/PageHelp.vue'
+import { stepsByPage } from '../page-help-steps'
 
 const { t } = useI18n()
 
-// Steps for contextual help (guided tour)
-const helpSteps = [
-  {
-    label: t('help.members_step1_label'),
-    content: t('help.members_step1_content'),
-    selector: '.members-table'
-  },
-  {
-    label: t('help.members_step2_label'),
-    content: t('help.members_step2_content'),
-    selector: '.add-member-btn'
-  }
-]
 
 // Pagination state
 const page = ref(1)

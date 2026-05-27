@@ -2,7 +2,7 @@
   <div class="calendar">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $t('calendar.title') }}</h2>
-      <PageHelp page="calendar" :helpText="$t('help.calendar')" />
+      <PageHelp page="calendar" :helpText="$t('help.calendar')" :steps="stepsByPage(t).calendar" />
     </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
@@ -167,6 +167,7 @@ import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import PlanForm from '../components/PlanForm.vue'
 import EventPopover from '../components/EventPopover.vue'
+import { stepsByPage } from '../page-help-steps'
 
 const router = useRouter()
 const { t, tm } = useI18n()

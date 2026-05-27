@@ -17,7 +17,7 @@
             {{ $t('checkin.back') }}
           </button>
           <h2 class="text-2xl font-bold text-gray-800">{{ $t('checkin.title') }}</h2>
-            <PageHelp page="checkin" :helpText="$t('help.checkin')" />
+            <PageHelp page="checkin" :helpText="$t('help.checkin')" :steps="stepsByPage(t).checkin" />
         </div>
 
         <!-- Sélection du plan/service -->
@@ -49,7 +49,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div v-for="plan in plans.slice(0, 4)" :key="plan.id"
                 class="border border-gray-200 rounded-lg p-3 text-center">
-                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`"
+                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`" class="qr-code"
                   alt="QR check-in" class="mx-auto mb-2" loading="lazy" />
                 <div class="text-xs text-gray-500">{{ formatDate(plan.date) }}</div>
               </div>
@@ -75,7 +75,7 @@
 
             <!-- QR affichage sous plan -->
             <div v-if="showQR" class="mt-3 text-center">
-              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + currentPlan.id)}`"
+              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + currentPlan.id)}`" class="qr-code"
                 alt="QR check-in" class="mx-auto" />
               <p class="text-xs text-gray-400 mt-1">{{ $t('checkin.scan_hint') }}</p>
             </div>
@@ -196,6 +196,7 @@
 
 <script setup lang="ts">
 import PageHelp from '../components/PageHelp.vue'
+import { stepsByPage } from '../page-help-steps'
 import { ref, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { showToast } from '../stores/toast'
