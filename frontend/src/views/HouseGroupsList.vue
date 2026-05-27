@@ -2,6 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('houseGroups.title') }}</h2>
+        <PageHelp page="housegroups" :helpText="$t('help.housegroups')" />
       <button @click="showForm = true"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
         {{ $t('houseGroups.add') }}
@@ -113,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import PageHelp from '../components/PageHelp.vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

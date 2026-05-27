@@ -117,11 +117,6 @@
       :lines="parsedLines"
     />
 
-function onChartMounted() {
-  // If there is any chart-mounted/auto-scroll-resume logic, do it here (noop by default)
-}
-
-
     <!-- Bottom song nav -->
     <div v-if="prevSongId || nextSongId" class="song-nav-bottom" @click.stop>
       <button v-if="prevSongId" @click="goToPrev" class="song-nav-btn">← {{ prevSongTitle }}</button>
@@ -139,8 +134,6 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'
-import { isInteractiveView } from '../stores/demo'
-import { getInteractiveSong, interactiveSongs as interactiveSongsData } from '../stores/demoData'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,15 +155,16 @@ const semitones = ref(0)
 const showSongBrowser = ref(false)
 const searchQuery = ref('')
 
-const demoSongs = ref<any[]>([])
+
 const planId = ref<number | null>(null)
 const planItems = ref<any[]>([])
 const showSetlist = ref(false)
 
 const filteredSongs = computed(() => {
-  if (!searchQuery.value) return demoSongs.value
+  if (!searchQuery.value) return songs.value
+
   const q = searchQuery.value.toLowerCase()
-  return demoSongs.value.filter(s => s.title.toLowerCase().includes(q))
+  return songs.value.filter(s => s.title.toLowerCase().includes(q))
 })
 
 // Metronome
@@ -315,20 +309,52 @@ const keyOptions = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 
 import type { ParsedLine } from '../types/ParsedLine'
 
+// Détecte si une ligne ne contient que des accords (format 2 lignes ChordPro)
+const CHORD_TOKEN_RE = /^[A-G][#b]?(m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?(\/[A-G][#b]?(m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?)?$/
+const CHORD_INLINE_RE = /([A-G][#b]?(?:m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?(?:\/[A-G][#b]?(?:m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?)?)/g
+
+function isChordOnlyLine(line: string): boolean {
+  if (!line.trim()) return false
+  const tokens = line.trim().split(/\s+/)
+  if (tokens.length === 0) return false
+  return tokens.every(t => CHORD_TOKEN_RE.test(t))
+}
+
+function buildTwoLineParts(chordLine: string, lyricLine: string): { chord: string; lyric: string }[] {
+  const chords: { chord: string; pos: number }[] = []
+  let m: RegExpExecArray | null
+  while ((m = CHORD_INLINE_RE.exec(chordLine)) !== null) {
+    chords.push({ chord: showChords.value ? transposeChord(m[0]) : '', pos: m.index })
+  }
+  if (chords.length === 0) {
+    return [{ chord: '', lyric: showLyrics.value ? transposeText(lyricLine) : '' }]
+  }
+  const parts: { chord: string; lyric: string }[] = []
+  for (let i = 0; i < chords.length; i++) {
+    const { chord, pos } = chords[i]
+    const nextPos = i < chords.length - 1 ? chords[i + 1].pos : Math.max(chordLine.length, lyricLine.length)
+    const lyric = lyricLine.slice(pos, nextPos).trim()
+    parts.push({ chord, lyric: showLyrics.value ? transposeText(lyric) : '' })
+  }
+  return parts
+}
+
 const parsedLines = computed<ParsedLine[]>(() => {
   if (!arrangement.value?.chord_chart) return []
   const chart = arrangement.value.chord_chart
   const lines = chart.split('\n')
   const result: ParsedLine[] = []
 
-  for (const line of lines) {
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
     const trimmed = line.trim()
+    i++
     if (!trimmed) continue
 
     // Section header: {section: Verse} or {chorus}, {verse}, etc.
     const sectionMatch = trimmed.match(/^\{([^}]+)\}/)
     if (sectionMatch && showSections.value) {
-      // Edge case: normalise label by collapsing multiple spaces
       let label = sectionMatch[1].replace(/\s{2,}/g, ' ').trim()
       result.push({ type: 'section', label })
       continue
@@ -350,43 +376,56 @@ const parsedLines = computed<ParsedLine[]>(() => {
       }
       const parts: { chord: string; lyric: string }[] = []
       let remaining = trimmed
-      let lastEnd = 0
-      let prevCloseIdx = 0
-      let foundAny = false
       while (remaining.length > 0) {
         const chordIdx = remaining.indexOf('[')
         const closeIdx = chordIdx !== -1 ? remaining.indexOf(']', chordIdx) : -1
 
         if (chordIdx === -1 || closeIdx === -1) {
-          // Plus de crochets : prendre tout le résiduel comme lyric seule
           if (remaining) {
             parts.push({ chord: '', lyric: showLyrics.value ? transposeText(remaining) : '' })
           }
           break
         }
 
-        // 1. Text avant le 1er accord de la ligne : lyrics seules
         if (chordIdx > 0) {
           const lyric = remaining.slice(0, chordIdx)
           if (lyric) parts.push({ chord: '', lyric: showLyrics.value ? transposeText(lyric) : '' })
         }
-        // 2. Accord courant
         const chord = remaining.slice(chordIdx + 1, closeIdx)
         const transposedChord = transposeChord(chord)
-        // 3. Texte qui suit l’accord (jusqu’au prochain accord ou la fin)
         let afterChord = remaining.slice(closeIdx + 1)
         let nextChordIdx = afterChord.indexOf('[')
         let lyric = nextChordIdx === -1 ? afterChord : afterChord.slice(0, nextChordIdx)
-        // Push un bloc même si lyric==="" (edge-case : deux accords accolés sans paroles)
         parts.push({ chord: showChords.value ? transposedChord : '', lyric: showLyrics.value ? transposeText(lyric) : '' })
-        // Avance
         remaining = nextChordIdx === -1 ? '' : afterChord.slice(nextChordIdx)
       }
-      // Garde tous les blocs, même lyrics vides consécutives + coupe lignes trop longues pour éviter poluer l’UI
       if (parts.length > 0) {
-        // Edge-case : limite trop longue pour forcer passage à la ligne côté viewer
         let MAX_PARTS = 100
         result.push({ type: 'chord-lyric', parts: parts.slice(0, MAX_PARTS) })
+      }
+      continue
+    }
+
+    // Two-line ChordPro: chord-only line followed by lyrics
+    if (isChordOnlyLine(trimmed)) {
+      if (!showChords.value && !showLyrics.value) continue
+      // Cherche la prochaine ligne non-vide qui n'est pas un en-tête / directive
+      let lyricLine = ''
+      let skipIdx = -1
+      for (let j = i; j < lines.length; j++) {
+        const l = lines[j].trim()
+        if (!l) continue
+        if (/^\{/.test(l) || (l.startsWith('[') && l.endsWith(']')) || isChordOnlyLine(l)) break
+        lyricLine = l
+        skipIdx = j
+        break
+      }
+      if (lyricLine) {
+        const parts = buildTwoLineParts(line, lyricLine)
+        if (parts.length > 0) result.push({ type: 'chord-lyric', parts })
+        i = skipIdx + 1
+      } else {
+        result.push({ type: 'plain', text: trimmed })
       }
       continue
     }
@@ -512,11 +551,7 @@ async function loadSongData(songId: number, arrId: number | null) {
 
   if (!songId) return
   try {
-    if (isInteractiveView.value) {
-      song.value = getInteractiveSong(songId)
-    } else {
-      song.value = await api.getSong(songId)
-    }
+
     if (arrId) {
       arrangement.value = song.value.arrangements?.find((a: any) => a.id === arrId)
     } else {
@@ -558,24 +593,7 @@ onMounted(async () => {
     await loadSetlist()
 
     // Load browser songs (all songs with charts) for Song Browser
-  if (isInteractiveView.value) {
-    demoSongs.value = interactiveSongsData
-    if (!planId.value) setlistSongs.value = interactiveSongsData
-  } else {
-    try {
-      const songs = await api.getSongs()
-      const withCharts = songs.filter((s: any) => s.arrangement_count > 0)
-      const withArrangements = await Promise.all(
-        withCharts.map((s: any) => api.getSong(s.id))
-      )
-      const haveCharts = withArrangements.filter((s: any) =>
-        s.arrangements?.some((a: any) => a.chord_chart)
-      )
-      demoSongs.value = haveCharts
-      if (!planId.value) setlistSongs.value = haveCharts
-    } catch (e: any) {
-      showToast(e.message || 'Erreur chargement chants', 'error')
-    }
+
   }
 
     await loadSongData(songId, arrId)

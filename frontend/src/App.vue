@@ -120,9 +120,7 @@
           </router-link>
         </nav>
         <div v-if="isAuthenticated" class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
-          <button @click="isInteractiveView ? disableInteractiveView() : enableInteractiveView()" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg cursor-pointer transition-colors" :class="isInteractiveView && 'bg-amber-50 dark:bg-amber-900/20 font-medium'">
-            <span>🕊️</span> {{ isInteractiveView ? $t('menu.exit_demo') : $t('menu.enter_demo') }}
-          </button>
+          
           <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
@@ -151,6 +149,7 @@
       <ConfirmDialog />
     </div>
 
+    <DemoBadge />
     <DemoGuide />
   </div>
 </template>
@@ -163,11 +162,13 @@ import { useRoute } from 'vue-router'
 import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
 import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as memberLoading } from './stores/member';
-import { isInteractiveView, enableInteractiveView, disableInteractiveView } from './stores/demo';
+
+initInteractiveView()
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
-import DemoGuide from './components/DemoGuide.vue'
+
+
 
 const { locale } = useI18n()
 const lang = ref(locale.value)

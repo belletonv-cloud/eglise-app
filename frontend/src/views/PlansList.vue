@@ -1,10 +1,11 @@
 <template>
   <div>
     <!-- Aide contextuelle -->
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">{{ $t('plansList.title') }}</h2>
-        <ContextHelp :text="$t('help.plans')" />
-      <div class="flex gap-2">
+    <div style="position:relative; min-height:100vh;">
+      <PageHelp page="plans" :helpText="t('help.plans')" :steps="helpSteps" />
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">{{ $t('plansList.title') }}</h2>
+        <div class="flex gap-2">
         <button @click="showApplyTemplate = true"
           class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
           {{ $t('plansList.add_template') }}

@@ -2,7 +2,7 @@
   <div class="calendar">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $t('calendar.title') }}</h2>
-      <ContextHelp :text="$t('help.calendar')" />
+      <PageHelp page="calendar" :helpText="$t('help.calendar')" />
     </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
@@ -43,7 +43,7 @@
             </div>
             <div class="space-y-0.5">
               <div v-for="item in day.items" :key="item.id"
-                @click.stop="handleItemClick(item)"
+                @click.stop="handleItemClick(item, $event)"
                 class="text-xs px-1 py-0.5 rounded truncate cursor-pointer font-medium leading-tight"
                 :class="itemColor(item)">
                 {{ item.emoji || '' }} {{ item.title }}
@@ -66,7 +66,7 @@
             </div>
             <div class="space-y-0.5">
               <div v-for="item in day.items" :key="item.id"
-                @click.stop="handleItemClick(item)"
+                @click.stop="handleItemClick(item, $event)"
                 class="text-xs px-1 py-0.5 rounded truncate cursor-pointer font-medium leading-tight"
                 :class="itemColor(item)">
                 {{ item.emoji || '' }} {{ item.title }}
@@ -140,21 +140,33 @@
             </div>
           </div>
           <p v-if="sortedItems.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-12">{{ $t('churchEvents.nothing') }}</p>
-        </div>
-      </template>
-    </template>
+   </div>
+   </template>
+
+   <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
+   <EventPopover
+     v-if="popover.visible && popover.event"
+     :event="popover.event"
+     :x="popover.x"
+     :y="popover.y"
+     :visible="popover.visible"
+     :onClose="closePopover"
+   />
+  </div>
+</template>
+
 
     <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
   </div>
 </template>
 
 <script setup lang="ts">
-import ContextHelp from '../components/ContextHelp.vue';
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import PlanForm from '../components/PlanForm.vue'
+import EventPopover from '../components/EventPopover.vue'
 
 const router = useRouter()
 const { t, tm } = useI18n()
@@ -166,6 +178,8 @@ const showForm = ref(false)
 const selectedDate = ref('')
 const currentDate = ref(new Date())
 const currentView = ref('month')
+
+const popover = ref<{event: CalendarItem|null, x: number, y: number, visible: boolean}>({ event: null, x: 0, y: 0, visible: false })
 
 const views = [
   { key: 'month', label: 'Mois' },
@@ -375,9 +389,25 @@ function goToPlan(id: number | null) {
   router.push({ name: 'plan-detail', params: { id: String(id) } })
 }
 
-function handleItemClick(item: CalendarItem) {
-  if (item.type === 'plan') goToPlan(item.planId)
-  else if (item.link) window.open(item.link, '_blank')
+function handleItemClick(item: CalendarItem, evt?: MouseEvent) {
+  if (item.type === 'plan') {
+    goToPlan(item.planId)
+    return
+  }
+  // Popover contextual uniquement pour events
+  if (evt) {
+    popover.value = {
+      event: item,
+      x: evt.clientX,
+      y: evt.clientY + 2,
+      visible: true,
+    }
+  }
+}
+
+function closePopover() {
+  popover.value.visible = false
+  popover.value.event = null
 }
 
 const onPlanSaved = () => {

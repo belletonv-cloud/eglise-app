@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('members.title', { count: members.length }) }}</h2>
-        <ContextHelp :text="$t('help.members')" />
+        <PageHelp page="members" :helpText="$t('help.members')" :steps="helpSteps" />
       <button @click="showForm = true"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
         {{ $t('members.add') }}
@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import ContextHelp from '../components/ContextHelp.vue';
+
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getMembers } from '../api/members'
@@ -145,8 +145,23 @@ import type { Member, Team } from '../utils/types'
 type MemberTeam = Team & { position?: string }
 import { confirmDialog } from '../stores/confirm'
 import { showToast } from '../stores/toast'
+import PageHelp from '../components/PageHelp.vue'
 
 const { t } = useI18n()
+
+// Steps for contextual help (guided tour)
+const helpSteps = [
+  {
+    label: t('help.members_step1_label'),
+    content: t('help.members_step1_content'),
+    selector: '.members-table'
+  },
+  {
+    label: t('help.members_step2_label'),
+    content: t('help.members_step2_content'),
+    selector: '.add-member-btn'
+  }
+]
 
 // Pagination state
 const page = ref(1)

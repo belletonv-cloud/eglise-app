@@ -35,9 +35,8 @@ import YoutubeView from '../views/YoutubeView.vue'
 import PcoSyncView from '../views/PcoSyncView.vue'
 import MusicStandView from '../views/MusicStandView.vue'
 import MusicStandListView from '../views/MusicStandListView.vue'
-import DemoTour from '../views/DemoTour.vue'
 
-export const publicRoutes: string[] = ['invitation', 'not-found', 'checkin']
+export const publicRoutes: string[] = ['login', 'invitation', 'not-found', 'checkin']
 
 const NotFound = { template: '<div class="flex items-center justify-center h-full"><div class="text-center"><h1 class="text-6xl font-bold text-gray-300 dark:text-gray-600">404</h1><p class="mt-2 text-gray-500 dark:text-gray-400">Page introuvable</p><router-link to="/" class="mt-4 inline-block text-blue-600 hover:underline">Retour à l\'accueil</router-link></div></div>' }
 
@@ -45,13 +44,9 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/demo-tour',
-      name: 'demo-tour',
-      component: DemoTour,
-    },
-    {
-      path: '/interactive',
-      redirect: '/demo-tour',
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/Login.vue'),
     },
     {
       path: '/dashboard',
@@ -262,10 +257,13 @@ const router = createRouter({
 
 // Guard global : authentification obligatoire sur toutes les routes sauf routes publiques
 router.beforeEach((to, from, next) => {
+  // Les routes publiques accessibles sans connexion (invitation, not-found)
   if (to.name && publicRoutes.includes(to.name as string)) return next();
+  // Si non authentifié → on redirige vers '/invitation' (ou '/login').
   if (!isAuthenticated.value) {
-    return next();
+    return next({ name: 'login' });
   }
+  // Sinon accès autorisé (toutes routes en session)
   return next();
 });
 

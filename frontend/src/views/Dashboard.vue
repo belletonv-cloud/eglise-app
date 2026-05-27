@@ -1,5 +1,10 @@
 <template>
-  <div>
+  <div style="position:relative; min-height:100vh;">
+    <PageHelp
+      page="dashboard"
+      :helpText="t('help.dashboard')"
+      :steps="helpSteps"
+    />
     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{ $t('dashboard.title') }}</h1>
 
     <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
@@ -72,9 +77,29 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import PageHelp from '../components/PageHelp.vue'
 import { api } from '../utils/api'
 
 const { t, tm } = useI18n()
+
+const helpSteps = [
+  {
+    title: t('help.dashboard_intro_title') || 'Vue d’ensemble',
+    desc: t('help.dashboard_intro_desc') || 'Sur ce tableau de bord, tu trouves tous les indicateurs clés : membres actifs, prochains plans de service, équipes.'
+  },
+  {
+    title: t('help.dashboard_stats_title') || 'Statistiques globales',
+    desc: t('help.dashboard_stats_desc') || 'La première ligne donne accès aux totaux membres, services, chants et équipes.'
+  },
+  {
+    title: t('help.dashboard_attendance_title') || 'Suivi de présence',
+    desc: t('help.dashboard_attendance_desc') || 'Analyse les présences, par mois et par membre. Clique sur les graphiques pour explorer.'
+  },
+  {
+    title: t('help.dashboard_nav_title') || 'Navigation rapide',
+    desc: t('help.dashboard_nav_desc') || 'Accède rapidement aux principales fonctionnalités : plans, membres, chants, check-in.'
+  },
+];
 
 const stats = ref({
   members: 0, activeMembers: 0, upcomingPlans: 0,

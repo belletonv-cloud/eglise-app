@@ -1,6 +1,9 @@
 <template>
   <div class="teams-page">
-    <h2>{{ $t('menu.ministries') }} ({{ teams.length }})</h2>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+      <h2>{{ $t('menu.ministries') }} ({{ teams.length }})</h2>
+      <PageHelp page="teams" :helpText="$t('help.teams')" />
+    </div>
     <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_ministry') }}</button>
 
     <div v-if="loading" class="loading">{{ $t('loading') }}</div>
@@ -43,6 +46,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import PageHelp from '../components/PageHelp.vue'
 import type { Team } from '../utils/types'
 import { useTeams } from '../composables/useTeams'
 import { showToast } from '../stores/toast'

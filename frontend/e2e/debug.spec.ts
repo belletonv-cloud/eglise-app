@@ -4,7 +4,7 @@ test('debug production', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', err => errors.push(err.message))
 
-  await page.goto('https://main.eglise-app.pages.dev/demo-tour', { waitUntil: 'networkidle', timeout: 15000 }).catch(() => {})
+  // Removed: demo-tour route is gone
   await page.waitForTimeout(3000)
 
   const html = await page.evaluate(() => document.querySelector('#app')?.innerHTML?.substring(0, 200) || 'EMPTY')
