@@ -89,7 +89,7 @@ const loadAttendances = async () => {
     attendances.value = await api.getPlanAttendances(props.planId)
     const attendanceIds = new Set(attendances.value.map((a: any) => a.member_id))
     availableMembers.value = members.value.filter((m: any) => !attendanceIds.has(m.id))
-  } catch {} finally {
+  } catch { console.warn('AttendanceSection filter failed') } finally {
     loading.value = false
   }
 }
@@ -121,7 +121,7 @@ const remove = async (id: number) => {
 onMounted(async () => {
   try {
     members.value = await api.getMembers()
-  } catch {}
+  } catch { console.warn('AttendanceSection getMembers failed') }
   loadAttendances()
 })
 </script>

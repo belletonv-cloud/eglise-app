@@ -1,5 +1,5 @@
 import type { Member } from '../utils/types'
-import { getApiBase } from '../utils/api'
+import { getApiBase, api } from '../utils/api'
 
 export interface GetMembersResult {
   members: Member[]
@@ -9,20 +9,18 @@ export interface GetMembersResult {
 export async function getMembers(params: { page: number; limit: number }): Promise<GetMembersResult> {
   const { page, limit } = params
   const base = getApiBase()
-  const res = await fetch(`${base}/members?page=${page}&limit=${limit}`)
-  const data = await res.json()
-
-  // Legacy fallback: array only
-  if (Array.isArray(data)) {
-    return {
-      members: data,
-      total: data.length,
+  try {
+    const res = await fetch(`${base}/members?page=${page}&limit=${limit}`)
+    const data = await res.json()
+    if (Array.isArray(data)) {
+      return { members: data, total: data.length }
     }
-  }
-
-  // API standard: { items, total } ou { members, total }
-  return {
-    members: data.members ?? data.items ?? [],
-    total: data.total ?? (data.members?.length ?? data.items?.length ?? 0),
+    return {
+      members: data.members ?? data.items ?? [],
+      total: data.total ?? (data.members?.length ?? data.items?.length ?? 0),
+    }
+  } catch {
+    const mock = await api.getMembers()
+    return { members: mock, total: mock.length }
   }
 }

@@ -119,7 +119,7 @@ watch(selectedArrangementId, async (val) => {
 onMounted(async () => {
   try {
     songs.value = await api.getSongs()
-  } catch {}
+  } catch { console.warn('PlanSongSelector getSongs failed') }
   loading.value = false
 })
 </script>

@@ -133,7 +133,7 @@ const loadPeople = async () => {
     people.value = await api.getPlanPeople(props.planId)
     const scheduledIds = new Set(people.value.map((p: any) => p.member_id))
     availableMembers.value = members.value.filter((m: any) => !scheduledIds.has(m.id))
-  } catch {} finally {
+  } catch { console.warn('SchedulePeople filter failed') } finally {
     loading.value = false
   }
 }
@@ -219,7 +219,7 @@ const doReplace = async (r: any) => {
 onMounted(async () => {
   try {
     ;[members.value, teams.value] = await Promise.all([api.getMembers(), api.getTeams()])
-  } catch {}
+  } catch { console.warn('SchedulePeople getMembers/getTeams failed') }
   loadPeople()
 })
 </script>

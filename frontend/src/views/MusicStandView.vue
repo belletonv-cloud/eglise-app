@@ -551,6 +551,8 @@ async function loadSongData(songId: number, arrId: number | null) {
 
   if (!songId) return
   try {
+    song.value = await api.getSong(songId)
+    if (!song.value) return
 
     if (arrId) {
       arrangement.value = song.value.arrangements?.find((a: any) => a.id === arrId)

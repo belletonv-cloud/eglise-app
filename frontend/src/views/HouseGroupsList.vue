@@ -182,7 +182,7 @@ function goNext() {
 const loadMembers = async () => {
   try {
     members.value = await api.getMembers()
-  } catch {}
+  } catch { console.warn('getMembers failed') }
 }
 onMounted(() => {
   fetchGroups()

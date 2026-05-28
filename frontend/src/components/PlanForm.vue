@@ -75,7 +75,7 @@ const save = async () => {
 onMounted(async () => {
   try {
     serviceTypes.value = await api.getServiceTypes()
-  } catch {}
+  } catch { console.warn('PlanForm getServiceTypes failed') }
   if (props.plan) {
     form.value = {
       date: props.plan.date?.slice(0, 10) || '',
