@@ -1,0 +1,95 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - heading "Application Église" [level=1] [ref=e8]
+        - paragraph
+      - generic [ref=e9]:
+        - button "Mode sombre" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+        - button "EN" [ref=e13] [cursor=pointer]
+    - navigation [ref=e14]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: 🔍
+        - textbox "Rechercher..." [ref=e19]
+      - link "📊 Tableau de bord" [ref=e20] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e21]: 📊
+        - text: Tableau de bord
+      - paragraph [ref=e23]: Planification
+      - link "📅 Calendrier" [ref=e24] [cursor=pointer]:
+        - /url: /calendar
+        - generic [ref=e25]: 📅
+        - text: Calendrier
+      - link "📋 Services" [ref=e26] [cursor=pointer]:
+        - /url: /plans
+        - generic [ref=e27]: 📋
+        - text: Services
+      - link "📄 Modèles" [ref=e28] [cursor=pointer]:
+        - /url: /plan-templates
+        - generic [ref=e29]: 📄
+        - text: Modèles
+      - link "✅ Présences" [ref=e30] [cursor=pointer]:
+        - /url: /checkin
+        - generic [ref=e31]: ✅
+        - text: Présences
+      - link "📜 Historique" [ref=e32] [cursor=pointer]:
+        - /url: /historique
+        - generic [ref=e33]: 📜
+        - text: Historique
+      - paragraph [ref=e35]: Personnes
+      - link "👥 Membres" [ref=e36] [cursor=pointer]:
+        - /url: /members
+        - generic [ref=e37]: 👥
+        - text: Membres
+      - link "🎪 Équipes" [ref=e38] [cursor=pointer]:
+        - /url: /teams
+        - generic [ref=e39]: 🎪
+        - text: Équipes
+      - link "📖 Annuaire" [ref=e40] [cursor=pointer]:
+        - /url: /annuaire
+        - generic [ref=e41]: 📖
+        - text: Annuaire
+      - link "🏠 Groupes" [ref=e42] [cursor=pointer]:
+        - /url: /house-groups
+        - generic [ref=e43]: 🏠
+        - text: Groupes
+      - paragraph [ref=e45]: Musique
+      - link "🎵 Chants" [ref=e46] [cursor=pointer]:
+        - /url: /songs
+        - generic [ref=e47]: 🎵
+        - text: Chants
+      - link "🎼 Music Stand" [ref=e48] [cursor=pointer]:
+        - /url: /music-stand
+        - generic [ref=e49]: 🎼
+        - text: Music Stand
+      - paragraph [ref=e51]: Communication
+      - link "📢 Annonces" [ref=e52] [cursor=pointer]:
+        - /url: /annonces
+        - generic [ref=e53]: 📢
+        - text: Annonces
+      - link "📅 Événements" [ref=e54] [cursor=pointer]:
+        - /url: /events
+        - generic [ref=e55]: 📅
+        - text: Événements
+      - link "📧 Emails" [ref=e56] [cursor=pointer]:
+        - /url: /email
+        - generic [ref=e57]: 📧
+        - text: Emails
+      - link "📊 Sondages" [ref=e58] [cursor=pointer]:
+        - /url: /sondages
+        - generic [ref=e59]: 📊
+        - text: Sondages
+      - link "▶️ Prédications" [ref=e60] [cursor=pointer]:
+        - /url: /youtube
+        - generic [ref=e61]: ▶️
+        - text: Prédications
+  - main [ref=e62]:
+    - generic [ref=e65]:
+      - heading "Connexion - Église App" [level=2] [ref=e66]
+      - generic [ref=e67]:
+        - textbox "Email" [ref=e68]
+        - textbox "Mot de passe" [ref=e69]
+        - button "Se connecter avec Email" [ref=e70] [cursor=pointer]
+        - button "Se connecter avec Google" [ref=e71] [cursor=pointer]
+  - status

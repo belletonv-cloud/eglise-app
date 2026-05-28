@@ -1,0 +1,98 @@
+- generic [ref=e4]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - heading "Application Église" [level=1] [ref=e8]
+        - paragraph [ref=e9]: admin@demo.church
+      - generic [ref=e10]:
+        - button "Mode sombre" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+        - button "EN" [ref=e14] [cursor=pointer]
+    - navigation [ref=e15]:
+      - generic [ref=e18]:
+        - generic [ref=e19]: 🔍
+        - textbox "Rechercher..." [ref=e20]
+      - link "📊 Tableau de bord" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e22]: 📊
+        - text: Tableau de bord
+      - paragraph [ref=e24]: Planification
+      - link "📅 Calendrier" [ref=e25] [cursor=pointer]:
+        - /url: /calendar
+        - generic [ref=e26]: 📅
+        - text: Calendrier
+      - link "📋 Services" [ref=e27] [cursor=pointer]:
+        - /url: /plans
+        - generic [ref=e28]: 📋
+        - text: Services
+      - link "📄 Modèles" [ref=e29] [cursor=pointer]:
+        - /url: /plan-templates
+        - generic [ref=e30]: 📄
+        - text: Modèles
+      - link "✅ Présences" [ref=e31] [cursor=pointer]:
+        - /url: /checkin
+        - generic [ref=e32]: ✅
+        - text: Présences
+      - link "📜 Historique" [ref=e33] [cursor=pointer]:
+        - /url: /historique
+        - generic [ref=e34]: 📜
+        - text: Historique
+      - paragraph [ref=e36]: Personnes
+      - link "👥 Membres" [ref=e37] [cursor=pointer]:
+        - /url: /members
+        - generic [ref=e38]: 👥
+        - text: Membres
+      - link "🎪 Équipes" [ref=e39] [cursor=pointer]:
+        - /url: /teams
+        - generic [ref=e40]: 🎪
+        - text: Équipes
+      - link "📖 Annuaire" [ref=e41] [cursor=pointer]:
+        - /url: /annuaire
+        - generic [ref=e42]: 📖
+        - text: Annuaire
+      - link "🏠 Groupes" [ref=e43] [cursor=pointer]:
+        - /url: /house-groups
+        - generic [ref=e44]: 🏠
+        - text: Groupes
+      - paragraph [ref=e46]: Musique
+      - link "🎵 Chants" [ref=e47] [cursor=pointer]:
+        - /url: /songs
+        - generic [ref=e48]: 🎵
+        - text: Chants
+      - link "🎼 Music Stand" [ref=e49] [cursor=pointer]:
+        - /url: /music-stand
+        - generic [ref=e50]: 🎼
+        - text: Music Stand
+      - paragraph [ref=e52]: Communication
+      - link "📢 Annonces" [ref=e53] [cursor=pointer]:
+        - /url: /annonces
+        - generic [ref=e54]: 📢
+        - text: Annonces
+      - link "📅 Événements" [ref=e55] [cursor=pointer]:
+        - /url: /events
+        - generic [ref=e56]: 📅
+        - text: Événements
+      - link "📧 Emails" [ref=e57] [cursor=pointer]:
+        - /url: /email
+        - generic [ref=e58]: 📧
+        - text: Emails
+      - link "📊 Sondages" [ref=e59] [cursor=pointer]:
+        - /url: /sondages
+        - generic [ref=e60]: 📊
+        - text: Sondages
+      - link "▶️ Prédications" [ref=e61] [cursor=pointer]:
+        - /url: /youtube
+        - generic [ref=e62]: ▶️
+        - text: Prédications
+    - button "Déconnexion" [ref=e64] [cursor=pointer]:
+      - img [ref=e65]
+      - text: Déconnexion
+  - main [ref=e67]:
+    - generic [ref=e69]:
+      - generic [ref=e70]:
+        - heading "Membres (0)" [level=2] [ref=e71]
+        - button "Aide/explications de la page" [ref=e73] [cursor=pointer]:
+          - generic [ref=e74]: "?"
+        - button "+ Ajouter un membre" [ref=e75] [cursor=pointer]
+      - generic [ref=e76]: Impossible de charger les membres.
+  - status
