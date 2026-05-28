@@ -49,8 +49,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div v-for="plan in plans.slice(0, 4)" :key="plan.id"
                 class="border border-gray-200 rounded-lg p-3 text-center">
-                <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`" class="qr-code"
-                  alt="QR check-in" class="mx-auto mb-2" loading="lazy" />
+<img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`" class="qr-code mx-auto mb-2" alt="QR check-in" loading="lazy" />
                 <div class="text-xs text-gray-500">{{ formatDate(plan.date) }}</div>
               </div>
             </div>
@@ -75,8 +74,8 @@
 
             <!-- QR affichage sous plan -->
             <div v-if="showQR" class="mt-3 text-center">
-              <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + currentPlan.id)}`" class="qr-code"
-                alt="QR check-in" class="mx-auto" />
+<img :src="`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(origin + '/checkin?plan=' + currentPlan.id)}`"
+                 class="qr-code mx-auto" alt="QR check-in" />
               <p class="text-xs text-gray-400 mt-1">{{ $t('checkin.scan_hint') }}</p>
             </div>
 
@@ -85,7 +84,7 @@
               <input
                 ref="searchInputRef"
                 v-model="manualForm.search"
-                @input="handleSearch($event.target.value)"
+                @input="handleSearch(($event.target as HTMLInputElement).value)"
                 :placeholder="$t('checkin.search_placeholder')"
                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg"
                 :aria-describedby="error ? 'checkin-error' : undefined"
@@ -218,7 +217,7 @@ const manualForm = ref({ first_name: '', last_name: '', search: '' })
 const searchInputRef = ref<HTMLInputElement | null>(null)
 
 const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long'})
-const formatTime = (tl: string) => tl ? new Date(tl).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit'}) : ''
+const formatTime = (tl?: string) => tl ? new Date(tl).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit'}) : ''
 const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
 const handleSelectPlan = async (plan: Plan) => {

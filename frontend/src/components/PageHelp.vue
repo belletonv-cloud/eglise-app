@@ -20,8 +20,8 @@
             </slot>
           </div>
           <div v-else>
-            <div class="font-semibold text-xl mb-3">{{ steps[stepIndex].title }}</div>
-            <div class="mb-6">{{ steps[stepIndex].desc }}</div>
+            <div class="font-semibold text-xl mb-3">{{ steps[stepIndex]?.title }}</div>
+            <div class="mb-6">{{ steps[stepIndex]?.desc }}</div>
             <div class="flex items-center gap-5 justify-between mt-8">
               <button v-if="stepIndex > 0" @click="prevStep" class="text-blue-500 hover:underline">← {{ $t('help.prev') || 'Précédent' }}</button>
               <span class="flex-1 text-center text-xs text-gray-400">{{ stepIndex + 1 }}/{{ steps.length }}</span>
@@ -35,16 +35,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, watch, defineProps, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 const props = defineProps({
   page: { type: String, required: true },
-  steps: { type: Array, default: () => [] },
+  steps: { type: Array as () => { title: string; desc: string; selector?: string }[], default: () => [] },
   helpText: { type: String, default: '' },
 });
 
 const visible = ref(false);
 const stepIndex = ref(0);
-const steps = computed(() => props.steps || []);
+const steps = computed<{ title: string; desc: string; selector?: string }[]>(() => (props.steps as any) || []);
 const btnRef = ref<null | HTMLButtonElement>(null);
 const modalContentRef = ref<null | HTMLElement>(null);
 let lastActiveElement: HTMLElement | null = null;

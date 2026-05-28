@@ -3605,43 +3605,6 @@ const routes3 = [
 const allRoutes = [...routes0, ...routes2, ...routes3];
 const router2 = createRouter(allRoutes);
 
-async function triggerWebhooks(env, event, payload) {
-    try {
-      const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all();
-    for (const wh of webhooks.results) {
-      let events;
-      try { events = JSON.parse(wh.events || '[]'); } catch (e) { console.error('triggerWebhooks: failed to parse webhook events', e); events = []; }
-      if (!events.includes(event) && !events.includes('*')) continue;
-
-      try {
-        const body = JSON.stringify({ event, payload, timestamp: new Date().toISOString() });
-        const res = await fetch(wh.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Webhook-Secret': wh.secret || '',
-            'X-Event': event,
-          },
-          body,
-        });
-        const resText = await res.text().catch(() => '').then(t => t.slice(0, 500));
-        if (res.ok) {
-          await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response) VALUES (?, ?, ?, ?)')
-            .bind(wh.id, event, res.status, resText).run();
-        } else {
-          const nextRetry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-          await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response, retry_count, max_retries, next_retry_at) VALUES (?, ?, ?, ?, 0, 6, ?)')
-            .bind(wh.id, event, res.status, resText, nextRetry).run();
-        }
-      } catch (e) {
-        const nextRetry = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-        await env.DB.prepare('INSERT INTO webhook_logs (webhook_id, event, status, response, retry_count, max_retries, next_retry_at) VALUES (?, ?, ?, ?, 0, 6, ?)')
-          .bind(wh.id, event, 0, e.message, nextRetry).run();
-      }
-    }
-  } catch (e) { console.error('triggerWebhooks failed', e); }
-}
-
 // RBAC path-based permission map for mutations (POST/PUT/DELETE)
 const RBAC_GUARDS = [
   { prefix: '/api/members', perm: 'edit_members' },

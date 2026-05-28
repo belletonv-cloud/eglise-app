@@ -160,6 +160,7 @@ const planId = ref<number | null>(null)
 const planItems = ref<any[]>([])
 const showSetlist = ref(false)
 
+const songs = ref<any[]>([])
 const filteredSongs = computed(() => {
   if (!searchQuery.value) return songs.value
 
@@ -179,8 +180,7 @@ let metroInterval: any = null
 // Auto-scroll
 const autoScrollActive = ref(false)
 const autoScrollInterval = ref<any>(null)
-// chartContainer no longer needed (managed in ChartViewer)
-// const chartContainer = ref<HTMLElement | null>(null)
+const chartContainer = ref<HTMLElement | null>(null)
 const currentScrollLine = ref(0)
 
 // Song browser / setlist navigation
@@ -331,8 +331,8 @@ function buildTwoLineParts(chordLine: string, lyricLine: string): { chord: strin
   }
   const parts: { chord: string; lyric: string }[] = []
   for (let i = 0; i < chords.length; i++) {
-    const { chord, pos } = chords[i]
-    const nextPos = i < chords.length - 1 ? chords[i + 1].pos : Math.max(chordLine.length, lyricLine.length)
+    const { chord, pos } = chords[i]!
+    const nextPos = i < chords.length - 1 ? chords[i + 1]!.pos : Math.max(chordLine.length, lyricLine.length)
     const lyric = lyricLine.slice(pos, nextPos).trim()
     parts.push({ chord, lyric: showLyrics.value ? transposeText(lyric) : '' })
   }
@@ -440,9 +440,9 @@ const parsedLines = computed<ParsedLine[]>(() => {
 // Pagination (split into pages by line count)
 const currentPage = ref(0)
 // Pagination and slicing handled by ChartViewer now
-// const linesPerPage = ...
-// const totalPages = ...
-// const pageLines = ...
+function nextPage() {}
+function prevPage() {}
+// TODO: implement nextPage/prevPage if pagination is re-added elsewhere
 
 function transposeChord(chord: string): string {
   if (semitones.value === 0) return chord
@@ -593,10 +593,16 @@ onMounted(async () => {
     await loadSetlist()
 
     // Load browser songs (all songs with charts) for Song Browser
-
-  }
-
+    try {
+      const all = await api.getSongs()
+      songs.value = all.filter((s: any) => (s.arrangements && s.arrangements.some((a: any) => a.chord_chart)))
+    } catch (e) {
+      console.error('Erreur chargement songs pour Song Browser', e)
+      songs.value = []
+    }
     await loadSongData(songId, arrId)
+  } catch (e) {
+    showToast(e instanceof Error ? e.message : 'Erreur chargement', 'error')
   } finally {
     loading.value = false
   }

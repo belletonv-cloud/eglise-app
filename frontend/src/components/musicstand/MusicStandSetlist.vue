@@ -40,7 +40,7 @@ import { computed } from 'vue'
  * UI et logique de sélection d’un chant dans la setlist (ordre du plan).
  * Props typés strict, events explicites.
  */
-defineProps<{
+const props = defineProps<{
   visible: boolean
   planItems: any[]
   currentSongId: number | null
@@ -63,7 +63,7 @@ function handleSelect(item: any) {
 }
 
 const itemClass = (item: any, idx: number) => ({
-  current: item.type === 'song' && item.arrangement_id && item.song_id === __props.currentSongId,
+  current: item.type === 'song' && item.arrangement_id && item.song_id === props.currentSongId,
   'song-item': item.type === 'song',
   'non-song': item.type !== 'song',
 })

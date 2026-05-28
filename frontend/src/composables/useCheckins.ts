@@ -10,6 +10,8 @@ export type Plan = {
   service_type_id?: number
   service_type_name?: string
   status?: string
+  theme?: string
+  attendance_count?: number
 }
 
 export type Member = {
@@ -26,6 +28,9 @@ export type Presence = {
   plan_id: number
   member_id: number
   checked_in_at: string
+  check_in_time?: string
+  first_name?: string
+  last_name?: string
   member: { first_name: string; last_name: string }
 }
 

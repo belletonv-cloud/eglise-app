@@ -163,6 +163,7 @@ import Login from './components/Login.vue';
 import { user, isAuthenticated, logout } from './stores/auth';
 import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as memberLoading } from './stores/member';
 
+declare function initInteractiveView(): void;
 initInteractiveView()
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';

@@ -16,11 +16,11 @@ let auth: ReturnType<typeof getAuth>;
 let googleProvider: GoogleAuthProvider;
 
 try {
-  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  app = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
 } catch {
-  app = getApps().length ? getApps()[0] : initializeApp({ apiKey: 'test', projectId: 'test' });
+  app = getApps().length ? getApps()[0]! : initializeApp({ apiKey: 'test', projectId: 'test' });
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
 }

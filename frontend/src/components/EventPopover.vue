@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PropType } from 'vue'
 import { Teleport, ref, computed, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
@@ -31,13 +32,13 @@ const props = defineProps({
   x: { type: Number, default: 0 },
   y: { type: Number, default: 0 },
   visible: { type: Boolean, default: false },
-  onClose: { type: Function, required: true },
+  onClose: { type: Function as PropType<() => void>, required: true },
 })
 
 const popoverEl = ref<HTMLElement|null>(null)
 
 const popoverStyle = computed(() => ({
-  position: 'fixed',
+  position: 'fixed' as const,
   left: props.x + 'px',
   top: props.y + 'px',
   zIndex: 9999,

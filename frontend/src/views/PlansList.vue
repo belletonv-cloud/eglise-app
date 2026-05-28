@@ -6,70 +6,71 @@
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">{{ $t('plansList.title') }}</h2>
         <div class="flex gap-2">
-        <button @click="showApplyTemplate = true"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
-          {{ $t('plansList.add_template') }}
-        </button>
-        <button @click="showForm = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-          {{ $t('plansList.add_new') }}
-        </button>
+          <button @click="showApplyTemplate = true"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
+            {{ $t('plansList.add_template') }}
+          </button>
+          <button @click="showForm = true"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+            {{ $t('plansList.add_new') }}
+          </button>
+        </div>
       </div>
     </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
-  <div class="w-80 h-8 bg-gray-200 rounded"></div>
-  <div class="w-72 h-5 bg-gray-100 rounded"></div>
-  <div class="w-[340px] h-16 bg-gray-100 rounded"></div>
-  <div class="w-80 h-12 bg-gray-200 rounded"></div>
-  <span class="text-gray-400 mt-4">{{ $t('loading') }}</span>
-</div>
-
-    <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
-
-    <div v-else class="space-y-3">
-      <div v-for="plan in plans" :key="plan.id"
-        @click="goToPlan(plan.id)"
-        class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md cursor-pointer transition-shadow">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div class="flex items-center gap-4">
-            <div class="text-center min-w-[60px]">
-              <div class="text-lg font-bold text-gray-800">{{ formatDay(plan.date) }}</div>
-              <div class="text-xs text-gray-500">{{ formatMonth(plan.date) }}</div>
+      <div class="w-80 h-8 bg-gray-200 rounded"></div>
+      <div class="w-72 h-5 bg-gray-100 rounded"></div>
+      <div class="w-[340px] h-16 bg-gray-100 rounded"></div>
+      <div class="w-80 h-12 bg-gray-200 rounded"></div>
+      <span class="text-gray-400 mt-4">{{ $t('loading') }}</span>
+    </div>
+    <div v-else>
+      <div v-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
+      <div v-else class="space-y-3">
+        <div v-for="plan in plans" :key="plan.id"
+          @click="goToPlan(plan.id)"
+          class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md cursor-pointer transition-shadow">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-4">
+              <div class="text-center min-w-[60px]">
+                <div class="text-lg font-bold text-gray-800">{{ formatDay(plan.date) }}</div>
+                <div class="text-xs text-gray-500">{{ formatMonth(plan.date) }}</div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800">{{ plan.service_type_name || $t('plansList.type') }}</h3>
+                <p class="text-sm text-gray-500">
+                  {{ plan.date }} <span v-if="plan.time">{{ $t('at') }} {{ plan.time }}</span>
+                </p>
+                <p v-if="plan.theme" class="text-sm text-gray-600 italic">« {{ plan.theme }} »</p>
+              </div>
             </div>
-            <div>
-              <h3 class="font-semibold text-gray-800">{{ plan.service_type_name || $t('plansList.type') }}</h3>
-              <p class="text-sm text-gray-500">
-                {{ plan.date }} <span v-if="plan.time">{{ $t('at') }} {{ plan.time }}</span>
-              </p>
-              <p v-if="plan.theme" class="text-sm text-gray-600 italic">« {{ plan.theme }} »</p>
+            <div class="flex items-center gap-2 sm:gap-3 text-sm text-gray-500 flex-wrap">
+              <span>{{ plan.items_count || 0 }} {{ $t('plansList.items') }}</span>
+              <span>·</span>
+              <span>{{ plan.people_count || 0 }} {{ $t('plansList.people') }}</span>
+              <span :class="statusClass(plan.status)" class="px-2 py-1 rounded-full text-xs font-medium">
+                {{ statusLabel(plan.status) }}
+              </span>
             </div>
-          </div>
-          <div class="flex items-center gap-2 sm:gap-3 text-sm text-gray-500 flex-wrap">
-            <span>{{ plan.items_count || 0 }} {{ $t('plansList.items') }}</span>
-            <span>·</span>
-            <span>{{ plan.people_count || 0 }} {{ $t('plansList.people') }}</span>
-            <span :class="statusClass(plan.status)" class="px-2 py-1 rounded-full text-xs font-medium">
-              {{ statusLabel(plan.status) }}
-            </span>
           </div>
         </div>
-      </div>
 
-      <div v-if="plans.length === 0 && !isLoading" class="text-center py-12 text-gray-400">
-        {{ $t('plansList.none') }}
-      </div>
+        <div v-if="plans.length === 0 && !isLoading" class="text-center py-12 text-gray-400">
+          {{ $t('plansList.none') }}
+        </div>
 
-      <!-- Pagination -->
-      <div class="pagination flex items-center gap-2 justify-center py-4" v-if="total > pageSize">
-        <button type="button" @click="goPrev" :disabled="page === 1"
-          class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Précédent</button>
-        <button v-for="p in totalPages" :key="p" type="button"
-          @click="goToPage(p)" :class="['px-3 py-1 rounded', { 'bg-blue-600 text-white': p === page, 'bg-gray-100': p !== page } ]">
-          {{ p }}
-        </button>
-        <button type="button" @click="goNext" :disabled="page === totalPages"
-          class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Suivant</button>
+        <!-- Pagination -->
+        <div class="pagination flex items-center gap-2 justify-center py-4" v-if="total > pageSize">
+          <button type="button" @click="goPrev" :disabled="page === 1"
+            class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Précédent</button>
+          <button v-for="p in totalPages" :key="p" type="button"
+            @click="goToPage(p)" :class="['px-3 py-1 rounded', { 'bg-blue-600 text-white': p === page, 'bg-gray-100': p !== page } ]">
+            {{ p }}
+          </button>
+          <button type="button" @click="goNext" :disabled="page === totalPages"
+            class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50">Suivant</button>
+        </div>
       </div>
     </div>
 

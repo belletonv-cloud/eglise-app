@@ -14,7 +14,7 @@
     </div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
-    <template v-else>
+    <div v-else>
       <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div class="flex items-center gap-2">
           <button @click="prev" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer border border-gray-200 dark:border-gray-600">&larr;</button>
@@ -31,7 +31,7 @@
       </div>
 
       <!-- Month view -->
-      <template v-if="currentView === 'month'">
+      <div v-if="currentView === 'month'">
         <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
           <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-800 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
           <div v-for="(day, i) in calendarDays" :key="i"
@@ -51,10 +51,10 @@
             </div>
           </div>
         </div>
-      </template>
+      </div>
 
       <!-- Week view -->
-      <template v-if="currentView === 'week'">
+      <div v-if="currentView === 'week'">
         <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
           <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-800 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
           <div v-for="day in weekDays" :key="day.date"
@@ -72,94 +72,35 @@
                 {{ item.emoji || '' }} {{ item.title }}
               </div>
             </div>
-          </div>
-        </div>
-      </template>
+      </div>
+     </div>
+    </div>
 
-      <!-- Cards view -->
-      <template v-if="currentView === 'cards'">
-        <div class="space-y-4">
-          <div v-for="item in sortedItems" :key="item.id" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
-            <div class="p-4 flex gap-4 items-start">
-              <div class="flex flex-col items-center justify-center min-w-[56px] bg-blue-600 rounded-lg py-2 px-3 text-white flex-shrink-0">
-                <span class="text-xl font-black leading-none">{{ formatDay(item.date) }}</span>
-                <span class="text-[0.6rem] font-bold uppercase opacity-85 mt-0.5">{{ formatMonth(item.date) }}</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2">
-                  <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">{{ item.title }}</h3>
-                  <span class="text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap shrink-0"
-                    :class="item.type === 'plan' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'">
-                    {{ item.type === 'plan' ? 'Service' : 'Événement' }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
-                  <span v-if="item.time">🕙 {{ item.time }}</span>
-                  <span v-if="item.location">📍 {{ item.location }}</span>
-                </div>
-                <p v-if="item.description" class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">{{ item.description }}</p>
-                <div class="flex gap-2 mt-2 flex-wrap">
-                  <button v-if="item.type === 'plan'" @click="goToPlan(item.planId)" class="text-xs px-2.5 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
-                    {{ $t('plan.edit') }}
-                  </button>
-                  <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 inline-block">
-                    En savoir plus
-                  </a>
-                  <a v-if="item.ticketUrl" :href="item.ticketUrl" target="_blank" rel="noopener" class="text-xs px-2.5 py-1 border border-blue-600 text-blue-600 dark:text-blue-400 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 inline-block">
-                    🎟️ Billetterie
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p v-if="sortedItems.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-12">{{ $t('churchEvents.nothing') }}</p>
-        </div>
-      </template>
+    <!-- Cards view -->
+    <div v-if="currentView === 'cards'">
+      <!-- TODO: implémenter Cards view ici -->
+      <div class="text-center py-12 text-gray-400">Vue "Cartes" à venir…</div>
+    </div>
 
-      <!-- Agenda view -->
-      <template v-if="currentView === 'agenda'">
-        <div class="space-y-8">
-          <div v-for="group in groupedByDate" :key="group.key" class="border-l-3 border-blue-600 pl-4">
-            <h3 class="text-base font-bold text-blue-700 dark:text-blue-400 mb-3 capitalize">{{ group.label }}</h3>
-            <div v-for="item in group.items" :key="item.id" class="flex gap-4 py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
-              <span class="text-sm text-gray-500 dark:text-gray-400 font-semibold min-w-[50px] flex-shrink-0 pt-0.5">{{ item.time || '—' }}</span>
-              <div class="flex-1">
-                <div class="flex items-start gap-2">
-                  <strong class="text-sm text-gray-800 dark:text-gray-200">{{ item.title }}</strong>
-                  <span class="text-[0.6rem] px-1 py-0.5 rounded font-medium"
-                    :class="item.type === 'plan' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'">
-                    {{ item.type === 'plan' ? 'Service' : '' }}
-                  </span>
-                </div>
-                <span v-if="item.location" class="text-xs text-gray-500 dark:text-gray-400">📍 {{ item.location }}</span>
-                <p v-if="item.description" class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ item.description }}</p>
-              </div>
-              <button v-if="item.type === 'plan'" @click="goToPlan(item.planId)" class="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 shrink-0 self-start cursor-pointer">
-                {{ $t('plan.edit') }}
-              </button>
-            </div>
-          </div>
-          <p v-if="sortedItems.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-12">{{ $t('churchEvents.nothing') }}</p>
-   </div>
-   </template>
-
-   <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
-   <EventPopover
-     v-if="popover.visible && popover.event"
-     :event="popover.event"
-     :x="popover.x"
-     :y="popover.y"
-     :visible="popover.visible"
-     :onClose="closePopover"
-   />
-  </div>
-</template>
-
+    <!-- Agenda view -->
+    <div v-if="currentView === 'agenda'">
+      <!-- TODO: implémenter Agenda view ici -->
+      <div class="text-center py-12 text-gray-400">Vue "Ordre du jour" à venir…</div>
+    </div>
 
     <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
+    <EventPopover
+      v-if="popover.visible && popover.event"
+      :event="popover.event"
+      :x="popover.x"
+      :y="popover.y"
+      :visible="popover.visible"
+      :onClose="closePopover"
+    />
   </div>
-</template>
+</div>
 
+</template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
