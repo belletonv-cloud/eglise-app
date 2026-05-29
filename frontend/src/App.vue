@@ -122,10 +122,10 @@
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
           <router-link v-if="isAdmin" to="/admin/content" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>📝</span> Contenus
+            <span>📝</span> {{$t('menu.content')}}
           </router-link>
           <router-link v-if="isAdmin" to="/admin/test-accounts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
-            <span>🧪</span> Comptes test
+            <span>🧪</span> {{$t('menu.test_accounts')}}
           </router-link>
         </nav>
         <div v-if="isAuthenticated" class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
