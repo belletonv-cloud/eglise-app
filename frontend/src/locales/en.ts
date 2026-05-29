@@ -1078,4 +1078,8 @@ export default {
       },
     },
   },
+  demoPersona: {
+    title: "Test Accounts",
+    instructions: "Click to impersonate an account",
+  },
 };

@@ -28,14 +28,15 @@
             <button @click="toggleLang" class="p-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="lang === 'fr' ? 'English' : 'Français'">
               {{ lang === 'fr' ? 'EN' : 'FR' }}
             </button>
-            <div class="relative demo-persona-selector" v-if="isDemoMode">
-              <button @click="demoPersonaMenuOpen = !demoPersonaMenuOpen" class="p-1.5 rounded-lg text-xs font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 cursor-pointer" title="Changer de persona">
+            <div class="relative demo-persona-selector" v-if="isAdmin || isDemoMode">
+              <button @click="demoPersonaMenuOpen = !demoPersonaMenuOpen" class="p-1.5 rounded-lg text-xs font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 cursor-pointer" :title="$t('demoPersona.title')">
                 🎭
               </button>
-              <div v-if="demoPersonaMenuOpen" class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1">
-                <button v-for="(persona, key) in demoPersonas" :key="key" @click="switchDemoPersona(key)" class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+              <div v-if="demoPersonaMenuOpen" class="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1">
+                <div class="px-3 py-2 text-xs text-gray-500 border-b border-gray-100 dark:border-gray-700">{{$t('demoPersona.instructions')}}</div>
+                <button v-for="(persona, key) in demoPersonas" :key="key" @click="switchDemoPersona(key)" class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 min-w-0">
                   <span class="font-medium">{{ persona.label }}</span>
-                  <span class="text-gray-400 text-xs">{{ persona.email }}</span>
+                  <span class="text-gray-400 text-xs truncate">{{ persona.email }}</span>
                 </button>
               </div>
             </div>
@@ -256,9 +257,13 @@ onLogin(() => {
   if (route.name === 'login') router.push('/')
 })
 
+// Demo mode detection (must be before watcher)
+const isDemoMode = computed(() => typeof window !== 'undefined' && window.location.search.includes('demo=1'))
+
 watch(user, (val) => {
   if (val) {
-    loadCurrentMember()
+    // Skip API call in demo mode - member.value is already set by switchDemoPersona
+    if (!isDemoMode.value) loadCurrentMember()
     if (route.name === 'login') router.push('/')
   }
   else member.value = null
@@ -266,7 +271,6 @@ watch(user, (val) => {
 
 // Demo persona switcher
 const demoPersonaMenuOpen = ref(false)
-const isDemoMode = computed(() => typeof window !== 'undefined' && window.location.search.includes('demo=1'))
 const demoPersonas: Record<string, { email: string; label: string }> = {
   admin: { email: 'admin@demo.church', label: 'Admin' },
   scheduler: { email: 'scheduler@demo.church', label: 'Planificateur' },

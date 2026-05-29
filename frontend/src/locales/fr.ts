@@ -1044,7 +1044,7 @@ export default {
       "RBAC, webhooks, logs, synchronisation PCO et configuration.",
     version: "Version",
     credits: "Développé par l'équipe technique — Église Cieux Ouverts",
-    back: "← Retour",
+    back: "Retour",
   },
 
   adminContent: {
@@ -1103,5 +1103,9 @@ export default {
         desc: "Accès minimal — lectures seules.",
       },
     },
+  },
+  demoPersona: {
+    title: "Comptes de test",
+    instructions: "Cliquez pour impersonnaliser un compte",
   },
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <div class="mb-6">
-      <router-link to="/" class="text-blue-600 hover:underline text-sm">&larr; {{ $t('about.back') }}</router-link>
+      <router-link to="/" class="text-blue-600 hover:underline text-sm">{{$t('about.back')}}</router-link>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
