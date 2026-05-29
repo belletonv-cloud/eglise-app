@@ -125,9 +125,7 @@ watch(stepIndex, () => {
 
 <style scoped>
 .page-help-root {
-  position: absolute;
-  top: 18px;
-  right: 24px;
+  display: inline-flex;
   z-index: 50;
 }
 .page-help-btn {

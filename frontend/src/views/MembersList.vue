@@ -2,11 +2,13 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('members.title', { count: members.length }) }}</h2>
+      <div class="flex items-center gap-2">
+        <button @click="showForm = true"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
+          {{ $t('members.add') }}
+        </button>
         <PageHelp page="members" :helpText="$t('help.members')" :steps="stepsByPage(t).members" />
-      <button @click="showForm = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-        {{ $t('members.add') }}
-      </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">

@@ -2,11 +2,13 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('houseGroups.title') }}</h2>
+      <div class="flex items-center gap-2">
+        <button @click="showForm = true"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer add-housegroup-btn">
+          {{ $t('houseGroups.add') }}
+        </button>
         <PageHelp page="housegroups" :helpText="$t('help.housegroups')" :steps="stepsByPage(t).housegroups" />
-      <button @click="showForm = true"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer add-housegroup-btn">
-        {{ $t('houseGroups.add') }}
-      </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">

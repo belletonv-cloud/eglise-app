@@ -208,7 +208,10 @@ onLogin(() => {
 })
 
 watch(user, (val) => {
-  if (val) loadCurrentMember()
+  if (val) {
+    loadCurrentMember()
+    if (route.name === 'login') router.push('/')
+  }
   else member.value = null
 }, { immediate: true })
 

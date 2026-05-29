@@ -2,7 +2,9 @@
   <div>
     <!-- Aide contextuelle -->
     <div style="position:relative; min-height:100vh;">
-      <PageHelp page="plans" :helpText="t('help.plans')" :steps="stepsByPage(t).plans" />
+      <div class="flex justify-end">
+        <PageHelp page="plans" :helpText="t('help.plans')" :steps="stepsByPage(t).plans" />
+      </div>
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">{{ $t('plansList.title') }}</h2>
         <div class="flex gap-2">

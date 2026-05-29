@@ -1,4 +1,4 @@
-// src/utils/api.ts
+import { user } from '../stores/auth'
 
 declare global {
   var __API_BASE__: string | undefined;
@@ -14,125 +14,111 @@ export function getApiBase(): string {
   return globalThis.__API_BASE__ || DEFAULT_BASE;
 }
 
-// Wrapper fetch avec token Firebase pour les appels API authentifiés
 export async function authenticatedFetch(url: string, options: RequestInit = {}) {
-  const { user } = await import('../stores/auth')
   const token = user.value ? await user.value.getIdToken() : null
-  return fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  })
+  const headers: Record<string, string> = {
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(options.headers as Record<string, string> || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+  return fetch(url, { ...options, headers })
 }
 
-// Helper pour dates dynamiques (mois courant, pour fallback mock)
 const _now = new Date();
 const _y = _now.getFullYear();
 const _m = String(_now.getMonth() + 1).padStart(2, '0');
 const _d = (day: number) => `${_y}-${_m}-${String(day).padStart(2, '0')}`;
 
-// Mapping : nom de méthode → { url, méthode HTTP, extraire ID du 1er arg? }
-const API_ROUTES: Record<string, { path: string; method: string; hasId?: boolean; hasBody?: boolean; isList?: boolean }> = {
-  // Plans
-  getPlans:          { path: '/api/plans', method: 'GET', isList: true },
-  getPlan:           { path: '/api/plans', method: 'GET', hasId: true },
-  getPlanItems:      { path: '/api/plans/{id}/items', method: 'GET', hasId: true, isList: true },
-  createPlan:        { path: '/api/plans', method: 'POST', hasBody: true },
-  updatePlan:        { path: '/api/plans/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deletePlan:        { path: '/api/plans/{id}', method: 'DELETE', hasId: true },
-  createPlanItem:    { path: '/api/plans/{id}/items', method: 'POST', hasId: true, hasBody: true },
-  updatePlanItem:    { path: '/api/plans/{planId}/items/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deletePlanItem:    { path: '/api/plans/{planId}/items/{id}', method: 'DELETE', hasId: true },
-  applyPlanTemplate: { path: '/api/plans/from-template', method: 'POST', hasBody: true },
-
-  // Songs
-  getSongs:          { path: '/api/songs', method: 'GET', isList: true },
-  getSong:           { path: '/api/songs', method: 'GET', hasId: true },
-  updateSong:        { path: '/api/songs/{id}', method: 'PUT', hasId: true, hasBody: true },
-  createSong:        { path: '/api/songs', method: 'POST', hasBody: true },
-  deleteSong:        { path: '/api/songs/{id}', method: 'DELETE', hasId: true },
-
-  // Members
-  getMembers:        { path: '/api/members', method: 'GET', isList: true },
-  getMember:         { path: '/api/members', method: 'GET', hasId: true },
-  createMember:      { path: '/api/members', method: 'POST', hasBody: true },
-  updateMember:      { path: '/api/members/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deleteMember:      { path: '/api/members/{id}', method: 'DELETE', hasId: true },
-  searchMembers:     { path: '/api/members/search', method: 'GET', isList: true },
-  getMemberExceptions: { path: '/api/member-exceptions', method: 'GET', isList: true },
-
-  // Teams
-  getTeams:          { path: '/api/teams', method: 'GET', isList: true },
-  getTeam:           { path: '/api/teams', method: 'GET', hasId: true },
-  createTeam:        { path: '/api/teams', method: 'POST', hasBody: true },
-  updateTeam:        { path: '/api/teams/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deleteTeam:        { path: '/api/teams/{id}', method: 'DELETE', hasId: true },
-  addTeamMember:     { path: '/api/teams/{id}/members', method: 'POST', hasId: true, hasBody: true },
-  removeTeamMember:  { path: '/api/teams/{teamId}/members/{memberId}', method: 'DELETE', hasId: true },
-
-  // Schedule
-  getPlanPeople:     { path: '/api/plans/{id}/people', method: 'GET', hasId: true, isList: true },
-  getReplacements:   { path: '/api/schedule/replacements', method: 'GET', isList: true },
-  updateSchedule:    { path: '/api/schedule', method: 'PUT', hasBody: true },
-  schedulePerson:    { path: '/api/schedule', method: 'POST', hasBody: true },
-  removeSchedule:    { path: '/api/schedule', method: 'DELETE', hasBody: true },
-  applyReplacement:  { path: '/api/schedule/replace', method: 'POST', hasBody: true },
-  updateTeamMember:  { path: '/api/teams/{teamId}/members/{memberId}', method: 'PUT', hasId: true, hasBody: true },
-
-  // Attendance
-  getPlanAttendances: { path: '/api/plans/{id}/attendances', method: 'GET', hasId: true, isList: true },
-  createAttendance:  { path: '/api/attendances', method: 'POST', hasBody: true },
-  deleteAttendance:  { path: '/api/attendances/{id}', method: 'DELETE', hasId: true },
-  getAttendanceStats: { path: '/api/attendance/stats', method: 'GET' },
-
-  // House Groups
-  getHouseGroups:    { path: '/api/house-groups', method: 'GET', isList: true },
-  getHouseGroup:     { path: '/api/house-groups', method: 'GET', hasId: true },
-  createHouseGroup:  { path: '/api/house-groups', method: 'POST', hasBody: true },
-  updateHouseGroup:  { path: '/api/house-groups/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deleteHouseGroup:  { path: '/api/house-groups/{id}', method: 'DELETE', hasId: true },
-  addGroupMember:    { path: '/api/house-groups/{id}/members', method: 'POST', hasId: true, hasBody: true },
-  removeGroupMember: { path: '/api/house-groups/{groupId}/members/{memberId}', method: 'DELETE', hasId: true },
-  addGroupMeeting:   { path: '/api/house-groups/{id}/meetings', method: 'POST', hasId: true, hasBody: true },
-
-  // Church Events
-  getChurchEvents:   { path: '/api/church-events', method: 'GET', isList: true },
-  createChurchEvent: { path: '/api/church-events', method: 'POST', hasBody: true },
-  updateChurchEvent: { path: '/api/church-events/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deleteChurchEvent: { path: '/api/church-events/{id}', method: 'DELETE', hasId: true },
-  createChurchEventException: { path: '/api/church-events/{id}/exceptions', method: 'POST', hasId: true, hasBody: true },
-
-  // Plan Templates
-  getPlanTemplates:  { path: '/api/plan-templates', method: 'GET', isList: true },
-  getPlanTemplate:   { path: '/api/plan-templates', method: 'GET', hasId: true },
-  createPlanTemplate: { path: '/api/plan-templates', method: 'POST', hasBody: true },
-  updatePlanTemplate: { path: '/api/plan-templates/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deletePlanTemplate: { path: '/api/plan-templates/{id}', method: 'DELETE', hasId: true },
-  getPlanTemplateItems: { path: '/api/plan-templates/{id}/items', method: 'GET', hasId: true, isList: true },
-  createPlanTemplateItem: { path: '/api/plan-templates/{id}/items', method: 'POST', hasId: true, hasBody: true },
-  updatePlanTemplateItem: { path: '/api/plan-templates/{planTemplateId}/items/{id}', method: 'PUT', hasId: true, hasBody: true },
-  deletePlanTemplateItem: { path: '/api/plan-templates/{planTemplateId}/items/{id}', method: 'DELETE', hasId: true },
-
-  // Logs
-  getEmailLogs:      { path: '/api/email/logs', method: 'GET', isList: true },
-  getConflictLogs:   { path: '/api/conflicts', method: 'GET', isList: true },
-  getAuditLogs:      { path: '/api/audit', method: 'GET', isList: true },
-
-  // Service types
-  getServiceTypes:   { path: '/api/service-types', method: 'GET', isList: true },
-
-  // Me / Account
-  getMe:             { path: '/api/me', method: 'GET' },
-  getMySchedule:     { path: '/api/me/schedule', method: 'GET', isList: true },
-  updateMe:          { path: '/api/me', method: 'PUT', hasBody: true },
-  getMemberAvailability: { path: '/api/me/availability', method: 'GET' },
-  updateMemberAvailability: { path: '/api/me/availability', method: 'PUT', hasBody: true },
+function toKebab(s: string): string {
+  return s.replace(/^[A-Z]/, c => c.toLowerCase())
+    .replace(/([A-Z])/g, '-$1')
+    .toLowerCase()
 }
 
-// Mock fallback (valeurs statiques)
+function guessRoute(prop: string): { path: string; method: string; hasBody?: boolean; hasId?: boolean } | null {
+  const patterns: [RegExp, string, boolean][] = [
+    [/^get(.+)$/, 'GET', false],
+    [/^create(.+)$/, 'POST', true],
+    [/^update(.+)$/, 'PUT', true],
+    [/^delete(.+)$/, 'DELETE', false],
+    [/^add(.+)$/, 'POST', true],
+    [/^remove(.+)$/, 'DELETE', false],
+  ]
+  for (const [re, method, hasBody] of patterns) {
+    const m = prop.match(re)
+    if (m) {
+      const rest = m[1]
+      const kebab = toKebab(rest)
+      return {
+        path: `/api/${kebab}`,
+        method,
+        hasBody: hasBody || method === 'POST' || method === 'PUT',
+        hasId: method === 'PUT' || method === 'DELETE' || (prop.startsWith('get') && rest !== 's' && !rest.endsWith('s')),
+      }
+    }
+  }
+  return null
+}
+
+function buildUrl(route: { path: string; method: string; hasId?: boolean; hasBody?: boolean; isList?: boolean }, args: any[], base: string): string {
+  let path = route.path
+  if (route.hasId && args.length > 0) {
+    const id = args[0]
+    path = path.replace('{id}', String(id)).replace('{planId}', String(id)).replace('{memberId}', String(args[1] ?? '')).replace('{teamId}', String(args[0])).replace('{groupId}', String(args[0])).replace('{songId}', String(args[0])).replace('{planTemplateId}', String(args[0])).replace('{pid}', String(id)).replace('{tid}', String(args[0])).replace('{gid}', String(args[0])).replace('{mid}', String(args[1] ?? ''))
+  }
+  if (route.method === 'GET' && args.length > 0 && typeof args[0] === 'object') {
+    const params = new URLSearchParams()
+    for (const [k, v] of Object.entries(args[0])) {
+      if (v !== undefined && v !== null) params.set(k, String(v))
+    }
+    const qs = params.toString()
+    if (qs) path += '?' + qs
+  }
+  return base + path
+}
+
+async function tryCall(prop: string, args: any[]): Promise<any> {
+  const base = getApiBase()
+  let madeAttempt = false
+  let lastError: any = null
+
+  for (const route of [API_ROUTES[prop], guessRoute(prop)]) {
+    if (!route) continue
+    const url = buildUrl(route, args, base)
+    const body = route.hasBody ? extractBody(args) : undefined
+    const options: RequestInit = { method: route.method }
+    if (body) options.body = JSON.stringify(body)
+    madeAttempt = true
+    try {
+      const res = await authenticatedFetch(url, options)
+      if (!res.ok) {
+        if (res.status >= 500) throw new Error(`HTTP ${res.status}`)
+        if (res.status === 401) {
+          console.warn(`[api] ${prop} → 401, skipping fallback`)
+          return { error: 'unauthorized' }
+        }
+        if (res.status === 404) { madeAttempt = false; continue }
+        throw new Error(`HTTP ${res.status}`)
+      }
+      return await res.json()
+    } catch (e) {
+      lastError = e
+    }
+  }
+
+  if (madeAttempt) {
+    console.warn(`[api] ${prop} → fallback mock (${lastError instanceof Error ? lastError.message : lastError})`)
+  }
+  return null
+}
+
+function extractBody(args: any[]): any {
+  for (const a of args) {
+    if (typeof a === 'object' && a !== null && !Array.isArray(a) && !(a instanceof URLSearchParams)) return a
+  }
+  return undefined
+}
+
 const mockFallback: Record<string, (...args: any[]) => any> = {
   getPlans: () => [
     { id: 1, title: 'Culte du dimanche', date: _d(1), time: '10:00', theme: 'Louange', attendance_count: 5, service_type_id: 1, service_type_name: 'Culte' },
@@ -183,62 +169,21 @@ const mockFallback: Record<string, (...args: any[]) => any> = {
   getBackupStatus: () => ({ lastBackup: _d(1), status: 'ok' }),
 }
 
-// Génère l'URL de l'API pour un appel
-function buildUrl(route: { path: string; method: string; hasId?: boolean; hasBody?: boolean; isList?: boolean }, args: any[], base: string): string {
-  let path = route.path
-  if (route.hasId && args.length > 0) {
-    const id = args[0]
-    path = path.replace('{id}', String(id)).replace('{planId}', String(id)).replace('{memberId}', String(args[1] ?? '')).replace('{teamId}', String(args[0])).replace('{groupId}', String(args[0])).replace('{songId}', String(args[0])).replace('{memberId}', String(args[1] ?? '')).replace('{planTemplateId}', String(args[0]))
-  }
-  // Pour les listes, passer les paramètres en query string
-  if (route.isList && args.length > 0 && typeof args[0] === 'object') {
-    const params = new URLSearchParams()
-    for (const [k, v] of Object.entries(args[0])) {
-      if (v !== undefined && v !== null) params.set(k, String(v))
-    }
-    const qs = params.toString()
-    if (qs) path += '?' + qs
-  }
-  return base + path
-}
-
-// Extrait le body JSON des arguments
-function extractBody(args: any[]): any {
-  for (const a of args) {
-    if (typeof a === 'object' && a !== null && !Array.isArray(a) && !(a instanceof URLSearchParams)) return a
-  }
-  return undefined
-}
-
-// Crée l'objet api : appelle le vrai backend, fallback mock si erreur
 function createApi() {
   const cache: Record<string, (...args: any[]) => Promise<any>> = {}
 
   const handler: ProxyHandler<any> = {
     get(_target, prop: string) {
-      if (prop === 'then') return undefined // pas une Promise
+      if (prop === 'then') return undefined
       if (cache[prop]) return cache[prop]
 
       cache[prop] = async (...args: any[]) => {
-        const route = API_ROUTES[prop]
-        if (route) {
-          const base = getApiBase()
-          const url = buildUrl(route, args, base)
-          const body = route.hasBody ? extractBody(args) : undefined
-          const options: RequestInit = { method: route.method }
-          if (body) options.body = JSON.stringify(body)
-          try {
-            const res = await authenticatedFetch(url, options)
-            if (!res.ok) throw new Error(`HTTP ${res.status}`)
-            return await res.json()
-          } catch (e) {
-            console.warn(`[api] ${prop} → fallback mock (${e instanceof Error ? e.message : e})`)
-          }
-        }
-        // Fallback : mock ou fonction générique
+        const result = await tryCall(prop, args)
+        if (result !== null) return result
+
         const mockFn = mockFallback[prop]
         if (mockFn) return mockFn(...args)
-        // Fallback générique pour create/update/delete
+
         if (prop.startsWith('create') || prop.startsWith('add')) return { id: Date.now(), success: true }
         if (prop.startsWith('update')) return { success: true }
         if (prop.startsWith('delete') || prop.startsWith('remove')) return { deleted: true }
@@ -253,5 +198,4 @@ function createApi() {
 }
 
 export const api: any = createApi()
-
 export default api

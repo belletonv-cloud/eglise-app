@@ -1,10 +1,12 @@
 <template>
   <div style="position:relative; min-height:100vh;">
-    <PageHelp
-      page="dashboard"
-      :helpText="t('help.dashboard')"
-      :steps="helpSteps"
-    />
+    <div class="flex justify-end">
+      <PageHelp
+        page="dashboard"
+        :helpText="t('help.dashboard')"
+        :steps="helpSteps"
+      />
+    </div>
     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{ $t('dashboard.title') }}</h1>
 
     <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
