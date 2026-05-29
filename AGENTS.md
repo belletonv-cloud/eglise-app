@@ -90,7 +90,10 @@ Déployée sur Cloudflare Workers + Pages.
 
 ## ⚠️ Problèmes connus
 
-- **Rate limiter** : in-memory, pas fiable en serverless
-- **Erreurs silencieuses** : plusieurs `catch(() => {})` dans le worker
-- **Créations de tables dans les handlers** : certaines migrations manquantes
+- **Rate limiter** : D1-based (OK), mais cleanup compare `window_start` (number) avec `cutoff` (ISO string) — fixé le 29/05
+- **Erreurs silencieuses** : plusieurs `catch(() => {})` dans le worker — la plupart sont des `console.error` simples sans re-throw
+- **Créations de tables dans les handlers** : résolu — toutes les migrations sont dans `migrations/`
 - **Code mort** : `audioop/`, `pyaudioop/` — shims Python inutilisés
+- **i18n** : clés `help.*_step*` manquantes (20 clés) — ajoutées le 29/05
+- **CI/CD** : `deploy.yml` référence des jobs d'un autre workflow — fixé le 29/05
+- **CI** : tests backend limités à `helpers.test.js` — fixé le 29/05

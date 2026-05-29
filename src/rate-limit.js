@@ -18,7 +18,7 @@ export async function rateLimit(request, env) {
   if (now - lastCleanup > CLEANUP_INTERVAL) {
     lastCleanup = now
     try {
-      const cutoff = new Date(now - WINDOW_MS * 2).toISOString()
+      const cutoff = now - WINDOW_MS * 2
       await env.DB.prepare('DELETE FROM api_rate_limits WHERE window_start < ?').bind(cutoff).run()
     } catch (e) { console.error('Rate limit cleanup failed', e) }
   }

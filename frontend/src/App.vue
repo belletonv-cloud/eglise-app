@@ -148,9 +148,6 @@
       <Toasts />
       <ConfirmDialog />
     </div>
-
-    <DemoBadge />
-    <DemoGuide />
   </div>
 </template>
 
