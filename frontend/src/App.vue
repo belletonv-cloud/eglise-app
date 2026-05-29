@@ -28,6 +28,17 @@
             <button @click="toggleLang" class="p-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="lang === 'fr' ? 'English' : 'Français'">
               {{ lang === 'fr' ? 'EN' : 'FR' }}
             </button>
+            <div class="relative demo-persona-selector" v-if="isDemoMode">
+              <button @click="demoPersonaMenuOpen = !demoPersonaMenuOpen" class="p-1.5 rounded-lg text-xs font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 cursor-pointer" title="Changer de persona">
+                🎭
+              </button>
+              <div v-if="demoPersonaMenuOpen" class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1">
+                <button v-for="(persona, key) in demoPersonas" :key="key" @click="switchDemoPersona(key)" class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                  <span class="font-medium">{{ persona.label }}</span>
+                  <span class="text-gray-400 text-xs">{{ persona.email }}</span>
+                </button>
+              </div>
+            </div>
             <button @click="mobileSidebarOpen = false" class="lg:hidden p-1 text-gray-500 hover:text-gray-700 cursor-pointer">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -129,7 +140,7 @@
           </router-link>
         </nav>
         <div v-if="isAuthenticated" class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
-          
+
           <button @click="handleLogout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
@@ -252,5 +263,45 @@ watch(user, (val) => {
   }
   else member.value = null
 }, { immediate: true })
+
+// Demo persona switcher
+const demoPersonaMenuOpen = ref(false)
+const isDemoMode = computed(() => typeof window !== 'undefined' && window.location.search.includes('demo=1'))
+const demoPersonas: Record<string, { email: string; label: string }> = {
+  admin: { email: 'admin@demo.church', label: 'Admin' },
+  scheduler: { email: 'scheduler@demo.church', label: 'Planificateur' },
+  editor: { email: 'editor@demo.church', label: 'Éditeur' },
+  member: { email: 'member@demo.church', label: 'Membre' },
+  guest: { email: 'guest@demo.church', label: 'Invité' },
+}
+
+function switchDemoPersona(key: string) {
+  demoPersonaMenuOpen.value = false
+  const persona = demoPersonas[key]
+  if (!persona) return
+  // Mettre à jour le user store et le member store (similaire à TestAccountsPanel)
+  user.value = {
+    email: persona.email,
+    uid: `demo-${key}`,
+    displayName: persona.label,
+  }
+  isAuthenticated.value = true
+  member.value = {
+    id: `demo-${key}`,
+    email: persona.email,
+    first_name: persona.label,
+    last_name: '',
+    role: key,
+  }
+}
+
+// Close demo persona menu when clicking outside
+onMounted(() => {
+  const closeMenu = (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (!target.closest('.demo-persona-selector')) demoPersonaMenuOpen.value = false
+  }
+  window.addEventListener('click', closeMenu)
+})
 
 </script>
