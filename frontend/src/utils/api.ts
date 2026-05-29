@@ -299,7 +299,11 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
         if (res.status === 404) { madeAttempt = false; continue }
         throw new Error(`HTTP ${res.status}`)
       }
-      return await res.json()
+      const json = await res.json()
+      if (route.isList && json && typeof json === 'object' && !Array.isArray(json) && Array.isArray(json.data)) {
+        return json.data
+      }
+      return json
     } catch (e) {
       lastError = e
     }
