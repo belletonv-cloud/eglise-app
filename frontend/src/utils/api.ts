@@ -12,9 +12,6 @@ const isDemoMode =
   typeof window !== "undefined" && window.location.search.includes("demo=1");
 
 export function getApiBase(): string {
-  if (isDemoMode) {
-    return "http://localhost:8787";
-  }
   if (
     typeof window !== "undefined" &&
     window.location.hostname === "localhost"
@@ -257,7 +254,7 @@ const API_ROUTES: Record<
     method: "DELETE",
     hasId: true,
   },
-  getAttendanceStats: { path: "/api/attendance/stats", method: "GET" },
+  getAttendanceStats: { path: "/api/attendance-stats", method: "GET" },
 
   // House Groups
   getHouseGroups: { path: "/api/house-groups", method: "GET", isList: true },

@@ -1,34 +1,49 @@
-import { ref } from 'vue';
-import { auth, googleProvider } from '../firebase';
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  signInWithPopup, 
-  signOut
-} from 'firebase/auth';
+import { ref } from "vue";
+import { auth, googleProvider } from "../firebase";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 
-let redirectAfterLogin: (() => void) | null = null
+let redirectAfterLogin: (() => void) | null = null;
 
 export function onLogin(cb: () => void) {
-  redirectAfterLogin = cb
+  redirectAfterLogin = cb;
 }
 
 export const user = ref<any>(null);
 export const isAuthenticated = ref(false);
 
+// Demo mode flag (checked by member store for initial role)
+export const isDemoMode = ref(false);
+
 // Démo locale : si ?demo=1 dans l'URL, on skip Firebase Auth
-if (typeof window !== 'undefined' && window.location.search.includes('demo=1')) {
+if (
+  typeof window !== "undefined" &&
+  window.location.search.includes("demo=1")
+) {
   isAuthenticated.value = true;
-  user.value = { email: 'admin@demo.church', uid: 'demo123', displayName: 'Admin Démo' };
+  user.value = {
+    email: "admin@demo.church",
+    uid: "demo123",
+    displayName: "Admin Démo",
+  };
+  isDemoMode.value = true;
 }
 
 onAuthStateChanged(auth, (firebaseUser: any) => {
   // Ne pas override le mode demo local
-  if (typeof window !== 'undefined' && window.location.search.includes('demo=1')) return;
+  if (
+    typeof window !== "undefined" &&
+    window.location.search.includes("demo=1")
+  )
+    return;
   if (firebaseUser) {
     user.value = firebaseUser;
     isAuthenticated.value = true;
-    redirectAfterLogin?.()
+    redirectAfterLogin?.();
   } else {
     user.value = null;
     isAuthenticated.value = false;
@@ -52,7 +67,10 @@ export const loginWithGoogle = async () => {
 };
 
 export const logout = async () => {
-  if (typeof window !== 'undefined' && window.location.search.includes('demo=1')) {
+  if (
+    typeof window !== "undefined" &&
+    window.location.search.includes("demo=1")
+  ) {
     isAuthenticated.value = false;
     user.value = null;
     return;
