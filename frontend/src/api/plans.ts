@@ -10,7 +10,7 @@ export async function getPlans(params: { page: number; limit: number }): Promise
   const { page, limit } = params
   const base = getApiBase()
   try {
-    const res = await authenticatedFetch(`${base}/plans?page=${page}&limit=${limit}`)
+    const res = await authenticatedFetch(`${base}/api/plans?page=${page}&limit=${limit}`)
     const data = await res.json()
     if (Array.isArray(data)) {
       return { plans: data, total: data.length }

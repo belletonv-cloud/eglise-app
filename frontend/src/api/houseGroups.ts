@@ -10,7 +10,7 @@ export async function getHouseGroups(params: { page: number; limit: number }): P
   const { page, limit } = params
   const base = getApiBase()
   try {
-    const res = await authenticatedFetch(`${base}/house-groups?page=${page}&limit=${limit}`)
+    const res = await authenticatedFetch(`${base}/api/house-groups?page=${page}&limit=${limit}`)
     const data = await res.json()
     if (Array.isArray(data)) {
       return { groups: data, total: data.length }
