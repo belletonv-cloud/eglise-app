@@ -101,14 +101,15 @@ const loadLogs = async () => {
 const getLogs = async () => {
   const params = new URLSearchParams()
   params.set('page', String(page.value))
-  const url = `${getApiBase()}/logs?${params}`
+  const url = `${getApiBase()}/api/email-logs?${params}`
   const res = await authenticatedFetch(url)
-  return res.json()
+  const data = await res.json()
+  return { rows: data.logs ?? data.rows ?? data ?? [], total: data.total ?? 0 }
 }
 
 const clearLogs = async () => {
   try {
-    await authenticatedFetch(`${getApiBase()}/logs`, { method: 'DELETE' })
+    await authenticatedFetch(`${getApiBase()}/api/email-logs`, { method: 'DELETE' })
     showToast(t('logs.cleaned'))
     await loadLogs()
   } catch (e: any) {

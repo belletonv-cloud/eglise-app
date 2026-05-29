@@ -25,7 +25,7 @@ export async function loadCurrentMember() {
   error.value = null
   try {
     const token = await user.value.getIdToken()
-    const res = await fetch(`${getApiBase()}/me`, {
+    const res = await fetch(`${getApiBase()}/api/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)

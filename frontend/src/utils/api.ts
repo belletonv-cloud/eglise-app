@@ -363,6 +363,7 @@ const mockFallback: Record<string, (...args: any[]) => any> = {
   getPlanChecklist: () => [{ id: 1, label: 'Préparer la sonorisation', checked: false, position: 0 }],
   getChecklistTemplates: () => [{ id: 1, name: 'Checklist type', items: [{ id: 1, label: 'Vérifier micros', position: 0 }] }],
   getReplacements: () => [{ id: 1, name: 'Marie Remplacement' }],
+  getAttendanceStats: () => ({ total: 0, perMember: [], perMonth: [], recent: [] }),
   getMemberAvailability: () => ({ available: true }),
   getVolunteerPreferences: () => ({ available: true, max_services_per_month: 4, notes: '', unavailable_dates: [] as string[] }),
   getBackupStatus: () => ({ lastBackup: _d(1), status: 'ok' }),
