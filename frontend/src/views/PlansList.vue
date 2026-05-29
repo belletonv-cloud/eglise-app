@@ -2,9 +2,6 @@
   <div>
     <!-- Aide contextuelle -->
     <div style="position:relative; min-height:100vh;">
-      <div class="flex justify-end">
-        <PageHelp page="plans" :helpText="t('help.plans')" :steps="stepsByPage(t).plans" />
-      </div>
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">{{ $t('plansList.title') }}</h2>
         <div class="flex gap-2">
@@ -167,11 +164,9 @@
 // - Ajouter un log clair en cas d’échec
 
 <script setup lang="ts">
-import ContextHelp from '../components/ContextHelp.vue';
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { stepsByPage } from '../page-help-steps'
 import { getPlans } from '../api/plans'
 import { api } from '../utils/api'
 import { showToast } from '../stores/toast'

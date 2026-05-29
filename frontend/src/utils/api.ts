@@ -243,8 +243,8 @@ function guessRoute(prop: string): { path: string; method: string; hasBody?: boo
   ]
   for (const [re, method, hasBody] of patterns) {
     const m = prop.match(re)
-    if (m) {
-      const rest = m[1]
+    if (m && m[1]) {
+      const rest: string = m[1]
       const kebab = toKebab(rest)
       return {
         path: `/api/${kebab}`,
@@ -279,8 +279,9 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
   let madeAttempt = false
   let lastError: any = null
 
-  const routes = [API_ROUTES[prop]]
-  if (!routes[0]) routes.push(guessRoute(prop))
+  const routes: any[] = [API_ROUTES[prop]]
+  const guessed = guessRoute(prop)
+  if (!routes[0] && guessed) routes.push(guessed)
 
   for (const route of routes) {
     if (!route) continue

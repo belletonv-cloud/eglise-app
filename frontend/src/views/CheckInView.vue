@@ -17,7 +17,6 @@
             {{ $t('checkin.back') }}
           </button>
           <h2 class="text-2xl font-bold text-gray-800">{{ $t('checkin.title') }}</h2>
-            <PageHelp page="checkin" :helpText="$t('help.checkin')" :steps="stepsByPage(t).checkin" />
         </div>
 
         <!-- Sélection du plan/service -->
@@ -194,8 +193,6 @@
 </template>
 
 <script setup lang="ts">
-import PageHelp from '../components/PageHelp.vue'
-import { stepsByPage } from '../page-help-steps'
 import { ref, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { showToast } from '../stores/toast'

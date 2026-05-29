@@ -7,9 +7,7 @@
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer add-housegroup-btn">
           {{ $t('houseGroups.add') }}
         </button>
-        <PageHelp page="housegroups" :helpText="$t('help.housegroups')" :steps="stepsByPage(t).housegroups" />
       </div>
-    </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
   <div class="w-80 h-8 bg-gray-200 rounded"></div>
@@ -116,8 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import PageHelp from '../components/PageHelp.vue'
-import { stepsByPage } from '../page-help-steps'
+
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

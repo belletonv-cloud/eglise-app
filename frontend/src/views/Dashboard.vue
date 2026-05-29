@@ -1,12 +1,5 @@
 <template>
   <div style="position:relative; min-height:100vh;">
-    <div class="flex justify-end">
-      <PageHelp
-        page="dashboard"
-        :helpText="t('help.dashboard')"
-        :steps="helpSteps"
-      />
-    </div>
     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{ $t('dashboard.title') }}</h1>
 
     <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
@@ -77,12 +70,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import PageHelp from '../components/PageHelp.vue'
 import { api } from '../utils/api'
 
 const { t, tm } = useI18n()
+
+const pageHelpOverride = inject<{ steps: any; text: any }>('pageHelpOverride')
 
 const helpSteps = [
   {
@@ -102,6 +96,11 @@ const helpSteps = [
     desc: t('help.dashboard_nav_desc') || 'Accède rapidement aux principales fonctionnalités : plans, membres, chants, check-in.'
   },
 ];
+
+// Définir les steps custom via le système global (injecté depuis App.vue)
+if (pageHelpOverride) {
+  pageHelpOverride.steps.value = helpSteps
+}
 
 const stats = ref({
   members: 0, activeMembers: 0, upcomingPlans: 0,

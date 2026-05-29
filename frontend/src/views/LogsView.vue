@@ -110,10 +110,9 @@ const getLogs = async () => {
 const clearLogs = async () => {
   try {
     await authenticatedFetch(`${getApiBase()}/api/email-logs`, { method: 'DELETE' })
-    showToast(t('logs.cleaned'))
     await loadLogs()
   } catch (e: any) {
-    showToast(e.message, 'error')
+    /* ignore */
   }
 }
 

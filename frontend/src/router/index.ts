@@ -248,6 +248,21 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/about',
+      name: 'about',
+      component: () => import('../views/AboutPage.vue'),
+    },
+    {
+      path: '/admin/content',
+      name: 'admin-content',
+      component: () => import('../views/AdminContentEditor.vue'),
+    },
+    {
+      path: '/admin/test-accounts',
+      name: 'admin-test-accounts',
+      component: () => import('../views/TestAccountsPanel.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: NotFound,

@@ -100,6 +100,9 @@
           <router-link to="/youtube" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>▶️</span> {{$t('menu.youtube')}}
           </router-link>
+          <router-link to="/about" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>ℹ️</span> {{$t('menu.about')}}
+          </router-link>
           <div v-if="isAdmin" class="pt-2 pb-1">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_admin')}}</p>
           </div>
@@ -118,10 +121,16 @@
           <router-link v-if="isAdmin" to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
+          <router-link v-if="isAdmin" to="/admin/content" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>📝</span> Contenus
+          </router-link>
+          <router-link v-if="isAdmin" to="/admin/test-accounts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+            <span>🧪</span> Comptes test
+          </router-link>
         </nav>
         <div v-if="isAuthenticated" class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5">
           
-          <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
+          <button @click="handleLogout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
             {{$t('app.logout')}}
           </button>
@@ -144,6 +153,13 @@
         <div class="flex-1 overflow-auto p-4 lg:p-6">
           <router-view />
         </div>
+        <PageHelp
+          v-if="isAuthenticated"
+          :page="String(route.name || '')"
+          :helpText="t(currentHelpKey)"
+          :steps="currentHelpSteps"
+          class="fixed bottom-4 right-4 z-40"
+        />
       </main>
       <Toasts />
       <ConfirmDialog />
@@ -152,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, provide } from 'vue'
 import { publicRoutes } from './router/index'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
@@ -163,6 +179,8 @@ import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as m
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
+import PageHelp from './components/PageHelp.vue'
+import { stepsByPage } from './page-help-steps'
 import { onLogin } from './stores/auth';
 import { useRouter } from 'vue-router'
 
@@ -202,6 +220,26 @@ onMounted(async () => {
 })
 
 const router = useRouter()
+const { t } = useI18n()
+
+const customHelpSteps = ref<any[] | null>(null)
+const customHelpText = ref('')
+provide('pageHelpOverride', { steps: customHelpSteps, text: customHelpText })
+
+const steps = stepsByPage(t) as Record<string, any>
+const currentHelpKey = computed(() => {
+  if (customHelpText.value) return customHelpText.value
+  const routeName = route.name as string
+  return steps[routeName] ? `help.${routeName}` : ''
+})
+const currentHelpSteps = computed(() => {
+  return customHelpSteps.value ?? steps[route.name as string] ?? []
+})
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
+}
 
 onLogin(() => {
   if (route.name === 'login') router.push('/')

@@ -7,7 +7,6 @@
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
           {{ $t('members.add') }}
         </button>
-        <PageHelp page="members" :helpText="$t('help.members')" :steps="stepsByPage(t).members" />
       </div>
     </div>
 
@@ -147,8 +146,6 @@ import type { Member, Team } from '../utils/types'
 type MemberTeam = Team & { position?: string }
 import { confirmDialog } from '../stores/confirm'
 import { showToast } from '../stores/toast'
-import PageHelp from '../components/PageHelp.vue'
-import { stepsByPage } from '../page-help-steps'
 
 const { t } = useI18n()
 
