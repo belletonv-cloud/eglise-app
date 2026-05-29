@@ -294,8 +294,7 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
       if (!res.ok) {
         if (res.status >= 500) throw new Error(`HTTP ${res.status}`)
         if (res.status === 401) {
-          console.warn(`[api] ${prop} → 401`)
-          return { error: 'unauthorized' }
+          throw new Error(`HTTP ${res.status}`)
         }
         if (res.status === 404) { madeAttempt = false; continue }
         throw new Error(`HTTP ${res.status}`)
