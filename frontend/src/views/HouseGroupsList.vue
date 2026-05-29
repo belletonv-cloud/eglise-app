@@ -8,6 +8,7 @@
           {{ $t('houseGroups.add') }}
         </button>
       </div>
+    </div>
 
     <div v-if="isLoading" class="py-12 flex flex-col gap-3 items-center animate-pulse" aria-busy="true">
   <div class="w-80 h-8 bg-gray-200 rounded"></div>
