@@ -20,7 +20,7 @@ jobs:
       - name: Check syntax
         run: node --check src/index.js
       - name: Run unit tests
-        run: npx vitest run test/helpers.test.js --reporter=verbose
+        run: npx vitest run --reporter=verbose
 
   frontend-tests:
     runs-on: ubuntu-latest
