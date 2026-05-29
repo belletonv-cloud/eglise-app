@@ -1,5 +1,5 @@
 import type { Member } from '../utils/types'
-import { getApiBase, api } from '../utils/api'
+import { getApiBase, authenticatedFetch, api } from '../utils/api'
 
 export interface GetMembersResult {
   members: Member[]
@@ -10,7 +10,7 @@ export async function getMembers(params: { page: number; limit: number }): Promi
   const { page, limit } = params
   const base = getApiBase()
   try {
-    const res = await fetch(`${base}/members?page=${page}&limit=${limit}`)
+    const res = await authenticatedFetch(`${base}/members?page=${page}&limit=${limit}`)
     const data = await res.json()
     if (Array.isArray(data)) {
       return { members: data, total: data.length }

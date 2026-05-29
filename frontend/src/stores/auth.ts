@@ -7,6 +7,12 @@ import {
   signOut
 } from 'firebase/auth';
 
+let redirectAfterLogin: (() => void) | null = null
+
+export function onLogin(cb: () => void) {
+  redirectAfterLogin = cb
+}
+
 export const user = ref<any>(null);
 export const isAuthenticated = ref(false);
 
@@ -22,6 +28,7 @@ onAuthStateChanged(auth, (firebaseUser: any) => {
   if (firebaseUser) {
     user.value = firebaseUser;
     isAuthenticated.value = true;
+    redirectAfterLogin?.()
   } else {
     user.value = null;
     isAuthenticated.value = false;

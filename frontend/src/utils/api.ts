@@ -14,6 +14,19 @@ export function getApiBase(): string {
   return globalThis.__API_BASE__ || DEFAULT_BASE;
 }
 
+// Wrapper fetch avec token Firebase pour les appels API authentifiés
+export async function authenticatedFetch(url: string, options: RequestInit = {}) {
+  const { user } = await import('../stores/auth')
+  const token = user.value ? await user.value.getIdToken() : null
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+}
+
 // Helper pour dates dynamiques (mois courant)
 const _now = new Date();
 const _y = _now.getFullYear();

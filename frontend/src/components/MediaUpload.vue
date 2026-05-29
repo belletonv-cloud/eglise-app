@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue';
-import { api, getApiBase } from '../utils/api';
+import { api, getApiBase, authenticatedFetch } from '../utils/api';
 
 const props = defineProps<{
   arrangementId: number
@@ -129,7 +129,7 @@ async function upload() {
     formData.append('arrangement_id', String(props.arrangementId));
     formData.append('file_type', mediaType.value);
 
-    const res = await fetch(`${getApiBase()}/upload`, {
+    const res = await authenticatedFetch(`${getApiBase()}/upload`, {
       method: 'POST',
       body: formData,
     });

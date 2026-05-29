@@ -163,6 +163,8 @@ import { member, loadCurrentMember, isAdmin, isEditor, isScheduler, loading as m
 import Toasts from './components/Toasts.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import GlobalSearch from './components/GlobalSearch.vue'
+import { onLogin } from './stores/auth';
+import { useRouter } from 'vue-router'
 
 
 
@@ -197,6 +199,12 @@ onMounted(async () => {
 
   const permission = await Notification.requestPermission().catch(() => 'denied')
   if (permission !== 'granted') return
+})
+
+const router = useRouter()
+
+onLogin(() => {
+  if (route.name === 'login') router.push('/')
 })
 
 watch(user, (val) => {

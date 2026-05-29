@@ -74,9 +74,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { showToast } from '../stores/toast'
 import { user } from '../stores/auth'
-import { getApiBase } from '../utils/api'
+import { getApiBase, authenticatedFetch } from '../utils/api'
 
 const { t, locale } = useI18n()
 
@@ -99,23 +98,17 @@ const loadLogs = async () => {
   finally { loading.value = false }
 }
 
-const authHeaders = () => {
-  const headers: Record<string, string> = {}
-  if (user.value && user.value.email) headers['x-user-email'] = user.value.email
-  return headers
-}
-
 const getLogs = async () => {
   const params = new URLSearchParams()
   params.set('page', String(page.value))
   const url = `${getApiBase()}/logs?${params}`
-  const res = await fetch(url, { headers: authHeaders() })
+  const res = await authenticatedFetch(url)
   return res.json()
 }
 
 const clearLogs = async () => {
   try {
-    await fetch(`${getApiBase()}/logs`, { method: 'DELETE', headers: authHeaders() })
+    await authenticatedFetch(`${getApiBase()}/logs`, { method: 'DELETE' })
     showToast(t('logs.cleaned'))
     await loadLogs()
   } catch (e: any) {
