@@ -29,6 +29,203 @@ const _y = _now.getFullYear();
 const _m = String(_now.getMonth() + 1).padStart(2, '0');
 const _d = (day: number) => `${_y}-${_m}-${String(day).padStart(2, '0')}`;
 
+// Routes explicites (patterns irreguliers)
+const API_ROUTES: Record<string, { path: string; method: string; hasId?: boolean; hasBody?: boolean; isList?: boolean }> = {
+  // Plans
+  getPlans:          { path: '/api/plans', method: 'GET', isList: true },
+  getPlan:           { path: '/api/plans', method: 'GET', hasId: true },
+  getPlanItems:      { path: '/api/plans/{id}/items', method: 'GET', hasId: true, isList: true },
+  createPlan:        { path: '/api/plans', method: 'POST', hasBody: true },
+  updatePlan:        { path: '/api/plans/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deletePlan:        { path: '/api/plans/{id}', method: 'DELETE', hasId: true },
+  createPlanItem:    { path: '/api/plans/{id}/items', method: 'POST', hasId: true, hasBody: true },
+  updatePlanItem:    { path: '/api/plans/{planId}/items/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deletePlanItem:    { path: '/api/plans/{planId}/items/{id}', method: 'DELETE', hasId: true },
+  applyPlanTemplate: { path: '/api/plans/from-template', method: 'POST', hasBody: true },
+
+  // Songs
+  getSongs:          { path: '/api/songs', method: 'GET', isList: true },
+  getSong:           { path: '/api/songs', method: 'GET', hasId: true },
+  updateSong:        { path: '/api/arrangements/{id}', method: 'PUT', hasId: true, hasBody: true },
+  createSong:        { path: '/api/songs', method: 'POST', hasBody: true },
+  deleteSong:        { path: '/api/songs/{id}', method: 'DELETE', hasId: true },
+
+  // Arrangements
+  updateArrangement: { path: '/api/arrangements/{id}', method: 'PUT', hasId: true, hasBody: true },
+  getArrangementMedia: { path: '/api/arrangements/{id}/media', method: 'GET', hasId: true, isList: true },
+  getArrangementAnnotations: { path: '/api/arrangements/{id}/annotations', method: 'GET', hasId: true, isList: true },
+  createAnnotation:  { path: '/api/arrangements/{id}/annotations', method: 'POST', hasId: true, hasBody: true },
+  updateAnnotation:  { path: '/api/annotations/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteAnnotation:  { path: '/api/annotations/{id}', method: 'DELETE', hasId: true },
+
+  // Members
+  getMembers:        { path: '/api/members', method: 'GET', isList: true },
+  getMember:         { path: '/api/members', method: 'GET', hasId: true },
+  createMember:      { path: '/api/members', method: 'POST', hasBody: true },
+  updateMember:      { path: '/api/members/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteMember:      { path: '/api/members/{id}', method: 'DELETE', hasId: true },
+  searchMembers:     { path: '/api/members/search', method: 'GET', isList: true },
+  getMemberExceptions: { path: '/api/member-exceptions', method: 'GET', isList: true },
+  createMemberException: { path: '/api/member-exceptions', method: 'POST', hasBody: true },
+  deleteMemberException: { path: '/api/member-exceptions/{id}', method: 'DELETE', hasId: true },
+  updateMemberRole:  { path: '/api/members/{id}/role', method: 'PUT', hasId: true, hasBody: true },
+
+  // Teams
+  getTeams:          { path: '/api/teams', method: 'GET', isList: true },
+  getTeam:           { path: '/api/teams', method: 'GET', hasId: true },
+  createTeam:        { path: '/api/teams', method: 'POST', hasBody: true },
+  updateTeam:        { path: '/api/teams/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteTeam:        { path: '/api/teams/{id}', method: 'DELETE', hasId: true },
+  addTeamMember:     { path: '/api/teams/{id}/members', method: 'POST', hasId: true, hasBody: true },
+  removeTeamMember:  { path: '/api/teams/{teamId}/members/{memberId}', method: 'DELETE', hasId: true },
+  updateTeamMember:  { path: '/api/teams/{teamId}/members/{memberId}', method: 'PUT', hasId: true, hasBody: true },
+
+  // Schedule
+  getPlanPeople:     { path: '/api/plans/{id}/scheduled-people', method: 'GET', hasId: true, isList: true },
+  updateSchedule:    { path: '/api/plans/{pid}/scheduled-people/{sid}', method: 'PUT', hasId: true, hasBody: true },
+  schedulePerson:    { path: '/api/plans/{id}/scheduled-people', method: 'POST', hasId: true, hasBody: true },
+  removeSchedule:    { path: '/api/plans/{pid}/scheduled-people/{sid}', method: 'DELETE', hasId: true, hasBody: true },
+  applyReplacement:  { path: '/api/schedule/replace', method: 'POST', hasBody: true },
+
+  // Attendance
+  getPlanAttendances: { path: '/api/plans/{id}/attendances', method: 'GET', hasId: true, isList: true },
+  createAttendance:  { path: '/api/attendances', method: 'POST', hasBody: true },
+  deleteAttendance:  { path: '/api/attendances/{id}', method: 'DELETE', hasId: true },
+  getAttendanceStats: { path: '/api/attendance/stats', method: 'GET' },
+
+  // House Groups
+  getHouseGroups:    { path: '/api/house-groups', method: 'GET', isList: true },
+  getHouseGroup:     { path: '/api/house-groups', method: 'GET', hasId: true },
+  createHouseGroup:  { path: '/api/house-groups', method: 'POST', hasBody: true },
+  updateHouseGroup:  { path: '/api/house-groups/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteHouseGroup:  { path: '/api/house-groups/{id}', method: 'DELETE', hasId: true },
+  addGroupMember:    { path: '/api/house-groups/{id}/members', method: 'POST', hasId: true, hasBody: true },
+  removeGroupMember: { path: '/api/house-groups/{groupId}/members/{memberId}', method: 'DELETE', hasId: true },
+  addGroupMeeting:   { path: '/api/house-groups/{id}/meetings', method: 'POST', hasId: true, hasBody: true },
+
+  // Church Events
+  getChurchEvents:   { path: '/api/church-events', method: 'GET', isList: true },
+  createChurchEvent: { path: '/api/church-events', method: 'POST', hasBody: true },
+  updateChurchEvent: { path: '/api/church-events/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteChurchEvent: { path: '/api/church-events/{id}', method: 'DELETE', hasId: true },
+  createChurchEventException: { path: '/api/church-events/{id}/exceptions', method: 'POST', hasId: true, hasBody: true },
+
+  // Plan Templates
+  getPlanTemplates:  { path: '/api/plan-templates', method: 'GET', isList: true },
+  getPlanTemplate:   { path: '/api/plan-templates', method: 'GET', hasId: true },
+  createPlanTemplate: { path: '/api/plan-templates', method: 'POST', hasBody: true },
+  updatePlanTemplate: { path: '/api/plan-templates/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deletePlanTemplate: { path: '/api/plan-templates/{id}', method: 'DELETE', hasId: true },
+  getPlanTemplateItems: { path: '/api/plan-templates/{id}/items', method: 'GET', hasId: true, isList: true },
+  createPlanTemplateItem: { path: '/api/plan-templates/{id}/items', method: 'POST', hasId: true, hasBody: true },
+  updatePlanTemplateItem: { path: '/api/plan-template-items/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deletePlanTemplateItem: { path: '/api/plan-template-items/{id}', method: 'DELETE', hasId: true },
+
+  // Logs
+  getEmailLogs:       { path: '/api/email-logs', method: 'GET', isList: true },
+  getConflictLogs:    { path: '/api/scheduled-conflict-logs', method: 'GET', isList: true },
+  getAuditLogs:       { path: '/api/audit', method: 'GET', isList: true },
+
+  // Service types
+  getServiceTypes:   { path: '/api/service-types', method: 'GET', isList: true },
+
+  // Me / Account
+  getMe:             { path: '/api/me', method: 'GET' },
+  getMySchedule:     { path: '/api/me/schedule', method: 'GET', isList: true },
+  updateMe:          { path: '/api/me', method: 'PUT', hasBody: true },
+
+  // Volunteer preferences
+  getVolunteerPreferences: { path: '/api/volunteer-preferences/{memberId}', method: 'GET', hasId: true },
+  updateVolunteerPreferences: { path: '/api/volunteer-preferences/{memberId}', method: 'PUT', hasId: true, hasBody: true },
+
+  // Messages
+  getInbox:          { path: '/api/messages/inbox', method: 'GET', isList: true },
+  getMessage:        { path: '/api/messages/{id}', method: 'GET', hasId: true },
+  markMessageRead:   { path: '/api/messages/{id}/read', method: 'POST', hasId: true, hasBody: true },
+  sendMessage:       { path: '/api/messages', method: 'POST', hasBody: true },
+
+  // Email
+  sendEmail:         { path: '/api/send-email', method: 'POST', hasBody: true },
+  sendBulkEmail:     { path: '/api/send-bulk-email', method: 'POST', hasBody: true },
+  getEmailTemplates: { path: '/api/email-templates', method: 'GET', isList: true },
+  createEmailTemplate: { path: '/api/email-templates', method: 'POST', hasBody: true },
+  deleteEmailTemplate: { path: '/api/email-templates/{id}', method: 'DELETE', hasId: true },
+
+  // Webhooks
+  getWebhooks:       { path: '/api/webhooks', method: 'GET', isList: true },
+  createWebhook:     { path: '/api/webhooks', method: 'POST', hasBody: true },
+  deleteWebhook:     { path: '/api/webhooks/{id}', method: 'DELETE', hasId: true },
+
+  // Polls
+  getPolls:          { path: '/api/polls', method: 'GET', isList: true },
+  createPoll:        { path: '/api/polls', method: 'POST', hasBody: true },
+  deletePoll:        { path: '/api/polls/{id}', method: 'DELETE', hasId: true },
+  createPollOption:  { path: '/api/polls/{id}/options', method: 'POST', hasId: true, hasBody: true },
+  deletePollOption:  { path: '/api/poll-options/{id}', method: 'DELETE', hasId: true },
+  createVote:        { path: '/api/polls/{id}/vote', method: 'POST', hasId: true, hasBody: true },
+  deleteVote:        { path: '/api/polls/{id}/vote', method: 'DELETE', hasId: true },
+
+  // Announcements
+  getAnnouncements:  { path: '/api/announcements', method: 'GET', isList: true },
+  createAnnouncement: { path: '/api/announcements', method: 'POST', hasBody: true },
+  updateAnnouncement: { path: '/api/announcements/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deleteAnnouncement: { path: '/api/announcements/{id}', method: 'DELETE', hasId: true },
+
+  // Directory
+  getDirectory:      { path: '/api/directory', method: 'GET', isList: true },
+
+  // Stats
+  getStats:          { path: '/api/stats', method: 'GET' },
+
+  // Check-in / Plans by date
+  getPlansByDate:    { path: '/api/plans', method: 'GET', isList: true },
+
+  // Checklist
+  getPlanChecklist:  { path: '/api/plans/{id}/checklist', method: 'GET', hasId: true, isList: true },
+  addPlanChecklistItem: { path: '/api/plans/{id}/checklist', method: 'POST', hasId: true, hasBody: true },
+  updatePlanChecklist: { path: '/api/plan-checklists/{id}', method: 'PUT', hasId: true, hasBody: true },
+  deletePlanChecklist: { path: '/api/plan-checklists/{id}', method: 'DELETE', hasId: true },
+  getChecklistTemplates: { path: '/api/checklist-templates', method: 'GET', isList: true },
+  createChecklistTemplate: { path: '/api/checklist-templates', method: 'POST', hasBody: true },
+  deleteChecklistTemplate: { path: '/api/checklist-templates/{id}', method: 'DELETE', hasId: true },
+
+  // Notifications
+  getNotifications:  { path: '/api/fcm/notifications', method: 'GET', isList: true },
+
+  // Search
+  search:            { path: '/api/search', method: 'GET', isList: true },
+
+  // Replacements
+  getReplacements:   { path: '/api/schedule/replacements', method: 'GET', isList: true },
+
+  // Audio
+  getPlanAudio:      { path: '/api/plans/{id}/audio', method: 'GET', hasId: true, isList: true },
+  getAudioSegments:  { path: '/api/plans/{id}/audio', method: 'GET', hasId: true, isList: true },
+  uploadPlanAudio:   { path: '/api/upload', method: 'POST', hasBody: true },
+
+  // Attachments
+  deleteAttachment:  { path: '/api/attachments/{id}', method: 'DELETE', hasId: true },
+
+  // Resource permissions
+  getResourcePermissions: { path: '/api/resource-permissions', method: 'GET', isList: true },
+  createResourcePermission: { path: '/api/resource-permissions', method: 'POST', hasBody: true },
+  deleteResourcePermission: { path: '/api/resource-permissions/{id}', method: 'DELETE', hasId: true },
+
+  // One-click
+  sendOneClick:      { path: '/api/oneclick', method: 'POST', hasBody: true },
+
+  // Invitations
+  getInvitation:     { path: '/api/invitations/{token}', method: 'GET', hasId: true },
+  redeemInvitation:  { path: '/api/invitations/{token}/redeem', method: 'POST', hasId: true, hasBody: true },
+
+  // Backup
+  getBackupStatus:   { path: '/api/backup', method: 'GET' },
+
+  // Communication preferences
+  getCommunicationPreferences: { path: '/api/communication-preferences/{memberId}', method: 'GET', hasId: true },
+  updateCommunicationPreferences: { path: '/api/communication-preferences', method: 'POST', hasBody: true },
+}
+
 function toKebab(s: string): string {
   return s.replace(/^[A-Z]/, c => c.toLowerCase())
     .replace(/([A-Z])/g, '-$1')
@@ -64,7 +261,7 @@ function buildUrl(route: { path: string; method: string; hasId?: boolean; hasBod
   let path = route.path
   if (route.hasId && args.length > 0) {
     const id = args[0]
-    path = path.replace('{id}', String(id)).replace('{planId}', String(id)).replace('{memberId}', String(args[1] ?? '')).replace('{teamId}', String(args[0])).replace('{groupId}', String(args[0])).replace('{songId}', String(args[0])).replace('{planTemplateId}', String(args[0])).replace('{pid}', String(id)).replace('{tid}', String(args[0])).replace('{gid}', String(args[0])).replace('{mid}', String(args[1] ?? ''))
+    path = path.replace('{id}', String(id)).replace('{planId}', String(id)).replace('{memberId}', String(args[1] ?? '')).replace('{teamId}', String(args[0])).replace('{groupId}', String(args[0])).replace('{songId}', String(args[0])).replace('{planTemplateId}', String(args[0])).replace('{pid}', String(id)).replace('{tid}', String(args[0])).replace('{gid}', String(args[0])).replace('{mid}', String(args[1] ?? '')).replace('{memberId}', String(args[1] ?? '')).replace('{token}', String(id))
   }
   if (route.method === 'GET' && args.length > 0 && typeof args[0] === 'object') {
     const params = new URLSearchParams()
@@ -82,7 +279,10 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
   let madeAttempt = false
   let lastError: any = null
 
-  for (const route of [API_ROUTES[prop], guessRoute(prop)]) {
+  const routes = [API_ROUTES[prop]]
+  if (!routes[0]) routes.push(guessRoute(prop))
+
+  for (const route of routes) {
     if (!route) continue
     const url = buildUrl(route, args, base)
     const body = route.hasBody ? extractBody(args) : undefined
@@ -94,7 +294,7 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
       if (!res.ok) {
         if (res.status >= 500) throw new Error(`HTTP ${res.status}`)
         if (res.status === 401) {
-          console.warn(`[api] ${prop} → 401, skipping fallback`)
+          console.warn(`[api] ${prop} → 401`)
           return { error: 'unauthorized' }
         }
         if (res.status === 404) { madeAttempt = false; continue }
@@ -106,7 +306,7 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
     }
   }
 
-  if (madeAttempt) {
+  if (madeAttempt && lastError) {
     console.warn(`[api] ${prop} → fallback mock (${lastError instanceof Error ? lastError.message : lastError})`)
   }
   return null
