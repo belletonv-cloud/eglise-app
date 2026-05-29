@@ -1,8 +1,8 @@
 <template>
   <div id="app" :class="{ dark: isDark }">
 
-    <div v-if="!isAuthenticated && publicRoutes.indexOf(route?.name as string) === -1" class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Login />
+    <div v-if="!isAuthenticated" class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <router-view />
     </div>
 
     <div v-else-if="memberLoading" class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
