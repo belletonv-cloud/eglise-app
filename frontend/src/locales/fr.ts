@@ -629,6 +629,11 @@ export default {
     nav_checkin: "Check-in",
     nav_checkin_desc: "Pointer les présences",
   },
+  songs: {
+    title: "Chants",
+    arrangements: "arrangements",
+    no_songs: "Aucun chant trouvé.",
+  },
   calendar: {
     title: "Calendrier",
     service: "Service",

@@ -28,14 +28,14 @@
             <button @click="toggleLang" class="p-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" :title="lang === 'fr' ? 'English' : 'Français'">
               {{ lang === 'fr' ? 'EN' : 'FR' }}
             </button>
-            <div class="relative demo-persona-selector" v-if="isAdmin || isDemoMode">
-              <button @click="demoPersonaMenuOpen = !demoPersonaMenuOpen" class="p-1.5 rounded-lg text-xs font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 cursor-pointer" :title="$t('demoPersona.title')">
-                🎭
+            <div class="relative demo-persona-selector" v-if="localIsAdmin || isDemoMode">
+              <button @click="demoPersonaMenuOpen = !demoPersonaMenuOpen" class="p-1.5 rounded-lg text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer transition-colors" :title="$t('demoPersona.title') || 'Comptes de test'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
               </button>
               <div v-if="demoPersonaMenuOpen" class="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1">
-                <div class="px-3 py-2 text-xs text-gray-500 border-b border-gray-100 dark:border-gray-700">{{$t('demoPersona.instructions')}}</div>
-                <button v-for="(persona, key) in demoPersonas" :key="key" @click="switchDemoPersona(key)" class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 min-w-0">
-                  <span class="font-medium">{{ persona.label }}</span>
+                <div class="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700">{{$t('demoPersona.instructions')}}</div>
+                <button v-for="(persona, key) in demoPersonas" :key="key" @click="switchDemoPersona(key)" class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 min-w-0 transition-colors">
+                  <span class="font-medium text-gray-800 dark:text-gray-100">{{ persona.label }}</span>
                   <span class="text-gray-400 text-xs truncate">{{ persona.email }}</span>
                 </button>
               </div>
@@ -115,28 +115,28 @@
           <router-link to="/about" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>ℹ️</span> {{$t('menu.about')}}
           </router-link>
-          <div v-if="isAdmin" class="pt-2 pb-1">
+          <div v-if="localIsAdmin" class="pt-2 pb-1">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{{$t('menu.section_admin')}}</p>
           </div>
-          <router-link v-if="isAdmin" to="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>⚙️</span> {{$t('menu.admin')}}
           </router-link>
-          <router-link v-if="isAdmin" to="/webhooks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/webhooks" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔗</span> {{$t('menu.webhooks')}}
           </router-link>
-          <router-link v-if="isScheduler" to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsScheduler" to="/conflicts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>⚠️</span> {{$t('menu.conflicts')}}
           </router-link>
-          <router-link v-if="isAdmin" to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/logs" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📋</span> {{$t('menu.logs')}}
           </router-link>
-          <router-link v-if="isAdmin" to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/pco-sync" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🔄</span> {{$t('menu.pco_sync')}}
           </router-link>
-          <router-link v-if="isAdmin" to="/admin/content" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/admin/content" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>📝</span> {{$t('menu.content')}}
           </router-link>
-          <router-link v-if="isAdmin" to="/admin/test-accounts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
+          <router-link v-if="localIsAdmin" to="/admin/test-accounts" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400" active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium">
             <span>🧪</span> {{$t('menu.test_accounts')}}
           </router-link>
         </nav>
@@ -195,6 +195,11 @@ import PageHelp from './components/PageHelp.vue'
 import { stepsByPage } from './page-help-steps'
 import { onLogin } from './stores/auth';
 import { useRouter } from 'vue-router'
+
+// Use local computed for reactivity to demo persona changes
+const userRole = computed(() => member.value?.role || null)
+const localIsAdmin = computed(() => userRole.value === 'admin')
+const localIsScheduler = computed(() => ['admin', 'scheduler', 'music_director'].includes(userRole.value))
 
 
 

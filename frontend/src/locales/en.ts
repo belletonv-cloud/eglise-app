@@ -609,6 +609,11 @@ export default {
     nav_checkin: "Check-in",
     nav_checkin_desc: "Track attendance",
   },
+  songs: {
+    title: "Songs",
+    arrangements: "arrangements",
+    no_songs: "No songs found.",
+  },
   calendar: {
     title: "Calendar",
     service: "Service",

@@ -816,8 +816,9 @@ const mockFallback: Record<string, (...args: any[]) => any> = {
     {
       id: 1,
       title: "Mock song",
-      arrangements: [{ id: 1, key: "C", tempo: 120 }],
-      arrangement_count: 3,
+      author: "Demo Author",
+      arrangements: [{ id: 1, key: "C", tempo: 120, chord_chart: "Am C G" }],
+      arrangement_count: 1,
     },
   ],
   getSong: () => ({
