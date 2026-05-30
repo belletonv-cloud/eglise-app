@@ -14,6 +14,11 @@
           {{ $t('testAccounts.current') }} : <strong>{{ getPersonaLabel(activePersona) }}</strong>
           <span class="text-blue-500"> ({{ getUserEmail(activePersona) }})</span>
         </p>
+        <button
+          v-if="isImpersonating"
+          @click="stopCurrentPersona"
+          class="mt-2 px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 cursor-pointer transition-colors"
+        >← {{ $t('demoPersona.stop') || 'Arrêter' }}</button>
       </div>
 
       <div class="grid grid-cols-1 gap-4">
@@ -46,8 +51,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { user, isAuthenticated } from '../stores/auth'
-import { member } from '../stores/member'
+import { user, isAuthenticated, isDemoMode as isDemoModeStore, isImpersonating, startImpersonating, stopImpersonating } from '../stores/auth'
+import { member, loadCurrentMember } from '../stores/member'
 
 const { t } = useI18n()
 
@@ -104,21 +109,34 @@ function applyPersona(key: string) {
   const p = personas[key]
   if (!p) return
 
-  // Mettre à jour le user store
-  user.value = {
+  const personaUser = {
     email: p.email,
     uid: `demo-${key}`,
     displayName: p.displayName,
   }
-  isAuthenticated.value = true
-
-  // Mettre à jour le member store
-  member.value = {
+  const personaMember = {
     id: `demo-${key}`,
     email: p.email,
     first_name: p.displayName,
     last_name: '',
     role: p.role,
+  }
+
+  if (!isDemoMode.value) {
+    startImpersonating(personaUser)
+  } else {
+    user.value = personaUser
+  }
+  isAuthenticated.value = true
+  member.value = personaMember
+}
+
+function stopCurrentPersona() {
+  activePersona.value = null
+  localStorage.removeItem(STORAGE_KEY)
+  if (!isDemoMode.value) {
+    stopImpersonating()
+    // loadCurrentMember is triggered by user watcher
   }
 }
 </script>

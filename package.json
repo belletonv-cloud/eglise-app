@@ -1,6 +1,5 @@
 {
   "type": "module",
-  
   "wrangler": {
     "deploy:staging": "npx wrangler publish --env staging"
   },
@@ -24,5 +23,8 @@
   },
   "dependencies": {
     "wrangler": "^4.88.0"
+  },
+  "volta": {
+    "node": "22.22.3"
   }
 }

@@ -1,4 +1,4 @@
-import { user } from "../stores/auth";
+import { user, isImpersonating } from "../stores/auth";
 
 declare global {
   var __API_BASE__: string | undefined;
@@ -25,9 +25,8 @@ export async function authenticatedFetch(
   url: string,
   options: RequestInit = {},
 ) {
-  // In demo mode, skip auth headers
-  if (isDemoMode && !url.includes("localhost")) {
-    const token = null;
+  // In demo mode or impersonation mode, skip auth headers (mock user has no token)
+  if (isDemoMode || isImpersonating.value) {
     const headers: Record<string, string> = {
       ...((options.headers as Record<string, string>) || {}),
     };
@@ -744,8 +743,8 @@ async function tryCall(prop: string, args: any[]): Promise<any> {
       `[api] ${prop} → fallback mock (${lastError instanceof Error ? lastError.message : lastError})`,
     );
   }
-  // In demo mode, return mock data as fallback
-  if (isDemoMode) {
+  // In demo or impersonation mode, return mock data as fallback
+  if (isDemoMode || isImpersonating.value) {
     const mockFn = mockFallback[prop];
     if (mockFn) return mockFn(...args);
   }

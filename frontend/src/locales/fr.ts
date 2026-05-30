@@ -1112,5 +1112,6 @@ export default {
   demoPersona: {
     title: "Comptes de test",
     instructions: "Cliquez pour impersonnaliser un compte",
+    stop: "Arrêter l'impersonnalisation",
   },
 };
