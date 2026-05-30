@@ -121,7 +121,12 @@ const routes0 = [
     const song = await env.DB.prepare('SELECT * FROM songs WHERE id = ?').bind(id).first();
     if (!song) return notFound();
     const arrangements = await env.DB.prepare('SELECT * FROM arrangements WHERE song_id = ? ORDER BY name ASC').bind(id).all();
-    return json({ ...song, arrangements: arrangements.results });
+    // Normalize empty chord_charts to null for cleaner frontend handling
+    const normalizedArrangements = arrangements.results.map((a: any) => ({
+      ...a,
+      chord_chart: a.chord_chart && a.chord_chart.trim().length > 0 ? a.chord_chart : null
+    }));
+    return json({ ...song, arrangements: normalizedArrangements });
   }),
 
   route('PUT', '/api/arrangements/:id', async (request, env, params) => {
@@ -803,7 +808,7 @@ const routes0 = [
     if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
-      
+
       // Validate required fields
       if (!body.plan_id || !body.member_id) {
         return badRequest('plan_id and member_id are required');
@@ -813,7 +818,7 @@ const routes0 = [
       const existing = await env.DB.prepare(
         'SELECT id FROM attendances WHERE plan_id = ? AND member_id = ?'
       ).bind(body.plan_id, body.member_id).first();
-      
+
       if (existing) {
         return badRequest('Already checked in for this service');
       }
@@ -821,8 +826,8 @@ const routes0 = [
       const result = await env.DB.prepare(
         'INSERT INTO attendances (plan_id, member_id, status, notes) VALUES (?, ?, ?, ?)'
       ).bind(
-        body.plan_id, 
-        body.member_id, 
+        body.plan_id,
+        body.member_id,
         body.status || 'present',
         body.notes || null
       ).run();
@@ -833,14 +838,14 @@ const routes0 = [
         JOIN members m ON m.id = a.member_id
         WHERE a.id = ?
       `).bind(result.meta.last_row_id).first();
-      
+
       return json(attendance, 201);
     }),
 
     route('GET', '/api/attendances/:id', async (request, env, params) => {
       const attendanceId = requireId({ id: params.id });
       if (!attendanceId) return badRequest('Invalid ID');
-      
+
       const attendance = await env.DB.prepare(`
         SELECT a.*, m.first_name, m.last_name, p.date as plan_date, p.time as plan_time
         FROM attendances a
@@ -848,7 +853,7 @@ const routes0 = [
         JOIN plans p ON p.id = a.plan_id
         WHERE a.id = ?
       `).bind(attendanceId).first();
-      
+
       if (!attendance) return notFound();
       return json(attendance);
     }),
@@ -857,10 +862,10 @@ const routes0 = [
     if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const attendanceId = requireId({ id: params.id });
       if (!attendanceId) return badRequest('Invalid ID');
-      
+
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
-      
+
       await env.DB.prepare(
         'UPDATE attendances SET status=?, notes=? WHERE id=?'
       ).bind(
@@ -868,14 +873,14 @@ const routes0 = [
         body.notes || null,
         attendanceId
       ).run();
-      
+
       const attendance = await env.DB.prepare(`
         SELECT a.*, m.first_name, m.last_name
         FROM attendances a
         JOIN members m ON m.id = a.member_id
         WHERE a.id = ?
       `).bind(attendanceId).first();
-      
+
       return json(attendance);
     }),
 
@@ -883,7 +888,7 @@ const routes0 = [
     if (!await hasPermission(request, env, 'schedule')) return json({ error: 'Forbidden' }, 403);
       const attendanceId = requireId({ id: params.id });
       if (!attendanceId) return badRequest('Invalid ID');
-      
+
       await env.DB.prepare('DELETE FROM attendances WHERE id = ?').bind(attendanceId).run();
       return new Response(null, { status: 204, headers: CORS });
     }),
@@ -891,7 +896,7 @@ const routes0 = [
     route('GET', '/api/plans/:pid/attendances', async (request, env, params) => {
       const planId = requireId({ id: params.pid });
       if (!planId) return badRequest('Invalid plan ID');
-      
+
       const attendances = await env.DB.prepare(`
         SELECT a.*, m.first_name, m.last_name
         FROM attendances a
@@ -899,7 +904,7 @@ const routes0 = [
         WHERE a.plan_id = ?
         ORDER BY a.check_in_time DESC
       `).bind(planId).all();
-      
+
       return json(attendances.results);
     }),
 
@@ -930,7 +935,7 @@ const routes0 = [
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       if (!body.name) return badRequest('Name is required');
-      
+
       const result = await env.DB.prepare(`
         INSERT INTO house_groups (name, description, leader_id, meeting_day, meeting_time, location)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -942,30 +947,30 @@ const routes0 = [
         body.meeting_time || null,
         body.location || null
       ).run();
-      
+
       const newGroup = await env.DB.prepare(`
         SELECT hg.*, m.first_name as leader_first, m.last_name as leader_last
         FROM house_groups hg
         LEFT JOIN members m ON m.id = hg.leader_id
         WHERE hg.id = ?
       `).bind(result.meta.last_row_id).first();
-      
+
       return json(newGroup, 201);
     }),
 
     route('GET', '/api/house-groups/:id', async (request, env, params) => {
       const groupId = requireId({ id: params.id });
       if (!groupId) return badRequest('Invalid ID');
-      
+
       const group = await env.DB.prepare(`
         SELECT hg.*, m.first_name as leader_first, m.last_name as leader_last
         FROM house_groups hg
         LEFT JOIN members m ON m.id = hg.leader_id
         WHERE hg.id = ?
       `).bind(groupId).first();
-      
+
       if (!group) return notFound();
-      
+
       // Get members
       group.members = (await env.DB.prepare(`
         SELECT gm.*, m.first_name, m.last_name
@@ -974,14 +979,14 @@ const routes0 = [
         WHERE gm.group_id = ?
         ORDER BY m.last_name ASC
       `).bind(groupId).all()).results;
-      
+
       // Get meetings
       group.meetings = (await env.DB.prepare(`
         SELECT * FROM group_meetings
         WHERE group_id = ?
         ORDER BY date DESC
       `).bind(groupId).all()).results;
-      
+
       return json(group);
     }),
 
@@ -989,13 +994,13 @@ const routes0 = [
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.id });
       if (!groupId) return badRequest('Invalid ID');
-      
+
       const existing = await env.DB.prepare('SELECT * FROM house_groups WHERE id = ?').bind(groupId).first();
       if (!existing) return notFound();
-      
+
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
-      
+
       await env.DB.prepare(`
         UPDATE house_groups SET name=?, description=?, leader_id=?, meeting_day=?, meeting_time=?, location=?
         WHERE id=?
@@ -1008,14 +1013,14 @@ const routes0 = [
         body.location !== undefined ? (body.location || null) : existing.location,
         groupId
       ).run();
-      
+
       const updated = await env.DB.prepare(`
         SELECT hg.*, m.first_name as leader_first, m.last_name as leader_last
         FROM house_groups hg
         LEFT JOIN members m ON m.id = hg.leader_id
         WHERE hg.id = ?
       `).bind(groupId).first();
-      
+
       return json(updated);
     }),
 
@@ -1023,7 +1028,7 @@ const routes0 = [
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.id });
       if (!groupId) return badRequest('Invalid ID');
-      
+
       await env.DB.prepare('DELETE FROM house_groups WHERE id = ?').bind(groupId).run();
       return new Response(null, { status: 204, headers: CORS });
     }),
@@ -1033,16 +1038,16 @@ const routes0 = [
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.gid });
       if (!groupId) return badRequest('Invalid group ID');
-      
+
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       if (!body.member_id) return badRequest('member_id is required');
-      
+
       await env.DB.prepare(`
         INSERT OR IGNORE INTO group_members (group_id, member_id, role)
         VALUES (?, ?, ?)
       `).bind(groupId, body.member_id, body.role || 'member').run();
-      
+
       return json({ success: true }, 201);
     }),
 
@@ -1051,7 +1056,7 @@ const routes0 = [
       const groupId = requireId({ id: params.gid });
       const memberId = requireId({ id: params.mid });
       if (!groupId || !memberId) return badRequest('Invalid ID');
-      
+
       await env.DB.prepare('DELETE FROM group_members WHERE group_id = ? AND member_id = ?').bind(groupId, memberId).run();
       return new Response(null, { status: 204, headers: CORS });
     }),
@@ -1060,13 +1065,13 @@ const routes0 = [
     route('GET', '/api/house-groups/:gid/meetings', async (request, env, params) => {
       const groupId = requireId({ id: params.gid });
       if (!groupId) return badRequest('Invalid group ID');
-      
+
       const meetings = await env.DB.prepare(`
         SELECT * FROM group_meetings
         WHERE group_id = ?
         ORDER BY date DESC
       `).bind(groupId).all();
-      
+
       return json(meetings.results);
     }),
 
@@ -1074,19 +1079,19 @@ const routes0 = [
     if (!await hasPermission(request, env, 'manage_members')) return json({ error: 'Forbidden' }, 403);
       const groupId = requireId({ id: params.gid });
       if (!groupId) return badRequest('Invalid group ID');
-      
+
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       if (!body.date) return badRequest('date is required');
-      
+
       const result = await env.DB.prepare(`
         INSERT INTO group_meetings (group_id, date, notes)
         VALUES (?, ?, ?)
       `).bind(groupId, body.date, body.notes || null).run();
-      
+
       const meeting = await env.DB.prepare('SELECT * FROM group_meetings WHERE id = ?')
         .bind(result.meta.last_row_id).first();
-      
+
       return json(meeting, 201);
     }),
 
@@ -1108,7 +1113,7 @@ const routes0 = [
       if (!body.name || !body.subject || !body.body) {
         return badRequest('name, subject and body are required');
       }
-      
+
       const result = await env.DB.prepare(`
         INSERT INTO email_templates (name, subject, body, variables)
         VALUES (?, ?, ?, ?)
@@ -1118,22 +1123,22 @@ const routes0 = [
         body.body,
         body.variables || null
       ).run();
-      
+
       const newTemplate = await env.DB.prepare(`
         SELECT * FROM email_templates WHERE id = ?
       `).bind(result.meta.last_row_id).first();
-      
+
       return json(newTemplate, 201);
     }),
 
     route('GET', '/api/email-templates/:id', async (request, env, params) => {
       const templateId = requireId({ id: params.id });
       if (!templateId) return badRequest('Invalid ID');
-      
+
       const template = await env.DB.prepare(`
         SELECT * FROM email_templates WHERE id = ?
       `).bind(templateId).first();
-      
+
       if (!template) return notFound();
       return json(template);
     }),
@@ -1141,13 +1146,13 @@ const routes0 = [
     route('PUT', '/api/email-templates/:id', async (request, env, params) => {
       const templateId = requireId({ id: params.id });
       if (!templateId) return badRequest('Invalid ID');
-      
+
       const existing = await env.DB.prepare('SELECT * FROM email_templates WHERE id = ?').bind(templateId).first();
       if (!existing) return notFound();
-      
+
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
-      
+
       await env.DB.prepare(`
         UPDATE email_templates SET name=?, subject=?, body=?, variables=?
         WHERE id=?
@@ -1158,18 +1163,18 @@ const routes0 = [
         body.variables !== undefined ? body.variables : existing.variables,
         templateId
       ).run();
-      
+
       const updated = await env.DB.prepare(`
         SELECT * FROM email_templates WHERE id = ?
       `).bind(templateId).first();
-      
+
       return json(updated);
     }),
 
     route('DELETE', '/api/email-templates/:id', async (request, env, params) => {
       const templateId = requireId({ id: params.id });
       if (!templateId) return badRequest('Invalid ID');
-      
+
       await env.DB.prepare('DELETE FROM email_templates WHERE id = ?').bind(templateId).run();
       return new Response(null, { status: 204, headers: CORS });
     }),
@@ -1556,7 +1561,7 @@ const routes0 = [
       if (!body.subject || !body.body || !body.recipient_email) {
         return badRequest('subject, body and recipient_email are required');
       }
-      
+
       const result = await env.DB.prepare(`
         INSERT INTO email_logs (template_id, subject, body, recipient_email, recipient_member_id, status)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -1568,14 +1573,14 @@ const routes0 = [
         body.recipient_member_id || null,
         body.status || 'sent'
       ).run();
-      
+
       const log = await env.DB.prepare(`
         SELECT el.*, et.name as template_name
         FROM email_logs el
         LEFT JOIN email_templates et ON et.id = el.template_id
         WHERE el.id = ?
       `).bind(result.meta.last_row_id).first();
-      
+
       return json(log, 201);
     }),
 
@@ -1698,11 +1703,11 @@ const routes0 = [
     route('GET', '/api/communication-preferences/:memberId', async (request, env, params) => {
       const memberId = requireId({ id: params.memberId });
       if (!memberId) return badRequest('Invalid member ID');
-      
+
       const prefs = await env.DB.prepare(`
         SELECT * FROM communication_preferences WHERE member_id = ?
       `).bind(memberId).first();
-      
+
       if (!prefs) {
         return json({ member_id: memberId, receive_emails: true, receive_sms: true, email_types: null });
       }
@@ -1713,7 +1718,7 @@ const routes0 = [
       const body = await getBody(request);
       if (!body) return badRequest('Invalid JSON body');
       if (!body.member_id) return badRequest('member_id is required');
-      
+
       await env.DB.prepare(`
         INSERT OR REPLACE INTO communication_preferences (member_id, receive_emails, receive_sms, email_types)
         VALUES (?, ?, ?, ?)
@@ -1723,11 +1728,11 @@ const routes0 = [
         body.receive_sms !== undefined ? body.receive_sms : 1,
         body.email_types || null
       ).run();
-      
+
       const prefs = await env.DB.prepare(`
         SELECT * FROM communication_preferences WHERE member_id = ?
       `).bind(body.member_id).first();
-      
+
       return json(prefs, 201);
     }),
   ];
@@ -3305,7 +3310,7 @@ const routes3 = [
     return json({ success: true, results });
   }),
 
-  
+
 
   // Backup (dump data as JSON)
   route('GET', '/api/backup', async (request, env) => {
@@ -3381,7 +3386,7 @@ const routes3 = [
     const countRes = await env.DB.prepare(`SELECT COUNT(*) as count FROM church_events ce ${where}`).bind(...binds).first();
     const totalCount = countRes?.count || 0;
     // Paginated fetch
-    let query = `SELECT ce.*, 
+    let query = `SELECT ce.*,
       (SELECT COUNT(*) FROM church_event_exceptions cee WHERE cee.event_id = ce.id) as exception_count
       FROM church_events ce ${where} ORDER BY ce.start_date ASC, ce.start_time ASC
       LIMIT ? OFFSET ?`;
