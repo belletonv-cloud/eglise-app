@@ -5152,14 +5152,21 @@ const routes3 = [
                   a.attributes && a.attributes.title
                     ? a.attributes.title
                     : `arr-${aId}`;
-                const content = (a.attributes && a.attributes.body) || null;
+                // PCO uses 'chord_chart' attribute (not 'body')
+                const content =
+                  (a.attributes &&
+                    (a.attributes.chord_chart || a.attributes.body)) ||
+                  null;
                 const updatedAt =
                   (a.attributes && a.attributes.updated_at) || null;
-                // use correct columns: name instead of title
+                // Also import key and tempo from PCO
+                const key = (a.attributes && a.attributes.key) || null;
+                const tempo = (a.attributes && a.attributes.tempo) || null;
+                // use correct columns
                 await env.DB.prepare(
-                  "INSERT INTO arrangements (song_id, pco_id, name, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?)",
+                  "INSERT INTO arrangements (song_id, pco_id, name, key, tempo, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 )
-                  .bind(songId, aId, title, content, updatedAt)
+                  .bind(songId, aId, title, key, tempo, content, updatedAt)
                   .run();
                 results.arrangements++;
               }
