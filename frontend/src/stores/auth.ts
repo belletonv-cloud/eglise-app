@@ -13,11 +13,31 @@ export function onLogin(cb: () => void) {
   redirectAfterLogin = cb;
 }
 
+export function startImpersonating(personaUser: any) {
+  if (!isImpersonating.value) {
+    originalUser.value = { ...user.value };
+  }
+  user.value = personaUser;
+  isImpersonating.value = true;
+}
+
+export function stopImpersonating() {
+  if (originalUser.value) {
+    user.value = originalUser.value;
+    originalUser.value = null;
+  }
+  isImpersonating.value = false;
+}
+
 export const user = ref<any>(null);
 export const isAuthenticated = ref(false);
 
 // Demo mode flag (checked by member store for initial role)
 export const isDemoMode = ref(false);
+
+// Impersonation state
+export const isImpersonating = ref(false);
+export const originalUser = ref<any>(null);
 
 // Démo locale : si ?demo=1 dans l'URL, on skip Firebase Auth
 if (
@@ -30,6 +50,7 @@ if (
     uid: "demo123",
     displayName: "Admin Démo",
   };
+  originalUser.value = { ...user.value }; // Store original for impersonation display
   isDemoMode.value = true;
 }
 
@@ -42,6 +63,7 @@ onAuthStateChanged(auth, (firebaseUser: any) => {
     return;
   if (firebaseUser) {
     user.value = firebaseUser;
+    if (!originalUser.value) originalUser.value = firebaseUser;
     isAuthenticated.value = true;
     redirectAfterLogin?.();
   } else {

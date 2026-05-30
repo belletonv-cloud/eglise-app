@@ -41,8 +41,9 @@
                         </h1>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 truncate"
+                            :title="emailTooltip"
                         >
-                            {{ user?.email || "" }}
+                            {{ displayEmail }}
                         </p>
                     </div>
                     <div class="flex items-center gap-1 ml-2 shrink-0">
@@ -91,7 +92,7 @@
                         </button>
                         <div
                             class="relative demo-persona-selector"
-                            v-if="localIsAdmin || isDemoMode"
+                            v-if="showPersonaSelector"
                         >
                             <button
                                 @click="
@@ -125,6 +126,17 @@
                                 >
                                     {{ $t("demoPersona.instructions") }}
                                 </div>
+                                <button
+                                    v-if="isImpersonating"
+                                    @click="stopDemoPersona"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 min-w-0 transition-colors text-red-600 dark:text-red-400 font-medium"
+                                >
+                                    ←
+                                    {{
+                                        $t("demoPersona.stop") ||
+                                        "Arrêter l'impersonnalisation"
+                                    }}
+                                </button>
                                 <button
                                     v-for="(persona, key) in demoPersonas"
                                     :key="key"
@@ -474,7 +486,16 @@ import { publicRoutes } from "./router/index";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import Login from "./components/Login.vue";
-import { user, isAuthenticated, logout } from "./stores/auth";
+import {
+    user,
+    isAuthenticated,
+    logout,
+    isDemoMode as isDemoModeStore,
+    isImpersonating,
+    originalUser,
+    startImpersonating,
+    stopImpersonating,
+} from "./stores/auth";
 import {
     member,
     loadCurrentMember,
@@ -492,7 +513,7 @@ import { stepsByPage } from "./page-help-steps";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
 
-// Demo mode detection (must be before watcher)
+// Demo mode detection
 const isDemoMode = computed(
     () =>
         typeof window !== "undefined" &&
@@ -504,6 +525,13 @@ const userRole = computed(() => member.value?.role || null);
 const localIsAdmin = computed(() => userRole.value === "admin");
 const localIsScheduler = computed(() =>
     ["admin", "scheduler", "music_director"].includes(userRole.value),
+);
+
+// Track if the ORIGINAL logged-in user is admin (for showing persona selector)
+const wasOriginallyAdmin = ref(false);
+// Show persona selector when original user is admin OR currently admin OR in demo mode
+const showPersonaSelector = computed(
+    () => wasOriginallyAdmin.value || localIsAdmin.value || isDemoMode.value,
 );
 
 const { locale } = useI18n();
@@ -568,6 +596,8 @@ const currentHelpSteps = computed(() => {
 });
 
 const handleLogout = async () => {
+    if (isImpersonating.value) stopImpersonating();
+    wasOriginallyAdmin.value = false;
     await logout();
     router.push("/login");
 };
@@ -581,12 +611,32 @@ watch(
     (val) => {
         if (val) {
             // Skip API call in demo mode - member.value is already set by switchDemoPersona
-            if (!isDemoMode.value) loadCurrentMember();
+            if (!isDemoMode.value && !isImpersonating.value) {
+                loadCurrentMember().then(() => {
+                    wasOriginallyAdmin.value = member.value?.role === "admin";
+                });
+            }
             if (route.name === "login") router.push("/");
         } else member.value = null;
     },
     { immediate: true },
 );
+
+// Email display (truncated with tooltip for full)
+const displayEmail = computed(() => {
+    const current = user.value?.email || "";
+    if (!isImpersonating.value) {
+        return current.length > 28 ? current.substring(0, 26) + "…" : current;
+    }
+    const orig = originalUser.value?.email || "";
+    return `${orig} (${current})`;
+});
+const emailTooltip = computed(() => {
+    if (!isImpersonating.value) return user.value?.email || "";
+    const orig = originalUser.value?.email || "";
+    const current = user.value?.email || "";
+    return `${orig} → ${current}`;
+});
 
 // Demo persona switcher
 const demoPersonaMenuOpen = ref(false);
@@ -602,20 +652,37 @@ function switchDemoPersona(key: string) {
     demoPersonaMenuOpen.value = false;
     const persona = demoPersonas[key];
     if (!persona) return;
-    // Mettre à jour le user store et le member store (similaire à TestAccountsPanel)
-    user.value = {
+    const personaUser = {
         email: persona.email,
         uid: `demo-${key}`,
         displayName: persona.label,
     };
-    isAuthenticated.value = true;
-    member.value = {
+    const personaMember = {
         id: `demo-${key}`,
         email: persona.email,
         first_name: persona.label,
         last_name: "",
         role: key,
     };
+    if (!isDemoMode.value) {
+        startImpersonating(personaUser);
+    } else {
+        // In demo mode, set isImpersonating to show the persona switch in UI
+        if (!isImpersonating.value) {
+            isImpersonating.value = true;
+        }
+        user.value = personaUser;
+    }
+    isAuthenticated.value = true;
+    member.value = personaMember;
+}
+
+function stopDemoPersona() {
+    demoPersonaMenuOpen.value = false;
+    if (!isDemoMode.value) {
+        stopImpersonating();
+        // loadCurrentMember is triggered by user watcher
+    }
 }
 
 // Close demo persona menu when clicking outside
