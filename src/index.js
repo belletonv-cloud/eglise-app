@@ -152,14 +152,21 @@ const routes0 = [
     const url = new URL(request.url);
     const q = (url.searchParams.get("q") || "").trim();
     const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const size = Math.min(parseInt(url.searchParams.get("size") || "200", 10), 500);
+    const size = Math.min(
+      parseInt(url.searchParams.get("size") || "200", 10),
+      500,
+    );
     const offset = (page - 1) * size;
     const where = q ? "WHERE s.title LIKE ? OR s.author LIKE ?" : "";
     const binds = q ? [`%${q}%`, `%${q}%`] : [];
-    const total = (await env.DB.prepare(
-      `SELECT COUNT(*) as c FROM songs s ${where}`
-    ).bind(...binds).first())?.c || 0;
-    const stmt = await env.DB.prepare(`
+    const total =
+      (
+        await env.DB.prepare(`SELECT COUNT(*) as c FROM songs s ${where}`)
+          .bind(...binds)
+          .first()
+      )?.c || 0;
+    const stmt = await env.DB.prepare(
+      `
       SELECT s.*,
              COUNT(a.id) as arrangement_count,
              MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart
@@ -167,10 +174,15 @@ const routes0 = [
       ${where}
       GROUP BY s.id ORDER BY s.title ASC
       LIMIT ? OFFSET ?
-    `).bind(...binds, size, offset).all();
+    `,
+    )
+      .bind(...binds, size, offset)
+      .all();
     // Return flat array when no pagination params supplied (backwards compat)
-    const paginated = url.searchParams.has("page") || url.searchParams.has("size");
-    if (paginated) return json({ data: stmt.results, page, size, totalCount: total });
+    const paginated =
+      url.searchParams.has("page") || url.searchParams.has("size");
+    if (paginated)
+      return json({ data: stmt.results, page, size, totalCount: total });
     return json(stmt.results);
   }),
 
@@ -182,17 +194,20 @@ const routes0 = [
     const err = validate({ title: { required: true, maxLength: 200 } }, body);
     if (err) return badRequest(err);
     const result = await env.DB.prepare(
-      "INSERT INTO songs (title, author, ccli_number, copyright, themes, notes) VALUES (?, ?, ?, ?, ?, ?)"
-    ).bind(
-      body.title,
-      body.author || null,
-      body.ccli_number || null,
-      body.copyright || null,
-      body.themes || null,
-      body.notes || null,
-    ).run();
+      "INSERT INTO songs (title, author, ccli_number, copyright, themes, notes) VALUES (?, ?, ?, ?, ?, ?)",
+    )
+      .bind(
+        body.title,
+        body.author || null,
+        body.ccli_number || null,
+        body.copyright || null,
+        body.themes || null,
+        body.notes || null,
+      )
+      .run();
     const song = await env.DB.prepare("SELECT * FROM songs WHERE id = ?")
-      .bind(result.meta.last_row_id).first();
+      .bind(result.meta.last_row_id)
+      .first();
     return json(song, 201);
   }),
 
@@ -201,7 +216,9 @@ const routes0 = [
       return json({ error: "Forbidden" }, 403);
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
-    const song = await env.DB.prepare("SELECT id FROM songs WHERE id = ?").bind(id).first();
+    const song = await env.DB.prepare("SELECT id FROM songs WHERE id = ?")
+      .bind(id)
+      .first();
     if (!song) return notFound();
     await env.DB.prepare("DELETE FROM songs WHERE id = ?").bind(id).run();
     return json({ ok: true });
@@ -292,7 +309,10 @@ const routes0 = [
 
     // Check caller role — non-admins get a reduced view (no sensitive fields)
     const caller = await getMemberFromRequest(request, env);
-    const isAdmin = caller && (caller.role === 'admin' || await hasPermission(request, env, 'edit_members'));
+    const isAdmin =
+      caller &&
+      (caller.role === "admin" ||
+        (await hasPermission(request, env, "edit_members")));
 
     // Count total members
     const countRes = await env.DB.prepare(
@@ -411,7 +431,9 @@ const routes0 = [
       .all();
     const result = { ...member, teams: teams.results };
     // Strip sensitive fields for non-admins viewing other members' profiles
-    const isAdmin = caller.role === 'admin' || await hasPermission(request, env, 'edit_members');
+    const isAdmin =
+      caller.role === "admin" ||
+      (await hasPermission(request, env, "edit_members"));
     if (!isAdmin && caller.id !== id) {
       delete result.birth_date;
       delete result.baptism_date;
@@ -431,7 +453,7 @@ const routes0 = [
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
     await env.DB.prepare(
-      "UPDATE members SET first_name=?, last_name=?, email=?, phone=?, birth_date=?, membership_type=?, baptism_date=?, notes=?, updated_at=datetime('now') WHERE id=?",
+      "UPDATE members SET first_name=?, last_name=?, email=?, phone=?, birth_date=?, membership_type=?, role=?, baptism_date=?, notes=?, updated_at=datetime('now') WHERE id=?",
     )
       .bind(
         body.first_name,
@@ -440,6 +462,7 @@ const routes0 = [
         body.phone || null,
         body.birth_date || null,
         body.membership_type || "guest",
+        body.role || null,
         body.baptism_date || null,
         body.notes || null,
         id,
@@ -695,8 +718,10 @@ const routes0 = [
               st.name as service_type_name
        FROM plans p
        LEFT JOIN service_types st ON st.id = p.service_type_id
-       WHERE p.share_token = ?`
-    ).bind(token).first();
+       WHERE p.share_token = ?`,
+    )
+      .bind(token)
+      .first();
     if (!plan) return notFound("Plan introuvable ou lien expiré");
     const items = await env.DB.prepare(
       `SELECT pi.id, pi.type, pi.title, pi.description, pi.position,
@@ -707,8 +732,10 @@ const routes0 = [
        LEFT JOIN arrangements a ON a.id = ps.arrangement_id
        LEFT JOIN songs s ON s.id = a.song_id
        WHERE pi.plan_id = ?
-       ORDER BY pi.position ASC`
-    ).bind(plan.id).all();
+       ORDER BY pi.position ASC`,
+    )
+      .bind(plan.id)
+      .all();
     return json({ plan, items: items.results });
   }),
 
@@ -718,12 +745,18 @@ const routes0 = [
       return json({ error: "Forbidden" }, 403);
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
-    const plan = await env.DB.prepare("SELECT id, share_token FROM plans WHERE id = ?").bind(id).first();
+    const plan = await env.DB.prepare(
+      "SELECT id, share_token FROM plans WHERE id = ?",
+    )
+      .bind(id)
+      .first();
     if (!plan) return notFound();
     if (plan.share_token) return json({ token: plan.share_token });
     // Generate a UUID-like token
     const token = crypto.randomUUID();
-    await env.DB.prepare("UPDATE plans SET share_token = ? WHERE id = ?").bind(token, id).run();
+    await env.DB.prepare("UPDATE plans SET share_token = ? WHERE id = ?")
+      .bind(token, id)
+      .run();
     return json({ token }, 201);
   }),
 
@@ -733,7 +766,9 @@ const routes0 = [
       return json({ error: "Forbidden" }, 403);
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
-    await env.DB.prepare("UPDATE plans SET share_token = NULL WHERE id = ?").bind(id).run();
+    await env.DB.prepare("UPDATE plans SET share_token = NULL WHERE id = ?")
+      .bind(id)
+      .run();
     return json({ ok: true });
   }),
 
@@ -1052,7 +1087,9 @@ const routes0 = [
     async (request, env, params) => {
       const planId = requireId(params);
       if (!planId) return badRequest("ID plan invalide");
-      const plan = await env.DB.prepare("SELECT id, date FROM plans WHERE id = ?")
+      const plan = await env.DB.prepare(
+        "SELECT id, date FROM plans WHERE id = ?",
+      )
         .bind(planId)
         .first();
       if (!plan) return notFound("Plan non trouvé");
@@ -1075,14 +1112,20 @@ const routes0 = [
       // Check if the member has marked this plan's date as unavailable
       if (!body.force) {
         const prefs = await env.DB.prepare(
-          "SELECT unavailable_dates FROM volunteer_preferences WHERE member_id = ?"
-        ).bind(body.member_id).first();
+          "SELECT unavailable_dates FROM volunteer_preferences WHERE member_id = ?",
+        )
+          .bind(body.member_id)
+          .first();
         if (prefs?.unavailable_dates) {
           const unavailable = JSON.parse(prefs.unavailable_dates || "[]");
           if (unavailable.includes(plan.date)) {
             return json(
-              { error: "Member is unavailable on this date", date: plan.date, unavailable: true },
-              409
+              {
+                error: "Member is unavailable on this date",
+                date: plan.date,
+                unavailable: true,
+              },
+              409,
             );
           }
         }
@@ -1369,7 +1412,10 @@ const routes0 = [
   route("GET", "/api/attendances", async (request, env, params, url) => {
     const caller = await getMemberFromRequest(request, env);
     if (!caller) return json({ error: "Not authenticated" }, 401);
-    if (!(await hasPermission(request, env, "schedule")) && caller.role !== "admin")
+    if (
+      !(await hasPermission(request, env, "schedule")) &&
+      caller.role !== "admin"
+    )
       return json({ error: "Forbidden" }, 403);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const size = Math.min(
@@ -1917,20 +1963,30 @@ const routes0 = [
   route("GET", "/api/email-logs", async (request, env) => {
     const caller = await getMemberFromRequest(request, env);
     if (!caller) return json({ error: "Not authenticated" }, 401);
-    if (caller.role !== "admin" && !(await hasPermission(request, env, "edit_announcements")))
+    if (
+      caller.role !== "admin" &&
+      !(await hasPermission(request, env, "edit_announcements"))
+    )
       return json({ error: "Forbidden" }, 403);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const size = Math.min(parseInt(url.searchParams.get("size") || "50", 10), 200);
+    const size = Math.min(
+      parseInt(url.searchParams.get("size") || "50", 10),
+      200,
+    );
     const offset = (page - 1) * size;
-    const total = (await env.DB.prepare("SELECT COUNT(*) as c FROM email_logs").first())?.c || 0;
+    const total =
+      (await env.DB.prepare("SELECT COUNT(*) as c FROM email_logs").first())
+        ?.c || 0;
     const logs = await env.DB.prepare(
       `SELECT el.*, et.name as template_name
        FROM email_logs el
        LEFT JOIN email_templates et ON et.id = el.template_id
        ORDER BY el.sent_at DESC
-       LIMIT ? OFFSET ?`
-    ).bind(size, offset).all();
+       LIMIT ? OFFSET ?`,
+    )
+      .bind(size, offset)
+      .all();
     return json({ data: logs.results, page, size, totalCount: total });
   }),
 
@@ -2068,7 +2124,9 @@ const routes0 = [
       const memberId = parseInt(params.memberId, 10);
       if (!memberId) return badRequest("Invalid member ID");
       // Members can only read their own preferences unless admin/scheduler
-      const canViewOthers = caller.role === 'admin' || await hasPermission(request, env, 'schedule');
+      const canViewOthers =
+        caller.role === "admin" ||
+        (await hasPermission(request, env, "schedule"));
       if (!canViewOthers && caller.id !== memberId) {
         return json({ error: "Forbidden" }, 403);
       }
@@ -2979,14 +3037,14 @@ const routes2 = [
 
   route(
     "POST",
-     "/api/arrangements/:id/annotations",
-     async (request, env, params) => {
-       const member = await getMemberFromRequest(request, env);
-       if (!member) return unauthorized();
-       const arrId = requireId(params);
-       if (!arrId) return badRequest("Invalid arrangement ID");
-       const body = await getBody(request);
-       if (!body || !body.content) return badRequest("content is required");
+    "/api/arrangements/:id/annotations",
+    async (request, env, params) => {
+      const member = await getMemberFromRequest(request, env);
+      if (!member) return unauthorized();
+      const arrId = requireId(params);
+      if (!arrId) return badRequest("Invalid arrangement ID");
+      const body = await getBody(request);
+      if (!body || !body.content) return badRequest("content is required");
       const result = await env.DB.prepare(
         "INSERT INTO arrangement_annotations (arrangement_id, member_id, content, is_shared) VALUES (?, ?, ?, ?)",
       )
@@ -3078,65 +3136,96 @@ const routes2 = [
   // ========================================
   // GET /api/arrangements/:id/drawings — list all drawings for an arrangement
   // Returns own drawing + shared drawings from other members
-  route("GET", "/api/arrangements/:id/drawings", async (request, env, params) => {
-    const member = await getMemberFromRequest(request, env);
-    if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params);
-    if (!arrangementId) return badRequest("Invalid arrangement id");
-    const drawings = await env.DB.prepare(`
+  route(
+    "GET",
+    "/api/arrangements/:id/drawings",
+    async (request, env, params) => {
+      const member = await getMemberFromRequest(request, env);
+      if (!member) return json({ error: "Not authenticated" }, 401);
+      const arrangementId = requireId(params);
+      if (!arrangementId) return badRequest("Invalid arrangement id");
+      const drawings = await env.DB.prepare(
+        `
       SELECT ad.*, m.first_name, m.last_name
       FROM arrangement_drawings ad
       JOIN members m ON m.id = ad.member_id
       WHERE ad.arrangement_id = ?
         AND (ad.member_id = ? OR ad.is_shared = 1)
       ORDER BY ad.updated_at DESC
-    `).bind(arrangementId, member.id).all();
-    return json(drawings.results);
-  }),
+    `,
+      )
+        .bind(arrangementId, member.id)
+        .all();
+      return json(drawings.results);
+    },
+  ),
 
   // PUT /api/arrangements/:id/drawings — upsert own drawing (one per member per arrangement)
-  route("PUT", "/api/arrangements/:id/drawings", async (request, env, params) => {
-    const member = await getMemberFromRequest(request, env);
-    if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params);
-    if (!arrangementId) return badRequest("Invalid arrangement id");
-    const body = await getBody(request);
-    if (!body) return badRequest("Missing body");
-    const paths = typeof body.paths === "string" ? body.paths : JSON.stringify(body.paths || []);
-    const isShared = body.is_shared ? 1 : 0;
-    // Upsert: one drawing per member per arrangement
-    const existing = await env.DB.prepare(
-      "SELECT id FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?"
-    ).bind(arrangementId, member.id).first();
-    if (existing) {
-      await env.DB.prepare(
-        "UPDATE arrangement_drawings SET paths = ?, is_shared = ?, updated_at = datetime('now') WHERE id = ?"
-      ).bind(paths, isShared, existing.id).run();
-    } else {
-      await env.DB.prepare(
-        "INSERT INTO arrangement_drawings (arrangement_id, member_id, paths, is_shared) VALUES (?, ?, ?, ?)"
-      ).bind(arrangementId, member.id, paths, isShared).run();
-    }
-    const row = await env.DB.prepare(`
+  route(
+    "PUT",
+    "/api/arrangements/:id/drawings",
+    async (request, env, params) => {
+      const member = await getMemberFromRequest(request, env);
+      if (!member) return json({ error: "Not authenticated" }, 401);
+      const arrangementId = requireId(params);
+      if (!arrangementId) return badRequest("Invalid arrangement id");
+      const body = await getBody(request);
+      if (!body) return badRequest("Missing body");
+      const paths =
+        typeof body.paths === "string"
+          ? body.paths
+          : JSON.stringify(body.paths || []);
+      const isShared = body.is_shared ? 1 : 0;
+      // Upsert: one drawing per member per arrangement
+      const existing = await env.DB.prepare(
+        "SELECT id FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?",
+      )
+        .bind(arrangementId, member.id)
+        .first();
+      if (existing) {
+        await env.DB.prepare(
+          "UPDATE arrangement_drawings SET paths = ?, is_shared = ?, updated_at = datetime('now') WHERE id = ?",
+        )
+          .bind(paths, isShared, existing.id)
+          .run();
+      } else {
+        await env.DB.prepare(
+          "INSERT INTO arrangement_drawings (arrangement_id, member_id, paths, is_shared) VALUES (?, ?, ?, ?)",
+        )
+          .bind(arrangementId, member.id, paths, isShared)
+          .run();
+      }
+      const row = await env.DB.prepare(
+        `
       SELECT ad.*, m.first_name, m.last_name
       FROM arrangement_drawings ad
       JOIN members m ON m.id = ad.member_id
       WHERE ad.arrangement_id = ? AND ad.member_id = ?
-    `).bind(arrangementId, member.id).first();
-    return json(row);
-  }),
+    `,
+      )
+        .bind(arrangementId, member.id)
+        .first();
+      return json(row);
+    },
+  ),
 
   // DELETE /api/arrangements/:id/drawings — clear own drawing
-  route("DELETE", "/api/arrangements/:id/drawings", async (request, env, params) => {
-    const member = await getMemberFromRequest(request, env);
-    if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params);
-    if (!arrangementId) return badRequest("Invalid arrangement id");
-    await env.DB.prepare(
-      "DELETE FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?"
-    ).bind(arrangementId, member.id).run();
-    return json({ success: true });
-  }),
+  route(
+    "DELETE",
+    "/api/arrangements/:id/drawings",
+    async (request, env, params) => {
+      const member = await getMemberFromRequest(request, env);
+      if (!member) return json({ error: "Not authenticated" }, 401);
+      const arrangementId = requireId(params);
+      if (!arrangementId) return badRequest("Invalid arrangement id");
+      await env.DB.prepare(
+        "DELETE FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?",
+      )
+        .bind(arrangementId, member.id)
+        .run();
+      return json({ success: true });
+    },
+  ),
 
   // ========================================
   // RESOURCE PERMISSIONS (RBAC fin)
@@ -3352,12 +3441,12 @@ const routes3 = [
 
     // Compute DTEND = start + 1h30, handling minute/hour/day rollover correctly
     function addMinutesToIcal(dateStr, timeStr, addMinutes) {
-      const [y, mo, d] = dateStr.split('-').map(Number);
-      const [h, mi] = timeStr.split(':').map(Number);
+      const [y, mo, d] = dateStr.split("-").map(Number);
+      const [h, mi] = timeStr.split(":").map(Number);
       const start = new Date(y, mo - 1, d, h, mi);
       start.setMinutes(start.getMinutes() + addMinutes);
-      const pad = n => String(n).padStart(2, '0');
-      return `${start.getFullYear()}${pad(start.getMonth()+1)}${pad(start.getDate())}T${pad(start.getHours())}${pad(start.getMinutes())}00`;
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${start.getFullYear()}${pad(start.getMonth() + 1)}${pad(start.getDate())}T${pad(start.getHours())}${pad(start.getMinutes())}00`;
     }
     const dtEnd = plan.time
       ? addMinutesToIcal(plan.date, plan.time, 90)
@@ -4734,7 +4823,8 @@ const routes3 = [
   route("POST", "/api/pco-sync", async (request, env) => {
     // Internal re-triggers carry a secret header — skip user permission check
     const internalSecret = request.headers.get("x-internal-sync");
-    const isInternalSync = internalSecret && internalSecret === env.INTERNAL_SYNC_SECRET;
+    const isInternalSync =
+      internalSecret && internalSecret === env.INTERNAL_SYNC_SECRET;
     if (!isInternalSync) {
       if (!(await hasPermission(request, env, "manage_members")))
         return json({ error: "Forbidden" }, 403);
@@ -4811,11 +4901,9 @@ const routes3 = [
 
     // 1. Acquire mutex (skip if force or phase=arrangements re-seed)
     const syncLockBody = await getBody(request).catch(() => null);
-    const isForceSync = syncLockBody?.force === true || syncLockBody?.phase === "arrangements";
-    if (
-      !isForceSync &&
-      !(await acquireSyncLock(env))
-    ) {
+    const isForceSync =
+      syncLockBody?.force === true || syncLockBody?.phase === "arrangements";
+    if (!isForceSync && !(await acquireSyncLock(env))) {
       // Stale lock — force-release it
       await env.DB.prepare("DELETE FROM sync_locks WHERE lock_name = ?")
         .bind("pco_sync")
@@ -4931,102 +5019,114 @@ const routes3 = [
       // For each PCO team, fetch the standing roster and upsert team_members
       if (!isPass1Only) {
         try {
-          const localTeams = (await env.DB.prepare(
-            "SELECT id, pco_id FROM teams WHERE pco_id IS NOT NULL"
-          ).all()).results || [];
+          const localTeams =
+            (
+              await env.DB.prepare(
+                "SELECT id, pco_id FROM teams WHERE pco_id IS NOT NULL",
+              ).all()
+            ).results || [];
 
           for (const team of localTeams) {
             try {
               const tmData = await pcoFetchAllLocal(
                 `${PCO_API}/services/v2/teams/${team.pco_id}/team_members`,
-                auth
+                auth,
               );
               for (const tm of tmData) {
                 const personPcoId = tm.relationships?.person?.data?.id;
                 if (!personPcoId) continue;
-                const position = tm.attributes?.site_team_leader ? 'leader' : (tm.attributes?.status || 'member');
+                const position = tm.attributes?.site_team_leader
+                  ? "leader"
+                  : tm.attributes?.status || "member";
                 // Look up local member by pco_id
                 const localMember = await env.DB.prepare(
-                  "SELECT id FROM members WHERE pco_id = ?"
-                ).bind(personPcoId).first();
+                  "SELECT id FROM members WHERE pco_id = ?",
+                )
+                  .bind(personPcoId)
+                  .first();
                 if (!localMember) continue; // member not synced yet, will be picked up later
                 // Upsert team_member row
                 await env.DB.prepare(
                   `INSERT INTO team_members (team_id, member_id, position)
                    VALUES (?, ?, ?)
-                   ON CONFLICT(team_id, member_id) DO UPDATE SET position = excluded.position`
-                ).bind(team.id, localMember.id, position).run();
+                   ON CONFLICT(team_id, member_id) DO UPDATE SET position = excluded.position`,
+                )
+                  .bind(team.id, localMember.id, position)
+                  .run();
               }
               results.teams = (results.teams || 0) + 1;
             } catch (e) {
               results.errors.push(`Team roster ${team.pco_id}: ${e.message}`);
             }
           }
-         } catch (e) {
-           results.errors.push(`Team members sync: ${e.message}`);
-         }
+        } catch (e) {
+          results.errors.push(`Team members sync: ${e.message}`);
         }
+      }
 
-
-       // 4. Sync plans (upcoming 12 weeks) + plan_items + people
-       if (!isPass1Only) {
-         try {
-           const today = new Date().toISOString().slice(0, 10);
-           const twelveWeeks = new Date(Date.now() + 84 * 86400000)
-             .toISOString()
-             .slice(0, 10);
-           const stList =
-             (
-               await env.DB.prepare(
-                 "SELECT id, pco_id FROM service_types WHERE pco_id IS NOT NULL",
-               ).all()
-             ).results || [];
+      // 4. Sync plans (upcoming 12 weeks) + plan_items + people
+      if (!isPass1Only) {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const twelveWeeks = new Date(Date.now() + 84 * 86400000)
+            .toISOString()
+            .slice(0, 10);
+          const stList =
+            (
+              await env.DB.prepare(
+                "SELECT id, pco_id FROM service_types WHERE pco_id IS NOT NULL",
+              ).all()
+            ).results || [];
 
           for (const stLocal of stList) {
-             // Fetch plan_times for this service type with plan included
-              const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
-              let ptData;
-              let ptIncluded = []; // embedded plan data from include=plan
-              try {
-                // Use include=plan to embed plan data and avoid N+1 individual plan fetches
-                const ptRaw = await pcoFetchLocal(
-                  `${ptUrl}?per_page=100&include=plan&filter%5Bstarts_at%5D=${today}..${twelveWeeks}`,
-                  auth,
-                );
-                ptData = ptRaw.data || [];
-                ptIncluded = ptRaw.included || [];
-             } catch (e) {
-               console.error("pco-sync: fetch plan items failed, continuing", e);
-               continue;
-             }
+            // Fetch plan_times for this service type with plan included
+            const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
+            let ptData;
+            let ptIncluded = []; // embedded plan data from include=plan
+            try {
+              // Use include=plan to embed plan data and avoid N+1 individual plan fetches
+              const ptRaw = await pcoFetchLocal(
+                `${ptUrl}?per_page=100&include=plan&filter%5Bstarts_at%5D=${today}..${twelveWeeks}`,
+                auth,
+              );
+              ptData = ptRaw.data || [];
+              ptIncluded = ptRaw.included || [];
+            } catch (e) {
+              console.error("pco-sync: fetch plan items failed, continuing", e);
+              continue;
+            }
 
-             // Build a lookup map from included plans (pco plan id → attributes)
-             const includedPlansMap = {};
-             for (const inc of ptIncluded) {
-               if (inc.type === "Plan") includedPlansMap[inc.id] = inc.attributes;
-             }
+            // Build a lookup map from included plans (pco plan id → attributes)
+            const includedPlansMap = {};
+            for (const inc of ptIncluded) {
+              if (inc.type === "Plan")
+                includedPlansMap[inc.id] = inc.attributes;
+            }
 
-              const pcoPlanIdsInWindow = new Set();
-              const FETCH_BUDGET = 38; // stop before hitting the 50 subrequest limit
+            const pcoPlanIdsInWindow = new Set();
+            const FETCH_BUDGET = 38; // stop before hitting the 50 subrequest limit
 
-              for (const pt of ptData) {
-                if (fetchCount >= FETCH_BUDGET) break; // budget exhausted, continue next sync
-                await new Promise((r) => setTimeout(r, 50));
-                const planRel =
-                 pt.relationships &&
-                 pt.relationships.plan &&
-                 pt.relationships.plan.data;
-               if (!planRel) continue;
+            for (const pt of ptData) {
+              if (fetchCount >= FETCH_BUDGET) break; // budget exhausted, continue next sync
+              await new Promise((r) => setTimeout(r, 50));
+              const planRel =
+                pt.relationships &&
+                pt.relationships.plan &&
+                pt.relationships.plan.data;
+              if (!planRel) continue;
               const pcoPlanId = planRel.id;
               pcoPlanIdsInWindow.add(pcoPlanId);
 
               const startsAt = pt.attributes && pt.attributes.starts_at;
               if (!startsAt) continue;
-               const date = startsAt.slice(0, 10);
-               const time = startsAt.slice(11, 16);
+              const date = startsAt.slice(0, 10);
+              const time = startsAt.slice(11, 16);
 
-               // Use plan data from included map (no extra fetch needed)
-               const planAttrs = includedPlansMap[pcoPlanId] || { title: "", updated_at: null };
+              // Use plan data from included map (no extra fetch needed)
+              const planAttrs = includedPlansMap[pcoPlanId] || {
+                title: "",
+                updated_at: null,
+              };
 
               // Find plan by pco_id
               let planRow = await env.DB.prepare(
@@ -5058,7 +5158,7 @@ const routes3 = [
                     pcoPlanId,
                     planAttrs.updated_at || null,
                     planRow.id,
-                   )
+                  )
                   .run();
                 results.plans++;
               } else {
@@ -5161,7 +5261,9 @@ const routes3 = [
 
                 for (const p of peopleData) {
                   const pAttrs = p.attributes || {};
-                  const personName = `${pAttrs.first_name || ""} ${pAttrs.last_name || ""}`.trim() || "";
+                  const personName =
+                    `${pAttrs.first_name || ""} ${pAttrs.last_name || ""}`.trim() ||
+                    "";
                   const status = pAttrs.status || "pending";
                   const teamName = pAttrs.team_name || pAttrs.team || "";
                   const role = pAttrs.role || "";

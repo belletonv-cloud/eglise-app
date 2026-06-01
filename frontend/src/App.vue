@@ -502,6 +502,7 @@ import {
     isAdmin,
     isEditor,
     isScheduler,
+    canManageMembers,
     loading as memberLoading,
 } from "./stores/member";
 

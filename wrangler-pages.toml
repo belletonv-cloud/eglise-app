@@ -1,0 +1,4 @@
+# Configuration spécifique pour Cloudflare Pages
+name = "eglise-app"
+compatibility_date = "2024-05-01"
+pages_build_output_dir = "frontend/dist"

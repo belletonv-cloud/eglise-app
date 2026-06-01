@@ -35,6 +35,7 @@ import YoutubeView from "../views/YoutubeView.vue";
 import PcoSyncView from "../views/PcoSyncView.vue";
 import MusicStandView from "../views/MusicStandView.vue";
 import MusicStandListView from "../views/MusicStandListView.vue";
+import AdminRoles from "../views/AdminRoles.vue";
 
 export const publicRoutes: string[] = [
   "login",
@@ -270,6 +271,11 @@ const router = createRouter({
       path: "/admin/test-accounts",
       name: "admin-test-accounts",
       component: () => import("../views/TestAccountsPanel.vue"),
+    },
+    {
+      path: "/admin/roles",
+      name: "admin-roles",
+      component: AdminRoles,
     },
     {
       path: "/plan/public/:token",
