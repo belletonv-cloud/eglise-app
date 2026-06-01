@@ -64,6 +64,7 @@ CREATE TABLE plan_items (
     description TEXT,
     position INTEGER,
     length_minutes INTEGER,
+    color TEXT DEFAULT NULL, -- optional hex color for visual coding
     created_at TEXT DEFAULT (datetime('now'))
 );
 

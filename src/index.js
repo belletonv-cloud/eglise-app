@@ -801,7 +801,7 @@ const routes0 = [
     }
 
     const result = await env.DB.prepare(
-      "INSERT INTO plan_items (plan_id, type, title, description, position, length_minutes) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO plan_items (plan_id, type, title, description, position, length_minutes, color) VALUES (?, ?, ?, ?, ?, ?, ?)",
     )
       .bind(
         planId,
@@ -810,6 +810,7 @@ const routes0 = [
         body.description || null,
         position,
         body.length_minutes || null,
+        body.color || null,
       )
       .run();
 
@@ -844,7 +845,7 @@ const routes0 = [
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
     await env.DB.prepare(
-      "UPDATE plan_items SET type=?, title=?, description=?, position=?, length_minutes=? WHERE id=?",
+      "UPDATE plan_items SET type=?, title=?, description=?, position=?, length_minutes=?, color=? WHERE id=?",
     )
       .bind(
         body.type || existing.type,
@@ -856,6 +857,7 @@ const routes0 = [
         body.length_minutes !== undefined
           ? body.length_minutes
           : existing.length_minutes,
+        body.color !== undefined ? body.color : existing.color,
         id,
       )
       .run();

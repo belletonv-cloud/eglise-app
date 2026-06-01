@@ -67,6 +67,7 @@
               @dragover.prevent="onDragOver(idx)"
               @dragenter.prevent
               @drop="onDrop(idx)"
+            :style="item.color ? { borderLeftColor: item.color, borderLeftWidth: '4px' } : {}"
               :class="{ 'border-blue-400': dragIndex === idx }"
               class="flex items-start gap-2 p-3 border border-gray-200 rounded-lg hover:border-gray-300 group transition-colors">
               <div class="flex flex-col items-center gap-0.5 pt-1">
@@ -97,13 +98,23 @@
                     </span>
                   </div>
                   <!-- Durée éditable inline -->
-                  <div class="flex items-center gap-1 mt-1">
+                  <div class="flex items-center gap-2 mt-1">
                     <input type="number" min="0" max="999"
                       :value="item.length_minutes || ''"
                       @change="(e: Event) => updateDuration(item, Number((e.target as HTMLInputElement).value))"
                       class="w-14 text-xs border-b border-transparent hover:border-gray-300 focus:border-indigo-500 outline-none bg-transparent text-gray-500 text-right"
                       placeholder="min" title="Durée en minutes" />
                     <span class="text-xs text-gray-400">min</span>
+                    <!-- Couleur de l'item -->
+                    <input type="color"
+                      :value="item.color || '#6366f1'"
+                      @change="(e: Event) => updateColor(item, (e.target as HTMLInputElement).value)"
+                      class="w-5 h-5 rounded-full border-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Couleur de l'item" />
+                    <button v-if="item.color"
+                      @click="updateColor(item, null)"
+                      class="text-xs text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      title="Supprimer la couleur">✕</button>
                   </div>
               </div>
             </div>
@@ -157,6 +168,15 @@ const updateDuration = async (item: any, val: number) => {
   item.length_minutes = val || null
   try {
     await api.updatePlanItem(item.id, { length_minutes: val || null })
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
+}
+
+const updateColor = async (item: any, color: string | null) => {
+  item.color = color
+  try {
+    await api.updatePlanItem(item.id, { color })
   } catch (e: any) {
     showToast(e.message || t('plan.error'), 'error')
   }
