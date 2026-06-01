@@ -149,15 +149,29 @@ const routes0 = [
   // SONGS
   // ========================================
   route("GET", "/api/songs", async (request, env) => {
-    const stmt = env.DB.prepare(`
+    const url = new URL(request.url);
+    const q = (url.searchParams.get("q") || "").trim();
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const size = Math.min(parseInt(url.searchParams.get("size") || "200", 10), 500);
+    const offset = (page - 1) * size;
+    const where = q ? "WHERE s.title LIKE ? OR s.author LIKE ?" : "";
+    const binds = q ? [`%${q}%`, `%${q}%`] : [];
+    const total = (await env.DB.prepare(
+      `SELECT COUNT(*) as c FROM songs s ${where}`
+    ).bind(...binds).first())?.c || 0;
+    const stmt = await env.DB.prepare(`
       SELECT s.*,
              COUNT(a.id) as arrangement_count,
              MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart
       FROM songs s LEFT JOIN arrangements a ON a.song_id = s.id
+      ${where}
       GROUP BY s.id ORDER BY s.title ASC
-    `);
-    const result = await stmt.all();
-    return json(result.results);
+      LIMIT ? OFFSET ?
+    `).bind(...binds, size, offset).all();
+    // Return flat array when no pagination params supplied (backwards compat)
+    const paginated = url.searchParams.has("page") || url.searchParams.has("size");
+    if (paginated) return json({ data: stmt.results, page, size, totalCount: total });
+    return json(stmt.results);
   }),
 
   route("POST", "/api/songs", async (request, env) => {
@@ -1901,15 +1915,23 @@ const routes0 = [
 
   // Email Logs
   route("GET", "/api/email-logs", async (request, env) => {
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
+    if (caller.role !== "admin" && !(await hasPermission(request, env, "edit_announcements")))
+      return json({ error: "Forbidden" }, 403);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const size = Math.min(parseInt(url.searchParams.get("size") || "50", 10), 200);
+    const offset = (page - 1) * size;
+    const total = (await env.DB.prepare("SELECT COUNT(*) as c FROM email_logs").first())?.c || 0;
     const logs = await env.DB.prepare(
-      `
-        SELECT el.*, et.name as template_name
-        FROM email_logs el
-        LEFT JOIN email_templates et ON et.id = el.template_id
-        ORDER BY el.sent_at DESC
-      `,
-    ).all();
-    return json(logs.results);
+      `SELECT el.*, et.name as template_name
+       FROM email_logs el
+       LEFT JOIN email_templates et ON et.id = el.template_id
+       ORDER BY el.sent_at DESC
+       LIMIT ? OFFSET ?`
+    ).bind(size, offset).all();
+    return json({ data: logs.results, page, size, totalCount: total });
   }),
 
   // Member exceptions management (admin)
@@ -4540,6 +4562,11 @@ const routes3 = [
   // IMPORT / EXPORT CSV
   // ========================================
   route("GET", "/api/export/:entity", async (request, env, params) => {
+    // Export contains PII — require manage_members permission
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
+    if (!(await hasPermission(request, env, "manage_members")))
+      return json({ error: "Forbidden" }, 403);
     const entity = params.entity;
     let rows;
     let columns;

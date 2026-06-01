@@ -16,3 +16,30 @@ crons = ["0 8 * * *"]
 enabled = true
 invocation_logs = true
 head_sampling_rate = 1
+
+# ── Required secrets (set via `wrangler secret put <NAME>`) ────────────────
+# Run each command to configure production secrets:
+#
+#   wrangler secret put FIREBASE_PROJECT_ID     # Firebase project ID for token verification (auth.js)
+#   wrangler secret put DEV_AUTH_SECRET         # Dev-only: secret for X-Auth-Secret header bypass
+#
+#   wrangler secret put PCO_TOKEN_ID            # Planning Center OAuth app token ID
+#   wrangler secret put PCO_TOKEN_SECRET        # Planning Center OAuth app token secret
+#
+#   wrangler secret put RESEND_API_KEY          # Resend.com API key for transactional emails
+#   wrangler secret put INFOMANIAK_TOKEN        # Infomaniak mail API token (fallback)
+#   wrangler secret put EMAIL_FROM              # Sender address (e.g. noreply@cieuxouverts.bzh)
+#   wrangler secret put ADMIN_EMAIL             # Admin notification address
+#
+#   wrangler secret put FCM_SERVER_KEY          # Firebase Cloud Messaging server key (push notifs)
+#
+#   wrangler secret put AUDIO_SPLITTER_URL      # Audio splitter service URL (HF Space)
+#   wrangler secret put AUDIO_SPLITTER_TOKEN    # Bearer token for audio splitter API
+#
+#   wrangler secret put FRONTEND_URL            # Deployed frontend URL (for CORS / links in emails)
+#   wrangler secret put ONECLICK_SECRET         # Secret for /api/admin/oneclick endpoint
+#   wrangler secret put INTERNAL_SYNC_SECRET    # Secret for x-internal-sync header (PCO sync bypass)
+#
+# ── Optional vars (non-sensitive, can be in [vars]) ────────────────────────
+# [vars]
+# ENVIRONMENT = "production"

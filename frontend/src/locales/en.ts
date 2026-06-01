@@ -295,6 +295,8 @@ export default {
     cancelled: "Cancelled",
   },
   loading: "Loading...",
+  cancel: "Cancel",
+  saving: "Saving…",
   at: "at",
   plansList: {
     title: "Service Planning",

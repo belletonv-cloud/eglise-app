@@ -314,6 +314,8 @@ export default {
     cancelled: "Annulé",
   },
   loading: "Chargement...",
+  cancel: "Annuler",
+  saving: "Enregistrement…",
   at: "à",
   plansList: {
     title: "Planning des Services",

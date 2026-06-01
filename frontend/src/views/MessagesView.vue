@@ -22,7 +22,7 @@
           <textarea v-model="form.content" :placeholder="$t('messages.content')" class="w-full p-2 border mb-2 rounded dark:bg-gray-800 dark:border-gray-600" rows="6"></textarea>
 
           <!-- Member picker -->
-          <div class="mb-2">
+          <div class="mb-2 member-picker-area">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('messages.recipients') }}</label>
             <input
               v-model="searchQuery"
@@ -104,7 +104,9 @@ async function loadInbox() {
 }
 
 async function loadMembers() {
-  members.value = await api.getMembers().catch(() => [])
+  const res = await api.getMembers().catch(() => ({ data: [] }))
+  // getMembers returns paginated { data: [...], totalCount, ... }
+  members.value = Array.isArray(res) ? res : (res?.data ?? [])
 }
 
 async function select(m: any) {
