@@ -7,13 +7,15 @@ test.describe('Plans feature', () => {
     const res = await request.get(`${API_BASE}/plans`)
     expect(res.ok()).toBeTruthy()
     const data = await res.json()
-    expect(Array.isArray(data)).toBe(true)
+    // API returns { plans: [], total: N } (paginated) or plain array
+    const plansArray = Array.isArray(data) ? data : data.plans
+    expect(Array.isArray(plansArray)).toBe(true)
   })
 
   test('GET /api/plans/:id/ical returns calendar file', async ({ request }) => {
-    // First get plans to find a valid ID
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const data = await plansRes.json()
+    const plans = Array.isArray(data) ? data : (data.plans ?? [])
     if (plans.length > 0) {
       const res = await request.get(`${API_BASE}/plans/${plans[0].id}/ical`)
       expect(res.ok()).toBeTruthy()
