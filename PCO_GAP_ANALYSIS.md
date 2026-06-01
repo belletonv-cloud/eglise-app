@@ -25,9 +25,9 @@
 | Ordre de service (items glissables) | ✅ | Items avec `position` + drag-and-drop |
 | Notes par item / service | ✅ | Champ notes sur items |
 | Pièces jointes par item | 🟡 | Médias sur arrangements, pas sur items libres |
-| Couleurs par item | ❌ | Non implémenté |
-| Réorganisation drag-and-drop | ✅ | |
-| Partage public du plan | ❌ | Pas de vue public/read-only partageable |
+ | Couleurs par item | ✅ | Champ color sur plan_items, color picker UI inline, bordure gauche colorée |
+ | Réorganisation drag-and-drop | ✅ | |
+ | Partage public du plan | ✅ | POST/DELETE /api/plans/:id/share, PublicPlanView.vue (lecture seule sans auth) |
 | Modèles de plan (templates) | ❌ | |
 | Titre de série + artwork | ❌ | |
 | Durées par item + total | ✅ | Ajouté (`length_minutes`) |
@@ -57,7 +57,7 @@
 | Arrangements multiples par chant | ✅ | Arrangements table |
 | Tonalités multiples par arrangement | ✅ | Champ `key` |
 | Tags par chant | 🟡 | Champ tags non exposé dans l'UI |
-| Transposition de grille d'accords | ❌ | Affichage ChordPro OK, transposition auto manquante |
+| Transposition de grille d'accords | ✅ | Implémentée : setKey(), transpose(±1 demi-ton), key picker UI |
 | Import SongSelect / PraiseCharts | 🚫 | Non prévu (licences PCO) |
 | Lecteur audio mobile | 🟡 | Basique, pas de looping de section |
 | CarPlay / Android Auto | 🚫 | Application web, hors scope |
@@ -131,16 +131,17 @@ Ces fonctions n'existent pas dans PCO mais ont été développées :
 
 ### P0 — Critique (bloque l'adoption)
 1. **Looping de section audio** — Répétition ciblée, très utilisé en pratique
-2. **Transposition automatique ChordPro** — La saisir la tonalité ne suffit pas
+2. ~~**Transposition automatique ChordPro**~~ — ✅ Implémenté (setKey, ±1 demi-ton, key picker)
 3. **Synchronisation page en temps réel** — Le chef de louange contrôle tous les écrans
 
 ### P1 — Important (différence notable avec PCO)
 4. **Services LIVE** — Suivi du déroulé en temps réel pendant le service
-5. **Dates de blocage bénévoles** — Éviter les conflits de planning
-6. **Partage public d'un plan** — Lien lecture seule pour invités/pasteurs
-7. **Couleurs par item** — Repérage visuel rapide
+5. ~~**Dates de blocage bénévoles**~~ — ✅ Implémenté (VolunteerPreferences, unavailable_dates consultées au scheduling)
+6. ~~**Partage public d'un plan**~~ — ✅ Implémenté (PublicPlanView, token UUID)
+7. ~~**Couleurs par item**~~ — ✅ Implémenté (color picker inline, bordure colorée)
 
 ### P2 — Nice to have
-8. Modèles de plan
-9. Vue "top chants"
-10. Rappels automatiques par email
+8. ~~Modèles de plan~~ — ✅ Implémenté
+9. Vue "top chants" — stats usage par chant
+10. ~~Rappels automatiques par email~~ — ✅ Implémenté (cron J-2/J-1)
+11. Création manuelle de chant — ✅ Implémenté (POST /api/songs, modal SongsList)
