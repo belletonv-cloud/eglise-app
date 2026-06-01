@@ -575,7 +575,12 @@ const parsedLines = computed<ParsedLine[]>(() => {
         }
 
         // Comment/directive: skip or show as plain
-        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        // Only treat as section if there's a single bracket pair (not a chord-only line)
+        if (
+            trimmed.startsWith("[") &&
+            trimmed.endsWith("]") &&
+            trimmed.indexOf("[") === trimmed.lastIndexOf("[")
+        ) {
             if (showSections.value) {
                 let label = trimmed
                     .slice(1, -1)
