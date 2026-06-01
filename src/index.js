@@ -243,6 +243,10 @@ const routes0 = [
     );
     const offset = (page - 1) * size;
 
+    // Check caller role — non-admins get a reduced view (no sensitive fields)
+    const caller = await getMemberFromRequest(request, env);
+    const isAdmin = caller && (caller.role === 'admin' || await hasPermission(request, env, 'edit_members'));
+
     // Count total members
     const countRes = await env.DB.prepare(
       "SELECT COUNT(*) as count FROM members",
@@ -283,8 +287,20 @@ const routes0 = [
       }
     }
 
-    // Attach teams array to each member
-    const withTeams = members.map((m) => ({ ...m, teams: map[m.id] || [] }));
+    // Attach teams array to each member, strip sensitive fields for non-admins
+    const withTeams = members.map((m) => {
+      const base = { ...m, teams: map[m.id] || [] };
+      if (!isAdmin) {
+        // Remove fields not relevant for the directory view
+        delete base.birth_date;
+        delete base.baptism_date;
+        delete base.notes;
+        delete base.pco_id;
+        delete base.pco_updated_at;
+        delete base.pco_deleted_at;
+      }
+      return base;
+    });
     return json({ data: withTeams, page, size, totalCount });
   }),
 
@@ -2840,12 +2856,10 @@ const routes2 = [
   ),
 
   route("PUT", "/api/annotations/:id", async (request, env, params) => {
-    if (!(await hasPermission(request, env, "schedule")))
-      return json({ error: "Forbidden" }, 403);
-    const id = requireId(params);
-    if (!id) return badRequest("Invalid annotation ID");
     const member = await getMemberFromRequest(request, env);
     if (!member) return unauthorized();
+    const id = requireId(params);
+    if (!id) return badRequest("Invalid annotation ID");
     const body = await getBody(request);
     if (!body) return badRequest();
     const annotation = await env.DB.prepare(
@@ -2854,8 +2868,9 @@ const routes2 = [
       .bind(id)
       .first();
     if (!annotation) return notFound("Annotation not found");
+    // Only owner or admin can edit
     if (annotation.member_id !== member.id && member.role !== "admin")
-      return unauthorized();
+      return json({ error: "Forbidden" }, 403);
     const updates = [];
     const values = [];
     if (body.content !== undefined) {
@@ -2888,20 +2903,19 @@ const routes2 = [
   }),
 
   route("DELETE", "/api/annotations/:id", async (request, env, params) => {
-    if (!(await hasPermission(request, env, "schedule")))
-      return json({ error: "Forbidden" }, 403);
-    const id = requireId(params);
-    if (!id) return badRequest("Invalid annotation ID");
     const member = await getMemberFromRequest(request, env);
     if (!member) return unauthorized();
+    const id = requireId(params);
+    if (!id) return badRequest("Invalid annotation ID");
     const annotation = await env.DB.prepare(
       "SELECT * FROM arrangement_annotations WHERE id = ?",
     )
       .bind(id)
       .first();
     if (!annotation) return notFound("Annotation not found");
+    // Only owner or admin can delete
     if (annotation.member_id !== member.id && member.role !== "admin")
-      return unauthorized();
+      return json({ error: "Forbidden" }, 403);
     await env.DB.prepare("DELETE FROM arrangement_annotations WHERE id = ?")
       .bind(id)
       .run();
@@ -4735,28 +4749,68 @@ const routes3 = [
         }
       }
 
-      // 4. Sync plans (upcoming 4 weeks) + plan_items + people
+      // 3b. Sync permanent team rosters from PCO (team_members)
+      // For each PCO team, fetch the standing roster and upsert team_members
       if (!isPass1Only) {
         try {
-          const today = new Date().toISOString().slice(0, 10);
-          const fourWeeks = new Date(Date.now() + 28 * 86400000)
-            .toISOString()
-            .slice(0, 10);
-          const stList =
-            (
-              await env.DB.prepare(
-                "SELECT id, pco_id FROM service_types WHERE pco_id IS NOT NULL",
-              ).all()
-            ).results || [];
+          const localTeams = (await env.DB.prepare(
+            "SELECT id, pco_id FROM teams WHERE pco_id IS NOT NULL"
+          ).all()).results || [];
+
+          for (const team of localTeams) {
+            try {
+              const tmData = await pcoFetchAllLocal(
+                `${PCO_API}/services/v2/teams/${team.pco_id}/team_members`,
+                auth
+              );
+              for (const tm of tmData) {
+                const personPcoId = tm.relationships?.person?.data?.id;
+                if (!personPcoId) continue;
+                const position = tm.attributes?.site_team_leader ? 'leader' : (tm.attributes?.status || 'member');
+                // Look up local member by pco_id
+                const localMember = await env.DB.prepare(
+                  "SELECT id FROM members WHERE pco_id = ?"
+                ).bind(personPcoId).first();
+                if (!localMember) continue; // member not synced yet, will be picked up later
+                // Upsert team_member row
+                await env.DB.prepare(
+                  `INSERT INTO team_members (team_id, member_id, position)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(team_id, member_id) DO UPDATE SET position = excluded.position`
+                ).bind(team.id, localMember.id, position).run();
+              }
+              results.teams = (results.teams || 0) + 1;
+            } catch (e) {
+              results.errors.push(`Team roster ${team.pco_id}: ${e.message}`);
+            }
+          }
+        } catch (e) {
+          results.errors.push(`Team members sync: ${e.message}`);
+        }
+      }
+
+       // 4. Sync plans (upcoming 12 weeks) + plan_items + people
+       if (!isPass1Only) {
+         try {
+           const today = new Date().toISOString().slice(0, 10);
+           const twelveWeeks = new Date(Date.now() + 84 * 86400000)
+             .toISOString()
+             .slice(0, 10);
+           const stList =
+             (
+               await env.DB.prepare(
+                 "SELECT id, pco_id FROM service_types WHERE pco_id IS NOT NULL",
+               ).all()
+             ).results || [];
 
           for (const stLocal of stList) {
-            // Fetch plan_times for this service type with plan included
-            const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
-            let ptData;
-            try {
-              ptData = await pcoFetchAllLocal(ptUrl, auth, {
-                "filter[starts_at]": `${today}..${fourWeeks}`,
-              });
+             // Fetch plan_times for this service type with plan included
+             const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
+             let ptData;
+             try {
+               ptData = await pcoFetchAllLocal(ptUrl, auth, {
+                 "filter[starts_at]": `${today}..${twelveWeeks}`,
+               });
             } catch (e) {
               console.error("pco-sync: fetch plan items failed, continuing", e);
               continue;
@@ -5122,6 +5176,9 @@ const routes3 = [
               const ccli = s.attributes
                 ? s.attributes.ccli_number || null
                 : null;
+              const copyright = s.attributes
+                ? s.attributes.copyright || null
+                : null;
               const updatedAt = s.attributes
                 ? s.attributes.updated_at || null
                 : null;
@@ -5129,9 +5186,9 @@ const routes3 = [
               let songId;
               if (!songRow) {
                 const ins = await env.DB.prepare(
-                  "INSERT INTO songs (title, author, ccli_number, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?)",
+                  "INSERT INTO songs (title, author, ccli_number, copyright, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?)",
                 )
-                  .bind(title, author, ccli, pcoSongId, updatedAt)
+                  .bind(title, author, ccli, copyright, pcoSongId, updatedAt)
                   .run();
                 songId = ins.meta.last_row_id;
                 results.songs++;
@@ -5139,15 +5196,15 @@ const routes3 = [
                 songId = songRow.id;
                 if (!songRow.pco_id) {
                   await env.DB.prepare(
-                    "UPDATE songs SET pco_id = ?, pco_updated_at = ? WHERE id = ?",
+                    "UPDATE songs SET pco_id = ?, pco_updated_at = ?, copyright = COALESCE(copyright, ?) WHERE id = ?",
                   )
-                    .bind(pcoSongId, updatedAt, songId)
+                    .bind(pcoSongId, updatedAt, copyright, songId)
                     .run();
                 } else {
                   await env.DB.prepare(
-                    "UPDATE songs SET pco_updated_at = ? WHERE id = ?",
+                    "UPDATE songs SET pco_updated_at = ?, copyright = COALESCE(copyright, ?) WHERE id = ?",
                   )
-                    .bind(updatedAt, songId)
+                    .bind(updatedAt, copyright, songId)
                     .run();
                 }
               }

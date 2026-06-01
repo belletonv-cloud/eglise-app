@@ -3,6 +3,9 @@ import { json, unauthorized } from './lib.js'
 
 export const ROLE_PERMISSIONS = {
   admin: ['*'],
+  // member: base role for any church member — can read everything,
+  // edit own profile, annotate charts, respond to scheduling requests
+  member: ['annotate', 'respond_schedule', 'edit_own_profile'],
   scheduler: ['schedule', 'view_conflicts', 'force_schedule'],
   editor: ['edit_members', 'edit_teams', 'manage_members'],
   music_director: ['schedule', 'edit_music', 'view_conflicts'],
