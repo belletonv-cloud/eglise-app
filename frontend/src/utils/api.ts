@@ -25,10 +25,11 @@ export async function authenticatedFetch(
   url: string,
   options: RequestInit = {},
 ) {
-  // In demo mode or impersonation mode, skip auth headers (mock user has no token)
+  // In demo mode or impersonation mode, send x-demo-email instead of Firebase token
   if (isDemoMode || isImpersonating.value) {
     const headers: Record<string, string> = {
       ...((options.headers as Record<string, string>) || {}),
+      ...(user.value?.email ? { "x-demo-email": user.value.email } : {}),
     };
     return fetch(url, { ...options, headers });
   }

@@ -681,7 +681,9 @@ function stopDemoPersona() {
     demoPersonaMenuOpen.value = false;
     if (!isDemoMode.value) {
         stopImpersonating();
-        // loadCurrentMember is triggered by user watcher
+        loadCurrentMember().then(() => {
+            wasOriginallyAdmin.value = member.value?.role === "admin";
+        });
     } else {
         // Demo mode: restore original demo admin user
         const orig = originalUser.value || { email: "admin@demo.church", uid: "demo123", displayName: "Admin Démo" };

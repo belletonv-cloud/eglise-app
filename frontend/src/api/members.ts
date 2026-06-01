@@ -10,14 +10,14 @@ export async function getMembers(params: { page: number; limit: number }): Promi
   const { page, limit } = params
   const base = getApiBase()
   try {
-    const res = await authenticatedFetch(`${base}/api/members?page=${page}&limit=${limit}`)
+    const res = await authenticatedFetch(`${base}/api/members?page=${page}&size=${limit}`)
     const data = await res.json()
     if (Array.isArray(data)) {
       return { members: data, total: data.length }
     }
     return {
-      members: data.members ?? data.items ?? [],
-      total: data.total ?? (data.members?.length ?? data.items?.length ?? 0),
+      members: data.data ?? data.members ?? data.items ?? [],
+      total: data.totalCount ?? data.total ?? (data.data?.length ?? 0),
     }
   } catch {
     const mock = await api.getMembers()

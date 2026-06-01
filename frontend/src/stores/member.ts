@@ -1,7 +1,7 @@
 // TODO RBAC UI
 // - Vérifier que seuls les rôles autorisés peuvent déclencher l'envoi d'emails
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { user, isDemoMode } from "./auth";
 import { getApiBase } from "../utils/api";
 
@@ -56,16 +56,3 @@ export async function loadCurrentMember() {
     loading.value = false;
   }
 }
-
-// Initialize demo member on mount
-onMounted(() => {
-  if (isDemoMode.value) {
-    member.value = {
-      id: "demo123",
-      email: "admin@demo.church",
-      first_name: "Admin",
-      last_name: "Démo",
-      role: "admin",
-    };
-  }
-});

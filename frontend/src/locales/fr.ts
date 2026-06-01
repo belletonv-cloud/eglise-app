@@ -447,7 +447,8 @@ export default {
     section_people: "Personnes",
     section_music: "Musique",
     section_communication: "Communication",
-    section_admin: "Administration",
+     section_admin: "Administration",
+     admin: "Administration",
   },
   app: {
     title: "Application Église",

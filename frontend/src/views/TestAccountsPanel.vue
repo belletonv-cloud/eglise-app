@@ -196,7 +196,7 @@ function stopCurrentPersona() {
     localStorage.removeItem(STORAGE_KEY);
     if (!isDemoMode.value) {
         stopImpersonating();
-        // loadCurrentMember is triggered by user watcher
+        loadCurrentMember();
     } else {
         // In demo mode, reset to original user
         user.value = null;

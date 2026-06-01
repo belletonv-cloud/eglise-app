@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold text-gray-800">{{ $t('members.title', { count: members.length }) }}</h2>
       <div class="flex items-center gap-2">
-        <button @click="showForm = true"
+        <button @click="showForm = true" v-if="isAdmin || canManageMembers"
           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
           {{ $t('members.add') }}
         </button>
@@ -59,10 +59,12 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
+                <template v-if="isAdmin || canManageMembers">
                 <button @click="editMember(m)"
                   class="text-blue-600 hover:text-blue-800 text-sm mr-3 cursor-pointer">{{ $t('members.edit') }}</button>
                 <button @click="deleteMember(m.id)"
                   class="text-red-600 hover:text-red-800 text-sm cursor-pointer">{{ $t('members.delete') }}</button>
+                </template>
               </td>
             </tr>
           </tbody>
@@ -144,8 +146,10 @@ import { useTeams } from '../composables/useTeams'
 import { api } from '../utils/api'
 import type { Member, Team } from '../utils/types'
 type MemberTeam = Team & { position?: string }
+
 import { confirmDialog } from '../stores/confirm'
 import { showToast } from '../stores/toast'
+import { isAdmin, canManageMembers } from '../stores/member'
 
 const { t } = useI18n()
 

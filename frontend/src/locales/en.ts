@@ -428,7 +428,8 @@ export default {
     section_people: "People",
     section_music: "Music",
     section_communication: "Communication",
-    section_admin: "Administration",
+     section_admin: "Administration",
+     admin: "Administration",
   },
   app: {
     title: "Church App",

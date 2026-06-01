@@ -131,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n'
 import { transposeChordChart, getKeyOptions, getSemitonesFromC } from '../utils/transpose';
@@ -284,10 +284,8 @@ function onChartSaved(newChart: string) {
 }
 
 // Recharger quand l'ID change dans la route
-const currentId = ref(route.params.id);
-router.afterEach(() => {
-  if (route.name === 'song-detail' && route.params.id !== currentId.value) {
-    currentId.value = route.params.id as string;
+watch(() => route.params.id, (newId, oldId) => {
+  if (route.name === 'song-detail' && newId !== oldId) {
     resetState();
     loadSong();
   }
