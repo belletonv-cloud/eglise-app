@@ -58,17 +58,16 @@ defineProps({
 
 .chord-lyric-block {
     display: inline-block;
-    vertical-align: top;
+    vertical-align: bottom;
     text-align: center;
 }
 
 .chord {
     display: block;
-    color: #ef4444;
+    color: #f59e0b;
     font-weight: bold;
     font-size: 0.85em;
     line-height: 1.2;
-    margin-bottom: -0.15em;
 }
 
 .lyric {
