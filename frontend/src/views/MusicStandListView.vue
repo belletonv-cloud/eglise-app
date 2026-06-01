@@ -64,7 +64,7 @@ onMounted(async () => {
 
   try {
     const all = await api.getSongs()
-    songs.value = all.filter((s: any) => s.arrangement_count > 0)
+    songs.value = all.filter((s: any) => s.has_chord_chart === 1 || s.has_chord_chart === true)
   } catch {
     songs.value = []
   } finally {

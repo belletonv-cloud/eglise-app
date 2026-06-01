@@ -682,6 +682,12 @@ function stopDemoPersona() {
     if (!isDemoMode.value) {
         stopImpersonating();
         // loadCurrentMember is triggered by user watcher
+    } else {
+        // Demo mode: restore original demo admin user
+        const orig = originalUser.value || { email: "admin@demo.church", uid: "demo123", displayName: "Admin Démo" };
+        user.value = orig;
+        member.value = { id: "demo123", email: "admin@demo.church", first_name: "Admin", last_name: "Démo", role: "admin" };
+        isImpersonating.value = false;
     }
 }
 

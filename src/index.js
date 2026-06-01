@@ -150,7 +150,9 @@ const routes0 = [
   // ========================================
   route("GET", "/api/songs", async (request, env) => {
     const stmt = env.DB.prepare(`
-      SELECT s.*, COUNT(a.id) as arrangement_count
+      SELECT s.*,
+             COUNT(a.id) as arrangement_count,
+             MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart
       FROM songs s LEFT JOIN arrangements a ON a.song_id = s.id
       GROUP BY s.id ORDER BY s.title ASC
     `);
@@ -4477,8 +4479,11 @@ const routes3 = [
   // PCO SYNC
   // ========================================
   route("POST", "/api/pco-sync", async (request, env) => {
-    if (!(await hasPermission(request, env, "manage_members")))
-      return json({ error: "Forbidden" }, 403);
+    // Internal re-triggers carry no auth header — skip permission check
+    if (!request.headers.get("x-internal-sync")) {
+      if (!(await hasPermission(request, env, "manage_members")))
+        return json({ error: "Forbidden" }, 403);
+    }
 
     const token_id = env.PCO_TOKEN_ID;
     const token_secret = env.PCO_TOKEN_SECRET;
@@ -4549,9 +4554,20 @@ const routes3 = [
       errors: [],
     };
 
-    // 1. Acquire mutex
-    if (!(await acquireSyncLock(env))) {
-      return json({ error: "Sync already in progress", results }, 409);
+    // 1. Acquire mutex (skip if force or phase=arrangements re-seed)
+    const syncLockBody = await getBody(request).catch(() => null);
+    const isForceSync = syncLockBody?.force === true || syncLockBody?.phase === "arrangements";
+    if (
+      !isForceSync &&
+      !(await acquireSyncLock(env))
+    ) {
+      // Stale lock — force-release it
+      await env.DB.prepare("DELETE FROM sync_locks WHERE lock_name = ?")
+        .bind("pco_sync")
+        .run();
+      if (!(await acquireSyncLock(env))) {
+        return json({ error: "Sync already in progress", results }, 409);
+      }
     }
 
     try {
@@ -4572,11 +4588,37 @@ const routes3 = [
       const songsToUpdateRowEarly = await env.DB.prepare(
         "SELECT value FROM sync_state WHERE key = 'songs_to_update'",
       ).first();
-      const songsToUpdate =
+      let songsToUpdate =
         songsToUpdateRowEarly && songsToUpdateRowEarly.value
           ? JSON.parse(songsToUpdateRowEarly.value)
           : null;
       const isPass1Only = phase === "pass1";
+
+      // 2b. Support force mode: seed arrangements queue from all songs with pco_id
+      if (syncLockBody?.phase === "arrangements") {
+        const allSongs = await env.DB.prepare(
+          "SELECT pco_id FROM songs WHERE pco_id IS NOT NULL ORDER BY title ASC",
+        ).all();
+        const pcoIds = (allSongs.results || []).map((r) => r.pco_id);
+        // Keep any existing songs_to_update that aren't in our fresh list
+        const existing = songsToUpdate || [];
+        const merged = [...new Set([...existing, ...pcoIds])];
+        await env.DB.prepare(
+          "INSERT OR REPLACE INTO sync_state (key, value) VALUES ('pco_sync_phase', 'pass2')",
+        ).run();
+        await env.DB.prepare(
+          "INSERT OR REPLACE INTO sync_state (key, value) VALUES ('songs_to_update', ?)",
+        )
+          .bind(JSON.stringify(merged))
+          .run();
+        // Also reset song offset in case pass1 reruns
+        await env.DB.prepare(
+          "DELETE FROM sync_state WHERE key = 'pco_song_offset'",
+        ).run();
+        results.songs = pcoIds.length;
+        // songsToUpdate will be picked up by isPass2 computation below
+        songsToUpdate = merged;
+      }
 
       // 3. Sync service types (full — rare modifications)
       if (!isPass1Only) {
@@ -4938,7 +4980,7 @@ const routes3 = [
       // 5. Sync songs + arrangements (incremental if lastSyncAt exists)
       // Patch 1: determine sync phase (pass1 = songs-only, pass2 = arrangements-only)
       // phase and songsToUpdate were already read earlier (earlyPhaseRow / songsToUpdateRowEarly)
-      const isPass2 =
+      let isPass2 =
         phase === "pass2" ||
         (Array.isArray(songsToUpdate) && songsToUpdate.length > 0);
 
@@ -5108,7 +5150,7 @@ const routes3 = [
           let queue =
             songsRow && songsRow.value ? JSON.parse(songsRow.value) : [];
           if (Array.isArray(queue) && queue.length > 0) {
-            const batchSize = 1;
+            const batchSize = 20;
             const toProcess = queue.slice(0, batchSize);
             const remaining = queue.slice(batchSize);
             for (const pcoSongId of toProcess) {
@@ -5142,32 +5184,39 @@ const routes3 = [
                 continue;
               }
               const songId = songRow.id;
-              // naive sync: delete and re-insert arrangements for now
-              await env.DB.prepare("DELETE FROM arrangements WHERE song_id = ?")
-                .bind(songId)
-                .run();
+              // Upsert: update existing by pco_id, insert new — preserves id for plan_songs FK
               for (const a of arrData) {
                 const aId = a.id;
                 const title =
                   a.attributes && a.attributes.title
                     ? a.attributes.title
                     : `arr-${aId}`;
-                // PCO uses 'chord_chart' attribute (not 'body')
                 const content =
                   (a.attributes &&
                     (a.attributes.chord_chart || a.attributes.body)) ||
                   null;
                 const updatedAt =
                   (a.attributes && a.attributes.updated_at) || null;
-                // Also import key and tempo from PCO
                 const key = (a.attributes && a.attributes.key) || null;
                 const tempo = (a.attributes && a.attributes.tempo) || null;
-                // use correct columns
-                await env.DB.prepare(
-                  "INSERT INTO arrangements (song_id, pco_id, name, key, tempo, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                const exists = await env.DB.prepare(
+                  "SELECT id FROM arrangements WHERE pco_id = ?",
                 )
-                  .bind(songId, aId, title, key, tempo, content, updatedAt)
-                  .run();
+                  .bind(aId)
+                  .first();
+                if (exists) {
+                  await env.DB.prepare(
+                    "UPDATE arrangements SET name = ?, key = ?, tempo = ?, chord_chart = ?, pco_updated_at = ? WHERE id = ?",
+                  )
+                    .bind(title, key, tempo, content, updatedAt, exists.id)
+                    .run();
+                } else {
+                  await env.DB.prepare(
+                    "INSERT INTO arrangements (song_id, pco_id, name, key, tempo, chord_chart, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                  )
+                    .bind(songId, aId, title, key, tempo, content, updatedAt)
+                    .run();
+                }
                 results.arrangements++;
               }
             }

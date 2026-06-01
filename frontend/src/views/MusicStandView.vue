@@ -863,12 +863,12 @@ onMounted(async () => {
         await loadSetlist();
 
         // Load browser songs for Song Browser
-        // NOTE: GET /api/songs returns arrangement_count (integer), NOT arrangements[]
-        // We filter on arrangement_count > 0 — full arrangements are loaded on demand via getSong()
+        // NOTE: GET /api/songs returns arrangement_count + has_chord_chart (1/0)
+        // Only show songs that have at least one arrangement WITH a chord chart
         try {
             const all = await api.getSongs();
             songs.value = (all || []).filter(
-                (s: any) => s.arrangement_count > 0,
+                (s: any) => s.has_chord_chart === 1 || s.has_chord_chart === true,
             );
         } catch (e) {
             console.error("Erreur chargement songs pour Song Browser", e);

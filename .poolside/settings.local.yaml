@@ -1,0 +1,48 @@
+tools:
+    shell:
+        allow:
+            - npm run *
+            - npx vitest *
+            - npm install
+            - git status *
+            - git add *
+            - git commit *
+            - git diff *
+            - git push origin *
+            - git log *
+            - grep *
+            - sed *
+            - sort
+            - git show 567bb48 *
+            - head *
+            - rm *
+            - tail *
+            - find *
+            - cd *
+            - curl *
+            - cat *
+            - ls *
+            - python3 *
+            - node *
+            - sleep 5
+            - pkill *
+            - "true"
+            - echo *
+            - npm install *
+            - nvm *
+            - volta *
+            - source *
+            - npx nuxt *
+            - sleep 10
+            - npx wrangler dev *
+            - mv *
+            - wc *
+            - git checkout *
+            - lsof
+            - cp *
+            - npx tsc *
+            - npx vue-tsc *
+            - mkdir *
+paths:
+    allow:
+        - path: /Users/vic/Downloads/**
