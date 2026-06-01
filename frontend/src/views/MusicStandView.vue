@@ -256,7 +256,7 @@
         </div>
 
         <!-- Chart Viewer Component (refacto) -->
-        <MusicStandChartViewer :lines="parsedLines" />
+        <MusicStandChartViewer :lines="parsedLines" :font-size="fontSize" />
 
         <!-- No chart state -->
         <div
@@ -1040,60 +1040,6 @@ onUnmounted(() => {
     background: #6366f1;
     color: white;
     border-color: #6366f1;
-}
-
-.chart-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 70px 20px 80px;
-    line-height: 1.6;
-}
-
-.chart-line {
-    margin-bottom: 4px;
-    white-space: pre-wrap;
-}
-
-.chart-line.section {
-    margin-top: 16px;
-    margin-bottom: 8px;
-}
-
-.section-label {
-    display: inline-block;
-    padding: 2px 10px;
-    background: rgba(99, 102, 241, 0.2);
-    color: #818cf8;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.chord-lyric-block {
-    display: inline-block;
-    vertical-align: top;
-    text-align: center;
-}
-
-.chord {
-    display: block;
-    color: #ef4444;
-    font-weight: bold;
-    font-size: 0.85em;
-    line-height: 1.2;
-    margin-bottom: -0.15em;
-}
-
-.lyric {
-    display: block;
-    color: #e0e0e0;
-}
-
-.plain-text {
-    color: #a0a0b0;
-    font-style: italic;
 }
 
 .chart-loading {

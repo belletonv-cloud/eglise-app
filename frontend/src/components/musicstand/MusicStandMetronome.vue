@@ -48,6 +48,72 @@ watch(innerBpm, (val) => { emits('bpm-change', val) })
 
 <style scoped>
 .metronome {
-  /* styles identiques à l’existant, on pourra raffiner ici */
+    background: #2a2a3e;
+    border: 1px solid #3a3a5e;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.metronome-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.metro-btn {
+    background: #3a3a5e;
+    border: none;
+    color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.metro-btn:hover {
+    background: #4a4a6e;
+}
+
+.bpm-display {
+    color: #e0e0e0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.bpm-input {
+    width: 60px;
+    background: #1a1a2e;
+    border: 1px solid #3a3a5e;
+    color: #e0e0e0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.beat-indicators {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    justify-content: center;
+}
+
+.beat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a5e;
+}
+
+.beat-dot.active {
+    background: #ef4444;
+    transform: scale(1.3);
+}
+
+.auto-scroll-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
 }
 </style>
