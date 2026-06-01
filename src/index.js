@@ -4965,49 +4965,7 @@ const routes3 = [
          } catch (e) {
            results.errors.push(`Team members sync: ${e.message}`);
          }
-       }
-
-       // 3b. Sync members from plan team_members (Services API scope only)
-       if (!isPass1Only) {
-         try {
-           const memberPlans = await env.DB.prepare(
-             "SELECT DISTINCT pco_id FROM plans WHERE pco_id IS NOT NULL LIMIT 5",
-           ).all();
-           let membersAdded = 0;
-           for (const plan of (memberPlans.results || [])) {
-             if (fetchCount >= 38) break;
-             const tmRes = await pcoFetchLocal(
-               `${PCO_API}/services/v2/plans/${plan.pco_id}/team_members?per_page=100`,
-               auth,
-             );
-             for (const tm of (tmRes.data || [])) {
-               const tmAttrs = tm.attributes || {};
-               const personRel = tm.relationships?.person?.data;
-               if (!personRel) continue;
-               const pcoPersonId = personRel.id;
-               const firstName = tmAttrs.first_name || "";
-               const lastName = tmAttrs.last_name || "";
-               if (!firstName && !lastName) continue;
-               const existing = await env.DB.prepare(
-                 "SELECT id FROM members WHERE pco_id = ?",
-               ).bind(pcoPersonId).first();
-               if (existing) {
-                 await env.DB.prepare(
-                   "UPDATE members SET first_name=?, last_name=?, updated_at=datetime('now') WHERE id=?",
-                 ).bind(firstName, lastName, existing.id).run();
-               } else {
-                 await env.DB.prepare(
-                   "INSERT INTO members (first_name, last_name, pco_id, role, membership_type) VALUES (?,?,?,'member','member')",
-                 ).bind(firstName, lastName, pcoPersonId).run();
-                 membersAdded++;
-               }
-             }
-           }
-           results.members = membersAdded;
-         } catch (e) {
-           results.errors.push(`Members sync: ${e.message}`);
-         }
-       }
+        }
 
 
        // 4. Sync plans (upcoming 12 weeks) + plan_items + people
@@ -5203,9 +5161,9 @@ const routes3 = [
 
                 for (const p of peopleData) {
                   const pAttrs = p.attributes || {};
-                  const personName = pAttrs.name || "";
+                  const personName = `${pAttrs.first_name || ""} ${pAttrs.last_name || ""}`.trim() || "";
                   const status = pAttrs.status || "pending";
-                  const teamName = pAttrs.team || "";
+                  const teamName = pAttrs.team_name || pAttrs.team || "";
                   const role = pAttrs.role || "";
                   const pcoPersonRel =
                     p.relationships &&
