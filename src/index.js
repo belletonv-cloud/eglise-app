@@ -639,6 +639,57 @@ const routes0 = [
     return json(plan);
   }),
 
+  // Public read-only plan view — no auth required, accessed via share token
+  route("GET", "/api/public/plans/:token", async (request, env, params) => {
+    const token = params.token;
+    if (!token) return badRequest("Token invalide");
+    const plan = await env.DB.prepare(
+      `SELECT p.id, p.date, p.time, p.theme, p.notes, p.status,
+              st.name as service_type_name
+       FROM plans p
+       LEFT JOIN service_types st ON st.id = p.service_type_id
+       WHERE p.share_token = ?`
+    ).bind(token).first();
+    if (!plan) return notFound("Plan introuvable ou lien expiré");
+    const items = await env.DB.prepare(
+      `SELECT pi.id, pi.type, pi.title, pi.description, pi.position,
+              pi.length_minutes, pi.color,
+              ps.transposed_key, a.name as arrangement_name, s.title as song_title
+       FROM plan_items pi
+       LEFT JOIN plan_songs ps ON ps.plan_item_id = pi.id
+       LEFT JOIN arrangements a ON a.id = ps.arrangement_id
+       LEFT JOIN songs s ON s.id = a.song_id
+       WHERE pi.plan_id = ?
+       ORDER BY pi.position ASC`
+    ).bind(plan.id).all();
+    return json({ plan, items: items.results });
+  }),
+
+  // Generate or retrieve share token for a plan (admin/scheduler only)
+  route("POST", "/api/plans/:id/share", async (request, env, params) => {
+    if (!(await hasPermission(request, env, "schedule")))
+      return json({ error: "Forbidden" }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    const plan = await env.DB.prepare("SELECT id, share_token FROM plans WHERE id = ?").bind(id).first();
+    if (!plan) return notFound();
+    if (plan.share_token) return json({ token: plan.share_token });
+    // Generate a UUID-like token
+    const token = crypto.randomUUID();
+    await env.DB.prepare("UPDATE plans SET share_token = ? WHERE id = ?").bind(token, id).run();
+    return json({ token }, 201);
+  }),
+
+  // Revoke share token
+  route("DELETE", "/api/plans/:id/share", async (request, env, params) => {
+    if (!(await hasPermission(request, env, "schedule")))
+      return json({ error: "Forbidden" }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    await env.DB.prepare("UPDATE plans SET share_token = NULL WHERE id = ?").bind(id).run();
+    return json({ ok: true });
+  }),
+
   route("POST", "/api/plans", async (request, env) => {
     if (!(await hasPermission(request, env, "schedule")))
       return json({ error: "Forbidden" }, 403);

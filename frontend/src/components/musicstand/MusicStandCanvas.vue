@@ -294,7 +294,9 @@ function onPointerMove(e: PointerEvent) {
   activeStroke.value.points.push(pos)
 
   // Live incremental draw (avoid full re-render on every point)
-  const ctx = ownCanvas.value?.getContext('2d')
+  const canvas = ownCanvas.value
+  if (canvas) resizeCanvas(canvas)  // B3: sync dimensions before incremental draw
+  const ctx = canvas?.getContext('2d')
   const pts = activeStroke.value.points
   if (ctx && pts.length >= 2) {
     ctx.save()

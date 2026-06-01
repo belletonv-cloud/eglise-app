@@ -41,6 +41,7 @@ export const publicRoutes: string[] = [
   "invitation",
   "not-found",
   "checkin",
+  "public-plan",
 ];
 
 const NotFound = {
@@ -269,6 +270,12 @@ const router = createRouter({
       path: "/admin/test-accounts",
       name: "admin-test-accounts",
       component: () => import("../views/TestAccountsPanel.vue"),
+    },
+    {
+      path: "/plan/public/:token",
+      name: "public-plan",
+      component: () => import("../views/PublicPlanView.vue"),
+      props: true,
     },
     {
       path: "/:pathMatch(.*)*",

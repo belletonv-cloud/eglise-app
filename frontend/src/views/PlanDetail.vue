@@ -14,31 +14,39 @@
           class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 cursor-pointer shrink-0">🎵 Music Stand</button>
         <a :href="`${apiBase}/plans/${plan.id}/ical`" target="_blank"
           class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer shrink-0">📅 {{t('plan.ical')}}</a>
+        <button @click="toggleShare"
+          class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer shrink-0"
+          title="Partager ce plan (lecture seule)">🔗 Partager</button>
         <button @click="showEditForm = true"
           class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer shrink-0">{{t('plan.edit')}}</button>
         <button @click="deletePlan"
           class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer shrink-0">{{t('plan.delete')}}</button>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div class="flex items-start justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">
-              {{ formatDate(plan.date) }}
-            </h1>
-            <p class="text-gray-500 mt-1">
-              {{ plan.service_type_name || t('plan.service') }}
-              <span v-if="plan.time"> &middot; {{ plan.time?.slice(0, 5) }}</span>
-            </p>
-            <p v-if="plan.theme" class="text-gray-700 mt-2 italic">{{ plan.theme }}</p>
-            <p v-if="plan.notes" class="text-gray-600 mt-2 text-sm">{{ plan.notes }}</p>
+      <!-- Share panel -->
+      <div v-if="showSharePanel" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 flex items-center gap-3 flex-wrap">
+        <div v-if="shareToken" class="flex-1 min-w-0">
+          <div class="text-sm text-gray-600 mb-1">Lien de partage (lecture seule) :</div>
+          <div class="flex items-center gap-2">
+            <input readonly :value="shareUrl" class="flex-1 text-sm border border-gray-300 rounded px-2 py-1 bg-white min-w-0" />
+            <button @click="copyShare" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer shrink-0">
+              {{ copied ? '✓ Copié' : 'Copier' }}
+            </button>
+            <button @click="revokeShare" class="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 cursor-pointer shrink-0">
+              Révoquer
+            </button>
           </div>
-          <span :class="statusClass(plan.status)"
-            class="px-3 py-1 rounded-full text-sm font-medium">
-            {{ statusLabel(plan.status) }}
-          </span>
         </div>
+        <div v-else class="flex-1">
+          <div class="text-sm text-gray-600 mb-2">Aucun lien actif. Générer un lien public ?</div>
+          <button @click="generateShare" :disabled="shareLoading"
+            class="px-4 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 cursor-pointer">
+            {{ shareLoading ? 'Génération…' : 'Générer le lien' }}
+          </button>
+        </div>
+        <button @click="showSharePanel = false" class="text-gray-400 hover:text-gray-600 cursor-pointer">✕</button>
       </div>
+
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -137,7 +145,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { api, getApiBase } from '../utils/api'
+import { api, getApiBase, authenticatedFetch } from '../utils/api'
 import { confirmDialog } from '../stores/confirm'
 import { showToast } from '../stores/toast'
 import PlanForm from '../components/PlanForm.vue'
@@ -156,6 +164,53 @@ const items = ref<any[]>([])
 const loading = ref(true)
 const error = ref('')
 const showEditForm = ref(false)
+
+// Share plan
+const showSharePanel = ref(false)
+const shareToken = ref<string | null>(null)
+const shareLoading = ref(false)
+const copied = ref(false)
+const shareUrl = computed(() =>
+  shareToken.value ? `${window.location.origin}/plan/public/${shareToken.value}` : ''
+)
+
+async function toggleShare() {
+  showSharePanel.value = !showSharePanel.value
+  if (showSharePanel.value && plan.value?.share_token) {
+    shareToken.value = plan.value.share_token
+  }
+}
+
+async function generateShare() {
+  shareLoading.value = true
+  try {
+    const res = await authenticatedFetch(`${getApiBase()}/api/plans/${plan.value.id}/share`, { method: 'POST' })
+    const data = await res.json()
+    shareToken.value = data.token
+    plan.value.share_token = data.token
+  } catch (e: any) {
+    showToast(e.message || 'Erreur', 'error')
+  } finally {
+    shareLoading.value = false
+  }
+}
+
+async function revokeShare() {
+  try {
+    await authenticatedFetch(`${getApiBase()}/api/plans/${plan.value.id}/share`, { method: 'DELETE' })
+    shareToken.value = null
+    plan.value.share_token = null
+  } catch (e: any) {
+    showToast(e.message || 'Erreur', 'error')
+  }
+}
+
+async function copyShare() {
+  if (!shareUrl.value) return
+  await navigator.clipboard.writeText(shareUrl.value)
+  copied.value = true
+  setTimeout(() => copied.value = false, 2000)
+}
 const showSongSelector = ref(false)
 const showChangeSong = ref(false)
 const changingItemId = ref<number | null>(null)

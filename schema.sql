@@ -52,6 +52,7 @@ CREATE TABLE plans (
     reminder_j1_sent INTEGER DEFAULT 0,
     audio_url TEXT,
     audio_title TEXT,
+    share_token TEXT DEFAULT NULL, -- UUID for public read-only sharing
     created_at TEXT DEFAULT (datetime('now'))
 );
 
