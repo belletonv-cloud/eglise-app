@@ -1,34 +1,40 @@
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import tailwindcss from "@tailwindcss/vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon-32.png', 'favicon-192.png', 'favicon-180.png'],
+      registerType: "autoUpdate",
+      includeAssets: [
+        "favicon.ico",
+        "favicon-32.png",
+        "favicon-192.png",
+        "favicon-180.png",
+      ],
       manifest: false,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        globIgnores: ['**/logo-hero.png', '**/logo-c.png', '**/logo.png'],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globIgnores: ["**/logo-hero.png", "**/logo-c.png", "**/logo.png"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigationPreload: true,
         skipWaiting: true,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/eglise-app\.belletonv\.workers\.dev\/api\/.*/i,
-            handler: 'NetworkFirst',
+            urlPattern:
+              /^https:\/\/eglise-app\.belletonv\.workers\.dev\/api\/.*/i,
+            handler: "NetworkFirst",
             options: {
-              cacheName: 'api-cache',
+              cacheName: "api-cache",
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
               networkTimeoutSeconds: 5,
               backgroundSync: {
-                name: 'api-sync-queue',
+                name: "api-sync-queue",
                 options: { maxRetentionTime: 24 * 60 },
               },
             },
@@ -39,7 +45,18 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-})
+  // Safari compatibility - avoid top-level await and dynamic imports issues
+  build: {
+    target: ["es2020", "chrome100", "safari150", "firefox100"],
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        // Safari-safe compression
+        ecma: 2020,
+      },
+    },
+  },
+});

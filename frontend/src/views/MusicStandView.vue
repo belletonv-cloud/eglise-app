@@ -155,7 +155,11 @@
                         <span class="browser-song-title">{{ s.title }}</span>
                         <span class="browser-song-arr"
                             >{{ s.arrangements?.[0]?.key || "" }}
-                            {{ s.arrangements?.[0]?.tempo ? '· ' + s.arrangements[0].tempo + ' BPM' : '' }}</span
+                            {{
+                                s.arrangements?.[0]?.tempo
+                                    ? "· " + s.arrangements[0].tempo + " BPM"
+                                    : ""
+                            }}</span
                         >
                     </div>
                     <div
@@ -249,30 +253,32 @@
         </div>
 
         <!-- Chart Viewer Component (refacto) -->
-        <div style="position: relative;">
-          <MusicStandChartViewer :lines="parsedLines" :font-size="fontSize" />
-          <MusicStandCanvas
-            v-if="arrangement"
-            :arrangement-id="arrangement.id"
-            :active="canvasActive"
-          />
+        <div style="position: relative">
+            <MusicStandChartViewer :lines="parsedLines" :font-size="fontSize" />
+            <MusicStandCanvas
+                v-if="arrangement"
+                :arrangement-id="arrangement.id"
+                :active="canvasActive"
+            />
         </div>
 
         <!-- No chart state -->
         <div
             v-if="!loading && song && arrangement && !arrangement.chord_chart"
             class="no-chart"
-            style="color: #6b7280; font-size: 14px;"
+            style="color: #6b7280; font-size: 14px"
         >
-            <div style="font-size: 32px; margin-bottom: 8px;">🎵</div>
+            <div style="font-size: 32px; margin-bottom: 8px">🎵</div>
             <div>{{ song.title }}</div>
-            <div style="margin-top: 4px; font-size: 12px;">Aucune grille disponible pour cet arrangement</div>
+            <div style="margin-top: 4px; font-size: 12px">
+                Aucune grille disponible pour cet arrangement
+            </div>
         </div>
 
         <div
             v-if="!loading && !song"
             class="no-chart"
-            style="color: #6b7280; font-size: 14px;"
+            style="color: #6b7280; font-size: 14px"
         >
             Chant introuvable
         </div>
@@ -281,17 +287,36 @@
         <div v-if="showNotes && arrangement" class="notes-panel" @click.stop>
             <div class="notes-header">
                 <span class="notes-title">📝 Notes</span>
-                <button @click="showNotes = false" class="notes-close">✕</button>
+                <button @click="showNotes = false" class="notes-close">
+                    ✕
+                </button>
             </div>
             <div class="notes-list">
                 <div v-if="notesLoading" class="notes-loading">Chargement…</div>
-                <div v-else-if="annotations.length === 0" class="notes-empty">Aucune note pour ce chant</div>
-                <div v-for="ann in annotations" :key="ann.id" class="note-item" :class="{ 'note-shared': ann.is_shared }">
+                <div v-else-if="annotations.length === 0" class="notes-empty">
+                    Aucune note pour ce chant
+                </div>
+                <div
+                    v-for="ann in annotations"
+                    :key="ann.id"
+                    class="note-item"
+                    :class="{ 'note-shared': ann.is_shared }"
+                >
                     <div class="note-meta">
-                        <span class="note-author">{{ ann.first_name }} {{ ann.last_name }}</span>
-                        <span v-if="ann.is_shared" class="note-badge shared">Partagée</span>
+                        <span class="note-author"
+                            >{{ ann.first_name }} {{ ann.last_name }}</span
+                        >
+                        <span v-if="ann.is_shared" class="note-badge shared"
+                            >Partagée</span
+                        >
                         <span v-else class="note-badge private">Privée</span>
-                        <button v-if="ann.member_id === currentMemberId" @click="deleteNote(ann.id)" class="note-delete">🗑</button>
+                        <button
+                            v-if="ann.member_id === currentMemberId"
+                            @click="deleteNote(ann.id)"
+                            class="note-delete"
+                        >
+                            🗑
+                        </button>
                     </div>
                     <p class="note-content">{{ ann.content }}</p>
                 </div>
@@ -310,7 +335,13 @@
                         <input type="checkbox" v-model="newNoteShared" />
                         Partager avec l'équipe
                     </label>
-                    <button @click="addNote" :disabled="!newNoteContent.trim()" class="notes-save-btn">Enregistrer</button>
+                    <button
+                        @click="addNote"
+                        :disabled="!newNoteContent.trim()"
+                        class="notes-save-btn"
+                    >
+                        Enregistrer
+                    </button>
                 </div>
             </div>
         </div>
@@ -380,7 +411,9 @@ async function loadAnnotations() {
     if (!arrangement.value?.id) return;
     notesLoading.value = true;
     try {
-        annotations.value = await api.getArrangementAnnotations(arrangement.value.id);
+        annotations.value = await api.getArrangementAnnotations(
+            arrangement.value.id,
+        );
     } catch {
         annotations.value = [];
     } finally {
@@ -411,8 +444,15 @@ async function deleteNote(id: number) {
     }
 }
 
-watch(showNotes, (v) => { if (v) loadAnnotations(); });
-watch(() => arrangement.value?.id, () => { if (showNotes.value) loadAnnotations(); });
+watch(showNotes, (v) => {
+    if (v) loadAnnotations();
+});
+watch(
+    () => arrangement.value?.id,
+    () => {
+        if (showNotes.value) loadAnnotations();
+    },
+);
 
 const songs = ref<any[]>([]);
 const filteredSongs = computed(() => {
@@ -776,12 +816,24 @@ const parsedLines = computed<ParsedLine[]>(() => {
 const currentPage = ref(0);
 // Scroll par page : avance / recule d'une hauteur d'écran dans le chart
 function nextPage() {
-    const container = document.querySelector('.chart-container') as HTMLElement | null;
-    if (container) container.scrollBy({ top: container.clientHeight * 0.85, behavior: 'smooth' });
+    const container = document.querySelector(
+        ".chart-container",
+    ) as HTMLElement | null;
+    if (container)
+        container.scrollBy({
+            top: container.clientHeight * 0.85,
+            behavior: "smooth",
+        });
 }
 function prevPage() {
-    const container = document.querySelector('.chart-container') as HTMLElement | null;
-    if (container) container.scrollBy({ top: -container.clientHeight * 0.85, behavior: 'smooth' });
+    const container = document.querySelector(
+        ".chart-container",
+    ) as HTMLElement | null;
+    if (container)
+        container.scrollBy({
+            top: -container.clientHeight * 0.85,
+            behavior: "smooth",
+        });
 }
 
 function transposeChord(chord: string): string {
@@ -961,7 +1013,8 @@ onMounted(async () => {
         try {
             const all = await api.getSongs();
             songs.value = (all || []).filter(
-                (s: any) => s.has_chord_chart === 1 || s.has_chord_chart === true,
+                (s: any) =>
+                    s.has_chord_chart === 1 || s.has_chord_chart === true,
             );
         } catch (e) {
             console.error("Erreur chargement songs pour Song Browser", e);
@@ -1007,7 +1060,8 @@ onUnmounted(() => {
     color: #e0e0e0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     font-family: "Courier New", monospace;
     user-select: none;
     -webkit-user-select: none;
@@ -1608,7 +1662,7 @@ onUnmounted(() => {
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .notes-title {
     font-size: 15px;
@@ -1624,7 +1678,10 @@ onUnmounted(() => {
     padding: 4px 8px;
     border-radius: 6px;
 }
-.notes-close:hover { background: rgba(255,255,255,0.1); color: white; }
+.notes-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
 .notes-list {
     flex: 1;
     overflow-y: auto;
@@ -1633,14 +1690,15 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 10px;
 }
-.notes-loading, .notes-empty {
+.notes-loading,
+.notes-empty {
     color: #888;
     font-size: 13px;
     text-align: center;
     padding: 20px 0;
 }
 .note-item {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     padding: 10px 12px;
     border-left: 3px solid transparent;
@@ -1666,8 +1724,14 @@ onUnmounted(() => {
     border-radius: 10px;
     font-weight: 600;
 }
-.note-badge.shared { background: rgba(99,102,241,0.3); color: #a5b4fc; }
-.note-badge.private { background: rgba(255,255,255,0.08); color: #9ca3af; }
+.note-badge.shared {
+    background: rgba(99, 102, 241, 0.3);
+    color: #a5b4fc;
+}
+.note-badge.private {
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
+}
 .note-delete {
     margin-left: auto;
     background: none;
@@ -1677,7 +1741,9 @@ onUnmounted(() => {
     opacity: 0.5;
     padding: 2px 4px;
 }
-.note-delete:hover { opacity: 1; }
+.note-delete:hover {
+    opacity: 1;
+}
 .note-content {
     font-size: 13px;
     color: #d1d5db;
@@ -1685,13 +1751,13 @@ onUnmounted(() => {
     line-height: 1.5;
 }
 .notes-add {
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding: 12px;
 }
 .notes-textarea {
     width: 100%;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     color: #e0e0e0;
     font-size: 13px;
@@ -1700,7 +1766,9 @@ onUnmounted(() => {
     outline: none;
     box-sizing: border-box;
 }
-.notes-textarea:focus { border-color: #6366f1; }
+.notes-textarea:focus {
+    border-color: #6366f1;
+}
 .notes-add-footer {
     display: flex;
     align-items: center;
@@ -1726,6 +1794,11 @@ onUnmounted(() => {
     cursor: pointer;
     font-weight: 600;
 }
-.notes-save-btn:hover { background: #4f46e5; }
-.notes-save-btn:disabled { opacity: 0.4; cursor: default; }
+.notes-save-btn:hover {
+    background: #4f46e5;
+}
+.notes-save-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
 </style>

@@ -531,7 +531,8 @@ const localIsScheduler = computed(() =>
 const wasOriginallyAdmin = ref(false);
 // Show persona selector when original user is admin OR currently admin OR in demo mode
 const showPersonaSelector = computed(
-    () => wasOriginallyAdmin.value || localIsAdmin.value || isDemoMode.value,
+    () =>
+        wasOriginallyAdmin.value || localIsAdmin.value || isDemoModeStore.value,
 );
 
 const { locale } = useI18n();
@@ -605,6 +606,18 @@ const handleLogout = async () => {
 onLogin(() => {
     if (route.name === "login") router.push("/");
 });
+
+// Watcher pour réagir aux changements de persona (pour les computed comme localIsAdmin)
+watch(
+    () => member.value?.role,
+    (newRole) => {
+        // Force reactivity update when persona changes
+        if (isDemoMode.value) {
+            // En mode demo, wasOriginallyAdmin reste false car c'est un demo user
+            // localIsAdmin réagit automatiquement via computed
+        }
+    },
+);
 
 watch(
     user,
@@ -686,9 +699,19 @@ function stopDemoPersona() {
         });
     } else {
         // Demo mode: restore original demo admin user
-        const orig = originalUser.value || { email: "admin@demo.church", uid: "demo123", displayName: "Admin Démo" };
+        const orig = originalUser.value || {
+            email: "admin@demo.church",
+            uid: "demo123",
+            displayName: "Admin Démo",
+        };
         user.value = orig;
-        member.value = { id: "demo123", email: "admin@demo.church", first_name: "Admin", last_name: "Démo", role: "admin" };
+        member.value = {
+            id: "demo123",
+            email: "admin@demo.church",
+            first_name: "Admin",
+            last_name: "Démo",
+            role: "admin",
+        };
         isImpersonating.value = false;
     }
 }

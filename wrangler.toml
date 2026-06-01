@@ -4,6 +4,9 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "c6408608867f869f85cc16572418424a"
 main = "src/index.js"
 
+# For Pages deployment
+pages_build_output_dir = "frontend/dist"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "eglise-db"

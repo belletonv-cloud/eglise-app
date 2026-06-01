@@ -84,7 +84,7 @@ import { useI18n } from "vue-i18n";
 import {
     user,
     isAuthenticated,
-    isDemoMode as isDemoModeStore,
+    isDemoMode,
     isImpersonating,
     startImpersonating,
     stopImpersonating,
@@ -92,13 +92,6 @@ import {
 import { member, loadCurrentMember } from "../stores/member";
 
 const { t } = useI18n();
-
-const isDemoMode = computed(() => {
-    return (
-        typeof window !== "undefined" &&
-        window.location.search.includes("demo=1")
-    );
-});
 
 const STORAGE_KEY = "demo-persona";
 
@@ -198,10 +191,21 @@ function stopCurrentPersona() {
         stopImpersonating();
         loadCurrentMember();
     } else {
-        // In demo mode, reset to original user
-        user.value = null;
+        // In demo mode, reset to original admin demo user
+        user.value = {
+            email: "admin@demo.church",
+            uid: "demo123",
+            displayName: "Admin Démo",
+        };
         isImpersonating.value = false;
-        isAuthenticated.value = false;
+        // Keep isAuthenticated true en demo mode
+        member.value = {
+            id: "demo123",
+            email: "admin@demo.church",
+            first_name: "Admin",
+            last_name: "Démo",
+            role: "admin",
+        };
     }
 }
 </script>
