@@ -4962,10 +4962,53 @@ const routes3 = [
               results.errors.push(`Team roster ${team.pco_id}: ${e.message}`);
             }
           }
-        } catch (e) {
-          results.errors.push(`Team members sync: ${e.message}`);
-        }
-      }
+         } catch (e) {
+           results.errors.push(`Team members sync: ${e.message}`);
+         }
+       }
+
+       // 3b. Sync members from plan team_members (Services API scope only)
+       if (!isPass1Only) {
+         try {
+           const memberPlans = await env.DB.prepare(
+             "SELECT DISTINCT pco_id FROM plans WHERE pco_id IS NOT NULL LIMIT 5",
+           ).all();
+           let membersAdded = 0;
+           for (const plan of (memberPlans.results || [])) {
+             if (fetchCount >= 38) break;
+             const tmRes = await pcoFetchLocal(
+               `${PCO_API}/services/v2/plans/${plan.pco_id}/team_members?per_page=100`,
+               auth,
+             );
+             for (const tm of (tmRes.data || [])) {
+               const tmAttrs = tm.attributes || {};
+               const personRel = tm.relationships?.person?.data;
+               if (!personRel) continue;
+               const pcoPersonId = personRel.id;
+               const firstName = tmAttrs.first_name || "";
+               const lastName = tmAttrs.last_name || "";
+               if (!firstName && !lastName) continue;
+               const existing = await env.DB.prepare(
+                 "SELECT id FROM members WHERE pco_id = ?",
+               ).bind(pcoPersonId).first();
+               if (existing) {
+                 await env.DB.prepare(
+                   "UPDATE members SET first_name=?, last_name=?, updated_at=datetime('now') WHERE id=?",
+                 ).bind(firstName, lastName, existing.id).run();
+               } else {
+                 await env.DB.prepare(
+                   "INSERT INTO members (first_name, last_name, pco_id, role, membership_type) VALUES (?,?,?,'member','member')",
+                 ).bind(firstName, lastName, pcoPersonId).run();
+                 membersAdded++;
+               }
+             }
+           }
+           results.members = membersAdded;
+         } catch (e) {
+           results.errors.push(`Members sync: ${e.message}`);
+         }
+       }
+
 
        // 4. Sync plans (upcoming 12 weeks) + plan_items + people
        if (!isPass1Only) {
@@ -4983,47 +5026,49 @@ const routes3 = [
 
           for (const stLocal of stList) {
              // Fetch plan_times for this service type with plan included
-             const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
-             let ptData;
-             try {
-               ptData = await pcoFetchAllLocal(ptUrl, auth, {
-                 "filter[starts_at]": `${today}..${twelveWeeks}`,
-               });
-            } catch (e) {
-              console.error("pco-sync: fetch plan items failed, continuing", e);
-              continue;
-            }
+              const ptUrl = `${PCO_API}/services/v2/service_types/${stLocal.pco_id}/plan_times`;
+              let ptData;
+              let ptIncluded = []; // embedded plan data from include=plan
+              try {
+                // Use include=plan to embed plan data and avoid N+1 individual plan fetches
+                const ptRaw = await pcoFetchLocal(
+                  `${ptUrl}?per_page=100&include=plan&filter%5Bstarts_at%5D=${today}..${twelveWeeks}`,
+                  auth,
+                );
+                ptData = ptRaw.data || [];
+                ptIncluded = ptRaw.included || [];
+             } catch (e) {
+               console.error("pco-sync: fetch plan items failed, continuing", e);
+               continue;
+             }
 
-            const pcoPlanIdsInWindow = new Set();
+             // Build a lookup map from included plans (pco plan id → attributes)
+             const includedPlansMap = {};
+             for (const inc of ptIncluded) {
+               if (inc.type === "Plan") includedPlansMap[inc.id] = inc.attributes;
+             }
 
-            for (const pt of ptData) {
-              await new Promise((r) => setTimeout(r, 50));
-              const planRel =
-                pt.relationships &&
-                pt.relationships.plan &&
-                pt.relationships.plan.data;
-              if (!planRel) continue;
+              const pcoPlanIdsInWindow = new Set();
+              const FETCH_BUDGET = 38; // stop before hitting the 50 subrequest limit
+
+              for (const pt of ptData) {
+                if (fetchCount >= FETCH_BUDGET) break; // budget exhausted, continue next sync
+                await new Promise((r) => setTimeout(r, 50));
+                const planRel =
+                 pt.relationships &&
+                 pt.relationships.plan &&
+                 pt.relationships.plan.data;
+               if (!planRel) continue;
               const pcoPlanId = planRel.id;
               pcoPlanIdsInWindow.add(pcoPlanId);
 
               const startsAt = pt.attributes && pt.attributes.starts_at;
               if (!startsAt) continue;
-              const date = startsAt.slice(0, 10);
-              const time = startsAt.slice(11, 16);
+               const date = startsAt.slice(0, 10);
+               const time = startsAt.slice(11, 16);
 
-              // Fetch full plan data for title/updated_at
-              let planAttrs = { title: "", updated_at: null };
-              try {
-                const planJson = await pcoFetchLocal(
-                  `${PCO_API}/services/v2/plans/${pcoPlanId}`,
-                  auth,
-                );
-                if (planJson.data && planJson.data.attributes) {
-                  planAttrs = planJson.data.attributes;
-                }
-              } catch (e) {
-                console.error("pco-sync: fetch plan data failed", e);
-              }
+               // Use plan data from included map (no extra fetch needed)
+               const planAttrs = includedPlansMap[pcoPlanId] || { title: "", updated_at: null };
 
               // Find plan by pco_id
               let planRow = await env.DB.prepare(
@@ -5055,8 +5100,9 @@ const routes3 = [
                     pcoPlanId,
                     planAttrs.updated_at || null,
                     planRow.id,
-                  )
+                   )
                   .run();
+                results.plans++;
               } else {
                 const ins = await env.DB.prepare(
                   "INSERT INTO plans (service_type_id, date, time, theme, status, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -5151,7 +5197,7 @@ const routes3 = [
               try {
                 await new Promise((r) => setTimeout(r, 100));
                 const peopleData = await pcoFetchAllLocal(
-                  `${PCO_API}/services/v2/plans/${pcoPlanId}/people`,
+                  `${PCO_API}/services/v2/plans/${pcoPlanId}/team_members`,
                   auth,
                 );
 
@@ -5289,7 +5335,7 @@ const routes3 = [
             songOffsetRow && songOffsetRow.value
               ? parseInt(songOffsetRow.value, 10)
               : 0;
-          const perPage = 1; // strictly one song per run
+          const perPage = 25; // batch songs to reduce subrequests
           // Request minimal fields if supported by PCO to avoid expansions (fields param optional)
           const params = { per_page: String(perPage) };
           if (lastSyncAt) {
