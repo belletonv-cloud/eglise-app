@@ -1079,7 +1079,7 @@ onUnmounted(() => {
 
 .chord {
     display: block;
-    color: #f59e0b;
+    color: #ef4444;
     font-weight: bold;
     font-size: 0.85em;
     line-height: 1.2;
