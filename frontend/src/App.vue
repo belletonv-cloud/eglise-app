@@ -529,10 +529,17 @@ const localIsScheduler = computed(() =>
 
 // Track if the ORIGINAL logged-in user is admin (for showing persona selector)
 const wasOriginallyAdmin = ref(false);
-// Show persona selector when original user is admin OR currently admin OR in demo mode
+// Show persona selector when:
+// - Original user is admin (can impersonate) OR
+// - Currently impersonating (show stop button) OR
+// - In demo mode OR
+// - User is authenticated and can manage members
 const showPersonaSelector = computed(
     () =>
-        wasOriginallyAdmin.value || localIsAdmin.value || isDemoModeStore.value,
+        wasOriginallyAdmin.value ||
+        isImpersonating.value ||
+        isDemoModeStore.value ||
+        (user.value && canManageMembers.value),
 );
 
 const { locale } = useI18n();
@@ -681,9 +688,11 @@ function switchDemoPersona(key: string) {
         startImpersonating(personaUser);
     } else {
         // In demo mode, set isImpersonating to show the persona switch in UI
-        if (!isImpersonating.value) {
-            isImpersonating.value = true;
+        // Save original user on first impersonation
+        if (!isImpersonating.value && !originalUser.value) {
+            originalUser.value = { ...user.value };
         }
+        isImpersonating.value = true;
         user.value = personaUser;
     }
     isAuthenticated.value = true;
@@ -699,6 +708,7 @@ function stopDemoPersona() {
         });
     } else {
         // Demo mode: restore original demo admin user
+        // originalUser contains the admin demo user saved at initialization
         const orig = originalUser.value || {
             email: "admin@demo.church",
             uid: "demo123",

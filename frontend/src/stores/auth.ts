@@ -14,7 +14,9 @@ export function onLogin(cb: () => void) {
 }
 
 export function startImpersonating(personaUser: any) {
-  if (!isImpersonating.value) {
+  // Ne sauvegarde originalUser que si ce n'est pas déjà un impersonation
+  // (donc si on passe de admin → persona, pas de persona → autre persona)
+  if (!isImpersonating.value && !originalUser.value) {
     originalUser.value = { ...user.value };
   }
   user.value = personaUser;
@@ -24,7 +26,7 @@ export function startImpersonating(personaUser: any) {
 export function stopImpersonating() {
   if (originalUser.value) {
     user.value = originalUser.value;
-    originalUser.value = null;
+    // Ne pas mettre originalUser à null - garder l'admin original pour pouvoir réimpersonnaliser
   }
   isImpersonating.value = false;
 }
