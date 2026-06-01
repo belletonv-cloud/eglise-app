@@ -538,6 +538,7 @@ const wasOriginallyAdmin = ref(false);
 const showPersonaSelector = computed(
     () =>
         wasOriginallyAdmin.value ||
+        localIsAdmin.value ||
         isImpersonating.value ||
         isDemoModeStore.value ||
         (user.value && canManageMembers.value),

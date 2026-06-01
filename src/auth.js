@@ -52,11 +52,15 @@ export async function getMemberFromRequest(request, env) {
   if (demoEmail) {
     const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
     if (m) return m
-    // Auto-create admin for demo
+    // Auto-create member for demo — derive role from email
     try {
+      const roleHint = demoEmail.split('@')[0]  // e.g. "admin", "member", "scheduler"
+      const knownRoles = ['admin', 'scheduler', 'editor', 'music_director', 'volunteer', 'viewer', 'member', 'guest']
+      const role = knownRoles.includes(roleHint) ? roleHint : 'member'
+      const nameParts = roleHint === 'admin' ? ['Admin', 'Démo'] : [roleHint.charAt(0).toUpperCase() + roleHint.slice(1), '']
       await env.DB.prepare(
-        'INSERT INTO members (first_name, last_name, email, role, membership_type) VALUES (?, ?, ?, ?, ?)'
-      ).bind('Admin', 'Démo', demoEmail, 'admin', 'staff').run()
+        'INSERT INTO members (first_name, last_name, email, role, membership_type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))'
+      ).bind(nameParts[0], nameParts[1], demoEmail, role, role === 'admin' ? 'staff' : 'member').run()
       return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
     } catch { return null }
   }
@@ -69,6 +73,21 @@ export async function getMemberFromRequest(request, env) {
     if (payload && payload.email) {
       const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(payload.email).first()
       if (m) return m
+      // Auto-create member for first-time Firebase users
+      try {
+        const name = payload.name || payload.email.split('@')[0] || ''
+        const parts = name.split(' ')
+        const firstName = parts[0] || name
+        const lastName = parts.slice(1).join(' ') || ''
+        const role = payload.email === 'belletonv@gmail.com' ? 'admin' : 'member'
+        await env.DB.prepare(
+          "INSERT INTO members (first_name, last_name, email, role, membership_type, created_at, updated_at) VALUES (?, ?, ?, ?, 'member', datetime('now'), datetime('now'))"
+        ).bind(firstName, lastName, payload.email, role).run()
+        return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(payload.email).first()
+      } catch (e) {
+        console.error('Auto-create Firebase member failed', e)
+        return null
+      }
     }
   }
 

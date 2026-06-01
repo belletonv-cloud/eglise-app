@@ -63,8 +63,9 @@ const loading = ref(true);
 
 async function loadMembers() {
     try {
-        const res = await api.get("/members?limit=100");
-        members.value = (res.members || []).map((m: any) => ({
+        const data = await api.getMembers({ size: 100 });
+        const list = Array.isArray(data) ? data : [];
+        members.value = list.map((m: any) => ({
             ...m,
             newRole: m.role || "member",
         }));
@@ -77,7 +78,7 @@ async function loadMembers() {
 
 async function updateRole(member: Member) {
     try {
-        await api.put(`/members/${member.id}`, { role: member.newRole });
+        await api.updateMember(member.id, { role: member.newRole });
         member.role = member.newRole;
     } catch (e: any) {
         console.error(e);
