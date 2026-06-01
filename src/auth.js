@@ -7,8 +7,9 @@ export const ROLE_PERMISSIONS = {
   // edit own profile, annotate charts, respond to scheduling requests
   member: ['annotate', 'respond_schedule', 'edit_own_profile'],
   scheduler: ['schedule', 'view_conflicts', 'force_schedule'],
-  editor: ['edit_members', 'edit_teams', 'manage_members'],
-  music_director: ['schedule', 'edit_music', 'view_conflicts'],
+  // editor can manage members/teams AND publish content (announcements, polls)
+  editor: ['edit_members', 'edit_teams', 'manage_members', 'edit_announcements'],
+  music_director: ['schedule', 'edit_music', 'view_conflicts', 'edit_announcements'],
   tech_director: ['schedule', 'view_conflicts', 'edit_tech'],
   volunteer: [],
   viewer: [],
@@ -91,7 +92,9 @@ export async function hasPermission(request, env, permission) {
   const rolePerms = ROLE_PERMISSIONS[member.role] || []
   let allowed = rolePerms.includes('*') || rolePerms.includes(permission)
 
-  // Check exceptions table (most recent entry wins)
+  // Check per-member exceptions (most recent entry wins over role default)
+  // Note: resource_permissions table stores per-resource overrides (e.g. access to plan #42)
+  // and is NOT consulted here — use hasResourcePermission() when that granularity is needed.
   const ex = await env.DB.prepare(
     'SELECT granted FROM member_exceptions WHERE member_id = ? AND permission = ? ORDER BY created_at DESC LIMIT 1'
   ).bind(member.id, permission).first()

@@ -160,6 +160,39 @@ const routes0 = [
     return json(result.results);
   }),
 
+  route("POST", "/api/songs", async (request, env) => {
+    if (!(await hasPermission(request, env, "edit_music")))
+      return json({ error: "Forbidden" }, 403);
+    const body = await getBody(request);
+    if (!body) return badRequest("Corps JSON invalide");
+    const err = validate({ title: { required: true, maxLength: 200 } }, body);
+    if (err) return badRequest(err);
+    const result = await env.DB.prepare(
+      "INSERT INTO songs (title, author, ccli_number, copyright, themes, notes) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(
+      body.title,
+      body.author || null,
+      body.ccli_number || null,
+      body.copyright || null,
+      body.themes || null,
+      body.notes || null,
+    ).run();
+    const song = await env.DB.prepare("SELECT * FROM songs WHERE id = ?")
+      .bind(result.meta.last_row_id).first();
+    return json(song, 201);
+  }),
+
+  route("DELETE", "/api/songs/:id", async (request, env, params) => {
+    if (!(await hasPermission(request, env, "edit_music")))
+      return json({ error: "Forbidden" }, 403);
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    const song = await env.DB.prepare("SELECT id FROM songs WHERE id = ?").bind(id).first();
+    if (!song) return notFound();
+    await env.DB.prepare("DELETE FROM songs WHERE id = ?").bind(id).run();
+    return json({ ok: true });
+  }),
+
   route("GET", "/api/songs/:id", async (request, env, params) => {
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
@@ -1005,7 +1038,7 @@ const routes0 = [
     async (request, env, params) => {
       const planId = requireId(params);
       if (!planId) return badRequest("ID plan invalide");
-      const plan = await env.DB.prepare("SELECT id FROM plans WHERE id = ?")
+      const plan = await env.DB.prepare("SELECT id, date FROM plans WHERE id = ?")
         .bind(planId)
         .first();
       if (!plan) return notFound("Plan non trouvé");
@@ -1024,6 +1057,22 @@ const routes0 = [
       if (body.force && !(await hasPermission(request, env, "force_schedule")))
         return json({ error: "Forbidden to force" }, 403);
       if (err) return badRequest(err);
+
+      // Check if the member has marked this plan's date as unavailable
+      if (!body.force) {
+        const prefs = await env.DB.prepare(
+          "SELECT unavailable_dates FROM volunteer_preferences WHERE member_id = ?"
+        ).bind(body.member_id).first();
+        if (prefs?.unavailable_dates) {
+          const unavailable = JSON.parse(prefs.unavailable_dates || "[]");
+          if (unavailable.includes(plan.date)) {
+            return json(
+              { error: "Member is unavailable on this date", date: plan.date, unavailable: true },
+              409
+            );
+          }
+        }
+      }
       // Prevent scheduling the same member twice for the same plan (even on another team)
       const conflict = await env.DB.prepare(
         "SELECT id, team_id, position FROM scheduled_people WHERE plan_id = ? AND member_id = ?",
@@ -1304,6 +1353,10 @@ const routes0 = [
 
   // Attendance endpoints
   route("GET", "/api/attendances", async (request, env, params, url) => {
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
+    if (!(await hasPermission(request, env, "schedule")) && caller.role !== "admin")
+      return json({ error: "Forbidden" }, 403);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const size = Math.min(
       parseInt(url.searchParams.get("size") || "25", 10),
@@ -2486,6 +2539,8 @@ const routes0 = [
   }),
 
   route("POST", "/api/email-logs", async (request, env) => {
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
     if (!body.subject || !body.body || !body.recipient_email) {
@@ -3064,6 +3119,13 @@ const routes2 = [
   // ========================================
   // RESOURCE PERMISSIONS (RBAC fin)
   // ========================================
+  // ========================================
+  // RESOURCE-LEVEL PERMISSIONS
+  // Stored per (member, resource_type, resource_id, permission).
+  // NOT consulted by hasPermission() — reserved for future granular access control
+  // (e.g. "member 5 can edit plan 42 specifically").
+  // Use hasResourcePermission() when that granularity is needed.
+  // ========================================
   route("GET", "/api/resource-permissions", async (request, env, params) => {
     const member = await getMemberFromRequest(request, env);
     if (!member || member.role !== "admin") return unauthorized();
@@ -3265,8 +3327,18 @@ const routes3 = [
     const dtStart = plan.time
       ? `${plan.date.replace(/-/g, "")}T${plan.time.replace(/:/g, "")}00`
       : `${plan.date.replace(/-/g, "")}T100000`;
+
+    // Compute DTEND = start + 1h30, handling minute/hour/day rollover correctly
+    function addMinutesToIcal(dateStr, timeStr, addMinutes) {
+      const [y, mo, d] = dateStr.split('-').map(Number);
+      const [h, mi] = timeStr.split(':').map(Number);
+      const start = new Date(y, mo - 1, d, h, mi);
+      start.setMinutes(start.getMinutes() + addMinutes);
+      const pad = n => String(n).padStart(2, '0');
+      return `${start.getFullYear()}${pad(start.getMonth()+1)}${pad(start.getDate())}T${pad(start.getHours())}${pad(start.getMinutes())}00`;
+    }
     const dtEnd = plan.time
-      ? `${plan.date.replace(/-/g, "")}T${String(parseInt(plan.time.replace(/:/g, "")) + 100).padStart(6, "0")}00`
+      ? addMinutesToIcal(plan.date, plan.time, 90)
       : `${plan.date.replace(/-/g, "")}T120000`;
 
     let desc = `Service: ${plan.service_type_name || "Général"}\nThème: ${plan.theme || "-"}\n\nParticipants:\n`;
@@ -4633,8 +4705,10 @@ const routes3 = [
   // PCO SYNC
   // ========================================
   route("POST", "/api/pco-sync", async (request, env) => {
-    // Internal re-triggers carry no auth header — skip permission check
-    if (!request.headers.get("x-internal-sync")) {
+    // Internal re-triggers carry a secret header — skip user permission check
+    const internalSecret = request.headers.get("x-internal-sync");
+    const isInternalSync = internalSecret && internalSecret === env.INTERNAL_SYNC_SECRET;
+    if (!isInternalSync) {
       if (!(await hasPermission(request, env, "manage_members")))
         return json({ error: "Forbidden" }, 403);
     }
