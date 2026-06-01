@@ -643,6 +643,14 @@ watch(
     { immediate: true },
 );
 
+// Also load member on initial mount (for Firebase users)
+onMounted(async () => {
+    if (user.value && !isDemoMode.value && !isImpersonating.value) {
+        const role = await loadCurrentMember();
+        wasOriginallyAdmin.value = member.value?.role === "admin";
+    }
+});
+
 // Email display (truncated with tooltip for full)
 const displayEmail = computed(() => {
     const current = user.value?.email || "";
