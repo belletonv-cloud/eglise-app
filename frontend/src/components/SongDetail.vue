@@ -108,7 +108,7 @@
     </div>
 
     <div v-if="showEditor && currentArrangement" class="modal-overlay" @click.self="showEditor = false">
-      <ChordProEditor
+      <ChordProWysiwygEditor
         :arrangement-id="currentArrangement.id"
         :initial-chart="currentArrangement.chord_chart || ''"
         @close="showEditor = false"
@@ -140,7 +140,7 @@ import { api } from '../utils/api';
 import { parseChordPro, type ParsedLine } from '../utils/chordpro';
 import { showToast } from '../stores/toast';
 import { confirmDialog } from '../stores/confirm';
-import ChordProEditor from './ChordProEditor.vue';
+import ChordProWysiwygEditor from './ChordProWysiwygEditor.vue';
 import MediaUpload from './MediaUpload.vue';
 import ArrangementAnnotations from './ArrangementAnnotations.vue';
 

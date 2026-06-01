@@ -43,7 +43,9 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">{{t('plan.order')}} ({{ items.length }})</h2>
+            <h2 class="text-lg font-semibold text-gray-800">{{t('plan.order')}} ({{ items.length }})
+              <span v-if="totalMinutes > 0" class="text-sm font-normal text-gray-500 ml-2">· {{ formatDuration(totalMinutes) }}</span>
+            </h2>
             <div class="flex gap-2">
               <button @click="showSongSelector = true"
                 class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">{{t('plan.add_song')}}</button>
@@ -85,15 +87,24 @@
                   <button @click="deleteItem(item)"
                     class="text-red-400 hover:text-red-600 text-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">✕</button>
                 </div>
-                <div v-if="item.type === 'song'" class="mt-1">
-                  <button @click="changeSong(item)"
-                    class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer">
-                    {{ item.arrangement_name ? t('plan.type.change_song') : t('plan.type.link_song') }}
-                  </button>
-                  <span v-if="item.transposed_key" class="text-xs text-gray-400 ml-2">
-                    {{t('plan.type.transposed')}} {{ item.transposed_key }}
-                  </span>
-                </div>
+                  <div v-if="item.type === 'song'" class="mt-1">
+                    <button @click="changeSong(item)"
+                      class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer">
+                      {{ item.arrangement_name ? t('plan.type.change_song') : t('plan.type.link_song') }}
+                    </button>
+                    <span v-if="item.transposed_key" class="text-xs text-gray-400 ml-2">
+                      {{t('plan.type.transposed')}} {{ item.transposed_key }}
+                    </span>
+                  </div>
+                  <!-- Durée éditable inline -->
+                  <div class="flex items-center gap-1 mt-1">
+                    <input type="number" min="0" max="999"
+                      :value="item.length_minutes || ''"
+                      @change="(e: Event) => updateDuration(item, Number((e.target as HTMLInputElement).value))"
+                      class="w-14 text-xs border-b border-transparent hover:border-gray-300 focus:border-indigo-500 outline-none bg-transparent text-gray-500 text-right"
+                      placeholder="min" title="Durée en minutes" />
+                    <span class="text-xs text-gray-400">min</span>
+                  </div>
               </div>
             </div>
           </div>
@@ -139,6 +150,17 @@ const showChangeSong = ref(false)
 const changingItemId = ref<number | null>(null)
 
 const songItems = computed(() => items.value.filter(i => i.type === 'song' && i.arrangement_id))
+const totalMinutes = computed(() => items.value.reduce((sum, i) => sum + (i.length_minutes || 0), 0))
+const formatDuration = (mins: number) => `${Math.floor(mins / 60) > 0 ? Math.floor(mins / 60) + 'h ' : ''}${mins % 60}min`
+
+const updateDuration = async (item: any, val: number) => {
+  item.length_minutes = val || null
+  try {
+    await api.updatePlanItem(item.id, { length_minutes: val || null })
+  } catch (e: any) {
+    showToast(e.message || t('plan.error'), 'error')
+  }
+}
 
 function openMusicStand() {
   const first = songItems.value[0]

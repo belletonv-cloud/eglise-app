@@ -234,14 +234,6 @@ const routes0 = [
   // ========================================
   // MEMBERS
   // ========================================
-  // Current user
-  route("GET", "/api/me", async (request, env) => {
-    const member = await getMemberFromRequest(request, env);
-    if (!member) return json({ error: "unauthorized" }, 401);
-    return json(member);
-  });
-
-  // ========================================
   route("GET", "/api/members", async (request, env, params, url) => {
     // Pagination params
     const page = parseInt(url.searchParams.get("page") || "1", 10);
@@ -3817,7 +3809,7 @@ const routes3 = [
     await env.DB.prepare(
       "INSERT INTO invitation_tokens (member_id, token, expires_at) VALUES (?, ?, ?)",
     )
-      .bind(member.id, token, expires_at)
+      .bind(member.id, token, expiresAt)
       .run();
 
     // Send email
