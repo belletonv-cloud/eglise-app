@@ -292,11 +292,22 @@ const router = createRouter({
 });
 
 // Guard global : authentification obligatoire sur toutes les routes sauf routes publiques
+// Store intended destination to redirect after login
+export let intendedRoute: string | null = null;
+export function consumeIntendedRoute(): string | null {
+  const r = intendedRoute;
+  intendedRoute = null;
+  return r;
+}
+
 router.beforeEach((to, from, next) => {
   // Les routes publiques accessibles sans connexion (invitation, not-found)
   if (to.name && publicRoutes.includes(to.name as string)) return next();
-  // Si non authentifié → on redirige vers '/invitation' (ou '/login').
+  // Si non authentifié → mémoriser la destination et rediriger vers login
   if (!isAuthenticated.value) {
+    if (to.path !== '/' && to.path !== '/login') {
+      intendedRoute = to.fullPath;
+    }
     return next({ name: "login" });
   }
   // Sinon accès autorisé (toutes routes en session)

@@ -482,7 +482,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, provide } from "vue";
-import { publicRoutes } from "./router/index";
+import { publicRoutes, consumeIntendedRoute } from "./router/index";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import Login from "./components/Login.vue";
@@ -612,17 +612,23 @@ const handleLogout = async () => {
 };
 
 onLogin(() => {
-    if (route.name === "login") router.push("/");
+    // Always navigate after login, even from login page
+    const dest = consumeIntendedRoute();
+    if (dest) {
+        router.push(dest);
+    } else {
+        router.push("/");
+    }
 });
 
 // Watcher pour réagir aux changements de persona (pour les computed comme localIsAdmin)
 watch(
     () => member.value?.role,
     (newRole) => {
-        // Force reactivity update when persona changes
-        if (isDemoMode.value) {
-            // En mode demo, wasOriginallyAdmin reste false car c'est un demo user
-            // localIsAdmin réagit automatiquement via computed
+        // Mise à jour de wasOriginallyAdmin quand le membre est chargé (timing Firebase)
+        // En mode demo ou impersonation, wasOriginallyAdmin reste false
+        if (!isDemoMode.value && !isImpersonating.value) {
+            wasOriginallyAdmin.value = newRole === "admin";
         }
     },
 );
@@ -631,13 +637,21 @@ watch(
     user,
     (val) => {
         if (val) {
-            // Skip API call in demo mode - member.value is already set by switchDemoPersona
+            // Load member for Firebase users
             if (!isDemoMode.value && !isImpersonating.value) {
                 loadCurrentMember().then(() => {
                     wasOriginallyAdmin.value = member.value?.role === "admin";
                 });
             }
-            if (route.name === "login") router.push("/");
+            // Navigate after login (remove duplicate navigation logic)
+            if (route.name === "login") {
+                const dest = consumeIntendedRoute();
+                if (dest) {
+                    router.push(dest);
+                } else {
+                    router.push("/");
+                }
+            }
         } else member.value = null;
     },
     { immediate: true },
