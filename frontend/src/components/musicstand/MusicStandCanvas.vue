@@ -1,20 +1,19 @@
 <template>
-  <!-- Canvas overlay (full screen, pointer-events controlled by active prop) -->
   <div
     ref="containerRef"
     class="ms-canvas-wrap"
     :class="{ 'is-active': active, 'is-readonly': readonly }"
     @click.stop
   >
-    <!-- Own drawing canvas (interactive) -->
+    <!-- Own drawing canvas -->
     <canvas
       ref="ownCanvas"
       class="ms-canvas own"
-      :style="{ pointerEvents: active && !readonly ? 'auto' : 'none' }"
+      :style="{ pointerEvents: active && !readonly ? 'auto' : 'none', cursor: eraserCursor }"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
       @pointerup="onPointerUp"
-      @pointerleave="onPointerUp"
+      @pointerleave="onPointerLeave"
     />
     <!-- Other members' drawings (read-only overlays) -->
     <canvas
@@ -24,7 +23,7 @@
       class="ms-canvas other"
     />
 
-    <!-- Floating toolbar (only when active) -->
+    <!-- Floating toolbar -->
     <div v-if="active" class="canvas-toolbar" @click.stop @pointerdown.stop>
       <!-- Tool selector -->
       <div class="tool-group">
@@ -36,10 +35,10 @@
         </button>
       </div>
 
-      <div class="sep"></div>
+      <div class="sep" />
 
-      <!-- Color picker (pen/highlighter) -->
-      <div v-if="currentTool !== 'text' && currentTool !== 'eraser' && currentTool !== 'selEraser'" class="tool-group">
+      <!-- Color picker (pen/highlighter/text only) -->
+      <div v-if="currentTool === 'pen' || currentTool === 'highlighter' || currentTool === 'text'" class="tool-group">
         <button v-for="c in colors" :key="c"
           :class="['color-dot', { active: currentColor === c }]"
           :style="{ background: c }"
@@ -47,33 +46,39 @@
           :title="c" />
       </div>
 
-      <!-- Size slider -->
-      <div v-if="currentTool !== 'eraser' && currentTool !== 'selEraser'" class="tool-group">
+      <!-- Size slider (not for eraser) -->
+      <div v-if="currentTool !== 'eraser'" class="tool-group">
         <input type="range" min="1" max="20" v-model.number="currentSize" class="size-slider" :title="`Épaisseur: ${currentSize}px`" />
         <span class="size-label">{{ currentSize }}px</span>
       </div>
 
-      <div class="sep"></div>
+      <!-- Eraser radius (eraser only) -->
+      <div v-else class="tool-group">
+        <input type="range" min="8" max="60" v-model.number="eraserRadius" class="size-slider" :title="`Rayon gomme: ${eraserRadius}px`" />
+        <span class="size-label">{{ eraserRadius }}px</span>
+      </div>
+
+      <div class="sep" />
 
       <!-- Share toggle -->
-      <label class="share-label" :title="isShared ? 'Annotations partagées avec l\'équipe' : 'Annotations privées'">
+      <label class="share-label" :title="isShared ? 'Partagé avec l\'équipe' : 'Privé'">
         <input type="checkbox" v-model="isShared" @change="saveDebounced()" />
         <span>{{ isShared ? '👥' : '🔒' }}</span>
       </label>
 
-      <!-- Erase all own -->
+      <!-- Erase all -->
       <button class="tool-btn danger" @click="eraseAll" title="Effacer tout (mes annotations)">🗑</button>
 
-      <!-- Annotation selector (👤) -->
-      <div class="selector-wrap" v-if="allDrawings.length > 1">
-        <button class="tool-btn" @click="showSelector = !showSelector" :class="{ active: showSelector }" title="Voir les annotations d'un autre membre">👤</button>
+      <!-- Member annotation selector -->
+      <div class="selector-wrap" v-if="otherDrawings.length > 0">
+        <button class="tool-btn" :class="{ active: showSelector }" @click="showSelector = !showSelector" title="Annotations des autres">👤</button>
         <div v-if="showSelector" class="selector-popup" @click.stop>
-          <div v-for="d in allDrawings" :key="d.member_id"
+          <div v-for="d in otherDrawings" :key="d.member_id"
             :class="['selector-item', { checked: visibleMemberIds.has(d.member_id) }]"
             @click="toggleMember(d.member_id)">
             <span class="check">{{ visibleMemberIds.has(d.member_id) ? '✓' : '○' }}</span>
             <span class="name">{{ d.first_name }} {{ d.last_name }}</span>
-            <span v-if="d.member_id === ownMemberId" class="you">(moi)</span>
+            <span v-if="!d.is_shared" class="private-badge">privé</span>
           </div>
         </div>
       </div>
@@ -92,111 +97,138 @@ const props = defineProps<{
   active: boolean
   readonly?: boolean
 }>()
-const emit = defineEmits(['update:active'])
 
-// ── Refs ─────────────────────────────────────────────────────────────────────
-const containerRef = ref<HTMLElement | null>(null)
-const ownCanvas = ref<HTMLCanvasElement | null>(null)
-const otherCanvasMap = new Map<number, HTMLCanvasElement>()
-function setOtherCanvas(memberId: number, el: HTMLCanvasElement | null) {
-  if (el) otherCanvasMap.set(memberId, el)
-}
+// ── Types ─────────────────────────────────────────────────────────────────────
+type Tool = 'pen' | 'highlighter' | 'text' | 'eraser'
 
-// ── State ─────────────────────────────────────────────────────────────────────
-type Tool = 'pen' | 'highlighter' | 'text' | 'eraser' | 'selEraser'
-
+interface Point { x: number; y: number }
 interface Stroke {
   tool: Tool
   color: string
   size: number
   opacity: number
-  points: { x: number; y: number }[]
+  points: Point[]
   text?: string
   x?: number
   y?: number
 }
 
-const currentTool = ref<Tool>('pen')
-const currentColor = ref('#f59e0b')  // amber default
-const currentSize = ref(3)
-const isShared = ref(false)
-const strokes = ref<Stroke[]>([])
+// ── Refs ──────────────────────────────────────────────────────────────────────
+const containerRef = ref<HTMLElement | null>(null)
+const ownCanvas    = ref<HTMLCanvasElement | null>(null)
+const otherCanvasMap = new Map<number, HTMLCanvasElement>()
+function setOtherCanvas(memberId: number, el: HTMLCanvasElement | null) {
+  if (el) otherCanvasMap.set(memberId, el)
+  else otherCanvasMap.delete(memberId)
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const currentTool  = ref<Tool>('pen')
+const currentColor = ref('#f59e0b')
+const currentSize  = ref(3)
+const eraserRadius = ref(20)
+const isShared     = ref(false)
+const strokes      = ref<Stroke[]>([])
 const activeStroke = ref<Stroke | null>(null)
-const isDrawing = ref(false)
-const allDrawings = ref<any[]>([])
-const ownMemberId = computed(() => currentMember.value?.id ?? null)
+const isDrawing    = ref(false)
+const allDrawings  = ref<any[]>([])
 const visibleMemberIds = ref(new Set<number>())
 const showSelector = ref(false)
-const saveTimer = ref<any>(null)
+const saveTimer    = ref<any>(null)
 
-// Selective eraser state
-const selEraserStart = ref<{ x: number; y: number } | null>(null)
-const selEraserRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
+// Eraser hover preview (circle cursor)
+const eraserPreview = ref<Point | null>(null)
+
+const ownMemberId = computed(() => currentMember.value?.id ?? null)
+
+const otherDrawings = computed(() =>
+  allDrawings.value.filter(d => d.member_id !== ownMemberId.value)
+)
+const visibleOtherDrawings = computed(() =>
+  otherDrawings.value.filter(d => visibleMemberIds.value.has(d.member_id))
+)
+
+const eraserCursor = computed(() =>
+  currentTool.value === 'eraser' ? 'none' : 'crosshair'
+)
 
 const tools: { id: Tool; icon: string; label: string }[] = [
-  { id: 'pen', icon: '✏️', label: 'Stylo' },
-  { id: 'highlighter', icon: '🖍', label: 'Surligneur' },
-  { id: 'text', icon: 'T', label: 'Texte' },
-  { id: 'eraser', icon: '⌫', label: 'Gomme (tracé)' },
-  { id: 'selEraser', icon: '⬜', label: 'Gomme sélective' },
+  { id: 'pen',         icon: '✏️', label: 'Stylo' },
+  { id: 'highlighter', icon: '🖍',  label: 'Surligneur' },
+  { id: 'text',        icon: 'T',   label: 'Texte' },
+  { id: 'eraser',      icon: '⌫',   label: 'Gomme (supprime un trait)' },
 ]
-
 const colors = ['#f59e0b', '#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#ffffff', '#000000']
-
-const visibleOtherDrawings = computed(() =>
-  allDrawings.value.filter(d => d.member_id !== ownMemberId.value && visibleMemberIds.value.has(d.member_id))
-)
 
 // ── Canvas helpers ─────────────────────────────────────────────────────────────
 function resizeCanvas(canvas: HTMLCanvasElement) {
   if (!canvas || !containerRef.value) return
   const rect = containerRef.value.getBoundingClientRect()
   if (canvas.width !== rect.width || canvas.height !== rect.height) {
-    canvas.width = rect.width
+    canvas.width  = rect.width
     canvas.height = rect.height
   }
 }
 
-function getPos(e: PointerEvent): { x: number; y: number } {
+function getPos(e: PointerEvent): Point {
   const rect = ownCanvas.value!.getBoundingClientRect()
   return { x: e.clientX - rect.left, y: e.clientY - rect.top }
 }
 
-function renderStrokes(canvas: HTMLCanvasElement, strokeList: Stroke[]) {
+function drawStroke(ctx: CanvasRenderingContext2D, stroke: Stroke) {
+  if (stroke.tool === 'text') {
+    ctx.save()
+    ctx.font = `${stroke.size * 5 + 10}px sans-serif`
+    ctx.fillStyle = stroke.color
+    ctx.globalAlpha = stroke.opacity ?? 1
+    ctx.fillText(stroke.text || '', stroke.x ?? 0, stroke.y ?? 0)
+    ctx.restore()
+    return
+  }
+  if (stroke.points.length < 1) return
+  ctx.save()
+  ctx.strokeStyle = stroke.color
+  ctx.lineWidth   = stroke.tool === 'highlighter' ? stroke.size * 5 : stroke.size
+  ctx.lineCap     = 'round'
+  ctx.lineJoin    = 'round'
+  ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.35 : (stroke.opacity ?? 1)
+  ctx.beginPath()
+  ctx.moveTo(stroke.points[0]!.x, stroke.points[0]!.y)
+  for (let i = 1; i < stroke.points.length; i++) {
+    ctx.lineTo(stroke.points[i]!.x, stroke.points[i]!.y)
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
+function renderStrokes(canvas: HTMLCanvasElement, strokeList: Stroke[], preview?: { eraserPos: Point; radius: number } | null) {
   resizeCanvas(canvas)
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  for (const stroke of strokeList) {
-    if (stroke.tool === 'text') {
-      ctx.save()
-      ctx.font = `${(stroke.size ?? 3) * 5 + 10}px sans-serif`
-      ctx.fillStyle = stroke.color
-      ctx.globalAlpha = stroke.opacity ?? 1
-      ctx.fillText(stroke.text || '', stroke.x ?? 0, stroke.y ?? 0)
-      ctx.restore()
-      continue
-    }
-    if (stroke.points.length < 1) continue
+  for (const s of strokeList) drawStroke(ctx, s)
+  // Draw eraser circle preview
+  if (preview) {
     ctx.save()
-    ctx.strokeStyle = stroke.color
-    ctx.lineWidth = stroke.tool === 'highlighter' ? stroke.size * 5 : stroke.size
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.35 : (stroke.opacity ?? 1)
-    ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over'
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([3, 3])
     ctx.beginPath()
-    ctx.moveTo(stroke.points[0]!.x, stroke.points[0]!.y)
-    for (let i = 1; i < stroke.points.length; i++) {
-      ctx.lineTo(stroke.points[i]!.x, stroke.points[i]!.y)
-    }
+    ctx.arc(preview.eraserPos.x, preview.eraserPos.y, preview.radius, 0, Math.PI * 2)
     ctx.stroke()
     ctx.restore()
   }
 }
 
-function renderOwn() {
-  if (ownCanvas.value) renderStrokes(ownCanvas.value, strokes.value)
+function renderOwn(withPreview = false) {
+  if (!ownCanvas.value) return
+  renderStrokes(
+    ownCanvas.value,
+    strokes.value,
+    withPreview && eraserPreview.value
+      ? { eraserPos: eraserPreview.value, radius: eraserRadius.value }
+      : null
+  )
 }
 
 function renderOther(memberId: number, strokeList: Stroke[]) {
@@ -204,7 +236,26 @@ function renderOther(memberId: number, strokeList: Stroke[]) {
   if (canvas) renderStrokes(canvas, strokeList)
 }
 
-// ── Pointer events ──────────────────────────────────────────────────────────
+function renderOthers() {
+  for (const d of visibleOtherDrawings.value) {
+    const parsed: Stroke[] = typeof d.paths === 'string' ? JSON.parse(d.paths) : (d.paths ?? [])
+    renderOther(d.member_id, parsed)
+  }
+}
+
+// ── Eraser hit-test ────────────────────────────────────────────────────────
+/** Returns true if the stroke passes within `radius` of `pos` */
+function strokeHitsEraser(stroke: Stroke, pos: Point, radius: number): boolean {
+  if (stroke.tool === 'text') {
+    return Math.hypot((stroke.x ?? 0) - pos.x, (stroke.y ?? 0) - pos.y) < radius + 20
+  }
+  for (const p of stroke.points) {
+    if (Math.hypot(p.x - pos.x, p.y - pos.y) < radius) return true
+  }
+  return false
+}
+
+// ── Pointer events ─────────────────────────────────────────────────────────
 function onPointerDown(e: PointerEvent) {
   if (props.readonly) return
   ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
@@ -213,106 +264,78 @@ function onPointerDown(e: PointerEvent) {
   if (currentTool.value === 'text') {
     const text = prompt('Texte à ajouter :')
     if (!text) return
-    strokes.value.push({
-      tool: 'text', color: currentColor.value, size: currentSize.value,
-      opacity: 1, points: [], text, x: pos.x, y: pos.y,
-    })
+    strokes.value.push({ tool: 'text', color: currentColor.value, size: currentSize.value, opacity: 1, points: [], text, x: pos.x, y: pos.y })
     renderOwn()
     saveDebounced()
     return
   }
 
-  if (currentTool.value === 'selEraser') {
-    selEraserStart.value = pos
-    selEraserRect.value = null
+  if (currentTool.value === 'eraser') {
     isDrawing.value = true
+    eraseAt(pos)
     return
   }
 
-  activeStroke.value = {
-    tool: currentTool.value,
-    color: currentColor.value,
-    size: currentSize.value,
-    opacity: 1,
-    points: [pos],
-  }
+  activeStroke.value = { tool: currentTool.value, color: currentColor.value, size: currentSize.value, opacity: 1, points: [pos] }
   isDrawing.value = true
 }
 
 function onPointerMove(e: PointerEvent) {
-  if (!isDrawing.value) return
   const pos = getPos(e)
 
-  if (currentTool.value === 'selEraser' && selEraserStart.value) {
-    selEraserRect.value = {
-      x: Math.min(pos.x, selEraserStart.value.x),
-      y: Math.min(pos.y, selEraserStart.value.y),
-      w: Math.abs(pos.x - selEraserStart.value.x),
-      h: Math.abs(pos.y - selEraserStart.value.y),
-    }
-    // Preview rect
-    renderOwn()
-    const ctx = ownCanvas.value?.getContext('2d')
-    if (ctx && selEraserRect.value) {
-      ctx.save()
-      ctx.strokeStyle = '#6366f1'
-      ctx.lineWidth = 1
-      ctx.setLineDash([4, 3])
-      ctx.strokeRect(selEraserRect.value.x, selEraserRect.value.y, selEraserRect.value.w, selEraserRect.value.h)
-      ctx.restore()
-    }
+  if (currentTool.value === 'eraser') {
+    eraserPreview.value = pos
+    if (isDrawing.value) eraseAt(pos)
+    else renderOwn(true)  // show hover circle only
     return
   }
 
-  if (activeStroke.value) {
-    activeStroke.value.points.push(pos)
-    // Live preview
-    renderOwn()
-    const ctx = ownCanvas.value?.getContext('2d')
-    if (ctx && activeStroke.value.points.length >= 2) {
-      const pts = activeStroke.value.points
-      ctx.save()
-      ctx.strokeStyle = activeStroke.value.color
-      ctx.lineWidth = activeStroke.value.tool === 'highlighter' ? activeStroke.value.size * 5 : activeStroke.value.size
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      ctx.globalAlpha = activeStroke.value.tool === 'highlighter' ? 0.35 : 1
-      ctx.globalCompositeOperation = activeStroke.value.tool === 'eraser' ? 'destination-out' : 'source-over'
-      ctx.beginPath()
-      ctx.moveTo(pts[pts.length - 2]!.x, pts[pts.length - 2]!.y)
-      ctx.lineTo(pts[pts.length - 1]!.x, pts[pts.length - 1]!.y)
-      ctx.stroke()
-      ctx.restore()
-    }
+  if (!isDrawing.value || !activeStroke.value) return
+  activeStroke.value.points.push(pos)
+
+  // Live incremental draw (avoid full re-render on every point)
+  const ctx = ownCanvas.value?.getContext('2d')
+  const pts = activeStroke.value.points
+  if (ctx && pts.length >= 2) {
+    ctx.save()
+    ctx.strokeStyle = activeStroke.value.color
+    ctx.lineWidth   = activeStroke.value.tool === 'highlighter' ? activeStroke.value.size * 5 : activeStroke.value.size
+    ctx.lineCap     = 'round'
+    ctx.lineJoin    = 'round'
+    ctx.globalAlpha = activeStroke.value.tool === 'highlighter' ? 0.35 : 1
+    ctx.beginPath()
+    ctx.moveTo(pts[pts.length - 2]!.x, pts[pts.length - 2]!.y)
+    ctx.lineTo(pts[pts.length - 1]!.x, pts[pts.length - 1]!.y)
+    ctx.stroke()
+    ctx.restore()
   }
 }
 
 function onPointerUp(e: PointerEvent) {
   if (!isDrawing.value) return
   isDrawing.value = false
-
-  if (currentTool.value === 'selEraser' && selEraserRect.value) {
-    const r = selEraserRect.value
-    // Remove strokes that have ANY point inside the rect
-    strokes.value = strokes.value.filter(stroke => {
-      if (stroke.tool === 'text') {
-        return !((stroke.x ?? 0) >= r.x && (stroke.x ?? 0) <= r.x + r.w &&
-                 (stroke.y ?? 0) >= r.y && (stroke.y ?? 0) <= r.y + r.h)
-      }
-      return !stroke.points.some(p => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h)
-    })
-    selEraserStart.value = null
-    selEraserRect.value = null
-    renderOwn()
-    saveDebounced()
-    return
-  }
-
   if (activeStroke.value && activeStroke.value.points.length > 0) {
     strokes.value.push({ ...activeStroke.value })
     activeStroke.value = null
     renderOwn()
     saveDebounced()
+  }
+}
+
+function onPointerLeave(e: PointerEvent) {
+  onPointerUp(e)
+  eraserPreview.value = null
+  if (currentTool.value === 'eraser') renderOwn(false)
+}
+
+function eraseAt(pos: Point) {
+  const before = strokes.value.length
+  strokes.value = strokes.value.filter(s => !strokeHitsEraser(s, pos, eraserRadius.value))
+  if (strokes.value.length !== before) {
+    renderOwn(true)
+    saveDebounced()
+  } else {
+    renderOwn(true)  // still redraw for eraser circle preview
   }
 }
 
@@ -322,22 +345,19 @@ async function loadDrawings() {
     const all = await api.getArrangementDrawings(props.arrangementId)
     allDrawings.value = all
 
-    // Load own strokes
     const own = all.find((d: any) => d.member_id === ownMemberId.value)
     if (own) {
-      strokes.value = typeof own.paths === 'string' ? JSON.parse(own.paths) : own.paths
+      strokes.value = typeof own.paths === 'string' ? JSON.parse(own.paths) : (own.paths ?? [])
       isShared.value = !!own.is_shared
     } else {
       strokes.value = []
       isShared.value = false
     }
 
-    // Auto-show all shared drawings
+    // Auto-show shared drawings
     const newVisible = new Set<number>()
     for (const d of all) {
-      if (d.member_id !== ownMemberId.value && d.is_shared) {
-        newVisible.add(d.member_id)
-      }
+      if (d.member_id !== ownMemberId.value && d.is_shared) newVisible.add(d.member_id)
     }
     visibleMemberIds.value = newVisible
 
@@ -349,13 +369,6 @@ async function loadDrawings() {
   }
 }
 
-function renderOthers() {
-  for (const d of visibleOtherDrawings.value) {
-    const parsed: Stroke[] = typeof d.paths === 'string' ? JSON.parse(d.paths) : d.paths
-    renderOther(d.member_id, parsed)
-  }
-}
-
 async function save() {
   try {
     await api.saveArrangementDrawing(props.arrangementId, {
@@ -363,7 +376,7 @@ async function save() {
       is_shared: isShared.value,
     })
   } catch (e: any) {
-    showToast(e.message || 'Erreur sauvegarde', 'error')
+    showToast(e.message || 'Erreur sauvegarde annotations', 'error')
   }
 }
 
@@ -387,15 +400,10 @@ function toggleMember(memberId: number) {
   nextTick(renderOthers)
 }
 
-// ── Resize observer ────────────────────────────────────────────────────────
+// ── Lifecycle ──────────────────────────────────────────────────────────────
 let ro: ResizeObserver | null = null
 onMounted(() => {
-  ro = new ResizeObserver(() => {
-    nextTick(() => {
-      renderOwn()
-      renderOthers()
-    })
-  })
+  ro = new ResizeObserver(() => nextTick(() => { renderOwn(); renderOthers() }))
   if (containerRef.value) ro.observe(containerRef.value)
 })
 onUnmounted(() => {
@@ -403,8 +411,7 @@ onUnmounted(() => {
   clearTimeout(saveTimer.value)
 })
 
-// Reload when arrangement changes
-watch(() => props.arrangementId, () => { loadDrawings() }, { immediate: true })
+watch(() => props.arrangementId, () => loadDrawings(), { immediate: true })
 watch(visibleMemberIds, renderOthers, { deep: true })
 </script>
 
@@ -415,9 +422,7 @@ watch(visibleMemberIds, renderOthers, { deep: true })
   pointer-events: none;
   z-index: 30;
 }
-.ms-canvas-wrap.is-active {
-  pointer-events: auto;
-}
+.ms-canvas-wrap.is-active { pointer-events: auto; }
 
 .ms-canvas {
   position: absolute;
@@ -425,7 +430,7 @@ watch(visibleMemberIds, renderOthers, { deep: true })
   width: 100%;
   height: 100%;
 }
-.ms-canvas.own { z-index: 2; }
+.ms-canvas.own   { z-index: 2; }
 .ms-canvas.other { z-index: 1; opacity: 0.65; }
 
 /* Toolbar */
@@ -474,8 +479,8 @@ watch(visibleMemberIds, renderOthers, { deep: true })
   justify-content: center;
   transition: all 0.15s;
 }
-.tool-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-.tool-btn.active { background: rgba(99,102,241,0.3); color: #a5b4fc; }
+.tool-btn:hover  { background: rgba(255,255,255,0.1); color: white; }
+.tool-btn.active { background: rgba(99,102,241,0.3);  color: #a5b4fc; }
 .tool-btn.danger:hover { background: rgba(239,68,68,0.2); color: #fca5a5; }
 
 .color-dot {
@@ -501,14 +506,12 @@ watch(visibleMemberIds, renderOthers, { deep: true })
 .share-label {
   display: flex;
   align-items: center;
-  gap: 4px;
   cursor: pointer;
   font-size: 16px;
   color: #9ca3af;
 }
 .share-label input { display: none; }
 
-/* Selector popup */
 .selector-wrap { position: relative; }
 .selector-popup {
   position: absolute;
@@ -530,8 +533,15 @@ watch(visibleMemberIds, renderOthers, { deep: true })
   font-size: 13px;
   color: #d1d5db;
 }
-.selector-item:hover { background: rgba(255,255,255,0.07); }
+.selector-item:hover   { background: rgba(255,255,255,0.07); }
 .selector-item.checked { color: #a5b4fc; }
 .check { font-size: 12px; width: 14px; }
-.you { font-size: 11px; color: #6b7280; }
+.private-badge {
+  margin-left: auto;
+  font-size: 10px;
+  color: #6b7280;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
 </style>

@@ -2812,16 +2812,14 @@ const routes2 = [
 
   route(
     "POST",
-    "/api/arrangements/:id/annotations",
-    async (request, env, params) => {
-      if (!(await hasPermission(request, env, "schedule")))
-        return json({ error: "Forbidden" }, 403);
-      const arrId = requireId(params);
-      if (!arrId) return badRequest("Invalid arrangement ID");
-      const member = await getMemberFromRequest(request, env);
-      if (!member) return unauthorized();
-      const body = await getBody(request);
-      if (!body || !body.content) return badRequest("content is required");
+     "/api/arrangements/:id/annotations",
+     async (request, env, params) => {
+       const member = await getMemberFromRequest(request, env);
+       if (!member) return unauthorized();
+       const arrId = requireId(params);
+       if (!arrId) return badRequest("Invalid arrangement ID");
+       const body = await getBody(request);
+       if (!body || !body.content) return badRequest("content is required");
       const result = await env.DB.prepare(
         "INSERT INTO arrangement_annotations (arrangement_id, member_id, content, is_shared) VALUES (?, ?, ?, ?)",
       )
@@ -2918,7 +2916,7 @@ const routes2 = [
   route("GET", "/api/arrangements/:id/drawings", async (request, env, params) => {
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params.id);
+    const arrangementId = requireId(params);
     if (!arrangementId) return badRequest("Invalid arrangement id");
     const drawings = await env.DB.prepare(`
       SELECT ad.*, m.first_name, m.last_name
@@ -2935,7 +2933,7 @@ const routes2 = [
   route("PUT", "/api/arrangements/:id/drawings", async (request, env, params) => {
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params.id);
+    const arrangementId = requireId(params);
     if (!arrangementId) return badRequest("Invalid arrangement id");
     const body = await getBody(request);
     if (!body) return badRequest("Missing body");
@@ -2967,7 +2965,7 @@ const routes2 = [
   route("DELETE", "/api/arrangements/:id/drawings", async (request, env, params) => {
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
-    const arrangementId = requireId(params.id);
+    const arrangementId = requireId(params);
     if (!arrangementId) return badRequest("Invalid arrangement id");
     await env.DB.prepare(
       "DELETE FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?"
@@ -5959,6 +5957,15 @@ const RBAC_GUARDS = [
 
 function checkRbacGuard(path, method) {
   if (method === "GET" || method === "OPTIONS") return null;
+  // Exemptions: sub-paths that any member can mutate (own data)
+  const memberPaths = [
+    /^\/api\/arrangements\/\d+\/drawings(\/|$)/,
+    /^\/api\/arrangements\/\d+\/annotations(\/|$)/,
+    /^\/api\/scheduled-people\/\d+\/status(\/|$)/,
+  ];
+  for (const re of memberPaths) {
+    if (re.test(path)) return null;
+  }
   for (const g of RBAC_GUARDS) {
     if (
       path === g.prefix ||
