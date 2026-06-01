@@ -68,13 +68,13 @@ test.describe('Music Stand — API', () => {
 
 test.describe('Music Stand — UI (site déployé)', () => {
   test('page /music-stand se charge correctement', async ({ page }) => {
-    const res = await page.goto(`${SITE}/music-stand`)
+    const res = await page.goto(`${SITE}/music-stand?demo=1`)
     expect(res?.status()).toBe(200)
     await page.waitForLoadState('networkidle')
   })
 
   test('la liste des chants est non-vide', async ({ page }) => {
-    await page.goto(`${SITE}/music-stand`)
+    await page.goto(`${SITE}/music-stand?demo=1`)
     await page.waitForLoadState('networkidle')
 
     // Attendre que le spinner de chargement disparaisse
@@ -89,7 +89,7 @@ test.describe('Music Stand — UI (site déployé)', () => {
   })
 
   test('le compteur de chants affiche un nombre > 0', async ({ page }) => {
-    await page.goto(`${SITE}/music-stand`)
+    await page.goto(`${SITE}/music-stand?demo=1`)
     await page.waitForLoadState('networkidle')
     // Le badge de compteur est un span avec bg-indigo-100
     const badge = page.locator('.bg-indigo-100.text-indigo-700')
@@ -100,7 +100,7 @@ test.describe('Music Stand — UI (site déployé)', () => {
   })
 
   test('cliquer sur un chant ouvre la vue Music Stand', async ({ page }) => {
-    await page.goto(`${SITE}/music-stand`)
+    await page.goto(`${SITE}/music-stand?demo=1`)
     await page.waitForLoadState('networkidle')
 
     const items = page.locator('.cursor-pointer').filter({ hasText: '🎵' })
@@ -112,7 +112,7 @@ test.describe('Music Stand — UI (site déployé)', () => {
   })
 
   test('la vue Music Stand affiche le titre du chant', async ({ page }) => {
-    await page.goto(`${SITE}/music-stand`)
+    await page.goto(`${SITE}/music-stand?demo=1`)
     await page.waitForLoadState('networkidle')
 
     // Récupère le titre du premier chant dans la liste
@@ -132,7 +132,7 @@ test.describe('Music Stand — UI (site déployé)', () => {
   })
 
   test('la barre de recherche filtre les chants', async ({ page }) => {
-    await page.goto(`${SITE}/music-stand`)
+    await page.goto(`${SITE}/music-stand?demo=1`)
     await page.waitForLoadState('networkidle')
 
     const items = page.locator('.cursor-pointer').filter({ hasText: '🎵' })

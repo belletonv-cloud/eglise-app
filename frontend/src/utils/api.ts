@@ -663,6 +663,7 @@ function buildUrl(
   let path = route.path;
   if (route.hasId && args.length > 0) {
     const id = args[0];
+    const originalPath = path;
     path = path
       .replace("{id}", String(id))
       .replace("{planId}", String(id))
@@ -677,6 +678,9 @@ function buildUrl(
       .replace("{mid}", String(args[1] ?? ""))
       .replace("{memberId}", String(args[1] ?? ""))
       .replace("{token}", String(id));
+    if (path === originalPath) {
+      path += "/" + String(id);
+    }
   }
   if (
     route.method === "GET" &&
