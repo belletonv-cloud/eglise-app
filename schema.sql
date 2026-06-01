@@ -349,3 +349,17 @@ CREATE TABLE webhook_logs (
     next_retry_at TEXT,
     created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- Canvas annotations (Music Stand drawings)
+CREATE TABLE IF NOT EXISTS arrangement_drawings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    arrangement_id INTEGER NOT NULL REFERENCES arrangements(id) ON DELETE CASCADE,
+    member_id INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    paths TEXT NOT NULL DEFAULT '[]',
+    is_shared INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(arrangement_id, member_id)
+);
+CREATE INDEX IF NOT EXISTS idx_drawings_arrangement ON arrangement_drawings(arrangement_id);
+CREATE INDEX IF NOT EXISTS idx_drawings_member ON arrangement_drawings(member_id);

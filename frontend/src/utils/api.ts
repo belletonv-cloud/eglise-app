@@ -146,6 +146,25 @@ const API_ROUTES: Record<
     hasId: true,
   },
 
+  // Drawings (canvas annotations)
+  getArrangementDrawings: {
+    path: "/api/arrangements/{id}/drawings",
+    method: "GET",
+    hasId: true,
+    isList: true,
+  },
+  saveArrangementDrawing: {
+    path: "/api/arrangements/{id}/drawings",
+    method: "PUT",
+    hasId: true,
+    hasBody: true,
+  },
+  deleteArrangementDrawing: {
+    path: "/api/arrangements/{id}/drawings",
+    method: "DELETE",
+    hasId: true,
+  },
+
   // Members
   getMembers: { path: "/api/members", method: "GET", isList: true },
   getMember: { path: "/api/members", method: "GET", hasId: true },
@@ -984,6 +1003,9 @@ const mockFallback: Record<string, (...args: any[]) => any> = {
   ],
   getArrangementMedia: () => [{ url: "mock.mp3", type: "audio" }],
   getArrangementAnnotations: () => [{ text: "Note", author: "User", id: 1 }],
+  getArrangementDrawings: () => [],
+  saveArrangementDrawing: () => ({ id: 1, paths: '[]', is_shared: 0 }),
+  deleteArrangementDrawing: () => ({ success: true }),
   getPlanChecklist: () => [
     { id: 1, label: "Préparer la sonorisation", checked: false, position: 0 },
   ],

@@ -2911,6 +2911,71 @@ const routes2 = [
   }),
 
   // ========================================
+  // ARRANGEMENT DRAWINGS (canvas annotations)
+  // ========================================
+  // GET /api/arrangements/:id/drawings — list all drawings for an arrangement
+  // Returns own drawing + shared drawings from other members
+  route("GET", "/api/arrangements/:id/drawings", async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: "Not authenticated" }, 401);
+    const arrangementId = requireId(params.id);
+    if (!arrangementId) return badRequest("Invalid arrangement id");
+    const drawings = await env.DB.prepare(`
+      SELECT ad.*, m.first_name, m.last_name
+      FROM arrangement_drawings ad
+      JOIN members m ON m.id = ad.member_id
+      WHERE ad.arrangement_id = ?
+        AND (ad.member_id = ? OR ad.is_shared = 1)
+      ORDER BY ad.updated_at DESC
+    `).bind(arrangementId, member.id).all();
+    return json(drawings.results);
+  }),
+
+  // PUT /api/arrangements/:id/drawings — upsert own drawing (one per member per arrangement)
+  route("PUT", "/api/arrangements/:id/drawings", async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: "Not authenticated" }, 401);
+    const arrangementId = requireId(params.id);
+    if (!arrangementId) return badRequest("Invalid arrangement id");
+    const body = await getBody(request);
+    if (!body) return badRequest("Missing body");
+    const paths = typeof body.paths === "string" ? body.paths : JSON.stringify(body.paths || []);
+    const isShared = body.is_shared ? 1 : 0;
+    // Upsert: one drawing per member per arrangement
+    const existing = await env.DB.prepare(
+      "SELECT id FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?"
+    ).bind(arrangementId, member.id).first();
+    if (existing) {
+      await env.DB.prepare(
+        "UPDATE arrangement_drawings SET paths = ?, is_shared = ?, updated_at = datetime('now') WHERE id = ?"
+      ).bind(paths, isShared, existing.id).run();
+    } else {
+      await env.DB.prepare(
+        "INSERT INTO arrangement_drawings (arrangement_id, member_id, paths, is_shared) VALUES (?, ?, ?, ?)"
+      ).bind(arrangementId, member.id, paths, isShared).run();
+    }
+    const row = await env.DB.prepare(`
+      SELECT ad.*, m.first_name, m.last_name
+      FROM arrangement_drawings ad
+      JOIN members m ON m.id = ad.member_id
+      WHERE ad.arrangement_id = ? AND ad.member_id = ?
+    `).bind(arrangementId, member.id).first();
+    return json(row);
+  }),
+
+  // DELETE /api/arrangements/:id/drawings — clear own drawing
+  route("DELETE", "/api/arrangements/:id/drawings", async (request, env, params) => {
+    const member = await getMemberFromRequest(request, env);
+    if (!member) return json({ error: "Not authenticated" }, 401);
+    const arrangementId = requireId(params.id);
+    if (!arrangementId) return badRequest("Invalid arrangement id");
+    await env.DB.prepare(
+      "DELETE FROM arrangement_drawings WHERE arrangement_id = ? AND member_id = ?"
+    ).bind(arrangementId, member.id).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
   // RESOURCE PERMISSIONS (RBAC fin)
   // ========================================
   route("GET", "/api/resource-permissions", async (request, env, params) => {

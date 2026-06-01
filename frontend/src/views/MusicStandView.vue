@@ -104,6 +104,15 @@
                     📝
                 </button>
                 <button
+                    v-if="arrangement"
+                    @click.stop="canvasActive = !canvasActive"
+                    class="toolbar-btn"
+                    :class="{ active: canvasActive }"
+                    title="Annotations dessin"
+                >
+                    ✏️
+                </button>
+                <button
                     @click.stop="showSettings = !showSettings"
                     class="toolbar-btn"
                     :title="$t('pdfExport.title')"
@@ -240,7 +249,14 @@
         </div>
 
         <!-- Chart Viewer Component (refacto) -->
-        <MusicStandChartViewer :lines="parsedLines" :font-size="fontSize" />
+        <div style="position: relative;">
+          <MusicStandChartViewer :lines="parsedLines" :font-size="fontSize" />
+          <MusicStandCanvas
+            v-if="arrangement"
+            :arrangement-id="arrangement.id"
+            :active="canvasActive"
+          />
+        </div>
 
         <!-- No chart state -->
         <div
@@ -320,6 +336,7 @@
 import MusicStandMetronome from "../components/musicstand/MusicStandMetronome.vue";
 import MusicStandSetlist from "../components/musicstand/MusicStandSetlist.vue";
 import MusicStandChartViewer from "../components/musicstand/MusicStandChartViewer.vue";
+import MusicStandCanvas from "../components/musicstand/MusicStandCanvas.vue";
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "../utils/api";
@@ -353,6 +370,7 @@ const showSetlist = ref(false);
 
 // Notes / Annotations
 const showNotes = ref(false);
+const canvasActive = ref(false);
 const annotations = ref<any[]>([]);
 const notesLoading = ref(false);
 const newNoteContent = ref("");
