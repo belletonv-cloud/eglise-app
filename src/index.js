@@ -345,6 +345,8 @@ const routes0 = [
   }),
 
   route("GET", "/api/members/:id", async (request, env, params) => {
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
     const member = await env.DB.prepare("SELECT * FROM members WHERE id = ?")
@@ -360,7 +362,18 @@ const routes0 = [
     )
       .bind(id)
       .all();
-    return json({ ...member, teams: teams.results });
+    const result = { ...member, teams: teams.results };
+    // Strip sensitive fields for non-admins viewing other members' profiles
+    const isAdmin = caller.role === 'admin' || await hasPermission(request, env, 'edit_members');
+    if (!isAdmin && caller.id !== id) {
+      delete result.birth_date;
+      delete result.baptism_date;
+      delete result.notes;
+      delete result.pco_id;
+      delete result.pco_updated_at;
+      delete result.pco_deleted_at;
+    }
+    return json(result);
   }),
 
   route("PUT", "/api/members/:id", async (request, env, params) => {
@@ -1921,8 +1934,16 @@ const routes0 = [
     "GET",
     "/api/volunteer-preferences/:memberId",
     async (request, env, params) => {
+      // Auth required — preferences include unavailable dates and personal notes
+      const caller = await getMemberFromRequest(request, env);
+      if (!caller) return json({ error: "Not authenticated" }, 401);
       const memberId = parseInt(params.memberId, 10);
       if (!memberId) return badRequest("Invalid member ID");
+      // Members can only read their own preferences unless admin/scheduler
+      const canViewOthers = caller.role === 'admin' || await hasPermission(request, env, 'schedule');
+      if (!canViewOthers && caller.id !== memberId) {
+        return json({ error: "Forbidden" }, 403);
+      }
       const prefs = await env.DB.prepare(
         "SELECT * FROM volunteer_preferences WHERE member_id = ?",
       )
@@ -3228,6 +3249,9 @@ const routes3 = [
   // DIRECTORY (annuaire en ligne)
   // ========================================
   route("GET", "/api/directory", async (request, env) => {
+    // Directory contains PII (email + phone) — auth required
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
     const members = await env.DB.prepare(
       `
       SELECT m.id, m.first_name, m.last_name, m.email, m.phone,
