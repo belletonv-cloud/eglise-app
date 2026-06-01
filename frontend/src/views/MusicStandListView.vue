@@ -55,12 +55,9 @@ const filtered = computed(() => {
 })
 
 function openMusicStand(song: any) {
-  const arr = song.arrangements?.find((a: any) => a.chord_chart) || song.arrangements?.[0]
-  if (arr) {
-    router.push(`/music-stand/${song.id}/${arr.id}`)
-  } else {
-    router.push(`/music-stand/${song.id}`)
-  }
+  // GET /api/songs doesn't return arrangements[] — just navigate by songId.
+  // MusicStandView resolves the best arrangement via getSong(id).
+  router.push(`/music-stand/${song.id}`)
 }
 
 onMounted(async () => {

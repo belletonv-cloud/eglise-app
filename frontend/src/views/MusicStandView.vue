@@ -161,8 +161,8 @@
                     >
                         <span class="browser-song-title">{{ s.title }}</span>
                         <span class="browser-song-arr"
-                            >{{ s.arrangements[0]?.key || "" }} ·
-                            {{ s.arrangements[0]?.tempo || "" }} BPM</span
+                            >{{ s.arrangements?.[0]?.key || "" }}
+                            {{ s.arrangements?.[0]?.tempo ? '· ' + s.arrangements[0].tempo + ' BPM' : '' }}</span
                         >
                     </div>
                     <div
@@ -257,6 +257,25 @@
 
         <!-- Chart Viewer Component (refacto) -->
         <MusicStandChartViewer :lines="parsedLines" />
+
+        <!-- No chart state -->
+        <div
+            v-if="!loading && song && arrangement && !arrangement.chord_chart"
+            class="no-chart"
+            style="color: #6b7280; font-size: 14px;"
+        >
+            <div style="font-size: 32px; margin-bottom: 8px;">🎵</div>
+            <div>{{ song.title }}</div>
+            <div style="margin-top: 4px; font-size: 12px;">Aucune grille disponible pour cet arrangement</div>
+        </div>
+
+        <div
+            v-if="!loading && !song"
+            class="no-chart"
+            style="color: #6b7280; font-size: 14px;"
+        >
+            Chant introuvable
+        </div>
 
         <!-- Bottom song nav -->
         <div
@@ -376,7 +395,8 @@ function selectSong(s: any) {
     router.replace({
         params: {
             songId: String(s.id),
-            arrangementId: String(s.arrangements[0]?.id || ""),
+            // arrangements[] absent du endpoint list — arrangementId resolved by loadSongData
+            arrangementId: String(s.arrangements?.[0]?.id || ""),
         },
         query: route.query,
     });
@@ -842,16 +862,13 @@ onMounted(async () => {
         // Load setlist from plan if ?plan= query param
         await loadSetlist();
 
-        // Load browser songs (all songs with charts) for Song Browser
+        // Load browser songs for Song Browser
+        // NOTE: GET /api/songs returns arrangement_count (integer), NOT arrangements[]
+        // We filter on arrangement_count > 0 — full arrangements are loaded on demand via getSong()
         try {
             const all = await api.getSongs();
-            songs.value = all.filter(
-                (s: any) =>
-                    s.arrangements &&
-                    s.arrangements.some(
-                        (a: any) =>
-                            a.chord_chart && a.chord_chart.trim().length > 0,
-                    ),
+            songs.value = (all || []).filter(
+                (s: any) => s.arrangement_count > 0,
             );
         } catch (e) {
             console.error("Erreur chargement songs pour Song Browser", e);
