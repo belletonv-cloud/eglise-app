@@ -1,3 +1,28 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Theme: Light (Planning/Services) */
+:root {
+  --primary: #1e40af;
+  --primary-hover: #1d4ed8;
+  --secondary: #059669;
+  --accent: #6366f1;
+}
+
+/* Theme: Dark (Music Stand) */
+[data-theme="dark"] {
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --secondary: #f59e0b;
+  --accent: #8b5cf6;
+}
+
+/* Menu group headers */
+.menu-group-header {
+  @apply px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider;
+}
+
+/* Menu item active state */
+.menu-item-active {
+  @apply bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium;
+}
