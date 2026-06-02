@@ -853,6 +853,19 @@ watch(
     { immediate: true },
 );
 
+// If auth state changes to unauthenticated without an explicit navigation,
+// force a redirect to /login so we don't keep rendering a protected route.
+watch(
+    isAuthenticated,
+    (authed) => {
+        if (authed) return;
+        const name = route.name as string | undefined;
+        if (name && publicRoutes.includes(name)) return;
+        if (name !== "login") router.replace({ name: "login" });
+    },
+    { immediate: true },
+);
+
 // Also load member on initial mount
 onMounted(async () => {
     if (user.value && !isImpersonating.value) {
