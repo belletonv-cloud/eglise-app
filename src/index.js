@@ -198,7 +198,7 @@ const routes0 = [
                JOIN arrangements ax ON ax.id = ps.arrangement_id
                WHERE ax.song_id = s.id
              ) as last_used,
-             COALESCE(s.updated_at, s.created_at) as last_edited
+             COALESCE(s.pco_updated_at, MAX(a.pco_updated_at), s.created_at) as last_edited
       FROM songs s LEFT JOIN arrangements a ON a.song_id = s.id
       ${where}
       GROUP BY s.id ORDER BY s.title ASC
