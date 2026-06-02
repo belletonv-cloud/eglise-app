@@ -90,6 +90,22 @@ const apps = computed(() => [
     to: '/music-stand-app',
   },
   {
+    key: 'serving-schedule',
+    icon: '📅',
+    iconBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
+    title: t('apps.serving_schedule_title'),
+    desc: t('apps.serving_schedule_desc'),
+    to: '/serving-schedule',
+  },
+  {
+    key: 'teams',
+    icon: '🎛️',
+    iconBg: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    title: t('apps.teams_title'),
+    desc: t('apps.teams_desc'),
+    to: '/teams-dashboard',
+  },
+  {
     key: 'members',
     icon: '👥',
     iconBg: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200',

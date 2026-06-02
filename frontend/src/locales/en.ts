@@ -461,6 +461,10 @@ export default {
     polls_title: "Polls",
     polls_desc: "Create and answer polls.",
     drag_hint: "(Prototype) Drag-and-drop item ordering",
+    serving_schedule_title: "Serving Schedule",
+    serving_schedule_desc: "Accept/decline requests — mobile UI.",
+    teams_title: "Teams",
+    teams_desc: "Band / Audio‑Visual — prep & emails.",
   },
   app: {
     title: "Church App",

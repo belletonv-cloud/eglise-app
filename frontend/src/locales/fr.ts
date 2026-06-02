@@ -482,6 +482,10 @@ export default {
     polls_title: "Sondages",
     polls_desc: "Créer et répondre à des sondages.",
     drag_hint: "(Prototype) Réordonnancement par glisser-déposer",
+    serving_schedule_title: "Serving Schedule",
+    serving_schedule_desc: "Demandes à accepter/refuser — interface mobile.",
+    teams_title: "Teams",
+    teams_desc: "Band / Audio‑Visual — préparation et emails.",
   },
   app: {
     title: "Application Église",

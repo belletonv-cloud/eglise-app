@@ -189,7 +189,7 @@ function openFullPlan() {
 
 function goTeams() {
   activeTab.value = 'teams'
-  router.push('/teams')
+  router.push('/teams-dashboard')
 }
 
 function goRehearse() {

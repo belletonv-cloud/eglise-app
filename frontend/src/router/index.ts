@@ -290,6 +290,16 @@ const router = createRouter({
       component: () => import("../views/FeatureCompare.vue"),
     },
     {
+      path: "/serving-schedule",
+      name: "serving-schedule",
+      component: () => import("../views/ServingScheduleView.vue"),
+    },
+    {
+      path: "/teams-dashboard",
+      name: "teams-dashboard",
+      component: () => import("../views/TeamsDashboardView.vue"),
+    },
+    {
       path: "/about",
       name: "about",
       component: () => import("../views/AboutPage.vue"),
