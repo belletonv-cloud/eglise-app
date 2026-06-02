@@ -313,13 +313,13 @@
                     <div class="px-1 pb-2">
                         <GlobalSearch />
                     </div>
-                    <MenuItemWithTooltip
+                    <router-link
                         to="/"
-                        icon="📊"
-                        :tooltip="menuTooltips.dashboard"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.dashboard") }
-                    </MenuItemWithTooltip>
+                        <span>📊</span> {{ $t("menu.dashboard") }}
+                    </router-link>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -327,41 +327,42 @@
                             {{ $t("menu.section_planning") }}
                         </p>
                     </div>
-                    <MenuItemWithTooltip
+                    <router-link
                         to="/calendar"
-                        icon="📅"
-                        :tooltip="menuTooltips.calendar"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.calendar") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📅</span> {{ $t("menu.calendar") }}
+                    </router-link>
+                    <router-link
                         to="/plans"
-                        icon="📋"
-                        :tooltip="menuTooltips.services"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.services") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📋</span> {{ $t("menu.services") }}
+                    </router-link>
+                    <router-link
+                        v-if="canSeePlanTemplates"
                         to="/plan-templates"
-                        icon="📄"
-                        :tooltip="menuTooltips.templates"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.templates") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📄</span> {{ $t("menu.templates") }}
+                    </router-link>
+                    <router-link
                         to="/checkin"
-                        icon="✅"
-                        :tooltip="menuTooltips.checkin"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.checkin") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>✅</span> {{ $t("menu.checkin") }}
+                    </router-link>
+                    <router-link
                         to="/historique"
-                        icon="📜"
-                        :tooltip="menuTooltips.history"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.history") }
-                    </MenuItemWithTooltip>
+                        <span>📜</span> {{ $t("menu.history") }}
+                    </router-link>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -369,34 +370,34 @@
                             {{ $t("menu.section_people") }}
                         </p>
                     </div>
-                    <MenuItemWithTooltip
+                    <router-link
                         to="/members"
-                        icon="👥"
-                        :tooltip="menuTooltips.members"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.members") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>👥</span> {{ $t("menu.members") }}
+                    </router-link>
+                    <router-link
                         to="/teams"
-                        icon="🎪"
-                        :tooltip="menuTooltips.teams"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.teams") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>🎪</span> {{ $t("menu.teams") }}
+                    </router-link>
+                    <router-link
                         to="/annuaire"
-                        icon="📖"
-                        :tooltip="menuTooltips.directory"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.directory") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📖</span> {{ $t("menu.directory") }}
+                    </router-link>
+                    <router-link
                         to="/house-groups"
-                        icon="🏠"
-                        :tooltip="menuTooltips.groups"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.groups") }
-                    </MenuItemWithTooltip>
+                        <span>🏠</span> {{ $t("menu.groups") }}
+                    </router-link>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -404,20 +405,20 @@
                             {{ $t("menu.section_music") }}
                         </p>
                     </div>
-                    <MenuItemWithTooltip
+                    <router-link
                         to="/songs"
-                        icon="🎵"
-                        :tooltip="menuTooltips.songs"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.songs") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>🎵</span> {{ $t("menu.songs") }}
+                    </router-link>
+                    <router-link
                         to="/music-stand"
-                        icon="🎼"
-                        :tooltip="menuTooltips.music_stand"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.music_stand") }
-                    </MenuItemWithTooltip>
+                        <span>🎼</span> {{ $t("menu.music_stand") }}
+                    </router-link>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -425,48 +426,48 @@
                             {{ $t("menu.section_communication") }}
                         </p>
                     </div>
-                    <MenuItemWithTooltip
+                    <router-link
                         to="/annonces"
-                        icon="📢"
-                        :tooltip="menuTooltips.announcements"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.announcements") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📢</span> {{ $t("menu.announcements") }}
+                    </router-link>
+                    <router-link
                         to="/events"
-                        icon="📅"
-                        :tooltip="menuTooltips.events"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.events") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📅</span> {{ $t("menu.events") }}
+                    </router-link>
+                    <router-link
                         to="/email"
-                        icon="📧"
-                        :tooltip="menuTooltips.emails"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.emails") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📧</span> {{ $t("menu.emails") }}
+                    </router-link>
+                    <router-link
                         to="/sondages"
-                        icon="📊"
-                        :tooltip="menuTooltips.polls"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.polls") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>📊</span> {{ $t("menu.polls") }}
+                    </router-link>
+                    <router-link
                         to="/youtube"
-                        icon="▶️"
-                        :tooltip="menuTooltips.youtube"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.youtube") }
-                    </MenuItemWithTooltip>
-                    <MenuItemWithTooltip
+                        <span>▶️</span> {{ $t("menu.youtube") }}
+                    </router-link>
+                    <router-link
                         to="/about"
-                        icon="ℹ️"
-                        :tooltip="menuTooltips.about"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        { $t("menu.about") }
-                    </MenuItemWithTooltip>
+                        <span>ℹ️</span> {{ $t("menu.about") }}
+                    </router-link>
                     <div v-if="showAdminSection" class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -653,10 +654,10 @@ import { hasRolePermission, roleHasAnyPermission } from "./utils/rbac";
 import Toasts from "./components/Toasts.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
 import GlobalSearch from "./components/GlobalSearch.vue";
-import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
-import { menuTooltips } from "./utils/menuTooltips";
 import PageHelp from "./components/PageHelp.vue";
 import { stepsByPage } from "./page-help-steps";
+import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
+import { menuTooltips } from "./utils/menuTooltips";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
 

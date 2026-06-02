@@ -318,7 +318,7 @@
                         icon="📊"
                         :tooltip="menuTooltips.dashboard"
                     >
-                        { $t("menu.dashboard") }
+                        {{ $t("menu.dashboard") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
@@ -332,35 +332,36 @@
                         icon="📅"
                         :tooltip="menuTooltips.calendar"
                     >
-                        { $t("menu.calendar") }
+                        {{ $t("menu.calendar") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/plans"
                         icon="📋"
                         :tooltip="menuTooltips.services"
                     >
-                        { $t("menu.services") }
+                        {{ $t("menu.services") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
+                        v-if="canSeePlanTemplates"
                         to="/plan-templates"
                         icon="📄"
                         :tooltip="menuTooltips.templates"
                     >
-                        { $t("menu.templates") }
+                        {{ $t("menu.templates") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/checkin"
                         icon="✅"
                         :tooltip="menuTooltips.checkin"
                     >
-                        { $t("menu.checkin") }
+                        {{ $t("menu.checkin") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/historique"
                         icon="📜"
                         :tooltip="menuTooltips.history"
                     >
-                        { $t("menu.history") }
+                        {{ $t("menu.history") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
@@ -374,28 +375,28 @@
                         icon="👥"
                         :tooltip="menuTooltips.members"
                     >
-                        { $t("menu.members") }
+                        {{ $t("menu.members") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/teams"
                         icon="🎪"
                         :tooltip="menuTooltips.teams"
                     >
-                        { $t("menu.teams") }
+                        {{ $t("menu.teams") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/annuaire"
                         icon="📖"
                         :tooltip="menuTooltips.directory"
                     >
-                        { $t("menu.directory") }
+                        {{ $t("menu.directory") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/house-groups"
                         icon="🏠"
                         :tooltip="menuTooltips.groups"
                     >
-                        { $t("menu.groups") }
+                        {{ $t("menu.groups") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
@@ -409,14 +410,14 @@
                         icon="🎵"
                         :tooltip="menuTooltips.songs"
                     >
-                        { $t("menu.songs") }
+                        {{ $t("menu.songs") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/music-stand"
                         icon="🎼"
                         :tooltip="menuTooltips.music_stand"
                     >
-                        { $t("menu.music_stand") }
+                        {{ $t("menu.music_stand") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
@@ -430,42 +431,42 @@
                         icon="📢"
                         :tooltip="menuTooltips.announcements"
                     >
-                        { $t("menu.announcements") }
+                        {{ $t("menu.announcements") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/events"
                         icon="📅"
                         :tooltip="menuTooltips.events"
                     >
-                        { $t("menu.events") }
+                        {{ $t("menu.events") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/email"
                         icon="📧"
                         :tooltip="menuTooltips.emails"
                     >
-                        { $t("menu.emails") }
+                        {{ $t("menu.emails") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/sondages"
                         icon="📊"
                         :tooltip="menuTooltips.polls"
                     >
-                        { $t("menu.polls") }
+                        {{ $t("menu.polls") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/youtube"
                         icon="▶️"
                         :tooltip="menuTooltips.youtube"
                     >
-                        { $t("menu.youtube") }
+                        {{ $t("menu.youtube") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/about"
                         icon="ℹ️"
                         :tooltip="menuTooltips.about"
                     >
-                        { $t("menu.about") }
+                        {{ $t("menu.about") }}
                     </MenuItemWithTooltip>
                     <div v-if="showAdminSection" class="pt-2 pb-1">
                         <p
@@ -474,7 +475,6 @@
                             {{ $t("menu.section_admin") }}
                         </p>
                     </div>
-                    <router-link
                         v-if="localIsAdmin"
                         to="/admin"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -482,7 +482,6 @@
                     >
                         <span>⚙️</span> {{ $t("menu.admin") }}
                     </router-link>
-                    <router-link
                         v-if="canManageMembersMenu"
                         to="/admin/members"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -490,7 +489,6 @@
                     >
                         <span>👥</span> {{ $t("menu.admin_members") }}
                     </router-link>
-                    <router-link
                         v-if="localIsAdmin"
                         to="/apps"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -498,7 +496,6 @@
                     >
                         <span>🧩</span> {{ $t("menu.apps") }}
                     </router-link>
-                    <router-link
                         v-if="localIsScheduler"
                         to="/conflicts"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -506,7 +503,6 @@
                     >
                         <span>⚠️</span> {{ $t("menu.conflicts") }}
                     </router-link>
-                    <router-link
                         v-if="canEditContentMenu"
                         to="/admin/content"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -514,7 +510,6 @@
                     >
                         <span>📝</span> {{ $t("menu.content") }}
                     </router-link>
-                    <router-link
                         v-if="localIsAdmin"
                         to="/webhooks"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -522,7 +517,6 @@
                     >
                         <span>🔗</span> {{ $t("menu.webhooks") }}
                     </router-link>
-                    <router-link
                         v-if="localIsAdmin"
                         to="/logs"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -530,7 +524,6 @@
                     >
                         <span>📋</span> {{ $t("menu.logs") }}
                     </router-link>
-                    <router-link
                         v-if="localIsAdmin"
                         to="/pco-sync"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
@@ -653,10 +646,10 @@ import { hasRolePermission, roleHasAnyPermission } from "./utils/rbac";
 import Toasts from "./components/Toasts.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
 import GlobalSearch from "./components/GlobalSearch.vue";
-import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
-import { menuTooltips } from "./utils/menuTooltips";
 import PageHelp from "./components/PageHelp.vue";
 import { stepsByPage } from "./page-help-steps";
+import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
+import { menuTooltips } from "./utils/menuTooltips";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
 
