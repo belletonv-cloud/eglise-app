@@ -92,7 +92,7 @@
                         <h1
                             class="text-lg font-bold text-gray-800 dark:text-gray-100"
                         >
-                            {{ $t("app.title") }}
+                            {{{ $t("app.title") }}}
                         </h1>
                         <p
                             class="text-sm text-gray-500 dark:text-gray-400 truncate"
@@ -259,7 +259,7 @@
                                 <div
                                     class="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700"
                                 >
-                                    {{ $t("demoPersona.instructions") }}
+                                    {{{ $t("demoPersona.instructions") }}}
                                 </div>
                                 <button
                                     v-if="isImpersonating"
@@ -318,13 +318,13 @@
                         icon="📊"
                         :tooltip="menuTooltips.dashboard"
                     >
-                        { $t("menu.dashboard") }
+                        {{ $t("menu.dashboard") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
-                            {{ $t("menu.section_planning") }}
+                            {{{ $t("menu.section_planning") }}}
                         </p>
                     </div>
                     <MenuItemWithTooltip
@@ -332,41 +332,41 @@
                         icon="📅"
                         :tooltip="menuTooltips.calendar"
                     >
-                        { $t("menu.calendar") }
+                        {{ $t("menu.calendar") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/plans"
                         icon="📋"
                         :tooltip="menuTooltips.services"
                     >
-                        { $t("menu.services") }
+                        {{ $t("menu.services") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/plan-templates"
                         icon="📄"
                         :tooltip="menuTooltips.templates"
                     >
-                        { $t("menu.templates") }
+                        {{ $t("menu.templates") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/checkin"
                         icon="✅"
                         :tooltip="menuTooltips.checkin"
                     >
-                        { $t("menu.checkin") }
+                        {{ $t("menu.checkin") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/historique"
                         icon="📜"
                         :tooltip="menuTooltips.history"
                     >
-                        { $t("menu.history") }
+                        {{ $t("menu.history") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
-                            {{ $t("menu.section_people") }}
+                            {{{ $t("menu.section_people") }}}
                         </p>
                     </div>
                     <MenuItemWithTooltip
@@ -374,34 +374,34 @@
                         icon="👥"
                         :tooltip="menuTooltips.members"
                     >
-                        { $t("menu.members") }
+                        {{ $t("menu.members") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/teams"
                         icon="🎪"
                         :tooltip="menuTooltips.teams"
                     >
-                        { $t("menu.teams") }
+                        {{ $t("menu.teams") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/annuaire"
                         icon="📖"
                         :tooltip="menuTooltips.directory"
                     >
-                        { $t("menu.directory") }
+                        {{ $t("menu.directory") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/house-groups"
                         icon="🏠"
                         :tooltip="menuTooltips.groups"
                     >
-                        { $t("menu.groups") }
+                        {{ $t("menu.groups") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
-                            {{ $t("menu.section_music") }}
+                            {{{ $t("menu.section_music") }}}
                         </p>
                     </div>
                     <MenuItemWithTooltip
@@ -409,20 +409,20 @@
                         icon="🎵"
                         :tooltip="menuTooltips.songs"
                     >
-                        { $t("menu.songs") }
+                        {{ $t("menu.songs") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/music-stand"
                         icon="🎼"
                         :tooltip="menuTooltips.music_stand"
                     >
-                        { $t("menu.music_stand") }
+                        {{ $t("menu.music_stand") }}
                     </MenuItemWithTooltip>
                     <div class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
-                            {{ $t("menu.section_communication") }}
+                            {{{ $t("menu.section_communication") }}}
                         </p>
                     </div>
                     <MenuItemWithTooltip
@@ -430,48 +430,48 @@
                         icon="📢"
                         :tooltip="menuTooltips.announcements"
                     >
-                        { $t("menu.announcements") }
+                        {{ $t("menu.announcements") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/events"
                         icon="📅"
                         :tooltip="menuTooltips.events"
                     >
-                        { $t("menu.events") }
+                        {{ $t("menu.events") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/email"
                         icon="📧"
                         :tooltip="menuTooltips.emails"
                     >
-                        { $t("menu.emails") }
+                        {{ $t("menu.emails") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/sondages"
                         icon="📊"
                         :tooltip="menuTooltips.polls"
                     >
-                        { $t("menu.polls") }
+                        {{ $t("menu.polls") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/youtube"
                         icon="▶️"
                         :tooltip="menuTooltips.youtube"
                     >
-                        { $t("menu.youtube") }
+                        {{ $t("menu.youtube") }}
                     </MenuItemWithTooltip>
                     <MenuItemWithTooltip
                         to="/about"
                         icon="ℹ️"
                         :tooltip="menuTooltips.about"
                     >
-                        { $t("menu.about") }
+                        {{ $t("menu.about") }}
                     </MenuItemWithTooltip>
                     <div v-if="showAdminSection" class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
-                            {{ $t("menu.section_admin") }}
+                            {{{ $t("menu.section_admin") }}}
                         </p>
                     </div>
                     <router-link
@@ -480,7 +480,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>⚙️</span> {{ $t("menu.admin") }}
+                        <span>⚙️</span> {{{ $t("menu.admin") }}}
                     </router-link>
                     <router-link
                         v-if="canManageMembersMenu"
@@ -488,7 +488,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>👥</span> {{ $t("menu.admin_members") }}
+                        <span>👥</span> {{{ $t("menu.admin_members") }}}
                     </router-link>
                     <router-link
                         v-if="localIsAdmin"
@@ -496,7 +496,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>🧩</span> {{ $t("menu.apps") }}
+                        <span>🧩</span> {{{ $t("menu.apps") }}}
                     </router-link>
                     <router-link
                         v-if="localIsScheduler"
@@ -504,7 +504,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>⚠️</span> {{ $t("menu.conflicts") }}
+                        <span>⚠️</span> {{{ $t("menu.conflicts") }}}
                     </router-link>
                     <router-link
                         v-if="canEditContentMenu"
@@ -512,7 +512,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>📝</span> {{ $t("menu.content") }}
+                        <span>📝</span> {{{ $t("menu.content") }}}
                     </router-link>
                     <router-link
                         v-if="localIsAdmin"
@@ -520,7 +520,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>🔗</span> {{ $t("menu.webhooks") }}
+                        <span>🔗</span> {{{ $t("menu.webhooks") }}}
                     </router-link>
                     <router-link
                         v-if="localIsAdmin"
@@ -528,7 +528,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>📋</span> {{ $t("menu.logs") }}
+                        <span>📋</span> {{{ $t("menu.logs") }}}
                     </router-link>
                     <router-link
                         v-if="localIsAdmin"
@@ -536,7 +536,7 @@
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>🔄</span> {{ $t("menu.pco_sync") }}
+                        <span>🔄</span> {{{ $t("menu.pco_sync") }}}
                     </router-link>
                 </nav>
                 <div
@@ -560,7 +560,7 @@
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                             />
                         </svg>
-                        {{ $t("app.logout") }}
+                        {{{ $t("app.logout") }}}
                     </button>
                 </div>
             </aside>
@@ -596,7 +596,7 @@
                     <h1
                         class="text-lg font-bold text-gray-800 dark:text-gray-100"
                     >
-                        {{ $t("app.headline") }}
+                        {{{ $t("app.headline") }}}
                     </h1>
                     <div class="w-6"></div>
                 </div>
@@ -604,7 +604,7 @@
                     v-if="!online"
                     class="bg-amber-500 text-white text-center py-1 text-sm font-medium"
                 >
-                    {{ $t("app.offline_mode") }}
+                    {{{ $t("app.offline_mode") }}}
                 </div>
                 <div class="flex-1 overflow-auto p-4 lg:p-6">
                     <router-view />
@@ -653,11 +653,9 @@ import { hasRolePermission, roleHasAnyPermission } from "./utils/rbac";
 import Toasts from "./components/Toasts.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
 import GlobalSearch from "./components/GlobalSearch.vue";
+import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
+import { menuTooltips } from "./utils/menuTooltips";
 import PageHelp from "./components/PageHelp.vue";
-import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
-import { menuTooltips } from "./utils/menuTooltips";
-import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
-import { menuTooltips } from "./utils/menuTooltips";
 import { stepsByPage } from "./page-help-steps";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
