@@ -76,9 +76,9 @@
                 : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-gray-700 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100'"
               @click="selectPlan(p.id)"
             >
-              <div class="text-sm font-semibold truncate">{{ p.title || ('Plan #' + p.id) }}</div>
+              <div class="text-sm font-semibold truncate">{{ p.theme || p.service_type_name || ('Plan #' + p.id) }}</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {{ p.date }} • {{ p.time || '' }}
+                {{ p.date }}{{ p.time ? ' · ' + p.time.slice(0,5) : '' }}
               </div>
             </button>
           </div>
@@ -182,8 +182,11 @@ function formatLen(mins: any): string {
 async function loadPlans() {
   loadingPlans.value = true
   try {
-    const res = await api.getPlans({ page: 1, size: 10 } as any)
-    plans.value = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : []
+    const res = await api.getPlans({ page: 1, size: 50 } as any)
+    const all: any[] = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : []
+    // Prefer upcoming / planned, fall back to last 10 if none
+    const upcoming = all.filter((p: any) => p.status !== 'done')
+    plans.value = upcoming.length > 0 ? upcoming.slice(0, 15) : all.slice(-10)
   } catch {
     plans.value = []
   } finally {
