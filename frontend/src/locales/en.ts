@@ -185,6 +185,8 @@ export default {
   },
   adminOneClick: {
     title: "One-click action",
+    token_help:
+      "This page is normally opened via an email link containing ?token=...",
     token_missing: "Missing token",
     action_label: "Cancel existing assignment",
     action: "Action",

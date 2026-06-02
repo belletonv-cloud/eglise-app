@@ -81,6 +81,13 @@ test.describe('Site déployé — Mode démo', () => {
     await expect(page.getByRole('heading', { name: /Connexion/i })).toHaveCount(0)
   })
 
+  test('le menu admin affiche /admin/roles pour un admin (démo)', async ({ page }) => {
+    await page.goto(`${SITE}/?demo=1`)
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.locator('a[href="/admin/roles"]')).toHaveCount(1)
+  })
+
   test('persona Éditeur: pas de lien /admin (hub), mais accès au contenu', async ({ page }) => {
     await page.goto(`${SITE}/?demo=1`)
 

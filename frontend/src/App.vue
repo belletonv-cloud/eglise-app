@@ -742,10 +742,10 @@ function isRunningInIframe() {
 
 const isPreviewFrame = computed(() => {
     if (typeof window === "undefined") return false;
-    // Hard stop: never allow the preview overlay from inside an iframe.
-    // This prevents iframe-in-iframe cascades if the query params are lost.
-    if (isRunningInIframe()) return true;
-    return new URLSearchParams(window.location.search).get("preview") === "true";
+    // Never allow the preview overlay from inside an iframe.
+    // (Some users may open the iframe URL directly in a new tab; in that case,
+    // we still want normal navigation/redirect behavior.)
+    return isRunningInIframe();
 });
 
 const deviceMenuOpen = ref(false);
