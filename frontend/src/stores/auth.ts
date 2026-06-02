@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { auth, googleProvider } from "../firebase";
+import { auth, googleProvider, firebaseReady } from "../firebase";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -55,25 +55,37 @@ if (
   isDemoMode.value = true;
 }
 
-onAuthStateChanged(auth, (firebaseUser: any) => {
-  // Ne pas override le mode demo local
-  if (
-    typeof window !== "undefined" &&
-    window.location.search.includes("demo=1")
-  )
-    return;
-  if (firebaseUser) {
-    user.value = firebaseUser;
-    if (!originalUser.value) originalUser.value = firebaseUser;
-    isAuthenticated.value = true;
-    redirectAfterLogin?.();
-  } else {
-    user.value = null;
-    isAuthenticated.value = false;
-  }
-});
+if (firebaseReady) {
+  onAuthStateChanged(auth, (firebaseUser: any) => {
+    // Ne pas override le mode demo local
+    if (
+      typeof window !== "undefined" &&
+      window.location.search.includes("demo=1")
+    )
+      return;
+    if (firebaseUser) {
+      user.value = firebaseUser;
+      if (!originalUser.value) originalUser.value = firebaseUser;
+      isAuthenticated.value = true;
+      redirectAfterLogin?.();
+    } else {
+      user.value = null;
+      isAuthenticated.value = false;
+    }
+  });
+} else if (typeof auth.onAuthStateChanged === "function") {
+  // Use mock onAuthStateChanged (demo or missing config)
+  auth.onAuthStateChanged((firebaseUser: any) => {
+    if (firebaseUser) {
+      user.value = firebaseUser;
+      isAuthenticated.value = true;
+      redirectAfterLogin?.();
+    }
+  });
+}
 
 export const loginWithEmail = async (email: string, password: string) => {
+  if (!firebaseReady) return;
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
@@ -82,6 +94,7 @@ export const loginWithEmail = async (email: string, password: string) => {
 };
 
 export const loginWithGoogle = async () => {
+  if (!firebaseReady) return;
   try {
     await signInWithPopup(auth, googleProvider);
   } catch (error) {
@@ -94,6 +107,11 @@ export const logout = async () => {
     typeof window !== "undefined" &&
     window.location.search.includes("demo=1")
   ) {
+    isAuthenticated.value = false;
+    user.value = null;
+    return;
+  }
+  if (!firebaseReady) {
     isAuthenticated.value = false;
     user.value = null;
     return;
