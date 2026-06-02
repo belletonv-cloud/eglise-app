@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test'
 
 /**
  * Tests E2E ciblant le site déployé https://eglise-app.pages.dev/
- * Exécutés avec --base-url https://eglise-app.pages.dev
+ * Exécutés avec la variable d'env EGLISE_APP_SITE (sinon https://eglise-app.pages.dev)
  * ou directement avec les URLs absolues ci-dessous.
  */
 
-const SITE = 'https://eglise-app.pages.dev'
+const SITE = process.env.EGLISE_APP_SITE || 'https://eglise-app.pages.dev'
 
 test.describe('Site déployé — Navigation globale', () => {
   const routes = [
@@ -71,5 +71,34 @@ test.describe('Site déployé — Mode démo', () => {
     // Le mock retourne 1 chant "Mock song"
     const items = page.locator('.cursor-pointer').filter({ hasText: '🎵' })
     await expect(items.first()).toBeVisible({ timeout: 8000 })
+  })
+
+  test('aperçu mobile (iframe) fonctionne sur le site déployé', async ({ page }) => {
+    await page.goto(`${SITE}/?demo=1`)
+
+    await page.getByTitle('Aperçu responsive (desktop/tablette/mobile)').click()
+    await page.getByRole('button', { name: '📲 Mobile' }).click()
+
+    await expect(page.getByText('Aperçu')).toBeVisible()
+    const frame = page.locator('iframe')
+    await expect(frame).toBeVisible()
+    await expect(frame).toHaveAttribute('src', /preview=true/)
+    await expect(frame).toHaveAttribute('src', /device=mobile/)
+
+    await page.getByRole('button', { name: 'Fermer ✕' }).click()
+    await expect(page.getByText('Aperçu')).toBeHidden()
+  })
+
+  test('aperçu tablette (iframe) fonctionne sur le site déployé', async ({ page }) => {
+    await page.goto(`${SITE}/?demo=1`)
+
+    await page.getByTitle('Aperçu responsive (desktop/tablette/mobile)').click()
+    await page.getByRole('button', { name: '📱 Tablette' }).click()
+
+    await expect(page.getByText('Aperçu')).toBeVisible()
+    const frame = page.locator('iframe')
+    await expect(frame).toBeVisible()
+    await expect(frame).toHaveAttribute('src', /preview=true/)
+    await expect(frame).toHaveAttribute('src', /device=tablet/)
   })
 })
