@@ -816,10 +816,14 @@ watch(
     user,
     (val) => {
         if (val) {
-            // Load member for Firebase users
-            if (!isDemoMode.value && !isImpersonating.value) {
+            // Load member (Firebase users + demo mode default member)
+            // Skip while impersonating to avoid overriding the persona member.
+            if (!isImpersonating.value) {
                 loadCurrentMember().then(() => {
-                    wasOriginallyAdmin.value = member.value?.role === "admin";
+                    if (!isDemoMode.value) {
+                        wasOriginallyAdmin.value =
+                            member.value?.role === "admin";
+                    }
                 });
             }
             // Navigate after login (remove duplicate navigation logic)
@@ -836,11 +840,13 @@ watch(
     { immediate: true },
 );
 
-// Also load member on initial mount (for Firebase users)
+// Also load member on initial mount
 onMounted(async () => {
-    if (user.value && !isDemoMode.value && !isImpersonating.value) {
-        const role = await loadCurrentMember();
-        wasOriginallyAdmin.value = member.value?.role === "admin";
+    if (user.value && !isImpersonating.value) {
+        await loadCurrentMember();
+        if (!isDemoMode.value) {
+            wasOriginallyAdmin.value = member.value?.role === "admin";
+        }
     }
 });
 
