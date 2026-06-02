@@ -73,6 +73,20 @@ test.describe('Site déployé — Mode démo', () => {
     await expect(items.first()).toBeVisible({ timeout: 8000 })
   })
 
+  test('/apps en mode démo rend le launcher', async ({ page }) => {
+    test.skip(
+      !process.env.EGLISE_APP_SITE,
+      'Test only when targeting a preview site that includes /apps (set EGLISE_APP_SITE).'
+    )
+
+    await page.goto(`${SITE}/apps?demo=1`)
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.getByRole('heading', { name: 'Apps' })).toBeVisible({ timeout: 8000 })
+    await expect(page.getByText('Services Center')).toBeVisible()
+    await expect(page.getByText('Music Stand')).toBeVisible()
+  })
+
   test('/admin/roles en mode démo ne redirige pas vers /login', async ({ page }) => {
     await page.goto(`${SITE}/admin/roles?demo=1`)
     await page.waitForLoadState('domcontentloaded')

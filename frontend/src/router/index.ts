@@ -265,6 +265,16 @@ const router = createRouter({
       props: true,
     },
     {
+      path: "/apps",
+      name: "apps",
+      component: () => import("../views/AppsLauncher.vue"),
+    },
+    {
+      path: "/apps/compare",
+      name: "apps-compare",
+      component: () => import("../views/AppsCompare.vue"),
+    },
+    {
       path: "/about",
       name: "about",
       component: () => import("../views/AboutPage.vue"),

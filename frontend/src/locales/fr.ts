@@ -422,6 +422,7 @@ export default {
     account: "Mon compte",
     dashboard: "Tableau de bord",
     home: "Accueil",
+    apps: "Apps",
     calendar: "Calendrier",
     services: "Services",
     templates: "Modèles",
@@ -454,6 +455,33 @@ export default {
     section_communication: "Communication",
     section_admin: "Administration",
     admin: "Administration",
+  },
+  apps: {
+    title: "Apps",
+    subtitle:
+      "Chaque module peut être utilisé comme une app autonome (surtout en mode mobile).",
+    open: "Ouvrir",
+    back: "Retour",
+    compare_title: "Comparatif split-screen (Services Center vs Music Stand)",
+    compare_desc:
+      "Prototype visuel pour aligner l'UX entre un dashboard de planification et une vue performance.",
+    services_center_title: "Services Center",
+    services_center_subtitle: "Dashboard de planification (UI claire)",
+    services_center_desc:
+      "Ordre, équipes, répétitions — style SaaS blanc/vert.",
+    music_stand_title: "Music Stand",
+    music_stand_subtitle: "Vue performance (UI sombre)",
+    music_stand_desc:
+      "Mode scène — interface noire/bleue orientée lecture.",
+    members_title: "Membres",
+    members_desc: "Annuaire et profils.",
+    songs_title: "Chants",
+    songs_desc: "Bibliothèque, arrangements, transposition.",
+    announcements_title: "Annonces",
+    announcements_desc: "Annonces & sujets de prière.",
+    polls_title: "Sondages",
+    polls_desc: "Créer et répondre à des sondages.",
+    drag_hint: "(Prototype) Réordonnancement par glisser-déposer",
   },
   app: {
     title: "Application Église",
