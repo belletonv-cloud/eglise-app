@@ -182,7 +182,23 @@ const routes0 = [
       `
       SELECT s.*,
              COUNT(a.id) as arrangement_count,
-             MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart
+             MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart,
+             (
+               SELECT a2.key
+               FROM arrangements a2
+               WHERE a2.song_id = s.id AND a2.key IS NOT NULL AND TRIM(a2.key) != ''
+               ORDER BY a2.id ASC
+               LIMIT 1
+             ) as primary_key,
+             (
+               SELECT MAX(p.date)
+               FROM plan_songs ps
+               JOIN plan_items pi ON pi.id = ps.plan_item_id
+               JOIN plans p ON p.id = pi.plan_id
+               JOIN arrangements ax ON ax.id = ps.arrangement_id
+               WHERE ax.song_id = s.id
+             ) as last_used,
+             COALESCE(s.updated_at, s.created_at) as last_edited
       FROM songs s LEFT JOIN arrangements a ON a.song_id = s.id
       ${where}
       GROUP BY s.id ORDER BY s.title ASC

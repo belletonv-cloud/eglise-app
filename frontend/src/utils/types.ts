@@ -7,6 +7,9 @@ export interface Song {
   themes?: string;
   notes?: string;
   arrangement_count?: number;
+  primary_key?: string;
+  last_used?: string;
+  last_edited?: string;
   arrangements?: Arrangement[];
   created_at?: string;
 }
