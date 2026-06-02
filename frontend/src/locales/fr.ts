@@ -443,12 +443,15 @@ export default {
     about: "À propos",
     content: "Contenus",
     test_accounts: "Comptes test",
+    admin_members: "Membres (admin)",
+    admin_roles: "Rôles",
+    admin_oneclick: "One-click",
     section_planning: "Planification",
     section_people: "Personnes",
     section_music: "Musique",
     section_communication: "Communication",
-     section_admin: "Administration",
-     admin: "Administration",
+    section_admin: "Administration",
+    admin: "Administration",
   },
   app: {
     title: "Application Église",
@@ -1044,7 +1047,7 @@ export default {
     title: "À propos",
     welcome: "Bienvenue sur Église Cieux Ouverts",
     subtitle:
-      "Une plateforme modulaire pour gérer votre église — planification, membres, musique, communication et administration.",
+      "Une plateforme modulaire (inspirée de Planning Center) : chaque module fonctionne comme une app dédiée — planning, membres, music stand, communication et admin.",
     modules_title: "Modules disponibles",
     module_services: "Gestion des services",
     module_services_desc:
@@ -1063,6 +1066,22 @@ export default {
     version: "Version",
     credits: "Développé par l'équipe technique — Église Cieux Ouverts",
     back: "Retour",
+  },
+
+  adminHome: {
+    title: "Administration",
+    subtitle: "Outils d’administration, rôles et configuration.",
+    no_access: "Vous n’avez pas accès aux outils d’administration avec votre rôle actuel.",
+    cards: {
+      members_desc: "Gérer les rôles, exceptions et permissions des membres.",
+      roles_desc: "Gestion simple des rôles (legacy).",
+      oneclick_desc: "Actions administratives rapides (avec token).",
+      content_desc: "Éditer les textes statiques (i18n) en local.",
+      test_accounts_desc: "Basculer entre des personas de test.",
+      webhooks_desc: "Configurer les webhooks sortants.",
+      logs_desc: "Consulter les logs des requêtes API.",
+      pco_desc: "Synchroniser les données Planning Center.",
+    },
   },
 
   adminContent: {

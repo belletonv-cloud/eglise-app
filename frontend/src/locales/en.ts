@@ -424,12 +424,15 @@ export default {
     about: "About",
     content: "Content",
     test_accounts: "Test Accounts",
+    admin_members: "Members (admin)",
+    admin_roles: "Roles",
+    admin_oneclick: "One-click",
     section_planning: "Planning",
     section_people: "People",
     section_music: "Music",
     section_communication: "Communication",
-     section_admin: "Administration",
-     admin: "Administration",
+    section_admin: "Administration",
+    admin: "Administration",
   },
   app: {
     title: "Church App",
@@ -1019,7 +1022,7 @@ export default {
     title: "About",
     welcome: "Welcome to Église Cieux Ouverts",
     subtitle:
-      "A modular platform to manage your church — planning, members, music, communication, and administration.",
+      "A modular platform (inspired by Planning Center): each module works like a dedicated app — planning, members, music stand, communication and admin.",
     modules_title: "Available Modules",
     module_services: "Service Management",
     module_services_desc:
@@ -1037,6 +1040,22 @@ export default {
     version: "Version",
     credits: "Built by the tech team — Église Cieux Ouverts",
     back: "← Back",
+  },
+
+  adminHome: {
+    title: "Administration",
+    subtitle: "Administration tools, roles and configuration.",
+    no_access: "You don’t have access to administration tools with your current role.",
+    cards: {
+      members_desc: "Manage member roles, exceptions and permissions.",
+      roles_desc: "Simple role management (legacy).",
+      oneclick_desc: "Quick admin actions (token-based).",
+      content_desc: "Edit static interface texts (i18n) locally.",
+      test_accounts_desc: "Switch between test personas.",
+      webhooks_desc: "Configure outgoing webhooks.",
+      logs_desc: "View API request logs.",
+      pco_desc: "Sync Planning Center data.",
+    },
   },
 
   adminContent: {

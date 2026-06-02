@@ -166,6 +166,11 @@ const router = createRouter({
       component: ConflictLogs,
     },
     {
+      path: "/admin",
+      name: "admin",
+      component: () => import("../views/AdminHome.vue"),
+    },
+    {
       path: "/admin/members",
       name: "admin-members",
       component: () => import("../views/AdminMembers.vue"),

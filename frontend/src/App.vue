@@ -467,7 +467,7 @@
                     >
                         <span>ℹ️</span> {{ $t("menu.about") }}
                     </router-link>
-                    <div v-if="localIsAdmin" class="pt-2 pb-1">
+                    <div v-if="showAdminMenu" class="pt-2 pb-1">
                         <p
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
                         >
@@ -475,7 +475,7 @@
                         </p>
                     </div>
                     <router-link
-                        v-if="localIsAdmin"
+                        v-if="showAdminMenu"
                         to="/admin"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
@@ -483,12 +483,28 @@
                         <span>⚙️</span> {{ $t("menu.admin") }}
                     </router-link>
                     <router-link
-                        v-if="localIsAdmin"
-                        to="/webhooks"
+                        v-if="canManageMembersMenu"
+                        to="/admin/members"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
-                        <span>🔗</span> {{ $t("menu.webhooks") }}
+                        <span>👥</span> {{ $t("menu.admin_members") }}
+                    </router-link>
+                    <router-link
+                        v-if="localIsAdmin"
+                        to="/admin/roles"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                    >
+                        <span>🛡️</span> {{ $t("menu.admin_roles") }}
+                    </router-link>
+                    <router-link
+                        v-if="localIsAdmin"
+                        to="/admin/oneclick"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                    >
+                        <span>⚡</span> {{ $t("menu.admin_oneclick") }}
                     </router-link>
                     <router-link
                         v-if="localIsScheduler"
@@ -497,6 +513,30 @@
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
                         <span>⚠️</span> {{ $t("menu.conflicts") }}
+                    </router-link>
+                    <router-link
+                        v-if="canEditContentMenu"
+                        to="/admin/content"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                    >
+                        <span>📝</span> {{ $t("menu.content") }}
+                    </router-link>
+                    <router-link
+                        v-if="localIsAdmin"
+                        to="/admin/test-accounts"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                    >
+                        <span>🧪</span> {{ $t("menu.test_accounts") }}
+                    </router-link>
+                    <router-link
+                        v-if="localIsAdmin"
+                        to="/webhooks"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                    >
+                        <span>🔗</span> {{ $t("menu.webhooks") }}
                     </router-link>
                     <router-link
                         v-if="localIsAdmin"
@@ -513,22 +553,6 @@
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
                         <span>🔄</span> {{ $t("menu.pco_sync") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/admin/content"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📝</span> {{ $t("menu.content") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/admin/test-accounts"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🧪</span> {{ $t("menu.test_accounts") }}
                     </router-link>
                 </nav>
                 <div
@@ -640,6 +664,7 @@ import {
     canManageMembers,
     loading as memberLoading,
 } from "./stores/member";
+import { hasRolePermission, roleHasAnyPermission } from "./utils/rbac";
 
 import Toasts from "./components/Toasts.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
@@ -661,6 +686,24 @@ const userRole = computed(() => member.value?.role || null);
 const localIsAdmin = computed(() => userRole.value === "admin");
 const localIsScheduler = computed(() =>
     ["admin", "scheduler", "music_director"].includes(userRole.value),
+);
+
+const canManageMembersMenu = computed(
+    () =>
+        localIsAdmin.value ||
+        roleHasAnyPermission(userRole.value, [
+            "manage_members",
+            "edit_members",
+            "edit_teams",
+        ]),
+);
+
+const canEditContentMenu = computed(
+    () => localIsAdmin.value || hasRolePermission(userRole.value, "edit_announcements"),
+);
+
+const showAdminMenu = computed(
+    () => localIsAdmin.value || canManageMembersMenu.value || canEditContentMenu.value,
 );
 
 // Track if the ORIGINAL logged-in user is admin (for showing persona selector)
