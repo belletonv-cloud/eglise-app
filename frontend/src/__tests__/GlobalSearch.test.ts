@@ -3,7 +3,9 @@ import { mount } from './setup'
 
 vi.mock('../firebase', () => ({
   default: {},
-  auth: { onAuthStateChanged: vi.fn() },
+  auth: {},
+  googleProvider: {},
+  firebaseReady: false,
 }))
 
 import GlobalSearch from '../components/GlobalSearch.vue'

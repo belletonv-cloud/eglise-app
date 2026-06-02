@@ -13,7 +13,9 @@ vi.mock('vue-router', () => ({
 // Mock firebase
 vi.mock('../firebase', () => ({
   default: {},
-  auth: { onAuthStateChanged: vi.fn() },
+  auth: {},
+  googleProvider: {},
+  firebaseReady: false,
 }))
 
 describe('App', () => {
