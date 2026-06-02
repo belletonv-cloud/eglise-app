@@ -38,17 +38,6 @@
         </div>
       </router-link>
 
-      <router-link
-        v-if="isAdmin"
-        to="/admin/oneclick"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-      >
-        <span class="text-3xl mt-1">⚡</span>
-        <div>
-          <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('menu.admin_oneclick') }}</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $t('adminHome.cards.oneclick_desc') }}</p>
-        </div>
-      </router-link>
 
       <router-link
         v-if="canEditContent"

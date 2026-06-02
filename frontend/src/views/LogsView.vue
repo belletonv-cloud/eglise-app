@@ -11,13 +11,13 @@
 
     <div v-else>
       <div class="flex gap-2 mb-4">
-        <select v-model="statusFilter" @change="loadLogs" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <select v-model="statusFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
           <option value="">{{ $t('logs.all_statuses') }}</option>
           <option value="4">{{ $t('logs.client_errors') }}</option>
           <option value="5">{{ $t('logs.server_errors') }}</option>
           <option value="2">{{ $t('logs.success') }}</option>
         </select>
-        <select v-model="slowFilter" @change="loadLogs" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <select v-model="slowFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
           <option value="0">{{ $t('logs.all_durations') }}</option>
           <option value="2000">{{ $t('logs.slow') }}</option>
           <option value="5000">{{ $t('logs.very_slow') }}</option>
@@ -74,7 +74,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { user } from '../stores/auth'
 import { getApiBase, authenticatedFetch } from '../utils/api'
 
 const { t, locale } = useI18n()
@@ -83,6 +82,7 @@ const logs = ref<any[]>([])
 const loading = ref(true)
 const total = ref(0)
 const page = ref(1)
+const per = ref(50)
 const statusFilter = ref('')
 const slowFilter = ref('0')
 
@@ -94,30 +94,53 @@ const loadLogs = async () => {
     const data = await getLogs()
     logs.value = data.rows
     total.value = data.total
-  } catch { /* ignore */ }
+  } catch {
+    logs.value = []
+    total.value = 0
+  }
   finally { loading.value = false }
 }
 
 const getLogs = async () => {
   const params = new URLSearchParams()
   params.set('page', String(page.value))
-  const url = `${getApiBase()}/api/email-logs?${params}`
+  params.set('per', String(per.value))
+  if (statusFilter.value) params.set('status_class', String(statusFilter.value))
+  if (slowFilter.value && slowFilter.value !== '0') params.set('min_duration', String(slowFilter.value))
+
+  const url = `${getApiBase()}/api/logs?${params}`
   const res = await authenticatedFetch(url)
   const data = await res.json()
-  return { rows: data.logs ?? data.rows ?? data ?? [], total: data.total ?? 0 }
+  return { rows: data.rows ?? [], total: data.total ?? 0 }
 }
 
 const clearLogs = async () => {
   try {
-    await authenticatedFetch(`${getApiBase()}/api/email-logs`, { method: 'DELETE' })
+    await authenticatedFetch(`${getApiBase()}/api/logs`, { method: 'DELETE' })
+    page.value = 1
     await loadLogs()
-  } catch (e: any) {
+  } catch {
     /* ignore */
   }
 }
 
-const prevPage = () => { if (page.value > 1) { page.value--; loadLogs() } }
-const nextPage = () => { page.value++; loadLogs() }
+function onFilterChange() {
+  page.value = 1
+  loadLogs()
+}
+
+const prevPage = () => {
+  if (page.value > 1) {
+    page.value--
+    loadLogs()
+  }
+}
+const nextPage = () => {
+  const nextOffset = page.value * per.value
+  if (total.value && nextOffset >= total.value) return
+  page.value++
+  loadLogs()
+}
 
 onMounted(loadLogs)
 </script>

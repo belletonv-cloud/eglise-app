@@ -4804,6 +4804,7 @@ const routes3 = [
   route("GET", "/api/logs", async (request, env, params, url) => {
     if (!(await hasPermission(request, env, "manage_members")))
       return json({ error: "Forbidden" }, 403);
+
     const page = parseInt(url.searchParams.get("page") || "1", 10) || 1;
     const per = Math.min(
       100,
@@ -4811,14 +4812,35 @@ const routes3 = [
     );
     const offset = (page - 1) * per;
 
+    const statusClass = url.searchParams.get("status_class"); // "2" | "4" | "5"
+    const minDuration =
+      parseInt(url.searchParams.get("min_duration") || "0", 10) || 0;
+
+    const where = [];
+    const binds = [];
+
+    if (statusClass === "2") where.push("status BETWEEN 200 AND 299");
+    if (statusClass === "4") where.push("status BETWEEN 400 AND 499");
+    if (statusClass === "5") where.push("status >= 500");
+    if (minDuration > 0) {
+      where.push("duration >= ?");
+      binds.push(minDuration);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
     const rows = await env.DB.prepare(
-      `SELECT * FROM api_logs ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT * FROM api_logs ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
     )
-      .bind(per, offset)
+      .bind(...binds, per, offset)
       .all();
+
     const total = await env.DB.prepare(
-      "SELECT COUNT(*) as c FROM api_logs",
-    ).first();
+      `SELECT COUNT(*) as c FROM api_logs ${whereSql}`,
+    )
+      .bind(...binds)
+      .first();
+
     return json({ rows: rows.results, total: total.c, page, per });
   }),
 

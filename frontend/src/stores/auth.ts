@@ -139,22 +139,23 @@ export const loginWithGoogle = async () => {
 };
 
 export const logout = async () => {
+  // Optimistic local state update to avoid rendering a protected page after a user clicks logout.
+  isAuthenticated.value = false;
+  user.value = null;
+
   if (
     typeof window !== "undefined" &&
     window.location.search.includes("demo=1")
   ) {
-    isAuthenticated.value = false;
-    user.value = null;
     return;
   }
   if (!firebaseReady) {
-    isAuthenticated.value = false;
-    user.value = null;
     return;
   }
   try {
     await signOut(auth);
   } catch (error) {
+    // If signOut fails, keep the UI logged out; user can refresh.
     throw error;
   }
 };

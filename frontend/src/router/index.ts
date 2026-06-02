@@ -43,6 +43,8 @@ export const publicRoutes: string[] = [
   "not-found",
   "checkin",
   "public-plan",
+  // One-click is token-based and should work even when not logged in.
+  "admin-oneclick",
 ];
 
 const NotFound = {

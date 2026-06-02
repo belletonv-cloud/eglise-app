@@ -169,7 +169,18 @@ export async function getMemberFromRequest(request, env) {
     const payload = await verifyFirebaseToken(token, env)
     if (payload && payload.email) {
       const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(payload.email).first()
-      if (m) return m
+      if (m) {
+        // Safety: ensure the primary admin email is always admin, even if the member was created earlier.
+        if (payload.email === 'belletonv@gmail.com' && m.role !== 'admin') {
+          await env.DB.prepare(
+            "UPDATE members SET role = 'admin', membership_type = 'staff', updated_at = datetime('now') WHERE id = ?",
+          )
+            .bind(m.id)
+            .run();
+          return await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(m.id).first();
+        }
+        return m
+      }
       // Auto-create member for first-time Firebase users
       try {
         const name = payload.name || payload.email.split('@')[0] || ''
