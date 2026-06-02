@@ -9,6 +9,23 @@ import {
 
 let redirectAfterLogin: (() => void) | null = null;
 
+// Auth init barrier: on first page load, Firebase auth state is async.
+// Without this, router guards can redirect to /login before onAuthStateChanged fires.
+export const authInitialized = ref(false);
+let _resolveAuthInit: (() => void) | null = null;
+const _authInitPromise = new Promise<void>((resolve) => {
+  _resolveAuthInit = resolve;
+});
+export async function waitForAuthInitialized(): Promise<void> {
+  if (authInitialized.value) return;
+  await _authInitPromise;
+}
+function markAuthInitialized() {
+  if (authInitialized.value) return;
+  authInitialized.value = true;
+  _resolveAuthInit?.();
+}
+
 export function onLogin(cb: () => void) {
   redirectAfterLogin = cb;
 }
@@ -53,6 +70,7 @@ if (
   };
   originalUser.value = { ...user.value }; // Store original for impersonation display
   isDemoMode.value = true;
+  markAuthInitialized();
 }
 
 if (firebaseReady) {
@@ -61,8 +79,10 @@ if (firebaseReady) {
     if (
       typeof window !== "undefined" &&
       window.location.search.includes("demo=1")
-    )
+    ) {
+      markAuthInitialized();
       return;
+    }
     if (firebaseUser) {
       user.value = firebaseUser;
       if (!originalUser.value) originalUser.value = firebaseUser;
@@ -72,16 +92,32 @@ if (firebaseReady) {
       user.value = null;
       isAuthenticated.value = false;
     }
+    markAuthInitialized();
   });
 } else if (typeof auth.onAuthStateChanged === "function") {
   // Use mock onAuthStateChanged (demo or missing config)
   auth.onAuthStateChanged((firebaseUser: any) => {
+    // Ne pas override le mode demo local
+    if (
+      typeof window !== "undefined" &&
+      window.location.search.includes("demo=1")
+    ) {
+      markAuthInitialized();
+      return;
+    }
     if (firebaseUser) {
       user.value = firebaseUser;
       isAuthenticated.value = true;
       redirectAfterLogin?.();
+    } else {
+      user.value = null;
+      isAuthenticated.value = false;
     }
+    markAuthInitialized();
   });
+} else {
+  // No Firebase, no mock: consider auth resolved (unauthenticated)
+  markAuthInitialized();
 }
 
 export const loginWithEmail = async (email: string, password: string) => {

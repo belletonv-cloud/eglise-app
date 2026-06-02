@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { isAuthenticated } from "../stores/auth";
+import { isAuthenticated, waitForAuthInitialized } from "../stores/auth";
 import HomePage from "../views/HomePage.vue";
 import SongDetail from "../components/SongDetail.vue";
 import PlansList from "../views/PlansList.vue";
@@ -305,19 +305,24 @@ export function consumeIntendedRoute(): string | null {
   return r;
 }
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to) => {
   // Les routes publiques accessibles sans connexion (invitation, not-found)
-  if (to.name && publicRoutes.includes(to.name as string)) return next();
+  if (to.name && publicRoutes.includes(to.name as string)) return true;
+
+  // Wait initial auth resolution (Firebase onAuthStateChanged)
+  await waitForAuthInitialized();
+
   // Si non authentifié → mémoriser la destination et rediriger vers login
   if (!isAuthenticated.value) {
-    if (to.path !== '/' && to.path !== '/login') {
+    if (to.path !== "/" && to.path !== "/login") {
       intendedRoute = to.fullPath;
     }
     // Preserve query params (ex: demo=1, preview=true) to avoid oscillations.
-    return next({ name: "login", query: to.query });
+    return { name: "login", query: to.query };
   }
+
   // Sinon accès autorisé (toutes routes en session)
-  return next();
+  return true;
 });
 
 export default router;

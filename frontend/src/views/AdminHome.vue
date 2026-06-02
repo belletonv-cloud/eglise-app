@@ -114,9 +114,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { member } from '../stores/member'
 import { hasRolePermission, roleHasAnyPermission } from '../utils/rbac'
+
+const router = useRouter()
+const route = useRoute()
 
 const role = computed(() => member.value?.role || null)
 
@@ -130,5 +134,21 @@ const canEditContent = computed(
 
 const canSeeAnything = computed(
   () => isAdmin.value || canManageMembers.value || canEditContent.value
+)
+
+// If someone opens /admin without being admin, redirect to the best permitted tool.
+watch(
+  [isAdmin, canManageMembers, canEditContent, role],
+  () => {
+    if (route.name !== 'admin') return
+    if (!role.value) return
+    if (isAdmin.value) return
+
+    if (canEditContent.value) return router.replace('/admin/content')
+    if (canManageMembers.value) return router.replace('/admin/members')
+
+    return router.replace('/dashboard')
+  },
+  { immediate: true },
 )
 </script>
