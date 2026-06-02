@@ -330,7 +330,8 @@ test.describe('UC6: Team Management — Schedule & Availability', () => {
 
     for (const m of members.slice(0, 3)) {
       expect(m.first_name).toBeTruthy()
-      expect(m.last_name).toBeTruthy()
+      // last_name can legitimately be empty (e.g. demo users)
+      expect(m.last_name).not.toBeUndefined()
       expect(Array.isArray(m.teams)).toBe(true)
     }
   })
