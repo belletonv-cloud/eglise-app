@@ -1155,25 +1155,3 @@ export default {
     stop: "Stop impersonating",
   },
 };
-
-// Help tooltips
-export const helpTooltips = {
-  dashboard: "Dashboard: statistics and quick access",
-  calendar: "Calendar: future events planning",
-  plans: "Plans: service orders management",
-  templates: "Templates: reusable service models",
-  checkin: "Check-in: attendance tracking",
-  history: "History: past services archive",
-  members: "Members: directory and profiles",
-  teams: "Teams: activity group management",
-  directory: "Directory: public member list",
-  groups: "Groups: home groups and cells",
-  songs: "Songs: music library",
-  music_stand: "Music Stand: interactive sheet music reading",
-  announcements: "Announcements: important communications",
-  events: "Events: activity calendar",
-  emails: "Emails: bulk message sending",
-  polls: "Polls: surveys and votes",
-  youtube: "YouTube: videos and streaming",
-  about: "About: application information"
-}
