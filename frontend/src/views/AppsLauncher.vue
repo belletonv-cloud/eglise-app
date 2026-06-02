@@ -103,7 +103,7 @@ const apps = computed(() => [
     iconBg: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
     title: t('apps.teams_title'),
     desc: t('apps.teams_desc'),
-    to: '/teams-dashboard',
+    to: '/teams',
   },
   {
     key: 'members',

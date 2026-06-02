@@ -22,7 +22,7 @@
             :class="activeTab === 'order'
               ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
               : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
-            @click="activeTab = 'order'"
+            @click="setTab('order')"
           >
             Order
           </button>
@@ -31,7 +31,7 @@
             :class="activeTab === 'teams'
               ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
               : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
-            @click="goTeams"
+            @click="setTab('teams')"
           >
             Teams
           </button>
@@ -40,7 +40,7 @@
             :class="activeTab === 'rehearse'
               ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
               : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
-            @click="goRehearse"
+            @click="setTab('rehearse')"
           >
             Rehearse
           </button>
@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3">
+      <div v-if="activeTab === 'order'" class="grid grid-cols-1 lg:grid-cols-3">
         <!-- Plans list -->
         <aside class="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 p-3">
           <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">
@@ -131,16 +131,37 @@
           </div>
         </main>
       </div>
+
+      <div v-else-if="activeTab === 'teams'" class="p-3">
+        <TeamsDashboardPanel />
+      </div>
+
+      <div v-else class="p-3">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Rehearse</div>
+          <div class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Ouvre Music Stand (mode scène) pour répéter.
+          </div>
+          <router-link
+            to="/music-stand-app"
+            class="mt-3 inline-flex items-center px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-sm font-semibold"
+          >
+            {{ $t('apps.open') }}
+          </router-link>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { api } from '../utils/api'
+import TeamsDashboardPanel from '../components/TeamsDashboardPanel.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 type Tab = 'order' | 'teams' | 'rehearse'
 const activeTab = ref<Tab>('order')
@@ -187,17 +208,20 @@ function openFullPlan() {
   router.push(`/plans/${selectedPlanId.value}`)
 }
 
-function goTeams() {
-  activeTab.value = 'teams'
-  router.push('/teams-dashboard')
-}
-
-function goRehearse() {
-  activeTab.value = 'rehearse'
-  router.push('/music-stand-app')
+function setTab(tab: Tab) {
+  activeTab.value = tab
+  const query = { ...route.query }
+  if (tab === 'order') delete (query as any).tab
+  else (query as any).tab = tab
+  router.replace({ query })
 }
 
 onMounted(async () => {
+  const tab = String(route.query.tab || '')
+  if (tab === 'teams' || tab === 'rehearse' || tab === 'order') {
+    activeTab.value = tab as Tab
+  }
+
   await loadPlans()
   if (plans.value[0]?.id) {
     await selectPlan(plans.value[0].id)

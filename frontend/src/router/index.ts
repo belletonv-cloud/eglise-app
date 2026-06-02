@@ -7,6 +7,7 @@ import PlanDetail from "../views/PlanDetail.vue";
 import MembersList from "../views/MembersList.vue";
 import MemberDetail from "../views/MemberDetail.vue";
 import TeamsList from "../views/TeamsList.vue";
+import TeamsDashboardView from "../views/TeamsDashboardView.vue";
 import TeamDetail from "../views/TeamDetail.vue";
 import CheckInView from "../views/CheckInView.vue";
 import HouseGroupsList from "../views/HouseGroupsList.vue";
@@ -128,6 +129,11 @@ const router = createRouter({
     {
       path: "/teams",
       name: "teams",
+      component: TeamsDashboardView,
+    },
+    {
+      path: "/teams/manage",
+      name: "teams-manage",
       component: TeamsList,
     },
     {
@@ -296,8 +302,7 @@ const router = createRouter({
     },
     {
       path: "/teams-dashboard",
-      name: "teams-dashboard",
-      component: () => import("../views/TeamsDashboardView.vue"),
+      redirect: "/teams",
     },
     {
       path: "/about",

@@ -1,7 +1,7 @@
 <template>
   <div class="teams-page">
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
-      <h2>{{ $t('menu.ministries') }} ({{ teams.length }})</h2>
+      <h2>{{ $t('menu.teams') }} ({{ teams.length }})</h2>
     </div>
     <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_ministry') }}</button>
 
