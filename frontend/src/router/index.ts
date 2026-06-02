@@ -308,7 +308,8 @@ router.beforeEach((to, from, next) => {
     if (to.path !== '/' && to.path !== '/login') {
       intendedRoute = to.fullPath;
     }
-    return next({ name: "login" });
+    // Preserve query params (ex: demo=1, preview=true) to avoid oscillations.
+    return next({ name: "login", query: to.query });
   }
   // Sinon accès autorisé (toutes routes en session)
   return next();

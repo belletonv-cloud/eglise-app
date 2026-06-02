@@ -804,6 +804,9 @@ const handleLogout = async () => {
 };
 
 onLogin(() => {
+    // Never auto-redirect inside the preview iframe.
+    if (isPreviewFrame.value) return;
+
     // Always navigate after login, even from login page
     const dest = consumeIntendedRoute();
     if (dest) {
@@ -840,7 +843,7 @@ watch(
                 });
             }
             // Navigate after login (remove duplicate navigation logic)
-            if (route.name === "login") {
+            if (!isPreviewFrame.value && route.name === "login") {
                 const dest = consumeIntendedRoute();
                 if (dest) {
                     router.push(dest);
@@ -855,16 +858,16 @@ watch(
 
 // If auth state changes to unauthenticated without an explicit navigation,
 // force a redirect to /login so we don't keep rendering a protected route.
-watch(
-    isAuthenticated,
-    (authed) => {
-        if (authed) return;
-        const name = route.name as string | undefined;
-        if (name && publicRoutes.includes(name)) return;
-        if (name !== "login") router.replace({ name: "login" });
-    },
-    { immediate: true },
-);
+watch(isAuthenticated, (authed, prev) => {
+    // Only react when we *lose* auth during a session.
+    // Initial unauth state is handled by the router guard.
+    if (authed || prev === false) return;
+
+    const name = route.name as string | undefined;
+    if (!name) return;
+    if (publicRoutes.includes(name)) return;
+    if (name !== "login") router.replace({ name: "login" });
+});
 
 // Also load member on initial mount
 onMounted(async () => {
