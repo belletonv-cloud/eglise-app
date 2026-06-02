@@ -15,9 +15,85 @@ export const ROLE_PERMISSIONS = {
   viewer: [],
 }
 
-// In-memory cache for Firebase token verification
+// In-memory caches for Firebase token verification
 const tokenCache = new Map()
 const TOKEN_CACHE_MAX = 500
+
+const SECURETOKEN_JWKS_URL =
+  'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
+
+const jwksCache = {
+  expiresAtMs: 0,
+  jwksByKid: new Map(),
+}
+
+const verifyKeyCache = new Map() // kid -> CryptoKey
+
+function parseMaxAgeSeconds(cacheControl) {
+  if (!cacheControl) return null
+  const m = cacheControl.match(/max-age=(\d+)/)
+  if (!m) return null
+  const n = Number(m[1])
+  return Number.isFinite(n) ? n : null
+}
+
+function base64UrlToBytes(s) {
+  const base64 = s.replace(/-/g, '+').replace(/_/g, '/')
+  const pad = base64.length % 4
+  const padded = pad === 0 ? base64 : base64 + '='.repeat(4 - pad)
+  const bin = atob(padded)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return bytes
+}
+
+function base64UrlToJson(s) {
+  const bytes = base64UrlToBytes(s)
+  const json = new TextDecoder().decode(bytes)
+  return JSON.parse(json)
+}
+
+async function getSecureTokenJwksByKid() {
+  if (Date.now() < jwksCache.expiresAtMs && jwksCache.jwksByKid.size) {
+    return jwksCache.jwksByKid
+  }
+
+  const res = await fetch(SECURETOKEN_JWKS_URL)
+  if (!res.ok) throw new Error('Failed to fetch SecureToken JWKS')
+
+  const maxAge = parseMaxAgeSeconds(res.headers.get('Cache-Control')) ?? 60 * 60
+  const data = await res.json()
+  const map = new Map()
+  for (const jwk of data.keys || []) {
+    if (jwk?.kid) map.set(jwk.kid, jwk)
+  }
+
+  jwksCache.jwksByKid = map
+  jwksCache.expiresAtMs = Date.now() + maxAge * 1000
+  verifyKeyCache.clear()
+
+  return jwksCache.jwksByKid
+}
+
+async function getVerifyKeyForKid(kid) {
+  const cached = verifyKeyCache.get(kid)
+  if (cached) return cached
+
+  const jwksByKid = await getSecureTokenJwksByKid()
+  const jwk = jwksByKid.get(kid)
+  if (!jwk) return null
+
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    jwk,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  )
+
+  verifyKeyCache.set(kid, key)
+  return key
+}
 
 async function verifyFirebaseToken(token, env) {
   const cached = tokenCache.get(token)
@@ -32,9 +108,13 @@ async function verifyFirebaseToken(token, env) {
   }
 
   try {
-    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`)
-    if (!res.ok) return null
-    const payload = await res.json()
+    const [h, p, s] = token.split('.')
+    if (!h || !p || !s) return null
+
+    const header = base64UrlToJson(h)
+    if (header.alg !== 'RS256' || !header.kid) return null
+
+    const payload = base64UrlToJson(p)
 
     // FIREBASE_PROJECT_ID is not a secret (it's the public Firebase project id),
     // but Cloudflare secrets may be missing/misconfigured in some environments.
@@ -44,7 +124,19 @@ async function verifyFirebaseToken(token, env) {
     if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null
     if (payload.aud !== projectId) return null
 
-    tokenCache.set(token, { payload, exp: payload.exp })
+    const now = Math.floor(Date.now() / 1000)
+    if (!payload.exp || Number(payload.exp) <= now) return null
+
+    const key = await getVerifyKeyForKid(header.kid)
+    if (!key) return null
+
+    const data = new TextEncoder().encode(`${h}.${p}`)
+    const sig = base64UrlToBytes(s)
+
+    const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, sig, data)
+    if (!ok) return null
+
+    tokenCache.set(token, { payload, exp: Number(payload.exp) })
     return payload
   } catch {
     return null
