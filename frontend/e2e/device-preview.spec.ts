@@ -16,6 +16,9 @@ test.describe('Aperçu responsive (iframe)', () => {
     await expect(frame).toHaveAttribute('src', /preview=true/)
     await expect(frame).toHaveAttribute('src', /device=mobile/)
 
+    // No iframe-in-iframe cascade
+    await expect(page.frameLocator('iframe').locator('iframe')).toHaveCount(0)
+
     await page.getByRole('button', { name: 'Fermer ✕' }).click()
     await expect(page.getByText('Aperçu')).toBeHidden()
   })
@@ -31,5 +34,8 @@ test.describe('Aperçu responsive (iframe)', () => {
     await expect(frame).toBeVisible()
     await expect(frame).toHaveAttribute('src', /preview=true/)
     await expect(frame).toHaveAttribute('src', /device=tablet/)
+
+    // No iframe-in-iframe cascade
+    await expect(page.frameLocator('iframe').locator('iframe')).toHaveCount(0)
   })
 })

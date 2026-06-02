@@ -690,8 +690,21 @@ const toggleLang = () => {
 
 type DevicePreview = "desktop" | "tablet" | "mobile";
 
+function isRunningInIframe() {
+    if (typeof window === "undefined") return false;
+    try {
+        return window.self !== window.top;
+    } catch {
+        // If access to window.top is blocked (cross-origin), assume we are framed.
+        return true;
+    }
+}
+
 const isPreviewFrame = computed(() => {
     if (typeof window === "undefined") return false;
+    // Hard stop: never allow the preview overlay from inside an iframe.
+    // This prevents iframe-in-iframe cascades if the query params are lost.
+    if (isRunningInIframe()) return true;
     return new URLSearchParams(window.location.search).get("preview") === "true";
 });
 
