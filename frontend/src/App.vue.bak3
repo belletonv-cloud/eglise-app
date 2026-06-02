@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import MenuItemWithTooltip from './components/MenuItemWithTooltip.vue'
 import { menuTooltips } from './utils/menuTooltips'
-</script>
 
 <template>
     <div id="app" :class="{ dark: isDark }">
