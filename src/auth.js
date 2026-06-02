@@ -36,8 +36,13 @@ async function verifyFirebaseToken(token, env) {
     if (!res.ok) return null
     const payload = await res.json()
 
-    if (payload.iss !== `https://securetoken.google.com/${env.FIREBASE_PROJECT_ID}`) return null
-    if (payload.aud !== env.FIREBASE_PROJECT_ID) return null
+    // FIREBASE_PROJECT_ID is not a secret (it's the public Firebase project id),
+    // but Cloudflare secrets may be missing/misconfigured in some environments.
+    // Use a safe fallback to avoid rejecting valid tokens due to env drift.
+    const projectId = env.FIREBASE_PROJECT_ID || 'eglise-app-b81b0'
+
+    if (payload.iss !== `https://securetoken.google.com/${projectId}`) return null
+    if (payload.aud !== projectId) return null
 
     tokenCache.set(token, { payload, exp: payload.exp })
     return payload
