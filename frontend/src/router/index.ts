@@ -275,6 +275,21 @@ const router = createRouter({
       component: () => import("../views/AppsCompare.vue"),
     },
     {
+      path: "/services-center",
+      name: "services-center",
+      component: () => import("../views/ServicesCenterView.vue"),
+    },
+    {
+      path: "/music-stand-app",
+      name: "music-stand-app",
+      component: () => import("../views/MusicStandAppView.vue"),
+    },
+    {
+      path: "/compare",
+      name: "feature-compare",
+      component: () => import("../views/FeatureCompare.vue"),
+    },
+    {
       path: "/about",
       name: "about",
       component: () => import("../views/AboutPage.vue"),

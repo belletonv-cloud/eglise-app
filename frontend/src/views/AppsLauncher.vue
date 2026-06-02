@@ -79,7 +79,7 @@ const apps = computed(() => [
     iconBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200',
     title: t('apps.services_center_title'),
     desc: t('apps.services_center_desc'),
-    to: '/plans',
+    to: '/services-center',
   },
   {
     key: 'music-stand',
@@ -87,7 +87,7 @@ const apps = computed(() => [
     iconBg: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
     title: t('apps.music_stand_title'),
     desc: t('apps.music_stand_desc'),
-    to: '/music-stand',
+    to: '/music-stand-app',
   },
   {
     key: 'members',
