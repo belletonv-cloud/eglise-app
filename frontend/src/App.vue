@@ -22,6 +22,61 @@
         </div>
 
         <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
+            <div
+                v-if="showDevicePreviewOverlay"
+                class="fixed inset-0 z-50 bg-gray-100 dark:bg-gray-900 flex flex-col"
+            >
+                <div
+                    class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between"
+                >
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+                        >
+                            Aperçu
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <button
+                                @click="setDevicePreview('desktop')"
+                                class="px-2 py-1 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                                🖥️
+                            </button>
+                            <button
+                                @click="setDevicePreview('tablet')"
+                                class="px-2 py-1 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                                :class="devicePreview === 'tablet' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : ''"
+                            >
+                                📱
+                            </button>
+                            <button
+                                @click="setDevicePreview('mobile')"
+                                class="px-2 py-1 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
+                                :class="devicePreview === 'mobile' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : ''"
+                            >
+                                📲
+                            </button>
+                        </div>
+                    </div>
+                    <button
+                        @click="setDevicePreview('desktop')"
+                        class="text-sm text-gray-600 dark:text-gray-300 hover:underline"
+                    >
+                        Fermer ✕
+                    </button>
+                </div>
+                <div class="flex-1 overflow-auto p-4">
+                    <div class="flex justify-center">
+                        <iframe
+                            :src="devicePreviewUrl"
+                            :style="{ width: devicePreviewWidth + 'px' }"
+                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg h-[calc(100vh-88px)]"
+                            frameborder="0"
+                        />
+                    </div>
+                </div>
+            </div>
+
             <aside
                 class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
                 :class="
@@ -44,6 +99,36 @@
                             :title="emailTooltip"
                         >
                             {{ displayEmail }}
+                        </p>
+                        <div
+                            v-if="impersonationActive"
+                            class="mt-1 flex items-center gap-2 min-w-0"
+                        >
+                            <span
+                                class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 text-[10px] font-semibold uppercase tracking-wide shrink-0"
+                            >
+                                Impersonné
+                            </span>
+                            <span
+                                class="text-xs text-gray-600 dark:text-gray-300 truncate"
+                                :title="currentEmail"
+                            >
+                                {{ impersonatedLabel }}
+                            </span>
+                            <button
+                                @click="stopDemoPersona"
+                                class="ml-auto text-xs text-red-600 dark:text-red-400 hover:underline shrink-0"
+                                :title="$t('demoPersona.stop') || 'Arrêter l\'impersonnalisation'"
+                            >
+                                Stop
+                            </button>
+                        </div>
+                        <p
+                            v-if="impersonationActive"
+                            class="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5"
+                            :title="originalEmail"
+                        >
+                            Orig: {{ originalEmail }}
                         </p>
                     </div>
                     <div class="flex items-center gap-1 ml-2 shrink-0">
@@ -90,6 +175,56 @@
                         >
                             {{ lang === "fr" ? "EN" : "FR" }}
                         </button>
+
+                        <div v-if="showDevicePreviewControls" class="relative">
+                            <button
+                                @click="deviceMenuOpen = !deviceMenuOpen"
+                                class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                title="Aperçu responsive (desktop/tablette/mobile)"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9.75 17h4.5m-9-12.75h13.5A1.5 1.5 0 0120.25 5.75v8.5A1.5 1.5 0 0118.75 15.75h-13.5A1.5 1.5 0 013.75 14.25v-8.5A1.5 1.5 0 015.25 4.25z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <div
+                                v-if="deviceMenuOpen"
+                                class="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1"
+                            >
+                                <button
+                                    @click="setDevicePreview('desktop')"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    :class="devicePreview === 'desktop' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                >
+                                    🖥️ Desktop
+                                </button>
+                                <button
+                                    @click="setDevicePreview('tablet')"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    :class="devicePreview === 'tablet' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                >
+                                    📱 Tablette
+                                </button>
+                                <button
+                                    @click="setDevicePreview('mobile')"
+                                    class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    :class="devicePreview === 'mobile' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                >
+                                    📲 Mobile
+                                </button>
+                            </div>
+                        </div>
+
                         <div
                             class="relative demo-persona-selector"
                             v-if="showPersonaSelector"
@@ -553,12 +688,55 @@ const toggleLang = () => {
     localStorage.setItem("locale", newLang);
 };
 
+type DevicePreview = "desktop" | "tablet" | "mobile";
+
+const isPreviewFrame = computed(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("preview") === "true";
+});
+
+const deviceMenuOpen = ref(false);
+const devicePreview = ref<DevicePreview>(
+    (typeof window !== "undefined" &&
+        (localStorage.getItem("device-preview") as DevicePreview)) ||
+        "desktop",
+);
+
+const showDevicePreviewControls = computed(() => !isPreviewFrame.value);
+const showDevicePreviewOverlay = computed(
+    () =>
+        !isPreviewFrame.value &&
+        isAuthenticated.value &&
+        devicePreview.value !== "desktop",
+);
+
+const devicePreviewWidth = computed(() => {
+    if (devicePreview.value === "mobile") return 375;
+    if (devicePreview.value === "tablet") return 768;
+    return 1200;
+});
+
+const devicePreviewUrl = computed(() => {
+    if (typeof window === "undefined") return "";
+    const url = new URL(window.location.href);
+    url.searchParams.set("preview", "true");
+    url.searchParams.set("device", devicePreview.value);
+    return url.toString();
+});
+
+function setDevicePreview(next: DevicePreview) {
+    devicePreview.value = next;
+    localStorage.setItem("device-preview", next);
+    deviceMenuOpen.value = false;
+}
+
 const mobileSidebarOpen = ref(false);
 const route = useRoute();
 watch(
     () => route.path,
     () => {
         mobileSidebarOpen.value = false;
+        deviceMenuOpen.value = false;
     },
 );
 
@@ -666,21 +844,33 @@ onMounted(async () => {
     }
 });
 
+// Impersonation display helpers (sidebar)
+const currentEmail = computed(() => user.value?.email || "");
+const originalEmail = computed(() => originalUser.value?.email || "");
+const impersonationActive = computed(
+    () =>
+        !!(
+            isImpersonating.value &&
+            originalEmail.value &&
+            currentEmail.value &&
+            originalEmail.value !== currentEmail.value
+        ),
+);
+const impersonatedLabel = computed(() => {
+    if (!impersonationActive.value) return "";
+    const name = [member.value?.first_name, member.value?.last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+    return name || currentEmail.value;
+});
+
 // Email display (truncated with tooltip for full)
 const displayEmail = computed(() => {
-    const current = user.value?.email || "";
-    if (!isImpersonating.value) {
-        return current.length > 28 ? current.substring(0, 26) + "…" : current;
-    }
-    const orig = originalUser.value?.email || "";
-    return `${orig} (${current})`;
+    const email = currentEmail.value;
+    return email.length > 28 ? email.substring(0, 26) + "…" : email;
 });
-const emailTooltip = computed(() => {
-    if (!isImpersonating.value) return user.value?.email || "";
-    const orig = originalUser.value?.email || "";
-    const current = user.value?.email || "";
-    return `${orig} → ${current}`;
-});
+const emailTooltip = computed(() => currentEmail.value);
 
 // Demo persona switcher
 const demoPersonaMenuOpen = ref(false);
