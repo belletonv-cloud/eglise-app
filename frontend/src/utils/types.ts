@@ -34,6 +34,7 @@ export interface Member {
   baptism_date?: string;
   notes?: string;
   teams?: Team[];
+  last_scheduled_plan?: string;
   created_at?: string;
   updated_at?: string;
 }

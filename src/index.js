@@ -364,7 +364,17 @@ const routes0 = [
 
     // Get paginated members
     const membersRes = await env.DB.prepare(
-      `SELECT m.* FROM members m${whereSql} ORDER BY m.last_name ASC, m.first_name ASC LIMIT ? OFFSET ?`,
+      `SELECT
+        m.*,
+        (
+          SELECT MAX(p.date)
+          FROM scheduled_people sp
+          JOIN plans p ON p.id = sp.plan_id
+          WHERE sp.member_id = m.id
+        ) as last_scheduled_plan
+       FROM members m${whereSql}
+       ORDER BY m.last_name ASC, m.first_name ASC
+       LIMIT ? OFFSET ?`,
     )
       .bind(...whereBindings, size, offset)
       .all();

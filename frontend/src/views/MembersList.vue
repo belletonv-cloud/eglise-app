@@ -1,18 +1,21 @@
 <template>
     <div>
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">
-                {{ $t("members.title", { count: total }) }}
-            </h2>
-            <div class="flex items-center gap-2">
-                <button
-                    @click="showForm = true"
-                    v-if="isAdmin || canManageMembers"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
-                >
-                    {{ $t("members.add") }}
-                </button>
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">People</h2>
+                <div class="mt-1 flex items-center gap-3 text-sm text-gray-500">
+                    <span class="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Teams</span>
+                    <span class="rounded-full bg-gray-100 px-2 py-0.5">Add text filter</span>
+                    <span class="font-medium text-gray-700">{{ displayMembers.length }} people</span>
+                </div>
             </div>
+            <button
+                @click="showForm = true"
+                v-if="isAdmin || canManageMembers"
+                class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+                {{ $t("members.add") }}
+            </button>
         </div>
 
         <div
@@ -30,173 +33,132 @@
             {{ error }}
         </div>
 
-        <div
-            v-else
-            class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-        >
-            <div
-                class="p-4 border-b border-gray-200 bg-gray-50/70 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
-            >
-                <div class="flex-1 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <div class="relative flex-1 max-w-xl">
-                        <span
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            >🔎</span
-                        >
+        <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <aside class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="space-y-5 text-sm">
+                    <section>
+                        <h3 class="mb-2 font-semibold text-gray-700">Teams</h3>
+                        <div class="space-y-2">
+                            <label
+                                v-for="team in teams"
+                                :key="team.id"
+                                class="flex cursor-pointer items-center gap-2 text-gray-700"
+                            >
+                                <input
+                                    type="checkbox"
+                                    class="h-4 w-4 rounded border-gray-300 text-blue-600"
+                                    :checked="selectedTeamIds.includes(Number(team.id))"
+                                    @change="toggleTeam(Number(team.id))"
+                                />
+                                <span>{{ team.name }}</span>
+                            </label>
+                            <p v-if="isLoadingTeams" class="text-xs text-gray-400">{{ $t("loading") }}</p>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="mb-2 font-semibold text-gray-700">Tags</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                v-for="tag in availableTags"
+                                :key="tag"
+                                type="button"
+                                class="rounded-full border px-2 py-1 text-xs"
+                                :class="selectedTags.includes(tag) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600'"
+                                @click="toggleTag(tag)"
+                            >
+                                {{ tag }}
+                            </button>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="mb-2 font-semibold text-gray-700">Dates</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="all" /> All</label>
+                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="recent" /> Last 90 days</label>
+                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="year" /> This year</label>
+                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="stale" /> Older</label>
+                        </div>
+                    </section>
+                    <section>
+                        <h3 class="mb-2 font-semibold text-gray-700">Permissions</h3>
+                        <div class="space-y-2">
+                            <label v-for="perm in permissionFilters" :key="perm" class="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    :checked="selectedPermissions.includes(perm)"
+                                    @change="togglePermission(perm)"
+                                />
+                                <span>{{ perm }}</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+            </aside>
+
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="border-b border-gray-200 bg-gray-50/80 p-4">
+                    <div class="relative max-w-xl">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔎</span>
                         <input
                             v-model="searchQuery"
+                            data-testid="people-search"
                             type="search"
                             :placeholder="$t('members.search_placeholder')"
-                            class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                            class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
                         />
                     </div>
-                    <div class="flex items-center gap-3">
-                        <label class="text-sm text-gray-600">{{
-                            $t("members.filter_ministry")
-                        }}</label>
-                        <select
-                            v-model.number="selectedTeamId"
-                            class="border px-3 py-2 rounded-lg bg-white text-sm"
-                        >
-                            <option :value="0">{{ $t("members.all") }}</option>
-                            <option v-for="t in teams" :key="t.id" :value="Number(t.id)">
-                                {{ t.name }}
-                            </option>
-                        </select>
-                    </div>
                 </div>
-                <div class="text-sm text-gray-500">
-                    {{ total }} {{ $t("table.member") }}<span v-if="total > 1">s</span>
-                </div>
-            </div>
-            <div class="px-4 py-2 text-xs text-gray-500 flex items-center gap-3">
-                <span v-if="searchQuery.trim()">
-                    “{{ searchQuery.trim() }}”
-                </span>
-                <span v-if="selectedTeamId > 0">
-                    {{ teams.find((t) => Number(t.id) === selectedTeamId)?.name }}
-                </span>
-                <span
-                    v-if="isLoadingTeams"
-                    class="text-xs text-gray-400"
-                    >{{ $t("loading") }}</span
-                >
-            </div>
-            <div class="px-4 pb-3" v-if="members.length === 0 && !isLoading">
-                <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500">
+
+                <div v-if="displayMembers.length === 0" class="px-4 py-10 text-center text-sm text-gray-500">
                     {{ $t("members.no_members") }}
                 </div>
-            </div>
-            <div v-else>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th
-                                class="text-left px-4 py-3 text-sm font-medium text-gray-600"
-                            >
-                                {{ $t("table.name") }}
-                            </th>
-                            <th
-                                class="text-left px-4 py-3 text-sm font-medium text-gray-600"
-                            >
-                                {{ $t("table.email") }}
-                            </th>
-                            <th
-                                class="text-left px-4 py-3 text-sm font-medium text-gray-600"
-                            >
-                                {{ $t("members.phone") }}
-                            </th>
-                            <th
-                                class="text-left px-4 py-3 text-sm font-medium text-gray-600"
-                            >
-                                {{ $t("members.type") }}
-                            </th>
-                            <th
-                                class="text-right px-4 py-3 text-sm font-medium text-gray-600"
-                            >
-                                {{ $t("members.edit") }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr
-                            v-for="m in filteredMembers"
-                            :key="m.id"
-                            class="hover:bg-gray-50"
-                        >
-                            <td class="px-4 py-3 font-medium text-gray-800">
-                                {{ m.first_name }} {{ m.last_name }}
-                            </td>
-                            <td class="px-4 py-3 text-gray-600">
-                                {{ m.email ?? "-" }}
-                            </td>
-                            <td class="px-4 py-3 text-gray-600">
-                                {{ m.phone ?? "-" }}
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex flex-col gap-2">
-                                    <span
-                                        :class="
-                                            typeClass(
-                                                m.membership_type ?? 'guest',
-                                            )
-                                        "
-                                        class="px-2 py-1 rounded-full text-xs font-medium inline-block w-max"
-                                    >
-                                        {{
-                                            typeLabel(
-                                                m.membership_type ?? "guest",
-                                                m.role,
-                                            )
-                                        }}
-                                    </span>
-                                    <div
-                                        v-if="m.teams && m.teams.length > 0"
-                                        class="flex flex-wrap gap-2 mt-1"
-                                    >
-                                        <span
-                                            v-for="t in m.teams as MemberTeam[]"
-                                            :key="t.id"
-                                            class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-lg"
-                                        >
-                                            {{ t.name
-                                            }}<span v-if="t.position">
-                                                · {{ t.position }}</span
-                                            >
-                                        </span>
+
+                <div v-else class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="border-b border-gray-200 bg-white">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">First Name</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Phone Number</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Permissions (Highest)</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Last Scheduled Plan</th>
+                                <th v-if="isAdmin || canManageMembers" class="px-4 py-3 text-right text-sm font-semibold text-gray-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr v-for="m in pagedDisplayMembers" :key="m.id" class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-medium text-gray-800">{{ m.first_name }} {{ m.last_name }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ m.phone ?? "-" }}</td>
+                                <td class="px-4 py-3 text-gray-600">
+                                    <div class="font-medium">{{ highestPermissionLabel(m) }}</div>
+                                    <div v-if="memberPermissionHints[m.id]?.length" class="text-xs text-gray-500">
+                                        ({{ memberPermissionHints[m.id]?.join(", ") }})
                                     </div>
-                                    <div v-else class="text-xs text-gray-400">
-                                        {{ $t("members.no_ministry") }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-right">
-                                <template v-if="isAdmin || canManageMembers">
+                                </td>
+                                <td class="px-4 py-3 text-gray-600">{{ formatPlanDate(m.last_scheduled_plan) }}</td>
+                                <td v-if="isAdmin || canManageMembers" class="px-4 py-3 text-right">
                                     <button
                                         @click="editMember(m)"
-                                        class="text-blue-600 hover:text-blue-800 text-sm mr-3 cursor-pointer"
+                                        class="mr-3 cursor-pointer text-sm text-blue-600 hover:text-blue-800"
                                     >
                                         {{ $t("members.edit") }}
                                     </button>
                                     <button
                                         @click="deleteMember(m.id)"
-                                        class="text-red-600 hover:text-red-800 text-sm cursor-pointer"
+                                        class="cursor-pointer text-sm text-red-600 hover:text-red-800"
                                     >
                                         {{ $t("members.delete") }}
                                     </button>
-                                </template>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Pagination -->
             <div
                 class="pagination flex items-center gap-2 justify-center py-4"
-                v-if="total > pageSize"
+                v-if="displayMembers.length > pageSize"
             >
                 <button
                     type="button"
@@ -343,6 +305,7 @@ import { useTeams } from "../composables/useTeams";
 import { api } from "../utils/api";
 import type { Member, Team } from "../utils/types";
 type MemberTeam = Team & { position?: string };
+type MemberException = { id: number; member_id: number; permission: string; granted: boolean };
 
 import { confirmDialog } from "../stores/confirm";
 import { showToast } from "../stores/toast";
@@ -357,10 +320,14 @@ const total = ref(0);
 const members = ref<Member[]>([]);
 const { teams, loadTeams } = useTeams();
 const isLoadingTeams = ref(false);
-const selectedTeamId = ref(0);
+const selectedTeamIds = ref<number[]>([]);
+const selectedTags = ref<string[]>([]);
+const selectedPermissions = ref<string[]>([]);
+const dateFilter = ref<"all" | "recent" | "year" | "stale">("all");
 const searchQuery = ref("");
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+const memberPermissionHints = ref<Record<number, string[]>>({});
 const showForm = ref(false);
 const editing = ref<number | null>(null);
 const form = ref({
@@ -371,8 +338,13 @@ const form = ref({
     membership_type: "guest",
 });
 
+const availableTags = computed(() => ["member", "guest", "inactive"]);
+const permissionFilters = ["admin", "scheduler", "music_director", "editor", "viewer"];
+
 const totalPages = computed(() =>
-    total.value > 0 ? Math.max(1, Math.ceil(total.value / pageSize.value)) : 1,
+    displayMembers.value.length > 0
+        ? Math.max(1, Math.ceil(displayMembers.value.length / pageSize.value))
+        : 1,
 );
 
 async function fetchMembers() {
@@ -381,12 +353,26 @@ async function fetchMembers() {
     try {
         const res = await getMembers({
             page: page.value,
-            limit: pageSize.value,
+            limit: 100,
             q: searchQuery.value,
-            teamId: selectedTeamId.value > 0 ? selectedTeamId.value : null,
+            teamId: null,
         });
         members.value = res.members ?? [];
         total.value = res.total ?? members.value.length;
+
+        try {
+            const exceptions = (await api.getMemberExceptions()) as MemberException[];
+            const grouped: Record<number, string[]> = {};
+            for (const ex of exceptions || []) {
+                if (!ex.granted) continue;
+                if (!grouped[ex.member_id]) grouped[ex.member_id] = [];
+                const current = grouped[ex.member_id];
+                if (current) current.push(ex.permission);
+            }
+            memberPermissionHints.value = grouped;
+        } catch {
+            memberPermissionHints.value = {};
+        }
 
         // Correction UX : rollback page si out-of-bounds (classement rafraîchi)
         if (page.value > totalPages.value) {
@@ -434,6 +420,23 @@ const typeClass = (tl: string) =>
         : tl === "inactive"
           ? "bg-gray-100 text-gray-600"
           : "bg-blue-100 text-blue-700";
+
+const highestPermissionLabel = (m: Member) => {
+    const role = (m.role || "").trim();
+    if (role) return role;
+    return typeLabel(m.membership_type ?? "guest", m.role);
+};
+
+const formatPlanDate = (value?: string) => {
+    if (!value) return "—";
+    const dt = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(dt.getTime())) return value;
+    return dt.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    });
+};
 
 const editMember = (m: Member) => {
     editing.value = m.id;
@@ -483,6 +486,18 @@ const loadTeamsInternal = async () => {
     isLoadingTeams.value = true;
     try {
         await loadTeams();
+        if (selectedTeamIds.value.length === 0) {
+            const preferred = new Set([
+                "Louange/Adoration Cdm",
+                "Pôle Accueil Cdm",
+                "Louange SCO",
+            ]);
+            const defaults = teams.value
+                .filter((team) => preferred.has(team.name))
+                .slice(0, 3)
+                .map((team) => Number(team.id));
+            selectedTeamIds.value = defaults;
+        }
     } finally {
         isLoadingTeams.value = false;
     }
@@ -493,7 +508,7 @@ onMounted(() => {
 
 let filterDebounce: ReturnType<typeof setTimeout> | null = null;
 
-watch([selectedTeamId, searchQuery], () => {
+watch(searchQuery, () => {
     if (filterDebounce) clearTimeout(filterDebounce);
     page.value = 1;
     filterDebounce = setTimeout(() => {
@@ -501,5 +516,71 @@ watch([selectedTeamId, searchQuery], () => {
     }, 180);
 });
 
-const filteredMembers = computed(() => members.value);
+const displayMembers = computed(() => {
+    const now = new Date();
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(now.getDate() - 90);
+
+    return members.value.filter((m) => {
+        if (
+            selectedTeamIds.value.length > 0 &&
+            !((m.teams as MemberTeam[] | undefined) || []).some((t) =>
+                selectedTeamIds.value.includes(Number(t.id)),
+            )
+        ) {
+            return false;
+        }
+
+        if (selectedTags.value.length > 0) {
+            const tag = (m.membership_type || "guest").toLowerCase();
+            if (!selectedTags.value.includes(tag)) return false;
+        }
+
+        if (selectedPermissions.value.length > 0) {
+            const highest = highestPermissionLabel(m).toLowerCase();
+            if (!selectedPermissions.value.some((perm) => highest.includes(perm.toLowerCase()))) {
+                return false;
+            }
+        }
+
+        const planDate = m.last_scheduled_plan ? new Date(`${m.last_scheduled_plan}T12:00:00`) : null;
+        if (dateFilter.value === "recent" && (!planDate || planDate < ninetyDaysAgo)) return false;
+        if (dateFilter.value === "year" && (!planDate || planDate.getFullYear() !== now.getFullYear())) return false;
+        if (dateFilter.value === "stale" && (!planDate || planDate.getFullYear() >= now.getFullYear())) return false;
+
+        return true;
+    });
+});
+
+const pagedDisplayMembers = computed(() => {
+    const start = (page.value - 1) * pageSize.value;
+    return displayMembers.value.slice(start, start + pageSize.value);
+});
+
+function toggleTeam(teamId: number) {
+    if (selectedTeamIds.value.includes(teamId)) {
+        selectedTeamIds.value = selectedTeamIds.value.filter((id) => id !== teamId);
+    } else {
+        selectedTeamIds.value = [...selectedTeamIds.value, teamId];
+    }
+    page.value = 1;
+}
+
+function toggleTag(tag: string) {
+    if (selectedTags.value.includes(tag)) {
+        selectedTags.value = selectedTags.value.filter((v) => v !== tag);
+    } else {
+        selectedTags.value = [...selectedTags.value, tag];
+    }
+    page.value = 1;
+}
+
+function togglePermission(permission: string) {
+    if (selectedPermissions.value.includes(permission)) {
+        selectedPermissions.value = selectedPermissions.value.filter((v) => v !== permission);
+    } else {
+        selectedPermissions.value = [...selectedPermissions.value, permission];
+    }
+    page.value = 1;
+}
 </script>

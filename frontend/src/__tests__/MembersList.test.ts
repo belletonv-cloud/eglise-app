@@ -60,26 +60,29 @@ describe('MembersList', () => {
     vi.clearAllMocks()
   })
 
-  it('sends search and team filters to the members API helper', async () => {
+  it('sends search query to the members API helper', async () => {
     const wrapper = mount(MembersList)
+    await vi.runAllTimersAsync()
+    await Promise.resolve()
     await Promise.resolve()
 
     expect(membersMocks.getMembers).toHaveBeenCalledWith({
       page: 1,
-      limit: 20,
+      limit: 100,
       q: '',
       teamId: null,
     })
 
-    await wrapper.find('input[type="search"]').setValue('marie')
-    await wrapper.find('select').setValue('4')
+    const searchInput = wrapper.find('input[type="search"]')
+    expect(searchInput.exists()).toBe(true)
+    await searchInput.setValue('marie')
     await vi.advanceTimersByTimeAsync(250)
 
     expect(membersMocks.getMembers).toHaveBeenLastCalledWith({
       page: 1,
-      limit: 20,
+      limit: 100,
       q: 'marie',
-      teamId: 4,
+      teamId: null,
     })
   })
 })
