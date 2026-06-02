@@ -184,9 +184,16 @@ const routes0 = [
              COUNT(a.id) as arrangement_count,
              MAX(CASE WHEN a.chord_chart IS NOT NULL AND TRIM(a.chord_chart) != '' THEN 1 ELSE 0 END) as has_chord_chart,
              (
-               SELECT a2.key
+               SELECT COALESCE(
+                 NULLIF(TRIM(a2.key), ''),
+                 (SELECT NULLIF(TRIM(ps2.transposed_key), '')
+                  FROM plan_songs ps2
+                  JOIN plan_items pi2 ON pi2.id = ps2.plan_item_id
+                  WHERE ps2.arrangement_id = a2.id AND ps2.transposed_key IS NOT NULL
+                  ORDER BY pi2.id DESC LIMIT 1)
+               )
                FROM arrangements a2
-               WHERE a2.song_id = s.id AND a2.key IS NOT NULL AND TRIM(a2.key) != ''
+               WHERE a2.song_id = s.id
                ORDER BY a2.id ASC
                LIMIT 1
              ) as primary_key,
