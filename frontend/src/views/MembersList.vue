@@ -2,7 +2,7 @@
     <div>
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-800">
-                {{ $t("members.title", { count: members.length }) }}
+                {{ $t("members.title", { count: total }) }}
             </h2>
             <div class="flex items-center gap-2">
                 <button
@@ -34,22 +34,60 @@
             v-else
             class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
         >
-            <div class="p-4 flex items-center gap-3">
-                <label class="text-sm text-gray-600">{{
-                    $t("members.filter_ministry")
-                }}</label>
-                <select v-model="selectedTeam" class="border px-2 py-1 rounded">
-                    <option :value="null">{{ $t("members.all") }}</option>
-                    <option v-for="t in teams" :key="t.id" :value="t.id">
-                        {{ t.name }}
-                    </option>
-                </select>
+            <div
+                class="p-4 border-b border-gray-200 bg-gray-50/70 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+            >
+                <div class="flex-1 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div class="relative flex-1 max-w-xl">
+                        <span
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                            >🔎</span
+                        >
+                        <input
+                            v-model="searchQuery"
+                            type="search"
+                            :placeholder="$t('members.search_placeholder')"
+                            class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                        />
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm text-gray-600">{{
+                            $t("members.filter_ministry")
+                        }}</label>
+                        <select
+                            v-model.number="selectedTeamId"
+                            class="border px-3 py-2 rounded-lg bg-white text-sm"
+                        >
+                            <option :value="0">{{ $t("members.all") }}</option>
+                            <option v-for="t in teams" :key="t.id" :value="Number(t.id)">
+                                {{ t.name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-sm text-gray-500">
+                    {{ total }} {{ $t("table.member") }}<span v-if="total > 1">s</span>
+                </div>
+            </div>
+            <div class="px-4 py-2 text-xs text-gray-500 flex items-center gap-3">
+                <span v-if="searchQuery.trim()">
+                    “{{ searchQuery.trim() }}”
+                </span>
+                <span v-if="selectedTeamId > 0">
+                    {{ teams.find((t) => Number(t.id) === selectedTeamId)?.name }}
+                </span>
                 <span
                     v-if="isLoadingTeams"
-                    class="text-xs text-gray-400 ml-2"
+                    class="text-xs text-gray-400"
                     >{{ $t("loading") }}</span
                 >
             </div>
+            <div class="px-4 pb-3" v-if="members.length === 0 && !isLoading">
+                <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500">
+                    {{ $t("members.no_members") }}
+                </div>
+            </div>
+            <div v-else>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50 border-b border-gray-200">
@@ -153,12 +191,6 @@
                     </tbody>
                 </table>
             </div>
-
-            <div
-                v-if="filteredMembers.length === 0 && !isLoading"
-                class="text-center py-12 text-gray-400"
-            >
-                {{ $t("members.no_members") }}
             </div>
 
             <!-- Pagination -->
@@ -325,7 +357,8 @@ const total = ref(0);
 const members = ref<Member[]>([]);
 const { teams, loadTeams } = useTeams();
 const isLoadingTeams = ref(false);
-const selectedTeam = ref<number | null>(null);
+const selectedTeamId = ref(0);
+const searchQuery = ref("");
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const showForm = ref(false);
@@ -349,6 +382,8 @@ async function fetchMembers() {
         const res = await getMembers({
             page: page.value,
             limit: pageSize.value,
+            q: searchQuery.value,
+            teamId: selectedTeamId.value > 0 ? selectedTeamId.value : null,
         });
         members.value = res.members ?? [];
         total.value = res.total ?? members.value.length;
@@ -456,17 +491,15 @@ onMounted(() => {
     loadTeamsInternal();
 });
 
-// Si on filtre par team, reset sur page 1
-watch(selectedTeam, () => {
+let filterDebounce: ReturnType<typeof setTimeout> | null = null;
+
+watch([selectedTeamId, searchQuery], () => {
+    if (filterDebounce) clearTimeout(filterDebounce);
     page.value = 1;
+    filterDebounce = setTimeout(() => {
+        fetchMembers();
+    }, 180);
 });
 
-const filteredMembers = computed(() => {
-    if (!selectedTeam.value) return members.value;
-    return members.value.filter((m) =>
-        ((m.teams as MemberTeam[]) || []).some(
-            (t: MemberTeam) => t.id === selectedTeam.value,
-        ),
-    );
-});
+const filteredMembers = computed(() => members.value);
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto p-4">
+  <div class="max-w-7xl mx-auto p-4 pb-24 md:pb-4">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -14,32 +14,32 @@
       </router-link>
     </div>
 
-    <div class="mt-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+    <div class="mt-4 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
       <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <button
-            class="px-3 py-1.5 rounded-lg text-sm font-semibold border"
+            class="border-b-2 px-3 py-2 text-sm font-semibold transition-colors"
             :class="activeTab === 'order'
-              ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
+              ? 'border-emerald-500 text-emerald-700'
+              : 'border-transparent text-gray-600 hover:text-emerald-700'"
             @click="setTab('order')"
           >
             Order
           </button>
           <button
-            class="px-3 py-1.5 rounded-lg text-sm border"
+            class="border-b-2 px-3 py-2 text-sm font-semibold transition-colors"
             :class="activeTab === 'teams'
-              ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
+              ? 'border-emerald-500 text-emerald-700'
+              : 'border-transparent text-gray-600 hover:text-emerald-700'"
             @click="setTab('teams')"
           >
             Teams
           </button>
           <button
-            class="px-3 py-1.5 rounded-lg text-sm border"
+            class="border-b-2 px-3 py-2 text-sm font-semibold transition-colors"
             :class="activeTab === 'rehearse'
-              ? 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-900'
-              : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-transparent'"
+              ? 'border-emerald-500 text-emerald-700'
+              : 'border-transparent text-gray-600 hover:text-emerald-700'"
             @click="setTab('rehearse')"
           >
             Rehearse
@@ -151,6 +151,7 @@
         </div>
       </div>
     </div>
+    <PlanningCenterMobileNav active="plans" />
   </div>
 </template>
 
@@ -158,6 +159,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../utils/api'
+import PlanningCenterMobileNav from '../components/PlanningCenterMobileNav.vue'
 import TeamsDashboardPanel from '../components/TeamsDashboardPanel.vue'
 
 const router = useRouter()

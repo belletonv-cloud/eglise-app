@@ -6,11 +6,22 @@ export interface GetMembersResult {
   total: number
 }
 
-export async function getMembers(params: { page: number; limit: number }): Promise<GetMembersResult> {
-  const { page, limit } = params
+export async function getMembers(params: {
+  page: number
+  limit: number
+  q?: string
+  teamId?: number | null
+}): Promise<GetMembersResult> {
+  const { page, limit, q, teamId } = params
   const base = getApiBase()
+  const qs = new URLSearchParams({
+    page: String(page),
+    size: String(limit),
+  })
+  if (q?.trim()) qs.set('q', q.trim())
+  if (teamId && teamId > 0) qs.set('teamId', String(teamId))
   try {
-    const res = await authenticatedFetch(`${base}/api/members?page=${page}&size=${limit}`)
+    const res = await authenticatedFetch(`${base}/api/members?${qs.toString()}`)
     const data = await res.json()
     if (Array.isArray(data)) {
       return { members: data, total: data.length }

@@ -14,17 +14,25 @@
       </router-link>
     </div>
 
-    <div class="mt-4 bg-black border border-gray-900 rounded-xl overflow-hidden shadow-sm">
+    <div class="mt-4 overflow-hidden rounded-2xl border border-gray-900 bg-black shadow-sm">
       <div class="px-4 py-3 border-b border-gray-900 flex items-center justify-between gap-3">
-        <div class="text-xs text-gray-400">
-          {{ songs.length }} song(s)
+        <div>
+          <div class="text-[11px] uppercase tracking-[0.24em] text-blue-300/70">
+            Stage mode
+          </div>
+          <div class="mt-1 text-xs text-gray-400">
+            {{ songs.length }} song(s) · Sunday service rehearsal
+          </div>
         </div>
-        <router-link
-          to="/music-stand"
-          class="text-xs px-2 py-1 rounded bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30"
-        >
-          {{ $t('apps.open') }}
-        </router-link>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="rounded-full border border-blue-500/30 bg-blue-600/10 px-2 py-1 text-blue-300">⚙️</span>
+          <router-link
+            to="/music-stand"
+            class="rounded-full border border-blue-500/30 bg-blue-600/20 px-3 py-1 text-blue-300 hover:bg-blue-600/30"
+          >
+            {{ $t('apps.open') }}
+          </router-link>
+        </div>
       </div>
 
       <div class="p-3">

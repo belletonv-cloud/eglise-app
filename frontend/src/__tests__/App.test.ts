@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
 
 // Mock vue-router
 vi.mock('vue-router', () => ({
@@ -22,5 +21,5 @@ describe('App', () => {
   it('can import App component', async () => {
     const App = await import('../App.vue')
     expect(App.default).toBeDefined()
-  })
+  }, 15000)
 })

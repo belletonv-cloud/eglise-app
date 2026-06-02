@@ -402,6 +402,7 @@ export default {
   search: {
     placeholder: "Rechercher...",
     typePrayer: "Prière",
+    no_results: "Aucun résultat",
   },
   setlist: {
     back_to_plan: "Retour au plan",
@@ -692,6 +693,7 @@ export default {
     title: "Membres ({count})",
     add: "+ Ajouter un membre",
     filter_ministry: "Filtrer par ministère :",
+    search_placeholder: "Rechercher un membre par nom, email ou téléphone...",
     all: "Tous",
     no_members: "Aucun membre.",
     edit: "Modifier",

@@ -383,6 +383,7 @@ export default {
   search: {
     placeholder: "Search...",
     typePrayer: "Prayer",
+    no_results: "No results",
   },
   setlist: {
     back_to_plan: "Back to plan",
@@ -670,6 +671,7 @@ export default {
     title: "Members ({count})",
     add: "+ Add Member",
     filter_ministry: "Filter by ministry:",
+    search_placeholder: "Search members by name, email, or phone...",
     all: "All",
     no_members: "No members.",
     edit: "Edit",

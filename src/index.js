@@ -319,6 +319,10 @@ const routes0 = [
       100,
     );
     const offset = (page - 1) * size;
+    const q = (url.searchParams.get("q") || "").trim();
+    const teamIdValue =
+      url.searchParams.get("teamId") || url.searchParams.get("team_id") || "";
+    const teamId = parseInt(teamIdValue, 10);
 
     const caller = await getMemberFromRequest(request, env);
     if (!caller) return json({ error: "Not authenticated" }, 401);
@@ -328,17 +332,41 @@ const routes0 = [
       caller.role === "admin" ||
       (await hasPermission(request, env, "edit_members"));
 
+    const whereClauses = [];
+    const whereBindings = [];
+
+    if (q) {
+      const term = `%${q}%`;
+      whereClauses.push(
+        "(m.first_name LIKE ? OR m.last_name LIKE ? OR m.email LIKE ? OR m.phone LIKE ?)",
+      );
+      whereBindings.push(term, term, term, term);
+    }
+
+    if (Number.isFinite(teamId) && teamId > 0) {
+      whereClauses.push(
+        "EXISTS (SELECT 1 FROM team_members tm_filter WHERE tm_filter.member_id = m.id AND tm_filter.team_id = ?)",
+      );
+      whereBindings.push(teamId);
+    }
+
+    const whereSql = whereClauses.length
+      ? ` WHERE ${whereClauses.join(" AND ")}`
+      : "";
+
     // Count total members
     const countRes = await env.DB.prepare(
-      "SELECT COUNT(*) as count FROM members",
-    ).first();
+      `SELECT COUNT(*) as count FROM members m${whereSql}`,
+    )
+      .bind(...whereBindings)
+      .first();
     const totalCount = countRes?.count || 0;
 
     // Get paginated members
     const membersRes = await env.DB.prepare(
-      "SELECT * FROM members ORDER BY last_name ASC, first_name ASC LIMIT ? OFFSET ?",
+      `SELECT m.* FROM members m${whereSql} ORDER BY m.last_name ASC, m.first_name ASC LIMIT ? OFFSET ?`,
     )
-      .bind(size, offset)
+      .bind(...whereBindings, size, offset)
       .all();
     const members = membersRes.results;
 
