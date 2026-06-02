@@ -14,12 +14,35 @@
 
     <div class="arrangements" v-if="song.arrangements && song.arrangements.length > 0">
       <h3>{{t('song.arrangements')}}</h3>
+      <div class="overflow-x-auto rounded-lg border border-gray-200">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500">Arrangement</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500">Key</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500">Tempo</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500">Chart</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="arr in song.arrangements"
+              :key="arr.id"
+              class="cursor-pointer border-t border-gray-100 hover:bg-blue-50"
+              :class="{ 'bg-blue-50': selectedArrangementId === arr.id }"
+              @click="selectArrangement(arr.id)"
+            >
+              <td class="px-3 py-2 font-medium text-gray-800">{{ arr.name }}</td>
+              <td class="px-3 py-2 text-gray-600">{{ arr.key || '—' }}</td>
+              <td class="px-3 py-2 text-gray-600">{{ arr.tempo ? `${arr.tempo} BPM` : '—' }}</td>
+              <td class="px-3 py-2 text-gray-600">{{ arr.chord_chart ? 'Yes' : 'No' }}</td>
+              <td class="px-3 py-2 text-gray-500">{{ arr.pco_updated_at ? arr.pco_updated_at.slice(0, 10) : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="arrangement-controls">
-        <select v-model="selectedArrangementId" @change="loadArrangement">
-          <option v-for="arr in song.arrangements" :key="arr.id" :value="arr.id">
-            {{ arr.name }} ({{ arr.key }})
-          </option>
-        </select>
         <button @click="showEditor = true" class="edit-chart-btn">
           ✏️ {{t('song.edit')}}
         </button>
@@ -353,6 +376,11 @@ const loadArrangement = () => {
     semitones.value = 0;
     loadMedia();
   }
+};
+
+const selectArrangement = (arrangementId: number) => {
+  selectedArrangementId.value = arrangementId;
+  loadArrangement();
 };
 
 const transpose = () => {

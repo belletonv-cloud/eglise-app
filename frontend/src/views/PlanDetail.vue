@@ -54,7 +54,39 @@
             <h2 class="text-lg font-semibold text-gray-800">{{t('plan.order')}} ({{ items.length }})
               <span v-if="totalMinutes > 0" class="text-sm font-normal text-gray-500 ml-2">· {{ formatDuration(totalMinutes) }}</span>
             </h2>
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center flex-wrap">
+              <div class="relative">
+                <button
+                  @click="showMusicMenu = !showMusicMenu"
+                  class="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  title="Music tools"
+                >
+                  🎵
+                </button>
+                <div
+                  v-if="showMusicMenu"
+                  class="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 bg-white shadow-lg z-20"
+                >
+                  <button
+                    @click="openMediaPlayer"
+                    class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Media Player
+                  </button>
+                  <button
+                    @click="openSongbook"
+                    class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Songbook
+                  </button>
+                  <button
+                    @click="openMusicStandFromMenu"
+                    class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Music Stand
+                  </button>
+                </div>
+              </div>
               <button @click="showSongSelector = true"
                 class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">{{t('plan.add_song')}}</button>
               <button @click="addItem('header')"
@@ -214,6 +246,7 @@ async function copyShare() {
 const showSongSelector = ref(false)
 const showChangeSong = ref(false)
 const changingItemId = ref<number | null>(null)
+const showMusicMenu = ref(false)
 
 const songItems = computed(() => items.value.filter(i => i.type === 'song' && i.arrangement_id))
 const totalMinutes = computed(() => items.value.reduce((sum, i) => sum + (i.length_minutes || 0), 0))
@@ -242,6 +275,21 @@ function openMusicStand() {
   if (first) {
     router.push(`/music-stand/${first.song_id}/${first.arrangement_id}?plan=${plan.value?.id}`)
   }
+}
+
+function openMediaPlayer() {
+  showMusicMenu.value = false
+  router.push(`/plans/${plan.value?.id}/setlist`)
+}
+
+function openSongbook() {
+  showMusicMenu.value = false
+  router.push('/songs')
+}
+
+function openMusicStandFromMenu() {
+  showMusicMenu.value = false
+  openMusicStand()
 }
 
 const statusClass = (s: string) =>

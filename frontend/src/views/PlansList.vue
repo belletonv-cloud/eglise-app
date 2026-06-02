@@ -1,26 +1,35 @@
 <template>
-  <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+  <div class="mx-auto max-w-7xl p-4 pb-24 md:pb-6">
+    <div class="mb-4 flex items-center justify-between gap-3">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $t('plansList.title') }}</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ total }} service{{ total > 1 ? 's' : '' }}</p>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Services Planning</h2>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ total }} service{{ total > 1 ? 's' : '' }}</p>
       </div>
       <div class="flex items-center gap-2">
-        <!-- View toggle -->
-        <div class="flex border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-          <button @click="viewMode = 'list'" :class="['px-3 py-1.5 text-sm', viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">☰</button>
-          <button @click="viewMode = 'matrix'" :class="['px-3 py-1.5 text-sm', viewMode === 'matrix' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">⊞</button>
+        <div class="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-600">
+          <button @click="viewMode = 'list'" :class="['px-3 py-1.5 text-sm', viewMode === 'list' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">Schedule</button>
+          <button @click="viewMode = 'matrix'" :class="['px-3 py-1.5 text-sm', viewMode === 'matrix' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">Matrix</button>
         </div>
-        <button @click="showApplyTemplate = true"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer text-sm">
+        <button @click="showApplyTemplate = true" class="cursor-pointer rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
           {{ $t('plansList.add_template') }}
         </button>
-        <button @click="showForm = true"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm">
+        <button @click="showForm = true" class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
           + {{ $t('plansList.add_new') }}
         </button>
       </div>
+    </div>
+
+    <div class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Service type</label>
+      <select
+        v-model="selectedServiceType"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+      >
+        <option value="all">Tous</option>
+        <option v-for="st in serviceTypes" :key="st.id" :value="String(st.id)">
+          {{ st.name }}
+        </option>
+      </select>
     </div>
 
     <!-- Skeleton loading -->
@@ -31,45 +40,72 @@
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <div v-else>
-      <!-- === VUE LISTE (groupée par type de service) === -->
+      <!-- === VUE LISTE (style Services Planning) === -->
       <div v-if="viewMode === 'list'">
-        <!-- À venir -->
-        <div v-if="upcomingByType.length > 0" class="mb-8">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
-            À venir
-          </h3>
-          <div v-for="group in upcomingByType" :key="group.type_id ?? 'none'" class="mb-6">
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ group.name }}</span>
-              <span class="text-xs text-gray-400">({{ group.plans.length }})</span>
-            </div>
-            <div class="space-y-2 pl-4">
-              <div v-for="plan in group.plans" :key="plan.id"
-                @click="goToPlan(plan.id)"
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 cursor-pointer transition-all">
-                <PlanRow :plan="plan" :t="t" :formatDay="formatDay" :formatMonth="formatMonth" :statusClass="statusClass" :statusLabel="statusLabel" />
-              </div>
-            </div>
+        <div v-if="visibleUpcomingPlans.length > 0" class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div class="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300">
+            Upcoming
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-gray-900/40">
+                <tr>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">Date</th>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">Service</th>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">Theme</th>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">Order</th>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">People</th>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-500">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="plan in visibleUpcomingPlans"
+                  :key="plan.id"
+                  class="cursor-pointer border-t border-gray-100 hover:bg-emerald-50/40 dark:border-gray-700 dark:hover:bg-gray-700/40"
+                  @click="goToPlan(plan.id)"
+                >
+                  <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ plan.date }}{{ plan.time ? ` · ${plan.time.slice(0,5)}` : '' }}</td>
+                  <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">{{ plan.service_type_name || 'Service' }}</td>
+                  <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ plan.theme || '—' }}</td>
+                  <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ plan.items_count || 0 }}</td>
+                  <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ plan.people_count || 0 }}</td>
+                  <td class="px-4 py-2">
+                    <span :class="`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusClass(plan.status)}`">
+                      {{ statusLabel(plan.status) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Passés -->
-        <div v-if="pastPlans.length > 0">
+        <div v-if="visiblePastPlans.length > 0">
           <div class="flex items-center gap-3 mb-3">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-              Passés
+              Past
             </h3>
             <button @click="showPast = !showPast" class="text-xs text-blue-500 hover:underline cursor-pointer">
-              {{ showPast ? 'Masquer' : `Afficher (${pastPlans.length})` }}
+              {{ showPast ? 'Masquer' : `Afficher (${visiblePastPlans.length})` }}
             </button>
           </div>
-          <div v-if="showPast" class="space-y-2 opacity-70">
-            <div v-for="plan in pastPlans" :key="plan.id"
-              @click="goToPlan(plan.id)"
-              class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-3 hover:shadow-sm cursor-pointer transition-all">
-              <PlanRow :plan="plan" :t="t" :formatDay="formatDay" :formatMonth="formatMonth" :statusClass="statusClass" :statusLabel="statusLabel" />
-            </div>
+          <div v-if="showPast" class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <table class="min-w-full text-sm opacity-80">
+              <tbody>
+                <tr
+                  v-for="plan in visiblePastPlans"
+                  :key="plan.id"
+                  class="cursor-pointer border-t border-gray-100 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/40"
+                  @click="goToPlan(plan.id)"
+                >
+                  <td class="px-4 py-2 text-gray-700 dark:text-gray-200">{{ plan.date }}</td>
+                  <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">{{ plan.service_type_name || 'Service' }}</td>
+                  <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ plan.theme || '—' }}</td>
+                  <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ plan.items_count || 0 }} items</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -121,7 +157,7 @@
         <p class="text-xs text-gray-400 mt-3 text-center">Cliquer sur un service pour voir le détail · ⊞ = 8 prochains services</p>
       </div>
 
-      <!-- Pagination (vue liste uniquement) -->
+      <!-- Pagination -->
       <div v-if="viewMode === 'list' && total > pageSize" class="flex items-center gap-2 justify-center py-6">
         <button @click="goPrev" :disabled="page === 1"
           class="px-3 py-1.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-40 text-sm cursor-pointer">← Préc.</button>
@@ -217,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, defineComponent, h } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
@@ -239,6 +275,7 @@ const showForm = ref(false)
 const showApplyTemplate = ref(false)
 const showPast = ref(false)
 const viewMode = ref<'list' | 'matrix'>('list')
+const selectedServiceType = ref<string>('all')
 const form = ref({ service_type_id: '', date: '', time: '10:00', theme: '', notes: '' })
 const applyTemplateId = ref<number | null>(null)
 const applyForm = ref({ date: '', time: '10:00', theme: '' })
@@ -247,21 +284,15 @@ const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.v
 
 const today = new Date().toISOString().slice(0, 10)
 
-const upcomingPlans = computed(() => plans.value.filter(p => p.date >= today).sort((a, b) => a.date.localeCompare(b.date)))
-const pastPlans = computed(() => plans.value.filter(p => p.date < today).sort((a, b) => b.date.localeCompare(a.date)))
-
-// Group upcoming plans by service type
-const upcomingByType = computed(() => {
-  const groups = new Map<string, { type_id: number | null; name: string; plans: any[] }>()
-  for (const plan of upcomingPlans.value) {
-    const key = String(plan.service_type_id ?? 'none')
-    if (!groups.has(key)) {
-      groups.set(key, { type_id: plan.service_type_id ?? null, name: plan.service_type_name || 'Sans type', plans: [] })
-    }
-    groups.get(key)!.plans.push(plan)
-  }
-  return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name))
-})
+const filteredPlans = computed(() =>
+  plans.value.filter((p) =>
+    selectedServiceType.value === 'all' || String(p.service_type_id ?? '') === selectedServiceType.value,
+  ),
+)
+const upcomingPlans = computed(() => filteredPlans.value.filter(p => p.date >= today).sort((a, b) => a.date.localeCompare(b.date)))
+const pastPlans = computed(() => filteredPlans.value.filter(p => p.date < today).sort((a, b) => b.date.localeCompare(a.date)))
+const visibleUpcomingPlans = computed(() => upcomingPlans.value.slice(0, 30))
+const visiblePastPlans = computed(() => pastPlans.value.slice(0, 30))
 
 // Matrix: next 8 upcoming plans (columns) × service types (rows)
 const matrixPlans = computed(() => upcomingPlans.value.slice(0, 8))
@@ -361,32 +392,4 @@ const applyTemplate = async () => {
     showToast(e.message || 'Error', 'error')
   }
 }
-
-// Inline sub-component for a plan row (avoids repetition)
-const PlanRow = defineComponent({
-  props: ['plan', 't', 'formatDay', 'formatMonth', 'statusClass', 'statusLabel'],
-  setup(props) {
-    return () => h('div', { class: 'flex flex-col sm:flex-row sm:items-center justify-between gap-2' }, [
-      h('div', { class: 'flex items-center gap-4' }, [
-        h('div', { class: 'text-center min-w-[50px]' }, [
-          h('div', { class: 'text-base font-bold text-gray-800 dark:text-gray-100' }, props.formatDay(props.plan.date)),
-          h('div', { class: 'text-xs text-gray-400' }, props.formatMonth(props.plan.date)),
-        ]),
-        h('div', {}, [
-          h('h3', { class: 'font-semibold text-gray-800 dark:text-gray-100 text-sm' }, props.plan.service_type_name || 'Service'),
-          h('p', { class: 'text-xs text-gray-500 dark:text-gray-400' }, `${props.plan.date}${props.plan.time ? ' · ' + props.plan.time.slice(0,5) : ''}`),
-          props.plan.theme ? h('p', { class: 'text-xs text-gray-500 dark:text-gray-400 italic' }, `« ${props.plan.theme} »`) : null,
-        ]),
-      ]),
-      h('div', { class: 'flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 flex-wrap' }, [
-        h('span', {}, `${props.plan.items_count || 0} éléments`),
-        h('span', {}, '·'),
-        h('span', {}, `${props.plan.people_count || 0} personnes`),
-        h('span', {
-          class: `px-2 py-0.5 rounded-full font-medium ${props.statusClass(props.plan.status)}`
-        }, props.statusLabel(props.plan.status)),
-      ]),
-    ])
-  }
-})
 </script>
