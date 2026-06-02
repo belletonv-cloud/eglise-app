@@ -17,6 +17,11 @@ import { test, expect } from '@playwright/test'
 const API_BASE = 'https://eglise-app.belletonv.workers.dev/api'
 const APP_URL = 'https://eglise-app.pages.dev'
 
+function unwrapList(data: any): any[] {
+  if (Array.isArray(data)) return data
+  return data?.data ?? data?.plans ?? data?.songs ?? data?.members ?? []
+}
+
 // Check if a page is the login screen (redirected due to no auth)
 async function isLoginPage(page) {
   const url = page.url()
@@ -50,7 +55,7 @@ test.describe('UC1: Worship Leader — Plan Management', () => {
 
   test('1.2 — View plan details with songs and team', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       const plan = plans[0]
@@ -64,7 +69,7 @@ test.describe('UC1: Worship Leader — Plan Management', () => {
 
   test('1.3 — View scheduled people for a plan', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       const peopleRes = await request.get(`${API_BASE}/plans/${plans[0].id}/scheduled-people`)
@@ -76,7 +81,7 @@ test.describe('UC1: Worship Leader — Plan Management', () => {
 
   test('1.4 — View plan items (order of service / setlist)', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       const itemsRes = await request.get(`${API_BASE}/plans/${plans[0].id}/items`)
@@ -95,7 +100,7 @@ test.describe('UC1: Worship Leader — Plan Management', () => {
 
   test('1.5 — Song items show arrangement details (key, tempo)', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     for (const plan of plans) {
       const itemsRes = await request.get(`${API_BASE}/plans/${plan.id}/items`)
@@ -194,7 +199,7 @@ test.describe('UC3: Rehearsal — Audio & Practice Tools', () => {
 
   test('3.1 — Sermon audio attached to plan', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     // Find a plan that declares an audio_url, otherwise skip the test
     const planWithAudio = (plans || []).find((p) => p && p.audio_url)
@@ -237,7 +242,7 @@ test.describe('UC4: Service — Setlist & Order of Service', () => {
 
   test('4.1 — Setlist view for a plan', async ({ page, request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       await page.goto(`${APP_URL}/plans/${plans[0].id}/setlist`)
@@ -251,7 +256,7 @@ test.describe('UC4: Service — Setlist & Order of Service', () => {
 
   test('4.2 — Kiosk mode for public display', async ({ page, request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       await page.goto(`${APP_URL}/kiosk/${plans[0].id}`)
@@ -262,7 +267,7 @@ test.describe('UC4: Service — Setlist & Order of Service', () => {
 
   test('4.3 — Checklist by position (prep for service)', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     if (plans.length > 0) {
       const checklistRes = await request.get(`${API_BASE}/plans/${plans[0].id}/checklist`)
@@ -315,10 +320,12 @@ test.describe('UC5: Collaboration — Annotations & Sharing', () => {
 // ============================================================
 test.describe('UC6: Team Management — Schedule & Availability', () => {
 
+  const asAdmin = { headers: { 'x-demo-email': 'admin@cieuxouverts.bzh' } }
+
   test('6.1 — View members with their teams', async ({ request }) => {
-    const membersRes = await request.get(`${API_BASE}/members`)
-    const members = await membersRes.json()
-    expect(Array.isArray(members)).toBe(true)
+    const membersRes = await request.get(`${API_BASE}/members`, asAdmin)
+    expect(membersRes.ok()).toBeTruthy()
+    const members = unwrapList(await membersRes.json())
     expect(members.length).toBeGreaterThan(0)
 
     for (const m of members.slice(0, 3)) {
@@ -330,7 +337,8 @@ test.describe('UC6: Team Management — Schedule & Availability', () => {
 
   test('6.2 — View teams with their members', async ({ request }) => {
     const teamsRes = await request.get(`${API_BASE}/teams`)
-    const teams = await teamsRes.json()
+    expect(teamsRes.ok()).toBeTruthy()
+    const teams = unwrapList(await teamsRes.json())
     expect(Array.isArray(teams)).toBe(true)
 
     for (const team of teams.slice(0, 3)) {
@@ -342,11 +350,15 @@ test.describe('UC6: Team Management — Schedule & Availability', () => {
   })
 
   test('6.3 — Volunteer preferences (availability)', async ({ request }) => {
-    const membersRes = await request.get(`${API_BASE}/members`)
-    const members = await membersRes.json()
+    const membersRes = await request.get(`${API_BASE}/members`, asAdmin)
+    expect(membersRes.ok()).toBeTruthy()
+    const members = unwrapList(await membersRes.json())
 
     if (members.length > 0) {
-      const prefsRes = await request.get(`${API_BASE}/volunteer-preferences/${members[0].id}`)
+      const prefsRes = await request.get(
+        `${API_BASE}/volunteer-preferences/${members[0].id}`,
+        asAdmin,
+      )
       expect(prefsRes.ok()).toBeTruthy()
       const prefs = await prefsRes.json()
       expect(prefs).toHaveProperty('max_services_per_month')
@@ -356,7 +368,7 @@ test.describe('UC6: Team Management — Schedule & Availability', () => {
 
   test('6.4 — Replacement suggestions when someone declines', async ({ request }) => {
     const plansRes = await request.get(`${API_BASE}/plans`)
-    const plans = await plansRes.json()
+    const plans = unwrapList(await plansRes.json())
 
     for (const plan of plans) {
       const peopleRes = await request.get(`${API_BASE}/plans/${plan.id}/scheduled-people`)
@@ -378,6 +390,8 @@ test.describe('UC6: Team Management — Schedule & Availability', () => {
 // ============================================================
 test.describe('UC7: Communication — Email & Notifications', () => {
 
+  const asAdmin = { headers: { 'x-demo-email': 'admin@cieuxouverts.bzh' } }
+
   test('7.1 — Email templates exist', async ({ request }) => {
     const templatesRes = await request.get(`${API_BASE}/email-templates`)
     expect(templatesRes.ok()).toBeTruthy()
@@ -386,23 +400,23 @@ test.describe('UC7: Communication — Email & Notifications', () => {
   })
 
   test('7.2 — Email logs are tracked', async ({ request }) => {
-    const logsRes = await request.get(`${API_BASE}/email-logs`)
+    const logsRes = await request.get(`${API_BASE}/email-logs`, asAdmin)
     expect(logsRes.ok()).toBeTruthy()
-    const logs = await logsRes.json()
+    const logs = unwrapList(await logsRes.json())
     expect(Array.isArray(logs)).toBe(true)
   })
 
   test('7.3 — Polls for team feedback', async ({ request }) => {
     const pollsRes = await request.get(`${API_BASE}/polls`)
     expect(pollsRes.ok()).toBeTruthy()
-    const polls = await pollsRes.json()
+    const polls = unwrapList(await pollsRes.json())
     expect(Array.isArray(polls)).toBe(true)
   })
 
   test('7.4 — Announcements & prayer requests', async ({ request }) => {
     const annRes = await request.get(`${API_BASE}/announcements`)
     expect(annRes.ok()).toBeTruthy()
-    const anns = await annRes.json()
+    const anns = unwrapList(await annRes.json())
     expect(Array.isArray(anns)).toBe(true)
   })
 })

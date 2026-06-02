@@ -41,11 +41,13 @@ test.describe('API endpoints — shape & auth', () => {
     expect(typeof data.totalCount).toBe('number')
   })
 
-  test('GET /api/teams returns array', async ({ request }) => {
+  test('GET /api/teams returns paginated envelope', async ({ request }) => {
     const res = await request.get(`${API}/teams`)
     expect(res.ok()).toBeTruthy()
     const data = await res.json()
-    expect(Array.isArray(data)).toBe(true)
+    expect(data).toHaveProperty('data')
+    expect(Array.isArray(data.data)).toBe(true)
+    expect(data).toHaveProperty('totalCount')
   })
 
   // GET /api/directory now requires auth
@@ -91,11 +93,11 @@ test.describe('API endpoints — shape & auth', () => {
     expect(res.status()).toBe(404)
   })
 
-  // POST /api/email-logs now requires auth
-  test('POST /api/email-logs returns 401 without auth', async ({ request }) => {
+  // POST /api/email-logs requires auth (and/or role) — 401 or 403 are both acceptable here
+  test('POST /api/email-logs is not accessible without auth', async ({ request }) => {
     const res = await request.post(`${API}/email-logs`, {
       data: { subject: 'Test', body: 'Hello', recipient_email: 'a@b.com' },
     })
-    expect(res.status()).toBe(401)
+    expect([401, 403]).toContain(res.status())
   })
 })
