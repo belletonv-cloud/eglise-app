@@ -73,6 +73,30 @@ test.describe('Site déployé — Mode démo', () => {
     await expect(items.first()).toBeVisible({ timeout: 8000 })
   })
 
+  test('/admin/roles en mode démo ne redirige pas vers /login', async ({ page }) => {
+    await page.goto(`${SITE}/admin/roles?demo=1`)
+    await page.waitForLoadState('domcontentloaded')
+
+    await expect(page.getByText('Gestion des rôles')).toBeVisible({ timeout: 8000 })
+    await expect(page.getByRole('heading', { name: /Connexion/i })).toHaveCount(0)
+  })
+
+  test('persona Éditeur: pas de lien /admin (hub), mais accès au contenu', async ({ page }) => {
+    await page.goto(`${SITE}/?demo=1`)
+
+    // Switch persona to editor
+    await page.locator('.demo-persona-selector > button').click()
+    await page.getByRole('button', { name: 'Éditeur' }).click()
+
+    // Hub admin (exact) hidden
+    await expect(page.locator('a[href="/admin"]')).toHaveCount(0)
+
+    // Content editor should be accessible
+    await page.goto(`${SITE}/admin/content?demo=1`)
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page.locator('body')).not.toBeEmpty()
+  })
+
   test('aperçu mobile (iframe) fonctionne sur le site déployé', async ({ page }) => {
     await page.goto(`${SITE}/?demo=1`)
 
