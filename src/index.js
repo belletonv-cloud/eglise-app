@@ -146,6 +146,19 @@ const releaseSyncLock = async (env) => {
 
 const routes0 = [
   // ========================================
+  // HEALTH
+  // ========================================
+  route("GET", "/api/health", async (request, env) => {
+    try {
+      // Light DB ping (does not depend on schema)
+      await env.DB.prepare("SELECT 1 as ok").first();
+      return json({ ok: true });
+    } catch {
+      return json({ ok: false }, 500);
+    }
+  }),
+
+  // ========================================
   // SONGS
   // ========================================
   route("GET", "/api/songs", async (request, env) => {
@@ -307,12 +320,13 @@ const routes0 = [
     );
     const offset = (page - 1) * size;
 
-    // Check caller role — non-admins get a reduced view (no sensitive fields)
     const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Not authenticated" }, 401);
+
+    // Check caller role — non-admins get a reduced view (no sensitive fields)
     const isAdmin =
-      caller &&
-      (caller.role === "admin" ||
-        (await hasPermission(request, env, "edit_members")));
+      caller.role === "admin" ||
+      (await hasPermission(request, env, "edit_members"));
 
     // Count total members
     const countRes = await env.DB.prepare(
