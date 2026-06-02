@@ -25,12 +25,12 @@
           <label>{{ $t('planTemplates.service_type') }}
             <select v-model="form.service_type">
               <option value="">—</option>
-              <option value="worship">{{ $t('teamsList.service_types_ministry.worship') }}</option>
-              <option value="sound">{{ $t('teamsList.service_types_ministry.sound') }}</option>
-              <option value="lights">{{ $t('teamsList.service_types_ministry.lights') }}</option>
-              <option value="welcome">{{ $t('teamsList.service_types_ministry.welcome') }}</option>
-              <option value="video">{{ $t('teamsList.service_types_ministry.video') }}</option>
-              <option value="other">{{ $t('teamsList.service_types_ministry.usher') }}</option>
+              <option value="worship">{{ $t('teamsList.service_types.worship') }}</option>
+              <option value="sound">{{ $t('teamsList.service_types.sound') }}</option>
+              <option value="lights">{{ $t('teamsList.service_types.lights') }}</option>
+              <option value="welcome">{{ $t('teamsList.service_types.welcome') }}</option>
+              <option value="video">{{ $t('teamsList.service_types.video') }}</option>
+              <option value="other">{{ $t('teamsList.service_types.usher') }}</option>
             </select>
           </label>
           <div class="form-actions">

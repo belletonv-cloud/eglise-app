@@ -6375,10 +6375,10 @@ export default {
     const startTime = Date.now();
     try {
       const response = await router2(request, env);
-      logApiCall(request, env, response, Date.now() - startTime);
+      await logApiCall(request, env, response, Date.now() - startTime);
       return response;
     } catch (e) {
-      logApiCall(request, env, null, Date.now() - startTime, e);
+      await logApiCall(request, env, null, Date.now() - startTime, e);
       throw e;
     }
   },
