@@ -8,6 +8,8 @@
   --secondary: #059669;
   --card-bg: #ffffff;
   --text: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
 }
 
 /* Theme: Dark (Music Stand) */
@@ -17,4 +19,34 @@
   --secondary: #f59e0b;
   --card-bg: #1e293b;
   --text: #f9fafb;
+  --text-muted: #9ca3af;
+  --border: #374151;
+}
+
+/* App backgrounds */
+[data-theme="light"] {
+  background-color: var(--card-bg);
+  color: var(--text);
+}
+
+[data-theme="dark"] {
+  background-color: #0f172a;
+  color: var(--text);
+}
+
+/* Card styling for dark theme */
+.dark .bg-white {
+  background-color: var(--card-bg);
+}
+
+.dark .text-gray-800 {
+  color: var(--text);
+}
+
+.dark .text-gray-600 {
+  color: var(--text-muted);
+}
+
+.dark .border-gray-200 {
+  border-color: var(--border);
 }

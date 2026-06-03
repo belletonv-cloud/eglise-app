@@ -5,10 +5,10 @@ import { useRoute } from 'vue-router'
 const currentTheme = ref<'light' | 'dark'>('light')
 
 // Routes qui utilisent le thème sombre (Music Stand)
-const darkThemeRoutes = ['/music-stand']
+const darkThemeRoutes = ['/music-stand', '/music-stand-app']
 
 // Routes qui utilisent le thème clair (Planning/Services)
-const lightThemeRoutes = ['/', '/calendar', '/plans', '/plan-templates', '/checkin', '/members', '/teams', '/songs', '/annonces', '/events', '/email', '/sondages', '/youtube', '/about']
+const lightThemeRoutes = ['/', '/calendar', '/plans', '/plan-templates', '/checkin', '/members', '/teams', '/songs', '/annonces', '/events', '/email', '/sondages', '/youtube', '/about', '/admin']
 
 export function useTheme() {
   const route = useRoute()
