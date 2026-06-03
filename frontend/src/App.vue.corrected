@@ -657,6 +657,10 @@ import GlobalSearch from "./components/GlobalSearch.vue";
 import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
 import { menuTooltips } from "./utils/menuTooltips";
 import { useTheme } from "./composables/useTheme";
+import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
+import { menuTooltips } from "./utils/menuTooltips";
+import PageHelp from "./components/PageHelp.vue";
+import { stepsByPage } from "./page-help-steps";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
 

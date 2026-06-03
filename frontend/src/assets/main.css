@@ -1,3 +1,20 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Theme: Light (Planning/Services) */
+:root[data-theme="light"] {
+  --primary: #1e40af;
+  --primary-hover: #1d4ed8;
+  --secondary: #059669;
+  --card-bg: #ffffff;
+  --text: #1f2937;
+}
+
+/* Theme: Dark (Music Stand) */
+:root[data-theme="dark"] {
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --secondary: #f59e0b;
+  --card-bg: #1e293b;
+  --text: #f9fafb;
+}

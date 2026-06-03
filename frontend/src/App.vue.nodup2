@@ -1,5 +1,5 @@
 <template>
-    <div id="app" :data-theme="currentTheme" :class="{ dark: isDark }">
+    <div id="app" :class="{ dark: isDark }">
         <div
             v-if="!isAuthenticated"
             class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900"
@@ -657,12 +657,11 @@ import GlobalSearch from "./components/GlobalSearch.vue";
 import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
 import { menuTooltips } from "./utils/menuTooltips";
 import { useTheme } from "./composables/useTheme";
+import { useTheme } from "./composables/useTheme";
+import PageHelp from "./components/PageHelp.vue";
+import { stepsByPage } from "./page-help-steps";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
-
-// Theme detection
-const { currentTheme, initTheme } = useTheme();
-initTheme();
 
 // Demo mode detection
 const isDemoMode = computed(
