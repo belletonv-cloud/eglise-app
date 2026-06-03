@@ -659,7 +659,6 @@ import { menuTooltips } from "./utils/menuTooltips";
 import { useTheme } from "./composables/useTheme";
 import { onLogin } from "./stores/auth";
 import { useRouter } from "vue-router";
-import { stepsByPage } from "./page-help-steps";
 
 // Theme detection
 const { currentTheme, initTheme } = useTheme();
