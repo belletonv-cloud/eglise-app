@@ -654,8 +654,6 @@ import { hasRolePermission, roleHasAnyPermission } from "./utils/rbac";
 import Toasts from "./components/Toasts.vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
 import GlobalSearch from "./components/GlobalSearch.vue";
-import MenuItemWithTooltip from "./components/MenuItemWithTooltip.vue";
-import { menuTooltips } from "./utils/menuTooltips";
 import PageHelp from "./components/PageHelp.vue";
 import { stepsByPage } from "./page-help-steps";
 import { onLogin } from "./stores/auth";
