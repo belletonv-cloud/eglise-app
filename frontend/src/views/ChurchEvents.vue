@@ -17,7 +17,7 @@
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">🔄 {{ $t('churchEvents.recurring') }}</h2>
         <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           <div v-for="ev in recurring" :key="ev.originalId + '-' + ev.date"
-            class="rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-750">
+            class="rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-900">
             <div class="p-3">
               <div class="flex items-start justify-between">
                 <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm flex-1">{{ ev.title }}</h3>

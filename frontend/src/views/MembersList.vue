@@ -2,17 +2,17 @@
     <div>
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800">People</h2>
-                <div class="mt-1 flex items-center gap-3 text-sm text-gray-500">
-                    <span class="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Teams</span>
-                    <span class="rounded-full bg-gray-100 px-2 py-0.5">Add text filter</span>
-                    <span class="font-medium text-gray-700">{{ displayMembers.length }} people</span>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">People</h2>
+                <div class="mt-1 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-blue-700 dark:text-blue-300">Teams</span>
+                    <span class="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5">Add text filter</span>
+                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ displayMembers.length }} people</span>
                 </div>
             </div>
             <button
                 @click="showForm = true"
                 v-if="isAdmin || canManageMembers"
-                class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                class="cursor-pointer rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
             >
                 {{ $t("members.add") }}
             </button>
@@ -23,47 +23,47 @@
             class="py-12 flex flex-col gap-3 items-center animate-pulse"
             aria-busy="true"
         >
-            <div class="w-80 h-8 bg-gray-200 rounded"></div>
-            <div class="w-72 h-5 bg-gray-100 rounded"></div>
-            <div class="w-[340px] h-16 bg-gray-100 rounded"></div>
-            <div class="w-80 h-12 bg-gray-200 rounded"></div>
-            <span class="text-gray-400 mt-4">{{ $t("loading") }}</span>
+            <div class="w-80 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div class="w-72 h-5 bg-gray-100 dark:bg-gray-800 rounded"></div>
+            <div class="w-[340px] h-16 bg-gray-100 dark:bg-gray-800 rounded"></div>
+            <div class="w-80 h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <span class="text-gray-400 dark:text-gray-500 mt-4">{{ $t("loading") }}</span>
         </div>
-        <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">
+        <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg">
             {{ error }}
         </div>
 
         <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <aside class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
                 <div class="space-y-5 text-sm">
                     <section>
-                        <h3 class="mb-2 font-semibold text-gray-700">Teams</h3>
+                        <h3 class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Teams</h3>
                         <div class="space-y-2">
                             <label
                                 v-for="team in teams"
                                 :key="team.id"
-                                class="flex cursor-pointer items-center gap-2 text-gray-700"
+                                class="flex cursor-pointer items-center gap-2 text-gray-700 dark:text-gray-300"
                             >
                                 <input
                                     type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-blue-600"
+                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-blue-400"
                                     :checked="selectedTeamIds.includes(Number(team.id))"
                                     @change="toggleTeam(Number(team.id))"
                                 />
                                 <span>{{ team.name }}</span>
                             </label>
-                            <p v-if="isLoadingTeams" class="text-xs text-gray-400">{{ $t("loading") }}</p>
+                            <p v-if="isLoadingTeams" class="text-xs text-gray-400 dark:text-gray-500">{{ $t("loading") }}</p>
                         </div>
                     </section>
                     <section>
-                        <h3 class="mb-2 font-semibold text-gray-700">Tags</h3>
+                        <h3 class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Tags</h3>
                         <div class="flex flex-wrap gap-2">
                             <button
                                 v-for="tag in availableTags"
                                 :key="tag"
                                 type="button"
                                 class="rounded-full border px-2 py-1 text-xs"
-                                :class="selectedTags.includes(tag) ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600'"
+                                :class="selectedTags.includes(tag) ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'"
                                 @click="toggleTag(tag)"
                             >
                                 {{ tag }}
@@ -71,18 +71,18 @@
                         </div>
                     </section>
                     <section>
-                        <h3 class="mb-2 font-semibold text-gray-700">Dates</h3>
+                        <h3 class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Dates</h3>
                         <div class="space-y-2">
-                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="all" /> All</label>
-                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="recent" /> Last 90 days</label>
-                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="year" /> This year</label>
-                            <label class="flex items-center gap-2"><input v-model="dateFilter" type="radio" value="stale" /> Older</label>
+                            <label class="flex items-center gap-2 dark:text-gray-200"><input v-model="dateFilter" type="radio" value="all" /> All</label>
+                            <label class="flex items-center gap-2 dark:text-gray-200"><input v-model="dateFilter" type="radio" value="recent" /> Last 90 days</label>
+                            <label class="flex items-center gap-2 dark:text-gray-200"><input v-model="dateFilter" type="radio" value="year" /> This year</label>
+                            <label class="flex items-center gap-2 dark:text-gray-200"><input v-model="dateFilter" type="radio" value="stale" /> Older</label>
                         </div>
                     </section>
                     <section>
-                        <h3 class="mb-2 font-semibold text-gray-700">Permissions</h3>
+                        <h3 class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Permissions</h3>
                         <div class="space-y-2">
-                            <label v-for="perm in permissionFilters" :key="perm" class="flex items-center gap-2">
+                            <label v-for="perm in permissionFilters" :key="perm" class="flex items-center gap-2 dark:text-gray-300">
                                 <input
                                     type="checkbox"
                                     :checked="selectedPermissions.includes(perm)"
@@ -95,56 +95,56 @@
                 </div>
             </aside>
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-200 bg-gray-50/80 p-4">
+            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 p-4">
                     <div class="relative max-w-xl">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔎</span>
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">🔎</span>
                         <input
                             v-model="searchQuery"
                             data-testid="people-search"
                             type="search"
                             :placeholder="$t('members.search_placeholder')"
-                            class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 pl-10 pr-3 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-300 dark:focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
                         />
                     </div>
                 </div>
 
-                <div v-if="displayMembers.length === 0" class="px-4 py-10 text-center text-sm text-gray-500">
+                <div v-if="displayMembers.length === 0" class="px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
                     {{ $t("members.no_members") }}
                 </div>
 
                 <div v-else class="overflow-x-auto">
                     <table class="min-w-full">
-                        <thead class="border-b border-gray-200 bg-white">
+                        <thead class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                             <tr>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">First Name</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Phone Number</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Permissions (Highest)</th>
-                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Last Scheduled Plan</th>
-                                <th v-if="isAdmin || canManageMembers" class="px-4 py-3 text-right text-sm font-semibold text-gray-600">Actions</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">First Name</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Phone Number</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Permissions (Highest)</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Last Scheduled Plan</th>
+                                <th v-if="isAdmin || canManageMembers" class="px-4 py-3 text-right text-sm font-semibold text-gray-600 dark:text-gray-300">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-for="m in pagedDisplayMembers" :key="m.id" class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-medium text-gray-800">{{ m.first_name }} {{ m.last_name }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ m.phone ?? "-" }}</td>
-                                <td class="px-4 py-3 text-gray-600">
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tr v-for="m in pagedDisplayMembers" :key="m.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ m.first_name }} {{ m.last_name }}</td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ m.phone ?? "-" }}</td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
                                     <div class="font-medium">{{ highestPermissionLabel(m) }}</div>
-                                    <div v-if="memberPermissionHints[m.id]?.length" class="text-xs text-gray-500">
+                                    <div v-if="memberPermissionHints[m.id]?.length" class="text-xs text-gray-500 dark:text-gray-400">
                                         ({{ memberPermissionHints[m.id]?.join(", ") }})
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-gray-600">{{ formatPlanDate(m.last_scheduled_plan) }}</td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ formatPlanDate(m.last_scheduled_plan) }}</td>
                                 <td v-if="isAdmin || canManageMembers" class="px-4 py-3 text-right">
                                     <button
                                         @click="editMember(m)"
-                                        class="mr-3 cursor-pointer text-sm text-blue-600 hover:text-blue-800"
+                                        class="mr-3 cursor-pointer text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                                     >
                                         {{ $t("members.edit") }}
                                     </button>
                                     <button
                                         @click="deleteMember(m.id)"
-                                        class="cursor-pointer text-sm text-red-600 hover:text-red-800"
+                                        class="cursor-pointer text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                                     >
                                         {{ $t("members.delete") }}
                                     </button>
@@ -164,7 +164,7 @@
                     type="button"
                     @click="goPrev"
                     :disabled="page === 1"
-                    class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                    class="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                 >
                     Précédent
                 </button>
@@ -176,8 +176,8 @@
                     :class="[
                         'px-3 py-1 rounded',
                         {
-                            'bg-blue-600 text-white': p === page,
-                            'bg-gray-100': p !== page,
+                            'bg-blue-600 dark:bg-blue-500 text-white': p === page,
+                            'bg-gray-100 dark:bg-gray-700': p !== page,
                         },
                     ]"
                 >
@@ -187,7 +187,7 @@
                     type="button"
                     @click="goNext"
                     :disabled="page === totalPages"
-                    class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                    class="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                 >
                     Suivant
                 </button>
@@ -199,7 +199,7 @@
             class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             @click.self="showForm = false"
         >
-            <div class="bg-white rounded-xl p-6 w-full max-w-lg shadow-xl">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
                 <h3 class="text-xl font-bold mb-4">
                     {{
                         editing
@@ -211,57 +211,57 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label
-                                class="block text-sm font-medium text-gray-700 mb-1"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >{{ $t("members.first_name") }}</label
                             >
                             <input
                                 v-model="form.first_name"
                                 required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100"
                             />
                         </div>
                         <div>
                             <label
-                                class="block text-sm font-medium text-gray-700 mb-1"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >{{ $t("members.last_name") }}</label
                             >
                             <input
                                 v-model="form.last_name"
                                 required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100"
                             />
                         </div>
                     </div>
                     <div>
                         <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >{{ $t("members.email") }}</label
                         >
                         <input
                             v-model="form.email"
                             type="email"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100"
                         />
                     </div>
                     <div>
                         <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >{{ $t("members.phone") }}</label
                         >
                         <input
                             v-model="form.phone"
                             type="tel"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100"
                         />
                     </div>
                     <div>
                         <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >{{ $t("members.membership_type") }}</label
                         >
                         <select
                             v-model="form.membership_type"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-gray-100"
                         >
                             <option value="guest">
                                 {{ $t("members.types.guest") }}
@@ -278,13 +278,13 @@
                         <button
                             type="button"
                             @click="showForm = false"
-                            class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg cursor-pointer"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
                         >
                             {{ $t("members.cancel") }}
                         </button>
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+                            class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 cursor-pointer"
                         >
                             {{
                                 editing ? $t("members.save") : $t("members.add")
@@ -374,7 +374,7 @@ async function fetchMembers() {
             memberPermissionHints.value = {};
         }
 
-        // Correction UX : rollback page si out-of-bounds (classement rafraîchi)
+        // Correction UX : rollback page si out-of-bounds (classement rafraîchi)
         if (page.value > totalPages.value) {
             page.value = totalPages.value;
             await fetchMembers();

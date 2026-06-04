@@ -1,29 +1,29 @@
 <template>
-  <div class="teams-page">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
-      <h2>{{ $t('menu.teams') }} ({{ teams.length }})</h2>
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-3 mb-1">
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $t('menu.teams') }} ({{ teams.length }})</h2>
     </div>
-    <button @click="showForm = true" class="add-btn">{{ $t('teamsList.create_ministry') }}</button>
+    <button @click="showForm = true" class="mb-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 cursor-pointer">{{ $t('teamsList.create_ministry') }}</button>
 
-    <div v-if="loading" class="loading">{{ $t('loading') }}</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+    <div v-if="loading" class="py-8 text-center text-gray-500 dark:text-gray-400">{{ $t('loading') }}</div>
+    <div v-else-if="error" class="py-8 text-center text-red-600 dark:text-red-400">{{ error }}</div>
     <div v-else>
-      <div v-for="t in teams" :key="t.id" class="team-card" @click="$router.push(`/teams/${t.id}`)">
-        <div class="team-name">{{ t.name }}</div>
-        <div class="team-meta">{{ t.member_count }} {{ $t('table.member') }}(s)</div>
-        <div v-if="t.description" class="team-desc">{{ t.description }}</div>
+      <div v-for="t in teams" :key="t.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mb-3 cursor-pointer border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" @click="$router.push(`/teams/${t.id}`)">
+        <div class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ t.name }}</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t.member_count }} {{ $t('table.member') }}(s)</div>
+        <div v-if="t.description" class="text-sm text-gray-600 dark:text-gray-300 mt-2">{{ t.description }}</div>
       </div>
-      <div v-if="teams.length === 0" class="empty">{{ $t('members.no_members') }}</div>
+      <div v-if="teams.length === 0" class="text-center py-10 text-gray-400">{{ $t('members.no_members') }}</div>
     </div>
 
-    <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
-      <div class="modal">
-        <h3>{{ $t('teamsList.new_ministry') }}</h3>
+    <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">{{ $t('teamsList.new_ministry') }}</h3>
         <form @submit.prevent="createTeam">
-          <label>{{ $t('houseGroups.name') }} <input v-model="form.name" required /></label>
-          <label>{{ $t('houseGroups.description') }} <textarea v-model="form.description" rows="3"></textarea></label>
-          <label>{{ $t('planTemplates.service_type') }}
-            <select v-model="form.service_type">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('houseGroups.name') }} <input v-model="form.name" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mt-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100" /></label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('houseGroups.description') }} <textarea v-model="form.description" rows="3" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mt-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100"></textarea></label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('planTemplates.service_type') }}
+            <select v-model="form.service_type" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mt-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100">
               <option value="">—</option>
               <option value="worship">{{ $t('teamsList.service_types.worship') }}</option>
               <option value="sound">{{ $t('teamsList.service_types.sound') }}</option>
@@ -33,9 +33,9 @@
               <option value="other">{{ $t('teamsList.service_types.usher') }}</option>
             </select>
           </label>
-          <div class="form-actions">
-            <button type="submit">{{ $t('houseGroups.create') }}</button>
-            <button type="button" @click="showForm = false">{{ $t('houseGroups.cancel') }}</button>
+          <div class="flex gap-3 justify-end pt-4">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">{{ $t('houseGroups.create') }}</button>
+            <button type="button" @click="showForm = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">{{ $t('houseGroups.cancel') }}</button>
           </div>
         </form>
       </div>
@@ -92,24 +92,3 @@ async function createTeam() {
 
 onMounted(load)
 </script>
-
-<style scoped>
-.teams-page { max-width: 900px; margin: 0 auto; }
-.add-btn { margin-bottom: 15px; padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
-.team-card { background: #f8f9fa; padding: 15px 20px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border: 1px solid #eee; }
-.team-card:hover { background: #eef; }
-.team-name { font-size: 1.1em; font-weight: 600; color: #2c3e50; }
-.team-meta { font-size: 0.85em; color: #666; margin-top: 4px; }
-.team-desc { color: #555; margin-top: 6px; font-size: 0.9em; }
-.empty { text-align: center; padding: 40px; color: #999; }
-.loading, .error { padding: 20px; text-align: center; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal { background: white; padding: 25px; border-radius: 8px; min-width: 400px; max-width: 90%; }
-.modal h3 { margin-top: 0; }
-.modal label { display: block; margin-bottom: 12px; }
-.modal input, .modal select, .modal textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; box-sizing: border-box; }
-.form-actions { display: flex; gap: 10px; margin-top: 15px; }
-.form-actions button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
-.form-actions button[type=submit] { background: #3498db; color: white; }
-.form-actions button[type=button] { background: #95a5a6; color: white; }
-</style>
