@@ -11,7 +11,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
             >
-                <div class="text-3xl font-bold text-blue-600">
+                <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {{ stats.members }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -28,7 +28,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
             >
-                <div class="text-3xl font-bold text-green-600">
+                <div class="text-3xl font-bold text-green-600 dark:text-green-400">
                     {{ stats.upcomingPlans }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -38,7 +38,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
             >
-                <div class="text-3xl font-bold text-indigo-600">
+                <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                     {{ stats.songsWithArrangements }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -48,7 +48,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
             >
-                <div class="text-3xl font-bold text-amber-600">
+                <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">
                     {{ stats.pendingConfirmations }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -58,7 +58,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
             >
-                <div class="text-3xl font-bold text-purple-600">
+                <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">
                     {{ stats.teams }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -80,10 +80,10 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4"
                 >
-                    <div class="text-2xl font-bold text-green-600">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                         {{ attendanceStats.total }}
                     </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
                         {{ $t("dashboard.attendance_total") }}
                     </div>
                 </div>

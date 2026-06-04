@@ -1,42 +1,6 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Force dark theme colors for specific elements */
-.dark .admin-members-container,
-.dark .about-page,
-.dark .events-page,
-.dark .songs-list-container,
-.dark .teams-container {
-  background-color: #1e293b !important;
-  color: #f9fafb !important;
-}
-
-/* Ensure titles are visible */
-.dark h1, .dark h2, .dark h3, .dark h4 {
-  color: #f9fafb !important;
-}
-
-/* Ensure text is visible */
-.dark p, .dark span, .dark div {
-  color: #e5e7eb !important;
-}
-
-/* Sidebar contrast */
-.dark .sidebar {
-  background-color: #111827 !important;
-}
-
-/* Card contrast in dark mode */
-.dark .card, .dark .bg-white {
-  background-color: #1e293b !important;
-  color: #f9fafb !important;
-}
-
-/* Menu text contrast */
-.dark .menu-item {
-  color: #e5e7eb !important;
-}
-
-.dark .menu-item:hover {
-  background-color: #374151 !important;
+.dark {
+  color-scheme: dark;
 }
