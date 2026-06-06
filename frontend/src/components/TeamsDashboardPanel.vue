@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-4">
         <div
-            class="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-white px-4 py-4 shadow-sm"
+            class="rounded-2xl border border-emerald-100 dark:border-emerald-900/50 bg-gradient-to-r from-emerald-50 dark:from-emerald-900/30 to-white dark:to-gray-900 px-4 py-4 shadow-sm"
         >
             <div
                 class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"

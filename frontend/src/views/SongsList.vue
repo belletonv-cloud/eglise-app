@@ -16,7 +16,7 @@
                         class="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-gray-600 dark:text-gray-400"
                         >Add text filter</span
                     >
-                    <span class="font-medium text-gray-700"
+                    <span class="font-medium text-gray-700 dark:text-gray-200"
                         >{{ filteredSongs.length }} songs</span
                     >
                 </div>
@@ -339,13 +339,19 @@
                                 >
                                     {{ song.title }}
                                 </td>
-                                <td class="px-4 py-3 text-gray-600">
+                                <td
+                                    class="px-4 py-3 text-gray-600 dark:text-gray-300"
+                                >
                                     {{ song.primary_key || "—" }}
                                 </td>
-                                <td class="px-4 py-3 text-gray-600">
+                                <td
+                                    class="px-4 py-3 text-gray-600 dark:text-gray-300"
+                                >
                                     {{ formatDate(song.last_used) }}
                                 </td>
-                                <td class="px-4 py-3 text-gray-600">
+                                <td
+                                    class="px-4 py-3 text-gray-600 dark:text-gray-300"
+                                >
                                     {{ formatDate(song.last_edited) }}
                                 </td>
                                 <td class="px-4 py-3">
@@ -355,7 +361,7 @@
                                                 song.themes,
                                             ).slice(0, 3)"
                                             :key="`${song.id}-${tag}`"
-                                            class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                                            class="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
                                         >
                                             {{ tag }}
                                         </span>
