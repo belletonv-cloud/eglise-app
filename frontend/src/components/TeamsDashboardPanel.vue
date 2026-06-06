@@ -19,17 +19,17 @@
                 </div>
                 <div class="flex flex-wrap gap-2 text-xs font-medium">
                     <span
-                        class="rounded-full bg-white px-3 py-1 text-gray-700 ring-1 ring-gray-200"
+                        class="rounded-full bg-white dark:bg-gray-800 px-3 py-1 text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700"
                     >
                         {{ teamCount }} teams
                     </span>
                     <span
-                        class="rounded-full bg-white px-3 py-1 text-gray-700 ring-1 ring-gray-200"
+                        class="rounded-full bg-white dark:bg-gray-800 px-3 py-1 text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700"
                     >
                         {{ assignedCount }} personnes
                     </span>
                     <span
-                        class="rounded-full bg-white px-3 py-1 text-emerald-700 ring-1 ring-emerald-200"
+                        class="rounded-full bg-white dark:bg-gray-800 px-3 py-1 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-700"
                     >
                         {{ boardStats.band.ok + boardStats.av.ok }} affectations
                     </span>
@@ -263,7 +263,7 @@
                             <div
                                 v-for="member in team.members"
                                 :key="member.id"
-                                class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2"
+                                class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-gray-900 px-3 py-2"
                             >
                                 <div class="min-w-0">
                                     <div
