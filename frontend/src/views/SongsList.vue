@@ -57,7 +57,7 @@
             class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]"
         >
             <aside
-                class="rounded-xl border border-gray-800 p-4 shadow-sm"
+                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm"
             >
                 <div class="space-y-5 text-sm">
                     <section>
@@ -293,7 +293,7 @@
                 </div>
 
                 <div v-else class="overflow-x-auto">
-                    <table class="min-w-full">
+                    <table class="min-w-full bg-white dark:bg-gray-900">
                         <thead
                             class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
                         >
@@ -331,7 +331,7 @@
                             <tr
                                 v-for="song in pagedSongs"
                                 :key="song.id"
-                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50"
                                 @click="goToSong(song.id)"
                             >
                                 <td
