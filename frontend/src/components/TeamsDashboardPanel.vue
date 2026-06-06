@@ -230,7 +230,7 @@
                     <article
                         v-for="team in supportTeams"
                         :key="team.id"
-                        class="rounded-2xl border border-gray-800 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/70 p-4"
+                        class="rounded-2xl border border-gray-800 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/90 p-4"
                     >
                         <div class="flex items-start justify-between gap-3">
                             <div>
@@ -240,13 +240,13 @@
                                     {{ team.name }}
                                 </h5>
                                 <p
-                                    class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                                    class="mt-1 text-xs text-gray-500 dark:text-gray-300"
                                 >
                                     {{ team.description || supportLabel(team) }}
                                 </p>
                             </div>
                             <span
-                                class="rounded-full bg-white dark:bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700"
+                                class="rounded-full bg-white dark:bg-gray-900 px-2.5 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200 ring-1 ring-gray-200 dark:ring-gray-700"
                             >
                                 {{ team.members?.length || 0 }}
                             </span>

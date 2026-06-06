@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900">
+        <div v-else class="flex h-screen bg-gray-100 dark:bg-gray-900 min-h-screen">
             <div
                 v-if="showDevicePreviewOverlay"
                 class="fixed inset-0 z-50 bg-gray-100 dark:bg-gray-900 flex flex-col"
