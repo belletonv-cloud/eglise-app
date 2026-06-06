@@ -2,5 +2,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  color-scheme: dark;
+    color-scheme: dark;
+    background-color: #111827;
 }
