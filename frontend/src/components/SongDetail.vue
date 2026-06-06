@@ -887,4 +887,99 @@ h1 {
     color: #6b7280;
     font-weight: 400;
 }
+
+.dark .song-detail {
+    color: #f9fafb;
+}
+.dark .header {
+    border-bottom-color: #374151;
+}
+.dark .song-detail h1 {
+    color: #f9fafb;
+}
+.dark .author,
+.dark .ccli {
+    color: #d1d5db;
+}
+.dark .song-info {
+    background: #1f2937;
+}
+.dark .arrangements,
+.dark .transpose-controls {
+    border-color: #374151;
+}
+.dark .arrangements select,
+.dark .transpose-controls select {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+.dark .arrangement-controls button {
+    background: #374151;
+    color: #f9fafb;
+}
+.dark .arrangement-controls button:hover {
+    background: #4b5563;
+}
+.dark .transpose-controls label {
+    color: #e5e7eb;
+}
+.dark .transpose-controls button {
+    background: #4b5563;
+    color: #f9fafb;
+}
+.dark .transpose-controls button:hover {
+    background: #6b7280;
+}
+.dark .transpose-controls .semitones {
+    color: #9ca3af;
+}
+.dark .no-chart-message {
+    background: #7c3aed;
+    border-color: #8b5cf6;
+}
+.dark .no-chart-message,
+.dark .loading,
+.dark .error {
+    color: #f9fafb;
+}
+.dark .modal-overlay {
+    background: rgba(0,0,0,0.75);
+}
+.dark .chord-chart {
+    background: #111827;
+}
+.dark .chordpro-block,
+.dark .media-section {
+    border-color: #374151;
+}
+.dark .media-section h3 {
+    color: #f9fafb;
+}
+.dark .no-media,
+.dark .media-type-badge {
+    color: #9ca3af;
+}
+.dark .media-item {
+    border-color: #374151;
+}
+.dark .media-type-badge {
+    background: #374151;
+}
+.dark .add-media-btn {
+    background: #6366f1;
+    color: #f9fafb;
+}
+.dark .add-media-btn:hover {
+    background: #818cf8;
+}
+.dark .media-delete-btn {
+    color: #fca5a5;
+}
+.dark .media-delete-btn:hover {
+    background: #7f1d1d;
+}
+.dark .count {
+    color: #d1d5db;
+}
 </style>

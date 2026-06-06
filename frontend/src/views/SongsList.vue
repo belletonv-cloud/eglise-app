@@ -326,7 +326,7 @@
                             </tr>
                         </thead>
                         <tbody
-                            class="divide-y divide-gray-100 dark:divide-gray-800"
+                            class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900"
                         >
                             <tr
                                 v-for="song in pagedSongs"
@@ -370,7 +370,7 @@
                                                 parseThemes(song.themes)
                                                     .length === 0
                                             "
-                                            class="text-xs text-gray-400"
+                                            class="text-xs text-gray-400 dark:text-gray-500"
                                             >—</span
                                         >
                                     </div>
