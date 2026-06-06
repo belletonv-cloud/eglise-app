@@ -97,8 +97,8 @@
                                 class="rounded-full border px-2 py-1 text-xs"
                                 :class="
                                     selectedTags.includes(tag)
-                                        ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                                        : 'border-gray-300 text-gray-600'
+                                        ? 'border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
                                 "
                                 @click="toggleTag(tag)"
                             >
@@ -114,7 +114,7 @@
                             Dates
                         </h3>
                         <div class="space-y-2">
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -122,7 +122,7 @@
                                 />
                                 All</label
                             >
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -130,7 +130,7 @@
                                 />
                                 Last 90 days</label
                             >
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -138,7 +138,7 @@
                                 />
                                 This year</label
                             >
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -163,8 +163,8 @@
                                 class="rounded-full border px-2 py-1 text-xs"
                                 :class="
                                     selectedKeys.includes(k)
-                                        ? 'border-blue-300 bg-blue-50 text-blue-700'
-                                        : 'border-gray-300 text-gray-600'
+                                        ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
                                 "
                                 @click="toggleKey(k)"
                             >
@@ -183,7 +183,7 @@
                             <label
                                 v-for="theme in availableThemes"
                                 :key="theme"
-                                class="flex items-center gap-2"
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                             >
                                 <input
                                     type="checkbox"
@@ -202,7 +202,7 @@
                             Usage
                         </h3>
                         <div class="space-y-2">
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
@@ -210,7 +210,7 @@
                                 />
                                 All</label
                             >
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
@@ -218,7 +218,7 @@
                                 />
                                 Recently used</label
                             >
-                            <label class="flex items-center gap-2"
+                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
@@ -239,7 +239,7 @@
                             <label
                                 v-for="perm in permissionFilters"
                                 :key="perm"
-                                class="flex items-center gap-2"
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                             >
                                 <input
                                     type="checkbox"
