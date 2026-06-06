@@ -15,7 +15,7 @@
           <div class="text-sm text-gray-400 uppercase tracking-wide mb-1">
             {{ plan.service_type_name || 'Culte' }}
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {{ formatDate(plan.date) }}
             <span v-if="plan.time" class="text-lg font-normal text-gray-500 ml-2">{{ plan.time }}</span>
           </h1>
@@ -34,7 +34,7 @@
             <span class="text-xs text-gray-400 mt-1 w-5 text-right shrink-0">{{ idx + 1 }}</span>
             <div class="flex-1 min-w-0">
               <div class="text-xs text-gray-400 uppercase tracking-wide">{{ typeLabel(item.type) }}</div>
-              <div class="font-medium text-gray-800">{{ item.title }}</div>
+              <div class="font-medium text-gray-800 dark:text-gray-100">{{ item.title }}</div>
               <div v-if="item.song_title && item.song_title !== item.title"
                 class="text-sm text-indigo-600">{{ item.song_title }}</div>
               <div v-if="item.arrangement_name" class="text-xs text-gray-400">{{ item.arrangement_name }}</div>

@@ -6,18 +6,18 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-3">{{ $t('about.welcome') }}</h1>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">{{ $t('about.welcome') }}</h1>
         <p class="text-gray-500 max-w-2xl mx-auto">{{ $t('about.subtitle') }}</p>
       </div>
 
-      <h2 class="text-xl font-semibold text-gray-800 mb-6">{{ $t('about.modules_title') }}</h2>
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-6">{{ $t('about.modules_title') }}</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <router-link to="/compare"
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors md:col-span-2">
           <span class="text-3xl mt-1">🧾</span>
           <div>
-            <h3 class="font-semibold text-gray-800">Comparatif des fonctionnalités</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">Comparatif des fonctionnalités</h3>
             <p class="text-sm text-gray-500 mt-1">Tableau Planning Center vs Église App + vision "modules standalone".</p>
           </div>
         </router-link>
@@ -25,7 +25,7 @@
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
           <span class="text-3xl mt-1">📋</span>
           <div>
-            <h3 class="font-semibold text-gray-800">{{ $t('about.module_services') }}</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('about.module_services') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ $t('about.module_services_desc') }}</p>
           </div>
         </router-link>
@@ -34,7 +34,7 @@
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
           <span class="text-3xl mt-1">👥</span>
           <div>
-            <h3 class="font-semibold text-gray-800">{{ $t('about.module_members') }}</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('about.module_members') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ $t('about.module_members_desc') }}</p>
           </div>
         </router-link>
@@ -43,7 +43,7 @@
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
           <span class="text-3xl mt-1">🎵</span>
           <div>
-            <h3 class="font-semibold text-gray-800">{{ $t('about.module_music') }}</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('about.module_music') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ $t('about.module_music_desc') }}</p>
           </div>
         </router-link>
@@ -52,7 +52,7 @@
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
           <span class="text-3xl mt-1">📧</span>
           <div>
-            <h3 class="font-semibold text-gray-800">{{ $t('about.module_communication') }}</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('about.module_communication') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ $t('about.module_communication_desc') }}</p>
           </div>
         </router-link>
@@ -61,7 +61,7 @@
           class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors md:col-span-2">
           <span class="text-3xl mt-1">⚙️</span>
           <div>
-            <h3 class="font-semibold text-gray-800">{{ $t('about.module_admin') }}</h3>
+            <h3 class="font-semibold text-gray-800 dark:text-gray-100">{{ $t('about.module_admin') }}</h3>
             <p class="text-sm text-gray-500 mt-1">{{ $t('about.module_admin_desc') }}</p>
           </div>
         </router-link>

@@ -4,24 +4,24 @@
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="member">
-      <h1 class="text-2xl font-bold text-gray-800 mb-6">{{$t('profile.account')}}</h1>
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{$t('profile.account')}}</h1>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">{{$t('profile.personal_info')}}</h2>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{$t('profile.personal_info')}}</h2>
         <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">{{$t('profile.first_name')}}</label>
-              <p class="mt-1 text-gray-900">{{ member.first_name }}</p>
+              <p class="mt-1 text-gray-900 dark:text-gray-100">{{ member.first_name }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">{{$t('profile.last_name')}}</label>
-              <p class="mt-1 text-gray-900">{{ member.last_name }}</p>
+              <p class="mt-1 text-gray-900 dark:text-gray-100">{{ member.last_name }}</p>
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">{{$t('profile.email')}}</label>
-            <p class="mt-1 text-gray-900">{{ member.email || $t('profile.unknown') }}</p>
+            <p class="mt-1 text-gray-900 dark:text-gray-100">{{ member.email || $t('profile.unknown') }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">{{$t('profile.phone')}}</label>
@@ -53,7 +53,7 @@
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">{{$t('profile.upcoming_services')}}</h2>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{$t('profile.upcoming_services')}}</h2>
         <div v-if="schedule.length === 0" class="text-gray-400 py-4 text-center">
           {{$t('profile.no_upcoming')}}
         </div>
@@ -61,7 +61,7 @@
           <div v-for="s in schedule" :key="s.id"
             class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
             <div @click="$router.push(`/plans/${s.plan_id}`)" class="flex-1 cursor-pointer">
-              <div class="font-medium text-gray-800">{{ formatDate(s.date) }}</div>
+              <div class="font-medium text-gray-800 dark:text-gray-100">{{ formatDate(s.date) }}</div>
               <div class="text-sm text-gray-500">
                 {{ s.service_type_name || $t('profile.service') }}
                 <span v-if="s.time"> à {{ s.time?.slice(0, 5) }}</span>

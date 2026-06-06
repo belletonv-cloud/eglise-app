@@ -28,7 +28,7 @@
                     >
                         {{ $t("checkin.back") }}
                     </button>
-                    <h2 class="text-2xl font-bold text-gray-800">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
                         {{ $t("checkin.title") }}
                     </h2>
                 </div>
@@ -49,7 +49,7 @@
                             class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer hover:shadow-md transition-all"
                             data-testid="plan-item"
                         >
-                            <div class="font-semibold text-gray-800">
+                            <div class="font-semibold text-gray-800 dark:text-gray-100">
                                 {{ formatDate(plan.date) }}
                             </div>
                             <div
@@ -118,7 +118,7 @@
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h3 class="text-xl font-bold text-gray-800">
+                                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
                                     {{ formatDate(currentPlan.date) }}
                                 </h3>
                                 <p class="text-gray-500 dark:text-gray-400">
@@ -189,7 +189,7 @@
                                 data-testid="member-result"
                             >
                                 <div>
-                                    <div class="font-medium text-gray-800">
+                                    <div class="font-medium text-gray-800 dark:text-gray-100">
                                         {{ member.first_name }}
                                         {{ member.last_name }}
                                     </div>
@@ -244,7 +244,7 @@
                                 data-testid="attendance-item"
                             >
                                 <div>
-                                    <span class="font-medium text-gray-800"
+                                    <span class="font-medium text-gray-800 dark:text-gray-100"
                                         >{{ att.first_name }}
                                         {{ att.last_name }}</span
                                     >

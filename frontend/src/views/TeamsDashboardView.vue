@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto p-4">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
-        <h1 class="text-2xl font-bold text-gray-900">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Teams
         </h1>
         <p class="mt-1 text-sm text-gray-600">

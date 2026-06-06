@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-800">Présents ({{ attendances.length }})</h3>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Présents ({{ attendances.length }})</h3>
       <button @click="showAdd = true"
         class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 cursor-pointer">
         + Check-in
@@ -14,7 +14,7 @@
       <div v-for="a in attendances" :key="a.id"
         class="flex items-center justify-between p-2.5 border border-gray-100 rounded-lg hover:bg-gray-50">
         <div>
-          <span class="font-medium text-gray-800">{{ a.first_name }} {{ a.last_name }}</span>
+          <span class="font-medium text-gray-800 dark:text-gray-100">{{ a.first_name }} {{ a.last_name }}</span>
           <span class="text-xs text-gray-400 ml-2">{{ formatTime(a.check_in_time) }}</span>
         </div>
         <button @click="remove(a.id)"

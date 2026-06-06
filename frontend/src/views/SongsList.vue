@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-7xl p-4 pb-24 md:pb-6">
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">Songs</h2>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Songs</h2>
         <div class="mt-1 flex items-center gap-3 text-sm text-gray-500">
           <span class="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Teams</span>
           <span class="rounded-full bg-gray-100 px-2 py-0.5">Add text filter</span>
@@ -121,7 +121,7 @@
               v-model="search"
               type="search"
               :placeholder="$t('songs.search_placeholder')"
-              class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
             />
           </div>
         </div>
@@ -148,7 +148,7 @@
                 class="cursor-pointer hover:bg-gray-50"
                 @click="goToSong(song.id)"
               >
-                <td class="px-4 py-3 font-medium text-gray-800">{{ song.title }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ song.title }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ song.primary_key || '—' }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ formatDate(song.last_used) }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ formatDate(song.last_edited) }}</td>
@@ -192,7 +192,7 @@
     <Teleport to="body">
       <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" @click.self="showCreate = false">
         <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-          <h3 class="mb-4 text-lg font-semibold text-gray-800">{{ $t('songs.new_song') }}</h3>
+          <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $t('songs.new_song') }}</h3>
           <div class="space-y-3">
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700">{{ $t('songs.song_title') }} *</label>

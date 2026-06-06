@@ -13,7 +13,7 @@
         </div>
 
         <template v-else>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 {{ $t("testAccounts.title") }}
             </h1>
             <p class="text-gray-500 mb-6">
@@ -48,7 +48,7 @@
                     :class="{ 'ring-2 ring-blue-400': activePersona === key }"
                 >
                     <div>
-                        <h3 class="font-semibold text-gray-800">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100">
                             {{ getPersonaLabel(key as string) }}
                         </h3>
                         <p class="text-sm text-gray-500">{{ persona.email }}</p>

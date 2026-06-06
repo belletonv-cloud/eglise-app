@@ -18,7 +18,7 @@
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <input v-model="editName" @change="saveTemplate"
-              class="text-2xl font-bold text-gray-800 w-full border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none bg-transparent" />
+              class="text-2xl font-bold text-gray-800 dark:text-gray-100 w-full border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none bg-transparent" />
             <textarea v-model="editDescription" @change="saveTemplate" rows="2"
               class="text-gray-500 mt-1 w-full border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none bg-transparent resize-none"></textarea>
           </div>
@@ -27,7 +27,7 @@
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800">{{ $t('planTemplateDetail.items_title', { count: items.length }) }}</h2>
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $t('planTemplateDetail.items_title', { count: items.length }) }}</h2>
           <div class="flex gap-2">
             <button @click="addItem('song')"
               class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">{{ $t('planTemplateDetail.add_song') }}</button>
@@ -56,7 +56,7 @@
               <span class="text-xs font-medium text-gray-400 uppercase">{{ typeLabel(item.type) }}</span>
               <div class="flex gap-2 items-start mt-1">
                 <input v-model="item.title" @change="updateItem(item)"
-                  class="flex-1 font-medium text-gray-800 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none bg-transparent" />
+                  class="flex-1 font-medium text-gray-800 dark:text-gray-100 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none bg-transparent" />
                 <button @click="deleteItem(item)"
                   class="text-red-400 hover:text-red-600 text-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">✕</button>
               </div>

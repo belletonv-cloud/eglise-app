@@ -1,6 +1,6 @@
 <template>
     <div
-        class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm"
+        class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm"
     >
         <div class="mb-4 flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -26,7 +26,7 @@
             class="grid grid-cols-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)]"
         >
             <aside
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/70 p-4"
+                class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/70 p-4"
             >
                 <section class="mb-4">
                     <h4
@@ -95,7 +95,7 @@
                 >
                     <div class="mb-3 flex items-center justify-between">
                         <div>
-                            <h4 class="text-base font-semibold text-gray-800">
+                            <h4 class="text-base font-semibold text-gray-800 dark:text-gray-100">
                                 {{ group.name }}
                             </h4>
                             <div class="mt-1 flex items-center gap-3 text-xs">
