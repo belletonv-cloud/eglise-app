@@ -63,7 +63,7 @@
 
         <div
             v-else-if="error"
-            class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            class="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400"
         >
             {{ error }}
         </div>
@@ -99,17 +99,17 @@
                             class="flex items-center gap-2 text-xs font-semibold"
                         >
                             <span
-                                class="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 dark:text-emerald-300"
+                                class="rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2.5 py-1 text-emerald-700 dark:text-emerald-300"
                             >
                                 ✓ {{ board.stats.ok }}
                             </span>
                             <span
-                                class="rounded-full bg-red-50 px-2.5 py-1 text-red-600"
+                                class="rounded-full bg-red-50 dark:bg-red-900/20 px-2.5 py-1 text-red-600 dark:text-red-400"
                             >
                                 ✕ {{ board.stats.missing }}
                             </span>
                             <span
-                                class="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700 dark:text-amber-300"
+                                class="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 text-amber-700 dark:text-amber-300"
                             >
                                 ● {{ board.stats.pending }}
                             </span>
@@ -152,7 +152,9 @@
                             >
                                 {{ role.role }}
                             </div>
-                            <div class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900">
+                            <div
+                                class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-900"
+                            >
                                 <div
                                     v-for="member in role.members"
                                     :key="member.id"
