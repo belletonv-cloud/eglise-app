@@ -5,16 +5,16 @@
       <div class="w-full lg:w-1/3">
         <div v-for="msg in inbox" :key="msg.id" class="p-2 border-b cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800" @click="select(msg)">
           <div class="font-medium">{{ msg.subject || $t('messages.no_subject') }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('messages.from') }}: {{ msg.sender_first }} {{ msg.sender_last }} — {{ msg.created_at }}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{{ $t('messages.from') }}: {{ msg.sender_first }} {{ msg.sender_last }} — {{ msg.created_at }}</div>
         </div>
       </div>
       <div class="flex-1">
         <div v-if="selected">
           <h2 class="text-lg font-semibold">{{ selected.subject || $t('messages.no_subject') }}</h2>
-          <div class="text-sm text-gray-600 dark:text-gray-400">{{ $t('messages.from') }}: {{ selected.sender_first }} {{ selected.sender_last }} — {{ selected.created_at }}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{{ $t('messages.from') }}: {{ selected.sender_first }} {{ selected.sender_last }} — {{ selected.created_at }}</div>
           <div class="mt-4 whitespace-pre-wrap">{{ selected.content }}</div>
         </div>
-        <div v-else class="text-gray-500">{{ $t('messages.select_prompt') }}</div>
+        <div v-else class="text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('messages.select_prompt') }}</div>
         <hr class="my-4" />
         <h3 class="font-semibold mb-2">{{ $t('messages.new') }}</h3>
         <form @submit.prevent="send">

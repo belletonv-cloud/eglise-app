@@ -10,13 +10,13 @@
       </button>
     </div>
 
-    <div v-if="loading" class="py-6 text-center text-gray-500">{{ $t('schedulePeople.loading') }}</div>
+    <div v-if="loading" class="py-6 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('schedulePeople.loading') }}</div>
 
     <div v-else class="grid grid-cols-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
       <aside class="rounded-xl border border-gray-200 bg-gray-50/70 p-4">
         <section class="mb-4">
           <h4 class="mb-2 text-sm font-semibold text-gray-700">Are you available for:</h4>
-          <p class="text-sm text-gray-600">{{ availabilityLabel }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ availabilityLabel }}</p>
           <div class="mt-3 flex gap-2">
             <button
               @click="setAvailability('declined')"
@@ -35,17 +35,17 @@
 
         <section class="mb-4">
           <h4 class="mb-1 text-sm font-semibold text-gray-700">Times</h4>
-          <p class="text-sm text-gray-600">{{ planTimeLabel }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ planTimeLabel }}</p>
         </section>
 
         <section class="mb-4">
           <h4 class="mb-1 text-sm font-semibold text-gray-700">Files</h4>
-          <p class="text-sm text-gray-500">No files for this plan</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">No files for this plan</p>
         </section>
 
         <section>
           <h4 class="mb-1 text-sm font-semibold text-gray-700">Notes</h4>
-          <p class="text-sm text-gray-600">{{ planNotes || '—' }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ planNotes || '—' }}</p>
         </section>
       </aside>
 
@@ -69,10 +69,10 @@
           <table class="min-w-full">
             <thead class="border-b border-gray-100">
               <tr>
-                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Role</th>
-                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Member</th>
-                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">Role</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">Member</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">Status</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -97,7 +97,7 @@
 
         <div class="rounded-xl border border-gray-200 bg-white p-4">
           <h4 class="text-sm font-semibold text-gray-700">Other Teams</h4>
-          <p class="mt-1 text-sm text-gray-500">{{ showAllTeams ? 'All teams are showing' : 'Only My Teams are showing' }}</p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ showAllTeams ? 'All teams are showing' : 'Only My Teams are showing' }}</p>
           <button
             @click="showAllTeams = !showAllTeams"
             class="mt-3 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"

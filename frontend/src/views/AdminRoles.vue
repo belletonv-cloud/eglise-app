@@ -16,8 +16,8 @@
                     <h3 class="font-semibold">
                         {{ member.first_name }} {{ member.last_name }}
                     </h3>
-                    <p class="text-sm text-gray-500">{{ member.email }}</p>
-                    <p class="text-xs text-gray-400">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ member.email }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">
                         Rôle actuel: {{ member.role || "member" }}
                     </p>
                 </div>

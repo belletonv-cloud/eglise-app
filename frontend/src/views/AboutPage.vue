@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center text-sm text-gray-400">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center text-sm text-gray-400 dark:text-gray-500">
       <p>{{ $t('about.version') }}: 1.0.0</p>
       <p class="mt-1">{{ $t('about.credits') }}</p>
     </div>

@@ -13,7 +13,7 @@
       <button @click="filter = 'prayer'" class="px-3 py-1.5 rounded-lg text-sm" :class="filter === 'prayer' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">{{ $t('announcements.prayers') }}</button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
 
     <div v-else class="space-y-3">
       <div v-for="a in filtered" :key="a.id"
@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-      <div v-if="filtered.length === 0" class="text-center py-12 text-gray-400">{{ $t('announcements.nothing') }}</div>
+      <div v-if="filtered.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('announcements.nothing') }}</div>
     </div>
 
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">

@@ -5,7 +5,7 @@
     </div>
     <button @click="showForm = true" class="mb-4 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 cursor-pointer">{{ $t('teamsList.create_ministry') }}</button>
 
-    <div v-if="loading" class="py-8 text-center text-gray-500 dark:text-gray-400">{{ $t('loading') }}</div>
+    <div v-if="loading" class="py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="py-8 text-center text-red-600 dark:text-red-400">{{ error }}</div>
     <div v-else>
       <div v-for="t in teams" :key="t.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mb-3 cursor-pointer border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" @click="$router.push(`/teams/${t.id}`)">
@@ -13,7 +13,7 @@
         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t.member_count }} {{ $t('table.member') }}(s)</div>
         <div v-if="t.description" class="text-sm text-gray-600 dark:text-gray-300 mt-2">{{ t.description }}</div>
       </div>
-      <div v-if="teams.length === 0" class="text-center py-10 text-gray-400">{{ $t('members.no_members') }}</div>
+      <div v-if="teams.length === 0" class="text-center py-10 text-gray-400 dark:text-gray-500">{{ $t('members.no_members') }}</div>
     </div>
 
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">

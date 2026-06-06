@@ -8,7 +8,7 @@
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-6 text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-center py-6 text-gray-500 dark:text-gray-400 dark:text-gray-500">Chargement...</div>
 
     <div v-else-if="attendances.length" class="space-y-2">
       <div v-for="a in attendances" :key="a.id"
@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div v-else class="text-center py-6 text-gray-400">
+    <div v-else class="text-center py-6 text-gray-400 dark:text-gray-500">
       Aucun check-in pour le moment.
     </div>
 

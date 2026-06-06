@@ -9,7 +9,7 @@
         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('youtube.loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('youtube.loading') }}</div>
 
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div v-for="video in videos" :key="video.id"
@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div v-if="!loading && videos.length === 0" class="text-center py-12 text-gray-400">{{ $t('youtube.nothing') }}</div>
+    <div v-if="!loading && videos.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('youtube.nothing') }}</div>
   </div>
 </template>
 

@@ -9,11 +9,11 @@
         <option value="">{{ $t('adminContent.all') }}</option>
         <option v-for="(label, key) in categories" :key="key" :value="key">{{ label }}</option>
       </select>
-      <span class="text-sm text-gray-400">{{ filteredKeys.length }} clés</span>
+      <span class="text-sm text-gray-400 dark:text-gray-500">{{ filteredKeys.length }} clés</span>
       <span v-if="overridesCount > 0" class="text-sm text-amber-600 font-medium">{{ overridesCount }} override(s)</span>
     </div>
 
-    <div v-if="filteredKeys.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400">
+    <div v-if="filteredKeys.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-400 dark:text-gray-500">
       {{ $t('adminContent.no_keys') }}
     </div>
 
@@ -22,8 +22,8 @@
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="text-left px-4 py-3 font-semibold text-gray-600 w-64">{{ $t('adminContent.key') }}</th>
-            <th class="text-left px-4 py-3 font-semibold text-gray-600">{{ $t('adminContent.current') }}</th>
-            <th class="text-left px-4 py-3 font-semibold text-gray-600">{{ $t('adminContent.override') }}</th>
+            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">{{ $t('adminContent.current') }}</th>
+            <th class="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">{{ $t('adminContent.override') }}</th>
             <th class="text-center px-4 py-3 font-semibold text-gray-600 w-24">{{ $t('adminContent.reset') }}</th>
           </tr>
         </thead>

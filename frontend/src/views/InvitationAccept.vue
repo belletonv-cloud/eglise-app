@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto mt-12">
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('invitation.loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('invitation.loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-6 rounded-xl">
       <h2 class="text-lg font-bold mb-2">{{ $t('invitation.invalid') }}</h2>
       <p>{{ error }}</p>

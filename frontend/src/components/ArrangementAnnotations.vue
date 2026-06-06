@@ -2,7 +2,7 @@
   <div class="annotations-panel">
     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
       📝 {{ $t('arrangementAnnotation.title') }}
-      <span class="text-sm font-normal text-gray-500">{{$t('arrangementAnnotation.count', { count: annotations.length })}}</span>
+      <span class="text-sm font-normal text-gray-500 dark:text-gray-400 dark:text-gray-500">{{$t('arrangementAnnotation.count', { count: annotations.length })}}</span>
     </h3>
 
     <div class="space-y-3 mb-4">

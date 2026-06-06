@@ -7,8 +7,8 @@
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
-    <div v-else-if="polls.length === 0" class="text-center py-12 text-gray-400">{{ $t('polls.no_polls') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
+    <div v-else-if="polls.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('polls.no_polls') }}</div>
 
     <div v-else class="space-y-4">
       <div v-for="poll in polls" :key="poll.id"
@@ -16,7 +16,7 @@
         <div class="flex items-start justify-between mb-3">
           <div>
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ poll.question }}</h3>
-            <p class="text-xs text-gray-400">{{ poll.vote_count }} {{ $t('polls.votes') }} · {{ poll.max_votes }} {{ $t('polls.max_votes') }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500">{{ poll.vote_count }} {{ $t('polls.votes') }} · {{ poll.max_votes }} {{ $t('polls.max_votes') }}</p>
           </div>
           <span v-if="poll.expires_at && poll.expires_at < now" class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">{{ $t('polls.expired') }}</span>
         </div>
@@ -28,7 +28,7 @@
             :class="poll.my_votes?.includes(opt.id) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 hover:border-blue-300'">
             <div class="flex items-center justify-between relative z-10">
               <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ opt.label }}</span>
-              <span class="text-xs text-gray-400">{{ getVoteCount(poll, opt.id) }} {{ $t('polls.voice') }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ getVoteCount(poll, opt.id) }} {{ $t('polls.voice') }}</span>
             </div>
             <div class="absolute inset-0 bg-blue-500/10 rounded-lg" :style="{ width: getVotePercent(poll, opt.id) + '%' }" />
           </div>

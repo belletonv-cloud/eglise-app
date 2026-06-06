@@ -12,7 +12,7 @@
       <div class="flex items-center gap-3 mb-4">
         <span class="text-2xl">🔄</span>
         <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('pcoSync.last_sync') }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('pcoSync.last_sync') }}</p>
           <p class="font-medium text-gray-800 dark:text-gray-100">{{ lastSync || $t('pcoSync.never') }}</p>
         </div>
       </div>

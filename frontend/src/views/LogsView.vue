@@ -7,7 +7,7 @@
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
 
     <div v-else>
       <div class="flex gap-2 mb-4">
@@ -50,16 +50,16 @@
               <td class="px-4 py-2">
                 <span class="font-mono" :class="log.status >= 500 ? 'text-red-600' : log.status >= 400 ? 'text-amber-600' : 'text-green-600'">{{ log.status }}</span>
               </td>
-              <td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ log.duration }}ms</td>
+              <td class="px-4 py-2 text-gray-600 dark:text-gray-400 dark:text-gray-500">{{ log.duration }}ms</td>
               <td class="px-4 py-2 text-red-600 text-xs max-w-xs truncate">{{ log.error || '-' }}</td>
             </tr>
           </tbody>
         </table>
         </div>
-        <div v-if="logs.length === 0" class="text-center py-8 text-gray-400">{{ $t('logs.no_logs') }}</div>
+        <div v-if="logs.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">{{ $t('logs.no_logs') }}</div>
       </div>
 
-      <div class="flex items-center justify-between mt-4 text-sm text-gray-500">
+      <div class="flex items-center justify-between mt-4 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
         <span>{{ total }} {{ $t('logs.entries') }}</span>
         <div class="flex gap-2">
           <button @click="prevPage" :disabled="page <= 1" class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30 cursor-pointer">←</button>

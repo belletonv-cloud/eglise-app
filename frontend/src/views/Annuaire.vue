@@ -7,9 +7,9 @@
         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('directory.loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('directory.loading') }}</div>
 
-    <div v-else-if="members.length === 0" class="text-center py-12 text-gray-400">{{ $t('directory.not_found') }}</div>
+    <div v-else-if="members.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('directory.not_found') }}</div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       <div v-for="m in filtered" :key="m.id"
@@ -18,7 +18,7 @@
         <div v-if="m.email" class="text-sm text-gray-500 mt-1">
           <a :href="`mailto:${m.email}`" class="hover:text-blue-600">{{ m.email }}</a>
         </div>
-        <div v-if="m.phone" class="text-sm text-gray-500">
+        <div v-if="m.phone" class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
           <a :href="`tel:${m.phone}`" class="hover:text-blue-600">{{ m.phone }}</a>
         </div>
         <div v-if="m.team_names" class="text-xs text-gray-400 mt-1">{{ m.team_names }}</div>

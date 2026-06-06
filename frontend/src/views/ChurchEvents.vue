@@ -9,7 +9,7 @@
       <button @click="filter = 'cieuxouverts.bzh'" class="px-3 py-1.5 rounded-lg text-sm" :class="filter === 'cieuxouverts.bzh' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">Cieux Ouverts</button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
 
     <div v-else class="space-y-6">
       <!-- Récurrents -->
@@ -23,7 +23,7 @@
                 <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm flex-1">{{ ev.title }}</h3>
                 <button @click="openActions(ev)" class="ml-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">⚙️</button>
               </div>
-              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <span>📆 {{ ev.dateLabel }}</span>
                 <span v-if="ev.startTime">🕐 {{ ev.startTime }}</span>
               </div>
@@ -54,7 +54,7 @@
                 <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm flex-1">{{ ev.title }}</h3>
                 <button @click="openOneTimeActions(ev)" class="ml-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">⚙️</button>
               </div>
-              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 <span>📆 {{ formatDate(ev.start_date) }}</span>
                 <span v-if="ev.start_time">🕐 {{ ev.start_time }}</span>
               </div>
@@ -138,7 +138,7 @@
       </div>
     </div>
 
-    <div v-if="!loading && recurring.length === 0 && oneTime.length === 0" class="text-center py-12 text-gray-400">{{ $t('churchEvents.nothing') }}</div>
+    <div v-if="!loading && recurring.length === 0 && oneTime.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('churchEvents.nothing') }}</div>
   </div>
 </template>
 

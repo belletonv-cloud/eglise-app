@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Loader global -->
-    <div v-if="isLoading" role="status" data-testid="loader" class="text-center py-12 text-gray-500">
+    <div v-if="isLoading" role="status" data-testid="loader" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
       {{ $t('loading') }}
     </div>
     
@@ -28,7 +28,7 @@
               class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer hover:shadow-md transition-all"
               data-testid="plan-item">
               <div class="font-semibold text-gray-800">{{ formatDate(plan.date) }}</div>
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {{ plan.service_type_name || $t('calendar.service') }}
                 <span v-if="plan.time">{{ plan.time?.slice(0, 5) }}</span>
               </div>
@@ -38,7 +38,7 @@
               </div>
             </div>
           </div>
-          <div v-if="plans.length === 0" class="text-center py-8 text-gray-400">
+          <div v-if="plans.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">
             {{ $t('checkin.no_upcoming') }}
           </div>
 
@@ -49,7 +49,7 @@
               <div v-for="plan in plans.slice(0, 4)" :key="plan.id"
                 class="border border-gray-200 rounded-lg p-3 text-center">
 <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`" class="qr-code mx-auto mb-2" alt="QR check-in" loading="lazy" />
-                <div class="text-xs text-gray-500">{{ formatDate(plan.date) }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ formatDate(plan.date) }}</div>
               </div>
             </div>
           </div>
@@ -61,7 +61,7 @@
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h3 class="text-xl font-bold text-gray-800">{{ formatDate(currentPlan.date) }}</h3>
-                <p class="text-gray-500">{{ currentPlan.service_type_name }}
+                <p class="text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ currentPlan.service_type_name }}
                   <span v-if="currentPlan.time">{{ currentPlan.time?.slice(0, 5) }}</span>
                 </p>
               </div>
@@ -102,7 +102,7 @@
               >
                 <div>
                   <div class="font-medium text-gray-800">{{ member.first_name }} {{ member.last_name }}</div>
-                  <div class="text-sm text-gray-500">{{ member.email || member.phone || '' }}</div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ member.email || member.phone || '' }}</div>
                 </div>
                 <button class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700" data-testid="checkin-button">
                   {{ $t('checkin.checkin_button') }}
@@ -124,7 +124,7 @@
             <h3 class="text-lg font-semibold mb-4">
               {{ $t('checkin.present_count', { count: attendances.length }) }}
             </h3>
-            <div v-if="attendances.length === 0" class="text-center py-8 text-gray-400">
+            <div v-if="attendances.length === 0" class="text-center py-8 text-gray-400 dark:text-gray-500">
               {{ $t('checkin.no_checkin') }}
             </div>
             <div v-else class="space-y-2">

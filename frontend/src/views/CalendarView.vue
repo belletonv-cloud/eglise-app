@@ -78,13 +78,13 @@
     <!-- Cards view -->
     <div v-if="currentView === 'cards'">
       <!-- TODO: implémenter Cards view ici -->
-      <div class="text-center py-12 text-gray-400">Vue "Cartes" à venir…</div>
+      <div class="text-center py-12 text-gray-400 dark:text-gray-500">Vue "Cartes" à venir…</div>
     </div>
 
     <!-- Agenda view -->
     <div v-if="currentView === 'agenda'">
       <!-- TODO: implémenter Agenda view ici -->
-      <div class="text-center py-12 text-gray-400">Vue "Ordre du jour" à venir…</div>
+      <div class="text-center py-12 text-gray-400 dark:text-gray-500">Vue "Ordre du jour" à venir…</div>
     </div>
 
     <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />

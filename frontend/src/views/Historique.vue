@@ -17,9 +17,9 @@
         class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex-1" />
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{$t('plan.loading')}}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{$t('plan.loading')}}</div>
 
-    <div v-else-if="plans.length === 0" class="text-center py-12 text-gray-400">{{$t('history.no_results')}}</div>
+    <div v-else-if="plans.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{$t('history.no_results')}}</div>
 
     <div v-else class="space-y-3">
       <div v-for="plan in plans" :key="plan.id"
@@ -28,14 +28,14 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ formatDate(plan.date) }}</span>
-              <span v-if="plan.time" class="text-sm text-gray-500">{{ plan.time?.slice(0, 5) }}</span>
+              <span v-if="plan.time" class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ plan.time?.slice(0, 5) }}</span>
               <span class="px-2 py-0.5 rounded-full text-xs font-medium"
                 :class="plan.service_type_name ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600'">
                 {{ plan.service_type_name || $t('plan.service') }}
               </span>
               <span v-if="plan.theme" class="text-sm text-gray-500 italic truncate">— {{ plan.theme }}</span>
             </div>
-            <div class="flex gap-4 mt-1 text-xs text-gray-500">
+            <div class="flex gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
               <span>{{ plan.items_count || 0 }} {{$t('history.elements')}}</span>
               <span>{{ plan.people_count || 0 }} {{$t('history.participants')}}</span>
             </div>

@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ $t('apps.compare_title') }}
         </h1>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
           {{ $t('apps.compare_desc') }}
         </p>
       </div>
@@ -26,7 +26,7 @@
               <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {{ $t('apps.services_center_title') }}
               </div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">
+              <div class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {{ $t('apps.services_center_subtitle') }}
               </div>
             </div>
@@ -52,12 +52,12 @@
             <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 w-12">{{ item.duration }}</div>
             <div class="flex-1 min-w-0">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.title }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.meta }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ item.meta }}</div>
             </div>
             <div class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">{{ item.key }}</div>
           </div>
 
-          <div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+          <div class="mt-2 text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 dark:text-gray-500">
             {{ $t('apps.drag_hint') }}
           </div>
         </div>
@@ -69,7 +69,7 @@
           <div class="flex items-center justify-between">
             <div>
               <div class="text-sm font-semibold text-white">{{ $t('apps.music_stand_title') }}</div>
-              <div class="text-xs text-gray-400">{{ $t('apps.music_stand_subtitle') }}</div>
+              <div class="text-xs text-gray-400 dark:text-gray-500">{{ $t('apps.music_stand_subtitle') }}</div>
             </div>
             <div class="text-xs px-2 py-1 rounded bg-blue-600/20 text-blue-300 font-semibold border border-blue-500/30">
               UI B
@@ -85,7 +85,7 @@
                 <div class="text-sm font-semibold text-white truncate">
                   {{ item.title }} <span class="text-blue-300 font-semibold">({{ item.key }})</span>
                 </div>
-                <div class="text-xs text-gray-400">{{ item.file }}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500">{{ item.file }}</div>
                 <div v-if="item.notes" class="text-xs text-gray-500 mt-1">
                   {{ item.notes }}
                 </div>
@@ -96,7 +96,7 @@
         </div>
 
         <footer class="px-4 py-3 border-t border-gray-900 bg-gray-950">
-          <div class="flex items-center justify-between text-xs text-gray-400">
+          <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
             <div>0:42</div>
             <div class="flex-1 mx-3 h-2 rounded bg-gray-800 overflow-hidden">
               <div class="h-full w-1/3 bg-blue-500"></div>

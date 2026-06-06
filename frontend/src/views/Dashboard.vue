@@ -4,7 +4,7 @@
             {{ $t("dashboard.title") }}
         </h1>
 
-        <div v-if="loading" class="text-center py-12 text-gray-500">
+        <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             {{ $t("loading") }}
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -17,7 +17,7 @@
                 <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     {{ $t("dashboard.members") }}
                 </div>
-                <div class="text-xs text-gray-400">
+                <div class="text-xs text-gray-400 dark:text-gray-500">
                     {{
                         $t("dashboard.active_members", {
                             count: stats.activeMembers,
@@ -73,7 +73,7 @@
             >
                 {{ $t("dashboard.attendance_title", { year: statsYear }) }}
             </h2>
-            <div v-if="attendanceLoading" class="text-sm text-gray-500">
+            <div v-if="attendanceLoading" class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                 {{ $t("loading") }}
             </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,7 +83,7 @@
                     <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                         {{ attendanceStats.total }}
                     </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500">
                         {{ $t("dashboard.attendance_total") }}
                     </div>
                 </div>

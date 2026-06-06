@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
           {{ $t('apps.title') }}
         </h1>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
           {{ $t('apps.subtitle') }}
         </p>
       </div>
@@ -31,7 +31,7 @@
                 {{ app.title }}
               </h2>
             </div>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">
               {{ app.desc }}
             </p>
             <div class="mt-3 text-xs text-blue-700 dark:text-blue-300 font-medium group-hover:underline">

@@ -18,11 +18,11 @@
         <table class="min-w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-3 py-2 text-left font-semibold text-gray-500">Arrangement</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-500">Key</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-500">Tempo</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-500">Chart</th>
-              <th class="px-3 py-2 text-left font-semibold text-gray-500">Updated</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Arrangement</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Key</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Tempo</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Chart</th>
+              <th class="px-3 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Updated</th>
             </tr>
           </thead>
           <tbody>
@@ -34,10 +34,10 @@
               @click="selectArrangement(arr.id)"
             >
               <td class="px-3 py-2 font-medium text-gray-800">{{ arr.name }}</td>
-              <td class="px-3 py-2 text-gray-600">{{ arr.key || '—' }}</td>
-              <td class="px-3 py-2 text-gray-600">{{ arr.tempo ? `${arr.tempo} BPM` : '—' }}</td>
-              <td class="px-3 py-2 text-gray-600">{{ arr.chord_chart ? 'Yes' : 'No' }}</td>
-              <td class="px-3 py-2 text-gray-500">{{ arr.pco_updated_at ? arr.pco_updated_at.slice(0, 10) : '—' }}</td>
+              <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ arr.key || '—' }}</td>
+              <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ arr.tempo ? `${arr.tempo} BPM` : '—' }}</td>
+              <td class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ arr.chord_chart ? 'Yes' : 'No' }}</td>
+              <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ arr.pco_updated_at ? arr.pco_updated_at.slice(0, 10) : '—' }}</td>
             </tr>
           </tbody>
         </table>
