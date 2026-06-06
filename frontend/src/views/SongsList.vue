@@ -57,7 +57,7 @@
             class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]"
         >
             <aside
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm"
+                class="rounded-xl border border-gray-800 p-4 shadow-sm"
             >
                 <div class="space-y-5 text-sm">
                     <section>

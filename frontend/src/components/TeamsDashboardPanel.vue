@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-4">
         <div
-            class="rounded-2xl border border-emerald-100 dark:border-emerald-900/50 bg-gradient-to-r from-emerald-50 dark:from-emerald-900/30 to-white dark:to-gray-900 px-4 py-4 shadow-sm"
+            class="rounded-2xl border border-emerald-100 dark:border-emerald-900/50 bg-gradient-to-r from-emerald-50/50 dark:from-emerald-900/30 to-gray-50 dark:to-gray-900 px-4 py-4 shadow-sm"
         >
             <div
                 class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
@@ -12,7 +12,7 @@
                     >
                         Teams
                     </h3>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-200">
                         Répartition des équipes façon Planning Center : Band,
                         Audio/Visual et équipes support.
                     </p>
