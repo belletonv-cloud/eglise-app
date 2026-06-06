@@ -148,7 +148,7 @@
                             class="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800"
                         >
                             <div
-                                class="bg-gray-50/70 dark:bg-gray-800/70 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200"
+                                class="bg-gray-50/70 dark:bg-gray-800/80 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-100"
                             >
                                 {{ role.role }}
                             </div>

@@ -11,7 +11,7 @@
             </div>
             <router-link
                 to="/services-center"
-                class="text-sm text-blue-700 hover:underline shrink-0"
+                class="text-sm text-blue-700 dark:text-blue-300 hover:underline shrink-0"
             >
                 ← Services Center
             </router-link>
