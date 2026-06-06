@@ -114,7 +114,7 @@
       </aside>
 
       <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-200 bg-gray-50/80 p-4">
+        <div class="border-b border-gray-200 bg-gray-50/80 dark:bg-gray-800/50 p-4">
           <div class="relative max-w-xl">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔎</span>
             <input
@@ -132,7 +132,7 @@
 
         <div v-else class="overflow-x-auto">
           <table class="min-w-full">
-            <thead class="border-b border-gray-200 bg-white">
+            <thead class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
               <tr>
                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Title</th>
                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Key</th>

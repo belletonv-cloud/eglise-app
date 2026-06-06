@@ -1,12 +1,12 @@
 <template>
   <div class="max-w-3xl mx-auto">
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{$t('plan.loading')}}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500 dark:text-gray-400">{{$t('plan.loading')}}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="member">
       <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">{{$t('profile.account')}}</h1>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{$t('profile.personal_info')}}</h2>
         <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -52,17 +52,17 @@
         <VolunteerPreferences :member-id="member.id" />
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{$t('profile.upcoming_services')}}</h2>
         <div v-if="schedule.length === 0" class="text-gray-400 py-4 text-center">
           {{$t('profile.no_upcoming')}}
         </div>
         <div v-else class="space-y-3">
           <div v-for="s in schedule" :key="s.id"
-            class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+            class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
             <div @click="$router.push(`/plans/${s.plan_id}`)" class="flex-1 cursor-pointer">
               <div class="font-medium text-gray-800 dark:text-gray-100">{{ formatDate(s.date) }}</div>
-              <div class="text-sm text-gray-500">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
                 {{ s.service_type_name || $t('profile.service') }}
                 <span v-if="s.time"> à {{ s.time?.slice(0, 5) }}</span>
               </div>

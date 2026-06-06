@@ -36,7 +36,7 @@
                 <!-- Sélection du plan/service -->
                 <div
                     v-if="!currentPlan"
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+                    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
                 >
                     <h3 class="text-lg font-semibold mb-4">
                         {{ $t("checkin.select_plan") }}
@@ -46,7 +46,7 @@
                             v-for="plan in plans"
                             :key="plan.id"
                             @click="handleSelectPlan(plan)"
-                            class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer hover:shadow-md transition-all"
+                            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 cursor-pointer hover:shadow-md transition-all"
                             data-testid="plan-item"
                         >
                             <div class="font-semibold text-gray-800 dark:text-gray-100">
@@ -93,7 +93,7 @@
                             <div
                                 v-for="plan in plans.slice(0, 4)"
                                 :key="plan.id"
-                                class="border border-gray-200 rounded-lg p-3 text-center"
+                                class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-center"
                             >
                                 <img
                                     :src="`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(origin + '/checkin?plan=' + plan.id)}`"
@@ -114,7 +114,7 @@
                 <!-- INTERFACE PRINCIPALE -->
                 <div v-else>
                     <div
-                        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+                        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <div>
@@ -185,7 +185,7 @@
                                 v-for="member in searchResults"
                                 :key="member.id"
                                 @click="handleCheckIn(member)"
-                                class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer"
+                                class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer"
                                 data-testid="member-result"
                             >
                                 <div>
@@ -208,7 +208,7 @@
                             </div>
                         </div>
 
-                        <div class="border-t border-gray-200 pt-4">
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                             <button
                                 @click="showManualCheckIn = true"
                                 class="text-sm text-blue-600 hover:text-blue-800"
@@ -221,7 +221,7 @@
 
                     <!-- Liste des présents -->
                     <div
-                        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 p-6"
                     >
                         <h3 class="text-lg font-semibold mb-4">
                             {{
@@ -273,7 +273,7 @@
                     role="dialog"
                 >
                     <div
-                        class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl"
+                        class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-xl"
                     >
                         <h3 class="text-lg font-bold mb-4">
                             {{ $t("checkin.manual_title") }}
