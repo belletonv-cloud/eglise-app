@@ -266,10 +266,10 @@
             </aside>
 
             <div
-                class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+                class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
             >
                 <div
-                    class="border-b border-gray-200 bg-gray-50/80 dark:bg-gray-800/50 p-4"
+                    class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 p-4"
                 >
                     <div class="relative max-w-xl">
                         <span
