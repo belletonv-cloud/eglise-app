@@ -27,7 +27,7 @@
                 class="fixed inset-0 z-50 bg-gray-100 dark:bg-gray-900 flex flex-col"
             >
                 <div
-                    class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between"
+                    class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center justify-between"
                 >
                     <div class="flex items-center gap-2">
                         <span
@@ -45,14 +45,22 @@
                             <button
                                 @click="setDevicePreview('tablet')"
                                 class="px-2 py-1 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
-                                :class="devicePreview === 'tablet' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : ''"
+                                :class="
+                                    devicePreview === 'tablet'
+                                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold'
+                                        : ''
+                                "
                             >
                                 📱
                             </button>
                             <button
                                 @click="setDevicePreview('mobile')"
                                 class="px-2 py-1 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700"
-                                :class="devicePreview === 'mobile' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold' : ''"
+                                :class="
+                                    devicePreview === 'mobile'
+                                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold'
+                                        : ''
+                                "
                             >
                                 📲
                             </button>
@@ -70,7 +78,7 @@
                         <iframe
                             :src="devicePreviewUrl"
                             :style="{ width: devicePreviewWidth + 'px' }"
-                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg h-[calc(100vh-88px)]"
+                            class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg h-[calc(100vh-88px)]"
                             frameborder="0"
                         />
                     </div>
@@ -78,7 +86,7 @@
             </div>
 
             <aside
-                class="w-64 bg-white dark:bg-gray-800 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
+                class="w-64 bg-white dark:bg-gray-900 shadow-md flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out"
                 :class="
                     mobileSidebarOpen
                         ? 'translate-x-0'
@@ -86,7 +94,7 @@
                 "
             >
                 <div
-                    class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
+                    class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between"
                 >
                     <div class="min-w-0">
                         <h1
@@ -118,7 +126,10 @@
                             <button
                                 @click="stopDemoPersona"
                                 class="ml-auto text-xs text-red-600 dark:text-red-400 hover:underline shrink-0"
-                                :title="$t('demoPersona.stop') || 'Arrêter l\'impersonnalisation'"
+                                :title="
+                                    $t('demoPersona.stop') ||
+                                    'Arrêter l\'impersonnalisation'
+                                "
                             >
                                 Stop
                             </button>
@@ -134,7 +145,7 @@
                     <div class="flex items-center gap-1 ml-2 shrink-0">
                         <button
                             @click="toggleDarkMode"
-                            class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
                             :title="
                                 isDark
                                     ? $t('app.light_mode')
@@ -170,7 +181,7 @@
                         </button>
                         <button
                             @click="toggleLang"
-                            class="p-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                            class="p-1.5 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
                             :title="lang === 'fr' ? 'English' : 'Français'"
                         >
                             {{ lang === "fr" ? "EN" : "FR" }}
@@ -179,7 +190,7 @@
                         <div v-if="showDevicePreviewControls" class="relative">
                             <button
                                 @click="deviceMenuOpen = !deviceMenuOpen"
-                                class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                                class="p-1.5 rounded-lg text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
                                 title="Aperçu responsive (desktop/tablette/mobile)"
                             >
                                 <svg
@@ -199,26 +210,38 @@
 
                             <div
                                 v-if="deviceMenuOpen"
-                                class="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1"
+                                class="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 z-50 py-1"
                             >
                                 <button
                                     @click="setDevicePreview('desktop')"
                                     class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    :class="devicePreview === 'desktop' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                    :class="
+                                        devicePreview === 'desktop'
+                                            ? 'font-semibold text-blue-700 dark:text-blue-300'
+                                            : ''
+                                    "
                                 >
                                     🖥️ Desktop
                                 </button>
                                 <button
                                     @click="setDevicePreview('tablet')"
                                     class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    :class="devicePreview === 'tablet' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                    :class="
+                                        devicePreview === 'tablet'
+                                            ? 'font-semibold text-blue-700 dark:text-blue-300'
+                                            : ''
+                                    "
                                 >
                                     📱 Tablette
                                 </button>
                                 <button
                                     @click="setDevicePreview('mobile')"
                                     class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    :class="devicePreview === 'mobile' ? 'font-semibold text-blue-700 dark:text-blue-300' : ''"
+                                    :class="
+                                        devicePreview === 'mobile'
+                                            ? 'font-semibold text-blue-700 dark:text-blue-300'
+                                            : ''
+                                    "
                                 >
                                     📲 Mobile
                                 </button>
@@ -254,10 +277,10 @@
                             </button>
                             <div
                                 v-if="demoPersonaMenuOpen"
-                                class="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-1"
+                                class="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 z-50 py-1"
                             >
                                 <div
-                                    class="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700"
+                                    class="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800"
                                 >
                                     {{ $t("demoPersona.instructions") }}
                                 </div>
@@ -542,7 +565,7 @@
                 </nav>
                 <div
                     v-if="isAuthenticated"
-                    class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1.5"
+                    class="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1.5"
                 >
                     <button
                         @click="handleLogout"
@@ -574,7 +597,7 @@
 
             <main class="flex-1 overflow-auto flex flex-col">
                 <div
-                    class="lg:hidden flex items-center justify-between p-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+                    class="lg:hidden flex items-center justify-between p-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
                 >
                     <button
                         @click="mobileSidebarOpen = true"
@@ -684,7 +707,9 @@ const canManageMembersMenu = computed(
 );
 
 const canEditContentMenu = computed(
-    () => localIsAdmin.value || hasRolePermission(userRole.value, "edit_announcements"),
+    () =>
+        localIsAdmin.value ||
+        hasRolePermission(userRole.value, "edit_announcements"),
 );
 
 const canSeePlanTemplates = computed(
@@ -692,7 +717,10 @@ const canSeePlanTemplates = computed(
 );
 
 const showAdminSection = computed(
-    () => localIsAdmin.value || canManageMembersMenu.value || canEditContentMenu.value,
+    () =>
+        localIsAdmin.value ||
+        canManageMembersMenu.value ||
+        canEditContentMenu.value,
 );
 
 // Track if the ORIGINAL logged-in user is admin (for showing persona selector)
