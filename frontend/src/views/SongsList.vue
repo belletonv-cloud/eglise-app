@@ -331,7 +331,7 @@
                             <tr
                                 v-for="song in pagedSongs"
                                 :key="song.id"
-                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50 bg-white dark:bg-gray-900"
                                 @click="goToSong(song.id)"
                             >
                                 <td
