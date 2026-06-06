@@ -70,7 +70,7 @@
 
         <div
             v-else-if="teamCount === 0"
-            class="rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
+            class="rounded-2xl border border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-10 text-center text-sm text-gray-500 dark:text-gray-400"
         >
             Aucune équipe disponible pour le moment.
         </div>
@@ -136,7 +136,7 @@
 
                     <div
                         v-if="board.roles.length === 0"
-                        class="mt-5 rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
+                        class="mt-5 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 px-4 py-8 bg-white dark:bg-gray-800 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
                         {{ board.emptyMessage }}
                     </div>
