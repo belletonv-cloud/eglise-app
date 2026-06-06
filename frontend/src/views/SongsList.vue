@@ -5,12 +5,15 @@
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
                     Songs
                 </h2>
-                <div class="mt-1 flex items-center gap-3 text-sm text-gray-500">
+                <div
+                    class="mt-1 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400"
+                >
                     <span
-                        class="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700"
+                        class="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 text-blue-700 dark:text-blue-300"
                         >Teams</span
                     >
-                    <span class="rounded-full bg-gray-100 px-2 py-0.5"
+                    <span
+                        class="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-gray-600 dark:text-gray-400"
                         >Add text filter</span
                     >
                     <span class="font-medium text-gray-700"
@@ -114,7 +117,8 @@
                             Dates
                         </h3>
                         <div class="space-y-2">
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -122,7 +126,8 @@
                                 />
                                 All</label
                             >
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -130,7 +135,8 @@
                                 />
                                 Last 90 days</label
                             >
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -138,7 +144,8 @@
                                 />
                                 This year</label
                             >
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="dateFilter"
                                     type="radio"
@@ -202,7 +209,8 @@
                             Usage
                         </h3>
                         <div class="space-y-2">
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
@@ -210,7 +218,8 @@
                                 />
                                 All</label
                             >
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
@@ -218,7 +227,8 @@
                                 />
                                 Recently used</label
                             >
-                            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                            <label
+                                class="flex items-center gap-2 text-gray-700 dark:text-gray-200"
                                 ><input
                                     v-model="usageFilter"
                                     type="radio"
