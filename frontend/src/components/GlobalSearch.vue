@@ -18,11 +18,11 @@
                 query.trim().length >= 2 &&
                 (loading || results.length || searched)
             "
-            class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto z-50"
+            class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 max-h-80 overflow-y-auto z-50"
         >
             <div
                 v-if="loading"
-                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500"
+                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
             >
                 {{ $t("loading") }}
             </div>
@@ -30,7 +30,7 @@
                 v-for="r in results"
                 :key="r.type + r.id"
                 @click="navigate(r)"
-                class="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                class="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-gray-100 dark:border-gray-800 last:border-0"
             >
                 <span class="text-lg">{{ r.icon || iconFor(r.type) }}</span>
                 <div class="flex-1 min-w-0">
@@ -46,7 +46,7 @@
             </div>
             <div
                 v-if="!loading && searched && results.length === 0"
-                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500"
+                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
             >
                 {{ $t("search.no_results") }}
             </div>
@@ -117,6 +117,14 @@ const quickLinks = computed(() => [
         description: t("apps.songs_desc"),
         to: "/songs",
         icon: "🎵",
+    },
+    {
+        id: "calendar",
+        type: "route",
+        title: t("menu.calendar"),
+        description: t("menu.section_services"),
+        to: "/calendar",
+        icon: "📅",
     },
     {
         id: "events",
