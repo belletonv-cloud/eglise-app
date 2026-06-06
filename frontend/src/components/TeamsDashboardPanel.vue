@@ -120,7 +120,7 @@
                         <span
                             v-for="team in board.teams"
                             :key="team.id"
-                            class="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 dark:text-gray-200"
+                            class="rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs text-gray-700 dark:text-gray-200"
                         >
                             {{ team.name }}
                         </span>
@@ -164,7 +164,7 @@
                                         class="flex min-w-0 items-center gap-3"
                                     >
                                         <div
-                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700 dark:text-gray-200"
+                                            class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200"
                                         >
                                             {{ initials(member.name) }}
                                         </div>
@@ -220,7 +220,7 @@
                         </p>
                     </div>
                     <div
-                        class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200"
+                        class="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200"
                     >
                         {{ supportTeams.length }} équipe(s)
                     </div>
