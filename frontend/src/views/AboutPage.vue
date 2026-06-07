@@ -7,15 +7,15 @@
         </div>
 
         <div
-            class="bg-gray-900 rounded-xl shadow-sm border border-gray-800 p-8 mb-6"
+            class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 mb-6"
         >
             <div class="text-center mb-8">
                 <h1
-                    class="text-3xl font-bold text-gray-100 mb-3"
+                    class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3"
                 >
                     {{ $t("about.welcome") }}
                 </h1>
-                <p class="text-gray-300 max-w-2xl mx-auto">
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                     {{ $t("about.subtitle") }}
                 </p>
             </div>
