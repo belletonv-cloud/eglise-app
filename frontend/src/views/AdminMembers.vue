@@ -28,6 +28,17 @@
                 >
                     {{ $t("admin.members.tabs.rbac") }}
                 </button>
+                <button
+                    @click="tab = 'rgpd'"
+                    :class="
+                        tab === 'rgpd'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+                    "
+                    class="px-4 py-2 rounded-lg cursor-pointer"
+                >
+                    {{ $t("admin.members.tabs.rgpd") }}
+                </button>
             </div>
 
             <!-- Roles tab -->
@@ -161,6 +172,95 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- RGPD tab -->
+            <div v-if="tab === 'rgpd'">
+                <div class="overflow-x-auto">
+                    <table class="w-full bg-white dark:bg-gray-900 rounded shadow">
+                        <thead>
+                            <tr>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-left">
+                                    {{ $t("table.name") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-left">
+                                    {{ $t("table.email") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-left">
+                                    {{ $t("admin.members.rgpd.origin") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-center">
+                                    {{ $t("admin.members.rgpd.consent_sharing") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-center">
+                                    {{ $t("admin.members.rgpd.consent_photo") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 text-center">
+                                    {{ $t("admin.members.rgpd.consent_communication") }}
+                                </th>
+                                <th class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="m in members"
+                                :key="m.id"
+                                class="border-b border-gray-200 dark:border-gray-700"
+                            >
+                                <td class="p-2 text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                                    {{ m.first_name }} {{ m.last_name }}
+                                </td>
+                                <td class="p-2 text-gray-800 dark:text-gray-200">
+                                    {{ m.email || "—" }}
+                                </td>
+                                <td class="p-2 text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                                    {{ m.data_origin || "—" }}
+                                </td>
+                                <td class="p-2 text-center">
+                                    <input
+                                        type="checkbox"
+                                        :checked="!!m.consent_data_sharing"
+                                        @change="toggleConsent(m, 'consent_data_sharing', $event.target.checked)"
+                                        class="w-4 h-4 cursor-pointer"
+                                    />
+                                </td>
+                                <td class="p-2 text-center">
+                                    <input
+                                        type="checkbox"
+                                        :checked="!!m.consent_photo"
+                                        @change="toggleConsent(m, 'consent_photo', $event.target.checked)"
+                                        class="w-4 h-4 cursor-pointer"
+                                    />
+                                </td>
+                                <td class="p-2 text-center">
+                                    <input
+                                        type="checkbox"
+                                        :checked="!!m.consent_communication"
+                                        @change="toggleConsent(m, 'consent_communication', $event.target.checked)"
+                                        class="w-4 h-4 cursor-pointer"
+                                    />
+                                </td>
+                                <td class="p-2 whitespace-nowrap">
+                                    <button
+                                        @click="gdprExport(m)"
+                                        class="text-blue-600 dark:text-blue-400 hover:underline text-sm cursor-pointer mr-2"
+                                    >
+                                        {{ $t("admin.members.rgpd.export") }}
+                                    </button>
+                                    <button
+                                        @click="gdprErase(m)"
+                                        class="text-red-600 dark:text-red-400 hover:underline text-sm cursor-pointer"
+                                    >
+                                        {{ $t("admin.members.rgpd.erase") }}
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p v-if="members.length === 0" class="text-gray-500 dark:text-gray-400 mt-4">
+                    {{ $t("table.no_results") }}
+                </p>
             </div>
 
             <!-- RBAC tab -->
@@ -317,8 +417,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { api } from "../utils/api";
 import { showToast } from "../stores/toast";
+
+const { t } = useI18n();
+
+const consentUpdating = ref({});
 
 const tab = ref("roles");
 const q = ref("");
@@ -414,6 +519,45 @@ async function addResourcePermission() {
 async function removeResourcePermission(id) {
     if (!confirm("Supprimer cette permission ?")) return;
     await api.deleteResourcePermission(id);
+    await load();
+}
+
+async function toggleConsent(m, field, checked) {
+    const key = `${m.id}-${field}`;
+    if (consentUpdating.value[key]) return;
+    consentUpdating.value[key] = true;
+    try {
+        const body = {
+            consent_data_sharing: field === "consent_data_sharing" ? checked : !!m.consent_data_sharing,
+            consent_photo: field === "consent_photo" ? checked : !!m.consent_photo,
+            consent_communication: field === "consent_communication" ? checked : !!m.consent_communication,
+        };
+        await api.updateMemberConsent(m.id, body);
+        m[field] = checked ? 1 : 0;
+        showToast(t("admin.members.rgpd.consent_updated"), "success");
+    } catch {
+        showToast(t("admin.members.rgpd.consent_error"), "error");
+    } finally {
+        delete consentUpdating.value[key];
+    }
+}
+
+async function gdprExport(m) {
+    const url = window.URL.createObjectURL(
+        new Blob([JSON.stringify(await api.gdprExport(m.id), null, 2)], { type: "application/json" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gdpr-export-${m.first_name}-${m.last_name}-${m.id}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    showToast(t("admin.members.rgpd.export_done"), "success");
+}
+
+async function gdprErase(m) {
+    if (!confirm(t("admin.members.rgpd.confirm_erase"))) return;
+    await api.gdprErase(m.id);
+    showToast(t("admin.members.rgpd.erase_done"), "success");
     await load();
 }
 </script>

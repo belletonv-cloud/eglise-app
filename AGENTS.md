@@ -72,14 +72,27 @@ Déployée sur Cloudflare Workers + Pages.
 - Groupes de maison, annonces, sondages
 - Emails en masse (Resend), notifications push (FCM)
 - Synchronisation PCO : `POST /api/pco-sync` (nécessite PCO_TOKEN_ID + PCO_TOKEN_SECRET)
+- PCO People sync : `POST /api/pco-sync-people` (admin only) — enrichit les membres avec email/téléphone depuis PCO People via `pco_id` ou nom
+- RGPD : `GET /api/members/:id/gdpr-export` (export JSON complet), `POST /api/members/:id/gdpr-erase` (anonymisation), `PUT /api/members/:id/consent` (consentement)
+- Migration 020 : ajoute `consent_data_sharing`, `consent_photo`, `consent_communication`, `data_origin`, `gdpr_data_exported_at`, `gdpr_erased_at` à la table `members`
 - Webhooks, invitations, iCal export, backup JSON
 
 ## PCO Sync
 
 - **Endpoint** : `POST /api/pco-sync`
-- **Frontend** : `/pco-sync` (vue PcoSyncView)
+- **PCO People** : `POST /api/pco-sync-people` (admin only) — enrichit email/téléphone
+- **Frontend** : `/pco-sync` (vue PcoSyncView avec carte "People sync")
 - **Secrets** : `PCO_TOKEN_ID` + `PCO_TOKEN_SECRET` dans Cloudflare Secrets
 - Sync : service types → plans → personnes → chants + arrangements (avec chord_chart)
+
+## RGPD / GDPR
+
+- **Consent UI** : onglet "RGPD" dans `AdminMembers.vue` — checkboxes consentement + export JSON + anonymisation
+- **Endpoints** :
+  - `GET /api/members/:id/gdpr-export` — export complet (membre, équipes, présences, services)
+  - `POST /api/members/:id/gdpr-erase` — anonymisation (champs vidés, `gdpr_erased_at` set)
+  - `PUT /api/members/:id/consent` — mise à jour `consent_data_sharing`, `consent_photo`, `consent_communication`
+- **Migration** : `migrations/020_rgpd_consent.sql` (à appliquer manuellement via `wrangler d1 execute`)
 
 ## Conventions
 
@@ -87,6 +100,10 @@ Déployée sur Cloudflare Workers + Pages.
 - Backend dev : `wrangler dev` → http://localhost:8787
 - Audio-splitter : voir `/Users/vic/Downloads/audio-splitter/` (serveur Whisper sur :8765)
 - Variables d'env dans `.env`, secrets Cloudflare via `wrangler secret put`
+
+## ⚠️ Migrations en attente
+
+- **020_rgpd_consent.sql** : pas encore appliquée en prod. À faire : `wrangler d1 execute eglise-app --file=migrations/020_rgpd_consent.sql`
 
 ## ⚠️ Problèmes connus
 
