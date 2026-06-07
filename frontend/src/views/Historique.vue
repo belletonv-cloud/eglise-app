@@ -4,17 +4,17 @@
 
     <div class="flex gap-2 mb-4 flex-wrap">
       <select v-model="yearFilter" @change="loadHistory"
-        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
         <option value="">{{$t('history.filter_all_years')}}</option>
         <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
       </select>
       <select v-model="typeFilter" @change="loadHistory"
-        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
         <option value="">{{$t('history.filter_all_types')}}</option>
         <option v-for="st in serviceTypes" :key="st.id" :value="st.id">{{ st.name }}</option>
       </select>
       <input v-model="searchQuery" @input="loadHistory" :placeholder="$t('history.search_placeholder')"
-        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex-1" />
+        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex-1" />
     </div>
 
     <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{$t('plan.loading')}}</div>
@@ -23,7 +23,7 @@
 
     <div v-else class="space-y-3">
       <div v-for="plan in plans" :key="plan.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 hover:shadow-md transition-shadow">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">

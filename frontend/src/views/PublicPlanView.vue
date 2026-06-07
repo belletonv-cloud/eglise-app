@@ -7,7 +7,7 @@
         <div class="text-sm text-gray-400 mt-1">Ordre du culte</div>
       </div>
 
-      <div v-if="loading" class="text-center py-12 text-gray-400">Chargement…</div>
+      <div v-if="loading" class="text-center py-12 text-gray-400 dark:text-gray-500">Chargement…</div>
       <div v-else-if="error" class="text-center py-12 text-red-500">{{ error }}</div>
       <template v-else-if="plan">
         <!-- Plan header -->
@@ -31,17 +31,17 @@
           <div v-for="(item, idx) in items" :key="item.id"
             :style="item.color ? { borderLeftColor: item.color, borderLeftWidth: '4px' } : {}"
             class="bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-start gap-3">
-            <span class="text-xs text-gray-400 mt-1 w-5 text-right shrink-0">{{ idx + 1 }}</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500 mt-1 w-5 text-right shrink-0">{{ idx + 1 }}</span>
             <div class="flex-1 min-w-0">
-              <div class="text-xs text-gray-400 uppercase tracking-wide">{{ typeLabel(item.type) }}</div>
+              <div class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">{{ typeLabel(item.type) }}</div>
               <div class="font-medium text-gray-800 dark:text-gray-100">{{ item.title }}</div>
               <div v-if="item.song_title && item.song_title !== item.title"
                 class="text-sm text-indigo-600">{{ item.song_title }}</div>
-              <div v-if="item.arrangement_name" class="text-xs text-gray-400">{{ item.arrangement_name }}</div>
-              <div v-if="item.transposed_key" class="text-xs text-gray-400">Tonalité : {{ item.transposed_key }}</div>
-              <div v-if="item.description" class="text-sm text-gray-500 mt-0.5">{{ item.description }}</div>
+              <div v-if="item.arrangement_name" class="text-xs text-gray-400 dark:text-gray-500">{{ item.arrangement_name }}</div>
+              <div v-if="item.transposed_key" class="text-xs text-gray-400 dark:text-gray-500">Tonalité : {{ item.transposed_key }}</div>
+              <div v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ item.description }}</div>
             </div>
-            <div v-if="item.length_minutes" class="text-xs text-gray-400 shrink-0 mt-1">
+            <div v-if="item.length_minutes" class="text-xs text-gray-400 dark:text-gray-500 shrink-0 mt-1">
               {{ item.length_minutes }}min
             </div>
           </div>

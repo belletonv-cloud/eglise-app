@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-3xl mx-auto">
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('plan.loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('plan.loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="plan">
@@ -14,7 +14,7 @@
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 text-center">
-        <h1 class="text-3xl font-bold text-gray-800">{{ formatDate(plan.date) }}</h1>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">{{ formatDate(plan.date) }}</h1>
         <p class="text-gray-500 mt-1">
           {{ plan.service_type_name || $t('plan.service') }}
           <span v-if="plan.time"> &middot; {{ plan.time?.slice(0, 5) }}</span>
@@ -22,7 +22,7 @@
         <p v-if="plan.theme" class="text-gray-700 mt-2 text-lg italic">{{ plan.theme }}</p>
       </div>
 
-      <div v-if="songs.length === 0" class="text-center py-12 text-gray-400">
+      <div v-if="songs.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">
         {{ $t('kiosk.no_songs') }}
       </div>
 
@@ -31,8 +31,8 @@
           class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div class="bg-indigo-50 px-6 py-3 border-b border-indigo-100">
             <div class="text-sm text-indigo-600 font-medium">{{ song.position }}. {{ song.type_label }}</div>
-            <h2 class="text-xl font-bold text-gray-800">{{ song.song_title }}</h2>
-            <div class="text-sm text-gray-500">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ song.song_title }}</h2>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
               {{ song.arrangement_name }}
               <span v-if="song.key"> · {{ $t('arrangement.original_key') }} {{ song.key }}</span>
               <span v-if="song.transposed_key" class="text-indigo-600 font-medium">

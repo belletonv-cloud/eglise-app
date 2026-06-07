@@ -17,7 +17,7 @@
 
     <div v-else class="space-y-3">
       <div v-for="a in filtered" :key="a.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <div class="text-sm text-gray-500 mb-1">
@@ -34,7 +34,7 @@
     </div>
 
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl">
         <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">{{ $t('announcements.new_title') }}</h3>
         <form @submit.prevent="create" class="space-y-4">
           <div>

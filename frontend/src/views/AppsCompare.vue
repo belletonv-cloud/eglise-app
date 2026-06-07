@@ -19,8 +19,8 @@
 
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Left: Services Center style -->
-      <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-        <header class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+        <header class="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
           <div class="flex items-center justify-between">
             <div>
               <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -48,7 +48,7 @@
         </header>
 
         <div class="p-3 space-y-2">
-          <div v-for="(item, idx) in servicesCenterItems" :key="idx" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm px-3 py-2 flex items-center gap-3">
+          <div v-for="(item, idx) in servicesCenterItems" :key="idx" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm px-3 py-2 flex items-center gap-3">
             <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 w-12">{{ item.duration }}</div>
             <div class="flex-1 min-w-0">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.title }}</div>

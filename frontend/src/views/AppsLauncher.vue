@@ -16,7 +16,7 @@
         v-for="app in apps"
         :key="app.key"
         :to="app.to"
-        class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+        class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
       >
         <div class="flex items-start gap-3">
           <div
@@ -100,7 +100,7 @@ const apps = computed(() => [
   {
     key: 'teams',
     icon: '🎛️',
-    iconBg: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    iconBg: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
     title: t('apps.teams_title'),
     desc: t('apps.teams_desc'),
     to: '/teams',

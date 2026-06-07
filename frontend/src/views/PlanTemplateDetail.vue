@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="template">
@@ -48,7 +48,7 @@
             <div class="flex flex-col items-center gap-0.5 pt-1">
               <button @click="moveItem(idx, -1)" :disabled="idx === 0"
                 class="text-gray-400 hover:text-gray-600 text-xs disabled:opacity-30 cursor-pointer">&uarr;</button>
-              <span class="text-xs text-gray-400">{{ idx + 1 }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ idx + 1 }}</span>
               <button @click="moveItem(idx, 1)" :disabled="idx === items.length - 1"
                 class="text-gray-400 hover:text-gray-600 text-xs disabled:opacity-30 cursor-pointer">&darr;</button>
             </div>

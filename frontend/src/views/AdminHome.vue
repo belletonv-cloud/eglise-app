@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <div v-if="!canSeeAnything" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div v-if="!canSeeAnything" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
       <p class="text-gray-600 dark:text-gray-300">{{ $t('adminHome.no_access') }}</p>
     </div>
 
@@ -17,7 +17,7 @@
       <router-link
         v-if="canManageMembers"
         to="/admin/members"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">👥</span>
         <div>
@@ -30,7 +30,7 @@
       <router-link
         v-if="canEditContent"
         to="/admin/content"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">📝</span>
         <div>
@@ -42,7 +42,7 @@
       <router-link
         v-if="isAdmin"
         to="/admin/test-accounts"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">🧪</span>
         <div>
@@ -54,7 +54,7 @@
       <router-link
         v-if="isAdmin"
         to="/webhooks"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">🔗</span>
         <div>
@@ -66,7 +66,7 @@
       <router-link
         v-if="isAdmin"
         to="/logs"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">📋</span>
         <div>
@@ -78,7 +78,7 @@
       <router-link
         v-if="isAdmin"
         to="/pco-sync"
-        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+        class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
       >
         <span class="text-3xl mt-1">🔄</span>
         <div>

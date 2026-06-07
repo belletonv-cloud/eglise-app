@@ -4,7 +4,7 @@
       <router-link to="/email-templates" class="text-sm font-normal text-blue-600 hover:underline ml-4">{{$t('email.manage_templates')}}</router-link>
     </h1>
 
-    <form @submit.prevent="sendEmail" class="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+    <form @submit.prevent="sendEmail" class="space-y-4 bg-white dark:bg-gray-900 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-800">
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{$t('email.recipient_type')}}</label>
         <select v-model="recipientType" @change="onRecipientTypeChange"
@@ -77,7 +77,7 @@
 
     <div class="mt-8">
       <h2 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-100">{{$t('email.logs_title')}}</h2>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-800">
         <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">

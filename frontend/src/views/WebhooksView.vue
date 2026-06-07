@@ -14,16 +14,16 @@
 
     <!-- Configs tab -->
     <div v-if="tab === 'configs'">
-      <div v-if="loading" class="text-center py-12 text-gray-500">{{$t('webhook.loading')}}</div>
-      <div v-else-if="webhooks.length === 0" class="text-center py-12 text-gray-400">{{$t('webhook.empty')}}</div>
+      <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{$t('webhook.loading')}}</div>
+      <div v-else-if="webhooks.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500 dark:text-gray-400">{{$t('webhook.empty')}}</div>
       <div v-else class="space-y-3">
         <div v-for="wh in webhooks" :key="wh.id"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
           <div class="flex items-start justify-between">
             <div class="flex-1">
 <div class="font-medium text-gray-800 dark:text-gray-100">{{ wh.label || wh.url }}</div>
-                <div class="text-sm text-gray-500 truncate">{{ wh.url }}</div>
-                <div class="text-xs text-gray-400 mt-1">{{$t('webhook.events')}}: {{ wh.events }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ wh.url }}</div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{$t('webhook.events')}}: {{ wh.events }}</div>
             </div>
             <button @click="deleteWebhook(wh.id)" class="text-red-400 hover:text-red-600 text-sm cursor-pointer">{{$t('webhook.delete')}}</button>
           </div>
@@ -33,16 +33,16 @@
 
     <!-- Logs tab -->
     <div v-if="tab === 'logs'">
-      <div v-if="logsLoading" class="text-center py-12 text-gray-500">{{$t('webhook.loading')}}</div>
-      <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div v-if="logsLoading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{$t('webhook.loading')}}</div>
+      <div v-else class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
             <tr>
-              <th class="text-left px-4 py-2 text-gray-600">{{$t('webhooklog.date')}}</th>
-              <th class="text-left px-4 py-2 text-gray-600">{{$t('webhooklog.event')}}</th>
-              <th class="text-left px-4 py-2 text-gray-600">{{$t('webhooklog.status')}}</th>
-              <th class="text-left px-4 py-2 text-gray-600">{{$t('webhooklog.response')}}</th>
+              <th class="text-left px-4 py-2 text-gray-600 dark:text-gray-400">{{$t('webhooklog.date')}}</th>
+              <th class="text-left px-4 py-2 text-gray-600 dark:text-gray-400">{{$t('webhooklog.event')}}</th>
+              <th class="text-left px-4 py-2 text-gray-600 dark:text-gray-400">{{$t('webhooklog.status')}}</th>
+              <th class="text-left px-4 py-2 text-gray-600 dark:text-gray-400">{{$t('webhooklog.response')}}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -60,7 +60,7 @@
 
     <!-- Create form modal -->
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl">
         <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">{{$t('webhook.new_label')}}</h3>
         <form @submit.prevent="create" class="space-y-4">
           <div>
@@ -70,7 +70,7 @@
           <div>
 <label class="block text-sm font-medium mb-1">{{$t('webhook.events')}}</label>
               <input v-model="form.events" :placeholder="$t('webhook.events_placeholder')" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" />
-              <p class="text-xs text-gray-400 mt-1">{{$t('webhook.any_event')}}</p>
+              <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{$t('webhook.any_event')}}</p>
           </div>
           <div>
 <label class="block text-sm font-medium mb-1">{{$t('webhook.label')}}</label>

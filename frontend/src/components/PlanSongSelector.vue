@@ -4,7 +4,7 @@
         @click.self="$emit('close')"
     >
         <div
-            class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-xl shadow-xl max-h-[80vh] flex flex-col"
+            class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-xl shadow-xl max-h-[80vh] flex flex-col"
         >
             <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
                 Ajouter un chant
@@ -13,7 +13,7 @@
             <input
                 v-model="search"
                 placeholder="Rechercher un chant..."
-                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mb-4 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mb-4 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
             />
 
             <div
@@ -27,7 +27,7 @@
                     v-for="song in filteredSongs"
                     :key="song.id"
                     @click="selectSong(song)"
-                    class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
+                    class="p-3 border border-gray-200 dark:border-gray-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors"
                     :class="{
                         'border-blue-400 bg-blue-50 dark:bg-blue-900/20':
                             selected?.id === song.id,
@@ -55,7 +55,7 @@
                         >
                         <select
                             v-model="selectedArrangementId"
-                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 mt-1 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                            class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 mt-1 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
                         >
                             <option :value="null">Choisir...</option>
                             <option
@@ -87,7 +87,7 @@
                             <input
                                 v-model="transposedKey"
                                 placeholder="Ex: C, Dm, G..."
-                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 mt-1 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 mt-1 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
                             />
                         </div>
                     </div>
@@ -101,7 +101,7 @@
             </div>
 
             <div
-                class="flex gap-3 justify-end pt-4 border-t dark:border-gray-700 mt-4"
+                class="flex gap-3 justify-end pt-4 border-t dark:border-gray-800 mt-4"
             >
                 <button
                     @click="$emit('close')"

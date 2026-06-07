@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">{{ $t('emailTemplates.title') }}</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $t('emailTemplates.title') }}</h2>
       <button @click="showForm = true"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
         {{ $t('emailTemplates.new') }}
       </button>
     </div>
 
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('emailTemplates.loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('emailTemplates.loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <div v-else class="space-y-3">
@@ -17,9 +17,9 @@
         class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md hover:border-blue-300 cursor-pointer transition-all">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-gray-800">{{ tpl.name }}</h3>
-            <p class="text-sm text-gray-500 mt-1">{{ tpl.subject }}</p>
-            <p class="text-xs text-gray-400 mt-2">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ tpl.name }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ tpl.subject }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
               {{ tpl.usage_count || 0 }} {{ $t('emailTemplates.usages') }}
             </p>
           </div>
@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <div v-if="templates.length === 0" class="text-center py-12 text-gray-400">
+      <div v-if="templates.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">
         {{ $t('emailTemplates.not_found') }}
       </div>
     </div>
@@ -64,7 +64,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('emailTemplates.variables') }}</label>
             <input v-model="form.variables" :placeholder="$t('emailTemplates.variables_placeholder')"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <p class="text-xs text-gray-400 mt-1">{{ $t('emailTemplates.variables_hint') }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $t('emailTemplates.variables_hint') }}</p>
           </div>
           <div class="flex gap-3 justify-end pt-2">
             <button type="button" @click="showForm = false"

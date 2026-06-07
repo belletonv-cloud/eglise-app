@@ -336,41 +336,19 @@
                     <div class="px-1 pb-2">
                         <GlobalSearch />
                     </div>
+
+                    <!-- General (always visible) -->
+                    <div class="pt-2 pb-1">
+                        <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            📊 {{ $t("menu.section_general") }}
+                        </p>
+                    </div>
                     <router-link
                         to="/"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
                         active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                     >
                         <span>📊</span> {{ $t("menu.dashboard") }}
-                    </router-link>
-                    <div class="pt-2 pb-1">
-                        <p
-                            class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                        >
-                            {{ $t("menu.section_planning") }}
-                        </p>
-                    </div>
-                    <router-link
-                        to="/calendar"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📅</span> {{ $t("menu.calendar") }}
-                    </router-link>
-                    <router-link
-                        to="/plans"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📋</span> {{ $t("menu.services") }}
-                    </router-link>
-                    <router-link
-                        v-if="canSeePlanTemplates"
-                        to="/plan-templates"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📄</span> {{ $t("menu.templates") }}
                     </router-link>
                     <router-link
                         to="/checkin"
@@ -386,182 +364,286 @@
                     >
                         <span>📜</span> {{ $t("menu.history") }}
                     </router-link>
+
+                    <!-- Planning (collapsible) -->
                     <div class="pt-2 pb-1">
-                        <p
-                            class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                        <div
+                            @click="toggleSection('planning')"
+                            class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
-                            {{ $t("menu.section_people") }}
-                        </p>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                📅 {{ $t("menu.section_planning") }}
+                            </p>
+                            <svg
+                                :class="{ 'rotate-180': expandedSections.planning }"
+                                class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
-                    <router-link
-                        to="/members"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>👥</span> {{ $t("menu.members") }}
-                    </router-link>
-                    <router-link
-                        to="/teams"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🎪</span> {{ $t("menu.teams") }}
-                    </router-link>
-                    <router-link
-                        to="/annuaire"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📖</span> {{ $t("menu.directory") }}
-                    </router-link>
-                    <router-link
-                        to="/house-groups"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🏠</span> {{ $t("menu.groups") }}
-                    </router-link>
+                    <template v-if="expandedSections.planning">
+                        <router-link
+                            to="/calendar"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📅</span> {{ $t("menu.calendar") }}
+                        </router-link>
+                        <router-link
+                            to="/plans"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📋</span> {{ $t("menu.services") }}
+                        </router-link>
+                        <router-link
+                            v-if="canSeePlanTemplates"
+                            to="/plan-templates"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📄</span> {{ $t("menu.templates") }}
+                        </router-link>
+                    </template>
+
+                    <!-- People (collapsible) -->
                     <div class="pt-2 pb-1">
-                        <p
-                            class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                        <div
+                            @click="toggleSection('people')"
+                            class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
-                            {{ $t("menu.section_music") }}
-                        </p>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                👥 {{ $t("menu.section_people") }}
+                            </p>
+                            <svg
+                                :class="{ 'rotate-180': expandedSections.people }"
+                                class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
-                    <router-link
-                        to="/songs"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🎵</span> {{ $t("menu.songs") }}
-                    </router-link>
-                    <router-link
-                        to="/music-stand"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🎼</span> {{ $t("menu.music_stand") }}
-                    </router-link>
+                    <template v-if="expandedSections.people">
+                        <router-link
+                            to="/members"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>👥</span> {{ $t("menu.members") }}
+                        </router-link>
+                        <router-link
+                            to="/teams"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>🎪</span> {{ $t("menu.teams") }}
+                        </router-link>
+                        <router-link
+                            to="/annuaire"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📖</span> {{ $t("menu.directory") }}
+                        </router-link>
+                        <router-link
+                            to="/house-groups"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>🏠</span> {{ $t("menu.groups") }}
+                        </router-link>
+                    </template>
+
+                    <!-- Music (collapsible) -->
                     <div class="pt-2 pb-1">
-                        <p
-                            class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                        <div
+                            @click="toggleSection('music')"
+                            class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
-                            {{ $t("menu.section_communication") }}
-                        </p>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                🎵 {{ $t("menu.section_music") }}
+                            </p>
+                            <svg
+                                :class="{ 'rotate-180': expandedSections.music }"
+                                class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
-                    <router-link
-                        to="/annonces"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📢</span> {{ $t("menu.announcements") }}
-                    </router-link>
-                    <router-link
-                        to="/events"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📅</span> {{ $t("menu.events") }}
-                    </router-link>
-                    <router-link
-                        to="/email"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📧</span> {{ $t("menu.emails") }}
-                    </router-link>
-                    <router-link
-                        to="/sondages"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📊</span> {{ $t("menu.polls") }}
-                    </router-link>
-                    <router-link
-                        to="/youtube"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>▶️</span> {{ $t("menu.youtube") }}
-                    </router-link>
-                    <router-link
-                        to="/about"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>ℹ️</span> {{ $t("menu.about") }}
-                    </router-link>
-                    <div v-if="showAdminSection" class="pt-2 pb-1">
-                        <p
-                            class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    <template v-if="expandedSections.music">
+                        <router-link
+                            to="/songs"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
                         >
-                            {{ $t("menu.section_admin") }}
-                        </p>
+                            <span>🎵</span> {{ $t("menu.songs") }}
+                        </router-link>
+                        <router-link
+                            to="/music-stand"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>🎼</span> {{ $t("menu.music_stand") }}
+                        </router-link>
+                    </template>
+
+                    <!-- Communication (collapsible) -->
+                    <div class="pt-2 pb-1">
+                        <div
+                            @click="toggleSection('communication')"
+                            class="flex items-center justify-between px-3 cursor-pointer select-none"
+                        >
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                📬 {{ $t("menu.section_communication") }}
+                            </p>
+                            <svg
+                                :class="{ 'rotate-180': expandedSections.communication }"
+                                class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/admin"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>⚙️</span> {{ $t("menu.admin") }}
-                    </router-link>
-                    <router-link
-                        v-if="canManageMembersMenu"
-                        to="/admin/members"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>👥</span> {{ $t("menu.admin_members") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/apps"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🧩</span> {{ $t("menu.apps") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsScheduler"
-                        to="/conflicts"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>⚠️</span> {{ $t("menu.conflicts") }}
-                    </router-link>
-                    <router-link
-                        v-if="canEditContentMenu"
-                        to="/admin/content"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📝</span> {{ $t("menu.content") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/webhooks"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🔗</span> {{ $t("menu.webhooks") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/logs"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>📋</span> {{ $t("menu.logs") }}
-                    </router-link>
-                    <router-link
-                        v-if="localIsAdmin"
-                        to="/pco-sync"
-                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
-                        active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                    >
-                        <span>🔄</span> {{ $t("menu.pco_sync") }}
-                    </router-link>
+                    <template v-if="expandedSections.communication">
+                        <router-link
+                            to="/annonces"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📢</span> {{ $t("menu.announcements") }}
+                        </router-link>
+                        <router-link
+                            to="/email"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📧</span> {{ $t("menu.emails") }}
+                        </router-link>
+                        <router-link
+                            to="/sondages"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📊</span> {{ $t("menu.polls") }}
+                        </router-link>
+                        <router-link
+                            to="/youtube"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>▶️</span> {{ $t("menu.youtube") }}
+                        </router-link>
+                        <router-link
+                            to="/events"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                            active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                        >
+                            <span>📅</span> {{ $t("menu.events") }}
+                        </router-link>
+                    </template>
+
+                    <!-- Admin (collapsible, conditional) -->
+                    <template v-if="showAdminSection">
+                        <div class="pt-2 pb-1">
+                            <div
+                                @click="toggleSection('admin')"
+                                class="flex items-center justify-between px-3 cursor-pointer select-none"
+                            >
+                                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                    ⚙️ {{ $t("menu.section_admin") }}
+                                </p>
+                                <svg
+                                    :class="{ 'rotate-180': expandedSections.admin }"
+                                    class="w-3 h-3 text-gray-400 transition-transform duration-200"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <template v-if="expandedSections.admin">
+                            <router-link
+                                v-if="localIsAdmin"
+                                to="/admin"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>⚙️</span> {{ $t("menu.admin") }}
+                            </router-link>
+                            <router-link
+                                v-if="canManageMembersMenu"
+                                to="/admin/members"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>👥</span> {{ $t("menu.admin_members") }}
+                            </router-link>
+                            <router-link
+                                v-if="canEditContentMenu"
+                                to="/admin/content"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>📝</span> {{ $t("menu.content") }}
+                            </router-link>
+                            <router-link
+                                v-if="localIsAdmin"
+                                to="/apps"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>🧩</span> {{ $t("menu.apps") }}
+                            </router-link>
+                            <router-link
+                                v-if="localIsScheduler"
+                                to="/conflicts"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>⚠️</span> {{ $t("menu.conflicts") }}
+                            </router-link>
+                            <router-link
+                                v-if="localIsAdmin"
+                                to="/webhooks"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>🔗</span> {{ $t("menu.webhooks") }}
+                            </router-link>
+                            <router-link
+                                v-if="localIsAdmin"
+                                to="/logs"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>📋</span> {{ $t("menu.logs") }}
+                            </router-link>
+                            <router-link
+                                v-if="localIsAdmin"
+                                to="/pco-sync"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                                active-class="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                            >
+                                <span>🔄</span> {{ $t("menu.pco_sync") }}
+                            </router-link>
+                        </template>
+                    </template>
                 </nav>
                 <div
                     v-if="isAuthenticated"
@@ -819,6 +901,17 @@ function toggleDarkMode() {
     isDark.value = !isDark.value;
     localStorage.setItem("dark-mode", String(isDark.value));
     document.documentElement.classList.toggle("dark", isDark.value);
+}
+
+const expandedSections = ref<Record<string, boolean>>({
+    planning: true,
+    people: true,
+    music: true,
+    communication: true,
+    admin: true,
+});
+function toggleSection(key: string) {
+    expandedSections.value[key] = !expandedSections.value[key];
 }
 
 const online = ref(navigator.onLine);

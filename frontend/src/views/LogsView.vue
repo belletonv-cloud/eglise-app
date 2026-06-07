@@ -11,20 +11,20 @@
 
     <div v-else>
       <div class="flex gap-2 mb-4">
-        <select v-model="statusFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <select v-model="statusFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
           <option value="">{{ $t('logs.all_statuses') }}</option>
           <option value="4">{{ $t('logs.client_errors') }}</option>
           <option value="5">{{ $t('logs.server_errors') }}</option>
           <option value="2">{{ $t('logs.success') }}</option>
         </select>
-        <select v-model="slowFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+        <select v-model="slowFilter" @change="onFilterChange" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
           <option value="0">{{ $t('logs.all_durations') }}</option>
           <option value="2000">{{ $t('logs.slow') }}</option>
           <option value="5000">{{ $t('logs.very_slow') }}</option>
         </select>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">

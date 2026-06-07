@@ -62,7 +62,7 @@
                 <div class="text-sm font-semibold text-white truncate">
                   {{ song.title }}
                 </div>
-                <div v-if="song.author" class="text-xs text-gray-400 truncate">
+                <div v-if="song.author" class="text-xs text-gray-400 dark:text-gray-500 truncate">
                   {{ song.author }}
                 </div>
               </div>

@@ -7,7 +7,7 @@
 
     <div class="space-y-3 mb-4">
       <div v-for="ann in annotations" :key="ann.id"
-        class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+        class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
         <div class="flex items-start justify-between gap-2">
           <div class="flex-1">
             <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div v-if="editing" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+    <div v-if="editing" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
       <textarea v-model="form.content" rows="3" :placeholder="$t('arrangementAnnotation.add_placeholder')"
         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"></textarea>
       <div class="flex items-center justify-between mt-2">

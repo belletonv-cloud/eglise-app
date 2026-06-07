@@ -1,6 +1,6 @@
 <template>
     <div
-        class="md:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur"
+        class="md:hidden fixed bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur"
     >
         <div
             class="mx-auto grid max-w-md grid-cols-5 gap-1 px-2 py-2 text-[11px] text-gray-700 dark:text-gray-300"

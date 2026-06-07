@@ -51,8 +51,8 @@
                         <h3 class="font-semibold text-gray-800 dark:text-gray-100">
                             {{ getPersonaLabel(key as string) }}
                         </h3>
-                        <p class="text-sm text-gray-500">{{ persona.email }}</p>
-                        <p class="text-xs text-gray-400 mt-1">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ persona.email }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                             {{ getPersonaDesc(key as string) }}
                         </p>
                     </div>

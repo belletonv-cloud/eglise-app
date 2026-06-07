@@ -13,7 +13,7 @@
             >
             <select
                 v-model="selectedCategory"
-                class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
             >
                 <option value="">{{ $t("adminContent.all") }}</option>
                 <option
@@ -36,18 +36,18 @@
 
         <div
             v-if="filteredKeys.length === 0"
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-400 dark:text-gray-500"
+            class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 text-center text-gray-400 dark:text-gray-500"
         >
             {{ $t("adminContent.no_keys") }}
         </div>
 
         <div
             v-else
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden"
         >
             <table class="w-full text-sm">
                 <thead
-                    class="bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700"
+                    class="bg-gray-50 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-800"
                 >
                     <tr>
                         <th
@@ -102,7 +102,7 @@
                                     )
                                 "
                                 rows="2"
-                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm resize-y bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm resize-y bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
                                 :class="{
                                     'border-amber-400 ring-1 ring-amber-200':
                                         hasOverride(key),

@@ -20,7 +20,7 @@
           <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mx-2 min-w-[180px] text-center">{{ periodLabel }}</h3>
           <button @click="next" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer border border-gray-200 dark:border-gray-600">&rarr;</button>
         </div>
-        <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+        <div class="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-lg p-0.5">
           <button v-for="v in views" :key="v.key" @click="currentView = v.key"
             class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer"
             :class="currentView === v.key ? 'bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'">
@@ -32,7 +32,7 @@
       <!-- Month view -->
       <div v-if="currentView === 'month'">
         <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-          <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-800 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
+          <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-900 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
           <div v-for="(day, i) in calendarDays" :key="i"
             @click="createPlan(day)"
             class="bg-white dark:bg-gray-900 min-h-[70px] md:min-h-[100px] p-1 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
@@ -55,7 +55,7 @@
       <!-- Week view -->
       <div v-if="currentView === 'week'">
         <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-          <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-800 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
+          <div v-for="d in dayNames" :key="d" class="bg-gray-50 dark:bg-gray-900 text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2">{{ d }}</div>
           <div v-for="day in weekDays" :key="day.date"
             class="bg-white dark:bg-gray-900 min-h-[120px] p-1 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
             :class="{ 'bg-blue-50/30 dark:bg-blue-900/10': isToday(day.date) }">

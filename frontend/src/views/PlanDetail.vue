@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{t('plan.loading')}}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{t('plan.loading')}}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
 
     <template v-else-if="plan">
@@ -51,7 +51,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">{{t('plan.order')}} ({{ items.length }})
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{t('plan.order')}} ({{ items.length }})
               <span v-if="totalMinutes > 0" class="text-sm font-normal text-gray-500 ml-2">· {{ formatDuration(totalMinutes) }}</span>
             </h2>
             <div class="flex gap-2 items-center flex-wrap">
@@ -113,7 +113,7 @@
               <div class="flex flex-col items-center gap-0.5 pt-1">
                 <button @click="moveItem(idx, -1)" :disabled="idx === 0"
                   class="text-gray-400 hover:text-gray-600 text-xs disabled:opacity-30 cursor-pointer">&uarr;</button>
-                <span class="text-xs text-gray-400">{{ idx + 1 }}</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">{{ idx + 1 }}</span>
                 <button @click="moveItem(idx, 1)" :disabled="idx === items.length - 1"
                   class="text-gray-400 hover:text-gray-600 text-xs disabled:opacity-30 cursor-pointer">&darr;</button>
               </div>
@@ -121,9 +121,9 @@
                 <div class="flex items-start justify-between">
                   <div>
                     <span class="text-xs font-medium text-gray-400 uppercase">{{ typeLabel(item.type) }}</span>
-                    <div class="font-medium text-gray-800">{{ item.title }}</div>
+                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ item.title }}</div>
                     <div v-if="item.song_title" class="text-sm text-indigo-600">{{ item.song_title }}</div>
-                    <div v-if="item.description" class="text-sm text-gray-500">{{ item.description }}</div>
+                    <div v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</div>
                   </div>
                   <button @click="deleteItem(item)"
                     class="text-red-400 hover:text-red-600 text-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">✕</button>
@@ -133,7 +133,7 @@
                       class="text-xs text-indigo-600 hover:text-indigo-800 cursor-pointer">
                       {{ item.arrangement_name ? t('plan.type.change_song') : t('plan.type.link_song') }}
                     </button>
-                    <span v-if="item.transposed_key" class="text-xs text-gray-400 ml-2">
+                    <span v-if="item.transposed_key" class="text-xs text-gray-400 dark:text-gray-500 ml-2">
                       {{t('plan.type.transposed')}} {{ item.transposed_key }}
                     </span>
                   </div>
@@ -144,7 +144,7 @@
                       @change="(e: Event) => updateDuration(item, Number((e.target as HTMLInputElement).value))"
                       class="w-14 text-xs border-b border-transparent hover:border-gray-300 focus:border-indigo-500 outline-none bg-transparent text-gray-500 text-right"
                       placeholder="min" title="Durée en minutes" />
-                    <span class="text-xs text-gray-400">min</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">min</span>
                     <!-- Couleur de l'item -->
                     <input type="color"
                       :value="item.color || '#6366f1'"
@@ -153,7 +153,7 @@
                       title="Couleur de l'item" />
                     <button v-if="item.color"
                       @click="updateColor(item, null)"
-                      class="text-xs text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       title="Supprimer la couleur">✕</button>
                   </div>
               </div>

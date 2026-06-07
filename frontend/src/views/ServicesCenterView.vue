@@ -21,7 +21,7 @@
             class="mt-4 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"
         >
             <div
-                class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3"
+                class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-3"
             >
                 <div class="flex items-center gap-2">
                     <button
@@ -76,7 +76,7 @@
             >
                 <!-- Plans list -->
                 <aside
-                    class="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 p-3"
+                    class="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 p-3"
                 >
                     <div
                         class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1"
@@ -101,7 +101,7 @@
                             :class="
                                 p.id === selectedPlanId
                                     ? 'border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-200'
-                                    : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-gray-700 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100'
+                                    : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50 dark:border-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-100'
                             "
                             @click="selectPlan(p.id)"
                         >
@@ -151,7 +151,7 @@
                         <div
                             v-for="it in items"
                             :key="it.id"
-                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm px-3 py-2 flex items-center gap-3"
+                            class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm px-3 py-2 flex items-center gap-3"
                         >
                             <div
                                 class="text-xs font-semibold text-gray-500 dark:text-gray-400 w-12"
@@ -196,7 +196,7 @@
 
             <div v-else class="p-3">
                 <div
-                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+                    class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4"
                 >
                     <div
                         class="text-sm font-semibold text-gray-900 dark:text-gray-100"

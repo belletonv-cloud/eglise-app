@@ -13,7 +13,7 @@
 
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div v-for="video in videos" :key="video.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-md transition-shadow">
         <img :src="video.thumbnail" :alt="video.title" class="w-full h-44 object-cover" loading="lazy" />
         <div class="p-4">
           <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm line-clamp-2">{{ video.title }}</h3>

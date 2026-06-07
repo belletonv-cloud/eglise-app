@@ -14,7 +14,7 @@
     </button>
     <div
       v-if="show"
-      class="absolute z-40 left-1/2 -translate-x-1/2 mt-2 w-60 max-w-xs px-3 py-2 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm text-left"
+      class="absolute z-40 left-1/2 -translate-x-1/2 mt-2 w-60 max-w-xs px-3 py-2 rounded-lg shadow-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200 text-sm text-left"
       @click.outside="close"
     >
       <slot>

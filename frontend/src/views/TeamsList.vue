@@ -8,7 +8,7 @@
     <div v-if="loading" class="py-8 text-center text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('loading') }}</div>
     <div v-else-if="error" class="py-8 text-center text-red-600 dark:text-red-400">{{ error }}</div>
     <div v-else>
-      <div v-for="t in teams" :key="t.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mb-3 cursor-pointer border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" @click="$router.push(`/teams/${t.id}`)">
+      <div v-for="t in teams" :key="t.id" class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl mb-3 cursor-pointer border border-gray-200 dark:border-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" @click="$router.push(`/teams/${t.id}`)">
         <div class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ t.name }}</div>
         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t.member_count }} {{ $t('table.member') }}(s)</div>
         <div v-if="t.description" class="text-sm text-gray-600 dark:text-gray-300 mt-2">{{ t.description }}</div>
@@ -17,7 +17,7 @@
     </div>
 
     <div v-if="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showForm = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-xl">
         <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">{{ $t('teamsList.new_ministry') }}</h3>
         <form @submit.prevent="createTeam">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('houseGroups.name') }} <input v-model="form.name" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 mt-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100" /></label>

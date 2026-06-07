@@ -9,7 +9,7 @@
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5"
             >
                 <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {{ stats.members }}
@@ -26,7 +26,7 @@
                 </div>
             </div>
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5"
             >
                 <div class="text-3xl font-bold text-green-600 dark:text-green-400">
                     {{ stats.upcomingPlans }}
@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5"
             >
                 <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                     {{ stats.songsWithArrangements }}
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5"
             >
                 <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">
                     {{ stats.pendingConfirmations }}
@@ -56,7 +56,7 @@
                 </div>
             </div>
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5"
             >
                 <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">
                     {{ stats.teams }}
@@ -78,7 +78,7 @@
             </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4"
+                    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4"
                 >
                     <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                         {{ attendanceStats.total }}
@@ -88,7 +88,7 @@
                     </div>
                 </div>
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4"
+                    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4"
                 >
                     <h4
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
@@ -115,7 +115,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <router-link
                 to="/"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 hover:shadow-md transition-shadow"
             >
                 <div
                     class="text-lg font-semibold text-gray-800 dark:text-gray-100"
@@ -128,7 +128,7 @@
             </router-link>
             <router-link
                 to="/members"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 hover:shadow-md transition-shadow"
             >
                 <div
                     class="text-lg font-semibold text-gray-800 dark:text-gray-100"
@@ -141,7 +141,7 @@
             </router-link>
             <router-link
                 to="/songs"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 hover:shadow-md transition-shadow"
             >
                 <div
                     class="text-lg font-semibold text-gray-800 dark:text-gray-100"
@@ -154,7 +154,7 @@
             </router-link>
             <router-link
                 to="/checkin"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
+                class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5 hover:shadow-md transition-shadow"
             >
                 <div
                     class="text-lg font-semibold text-gray-800 dark:text-gray-100"

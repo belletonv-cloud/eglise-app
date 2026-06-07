@@ -19,7 +19,7 @@
                             'px-3 py-1.5 text-sm',
                             viewMode === 'list'
                                 ? 'bg-emerald-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                         ]"
                     >
                         Schedule
@@ -30,7 +30,7 @@
                             'px-3 py-1.5 text-sm',
                             viewMode === 'matrix'
                                 ? 'bg-emerald-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                         ]"
                     >
                         Matrix
@@ -52,7 +52,7 @@
         </div>
 
         <div
-            class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-900"
         >
             <label
                 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 dark:text-gray-500"
@@ -78,7 +78,7 @@
             <div
                 v-for="i in 4"
                 :key="i"
-                class="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg"
+                class="h-16 bg-gray-100 dark:bg-gray-900 rounded-lg"
             ></div>
         </div>
 
@@ -94,10 +94,10 @@
             <div v-if="viewMode === 'list'">
                 <div
                     v-if="visibleUpcomingPlans.length > 0"
-                    class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                    class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
                 >
                     <div
-                        class="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:text-gray-300"
+                        class="border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 dark:border-gray-800 dark:text-gray-300"
                     >
                         Upcoming
                     </div>
@@ -141,7 +141,7 @@
                                 <tr
                                     v-for="plan in visibleUpcomingPlans"
                                     :key="plan.id"
-                                    class="cursor-pointer border-t border-gray-100 hover:bg-emerald-50/40 dark:border-gray-700 dark:hover:bg-gray-700/40"
+                                    class="cursor-pointer border-t border-gray-100 hover:bg-emerald-50/40 dark:border-gray-800 dark:hover:bg-gray-700/40"
                                     @click="goToPlan(plan.id)"
                                 >
                                     <td
@@ -209,14 +209,14 @@
                     </div>
                     <div
                         v-if="showPast"
-                        class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                        class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
                     >
                         <table class="min-w-full text-sm opacity-80">
                             <tbody>
                                 <tr
                                     v-for="plan in visiblePastPlans"
                                     :key="plan.id"
-                                    class="cursor-pointer border-t border-gray-100 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/40"
+                                    class="cursor-pointer border-t border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-700/40"
                                     @click="goToPlan(plan.id)"
                                 >
                                     <td
@@ -262,7 +262,7 @@
                     <table class="w-full border-collapse">
                         <thead>
                             <tr
-                                class="border-b border-gray-200 dark:border-gray-700"
+                                class="border-b border-gray-200 dark:border-gray-800"
                             >
                                 <th
                                     class="text-left py-2 pr-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide w-40"
@@ -379,7 +379,7 @@
             @click.self="showForm = false"
         >
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl"
+                class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl"
             >
                 <h3 class="text-xl font-bold mb-4 dark:text-gray-100">
                     {{ $t("plansList.modal_new_title") }}
@@ -482,7 +482,7 @@
             @click.self="showApplyTemplate = false"
         >
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl"
+                class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl"
             >
                 <h3 class="text-xl font-bold mb-4 dark:text-gray-100">
                     {{ $t("plansList.modal_template_title") }}

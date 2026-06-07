@@ -30,7 +30,7 @@
                 v-for="tpl in templates"
                 :key="tpl.id"
                 @click="$router.push(`/plan-templates/${tpl.id}`)"
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md cursor-pointer transition-shadow"
+                class="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-4 hover:shadow-md cursor-pointer transition-shadow"
             >
                 <div class="flex items-center justify-between">
                     <div>
@@ -67,7 +67,7 @@
             @click.self="showForm = false"
         >
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl"
+                class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl"
             >
                 <h3
                     class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100"

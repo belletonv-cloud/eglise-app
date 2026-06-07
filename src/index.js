@@ -5563,13 +5563,16 @@ const routes3 = [
               const updatedAt = s.attributes
                 ? s.attributes.updated_at || null
                 : null;
+              const themes = s.attributes
+                ? s.attributes.themes || null
+                : null;
 
               let songId;
               if (!songRow) {
                 const ins = await env.DB.prepare(
-                  "INSERT INTO songs (title, author, ccli_number, copyright, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                  "INSERT INTO songs (title, author, ccli_number, copyright, themes, pco_id, pco_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 )
-                  .bind(title, author, ccli, copyright, pcoSongId, updatedAt)
+                  .bind(title, author, ccli, copyright, themes, pcoSongId, updatedAt)
                   .run();
                 songId = ins.meta.last_row_id;
                 results.songs++;
@@ -5577,15 +5580,15 @@ const routes3 = [
                 songId = songRow.id;
                 if (!songRow.pco_id) {
                   await env.DB.prepare(
-                    "UPDATE songs SET pco_id = ?, pco_updated_at = ?, copyright = COALESCE(copyright, ?) WHERE id = ?",
+                    "UPDATE songs SET pco_id = ?, pco_updated_at = ?, copyright = COALESCE(copyright, ?), themes = COALESCE(themes, ?) WHERE id = ?",
                   )
-                    .bind(pcoSongId, updatedAt, copyright, songId)
+                    .bind(pcoSongId, updatedAt, copyright, themes, songId)
                     .run();
                 } else {
                   await env.DB.prepare(
-                    "UPDATE songs SET pco_updated_at = ?, copyright = COALESCE(copyright, ?) WHERE id = ?",
+                    "UPDATE songs SET pco_updated_at = ?, copyright = COALESCE(copyright, ?), themes = COALESCE(themes, ?) WHERE id = ?",
                   )
-                    .bind(updatedAt, copyright, songId)
+                    .bind(updatedAt, copyright, themes, songId)
                     .run();
                 }
               }

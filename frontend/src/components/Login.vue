@@ -74,7 +74,7 @@
 
             <p
                 v-if="error"
-                class="error text-red-500 dark:text-red-400 text-sm text-center"
+                class="error text-red-500 dark:text-red-400 dark:text-red-400 text-sm text-center"
             >
                 {{ error }}
             </p>

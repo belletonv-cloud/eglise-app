@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4"
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4"
     >
         <div class="flex items-center justify-between mb-3">
             <h3 class="font-semibold text-gray-800 dark:text-gray-100">
@@ -65,7 +65,7 @@
             <input
                 v-model="audioTitle"
                 :placeholder="$t('sermonAudio.placeholder')"
-                class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded mb-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded mb-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
             />
             <div v-if="processing" class="space-y-2 mb-2">
                 <div
@@ -116,7 +116,7 @@
 
         <div
             v-if="segmentsData"
-            class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3"
+            class="mt-4 border-t border-gray-200 dark:border-gray-800 pt-3"
         >
             <div class="flex items-center justify-between mb-2">
                 <h4

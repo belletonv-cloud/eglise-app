@@ -24,8 +24,8 @@
             aria-busy="true"
         >
             <div class="w-80 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div class="w-72 h-5 bg-gray-100 dark:bg-gray-800 rounded"></div>
-            <div class="w-[340px] h-16 bg-gray-100 dark:bg-gray-800 rounded"></div>
+            <div class="w-72 h-5 bg-gray-100 dark:bg-gray-900 rounded"></div>
+            <div class="w-[340px] h-16 bg-gray-100 dark:bg-gray-900 rounded"></div>
             <div class="w-80 h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <span class="text-gray-400 dark:text-gray-500 mt-4">{{ $t("loading") }}</span>
         </div>
@@ -34,7 +34,7 @@
         </div>
 
         <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+            <aside class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
                 <div class="space-y-5 text-sm">
                     <section>
                         <h3 class="mb-2 font-semibold text-gray-700 dark:text-gray-300">Teams</h3>
@@ -95,8 +95,8 @@
                 </div>
             </aside>
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-                <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 p-4">
+            <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+                <div class="border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80 p-4">
                     <div class="relative max-w-xl">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">🔎</span>
                         <input
@@ -115,7 +115,7 @@
 
                 <div v-else class="overflow-x-auto">
                     <table class="min-w-full">
-                        <thead class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                        <thead class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                             <tr>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">First Name</th>
                                 <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Phone Number</th>
@@ -199,7 +199,7 @@
             class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
             @click.self="showForm = false"
         >
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
+            <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl">
                 <h3 class="text-xl font-bold mb-4">
                     {{
                         editing

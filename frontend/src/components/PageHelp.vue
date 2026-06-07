@@ -16,7 +16,7 @@
                 class="page-help-modal fixed inset-0 z-50 flex items-center justify-center bg-black/40"
             >
                 <div
-                    class="page-help-content bg-white dark:bg-gray-800 shadow-xl rounded-xl p-8 max-w-lg w-full relative"
+                    class="page-help-content bg-white dark:bg-gray-900 shadow-xl rounded-xl p-8 max-w-lg w-full relative"
                     ref="modalContentRef"
                     tabindex="0"
                 >

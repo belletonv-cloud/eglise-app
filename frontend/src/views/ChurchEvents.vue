@@ -13,11 +13,11 @@
 
     <div v-else class="space-y-6">
       <!-- Récurrents -->
-      <div v-if="recurring.length" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+      <div v-if="recurring.length" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">🔄 {{ $t('churchEvents.recurring') }}</h2>
         <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           <div v-for="ev in recurring" :key="ev.originalId + '-' + ev.date"
-            class="rounded-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-900">
+            class="rounded-lg border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-900">
             <div class="p-3">
               <div class="flex items-start justify-between">
                 <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm flex-1">{{ ev.title }}</h3>
@@ -39,11 +39,11 @@
       </div>
 
       <!-- Ponctuels -->
-      <div v-if="oneTime.length" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+      <div v-if="oneTime.length" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">📌 Événements ponctuels</h2>
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div v-for="ev in oneTime" :key="ev.id"
-            class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
+            class="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-md transition-shadow bg-white dark:bg-gray-900"
             :class="{ 'opacity-60': ev.status === 'cancelled' }">
             <img v-if="ev.image_url" :src="ev.image_url" :alt="ev.title" class="w-full h-32 object-cover" loading="lazy" />
             <div v-else class="w-full h-32 bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
@@ -68,7 +68,7 @@
 
     <!-- Modal actions récurrent -->
     <div v-if="showActionsModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showActionsModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-xl">
         <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">⚙️ {{ selectedEvent?.title }}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ selectedEvent?.ruleLabel }} — {{ selectedEvent?.dateLabel }}</p>
 
@@ -112,7 +112,7 @@
 
     <!-- Modal actions ponctuel -->
     <div v-if="showOneTimeActionsModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showOneTimeActionsModal = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md shadow-xl">
         <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">⚙️ {{ selectedOneTime?.title }}</h3>
 
         <div class="space-y-3">

@@ -435,6 +435,7 @@ export default {
     section_people: "People",
     section_music: "Music",
     section_communication: "Communication",
+    section_general: "General",
     section_admin: "Administration",
     admin: "Administration",
   },

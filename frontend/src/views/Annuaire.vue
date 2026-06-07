@@ -4,7 +4,7 @@
 
     <div class="mb-4">
       <input v-model="search" :placeholder="$t('directory.search')"
-        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" />
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200" />
     </div>
 
     <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400 dark:text-gray-500">{{ $t('directory.loading') }}</div>
@@ -13,7 +13,7 @@
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       <div v-for="m in filtered" :key="m.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
         <div class="font-semibold text-gray-800 dark:text-gray-100">{{ m.first_name }} {{ m.last_name }}</div>
         <div v-if="m.email" class="text-sm text-gray-500 mt-1">
           <a :href="`mailto:${m.email}`" class="hover:text-blue-600">{{ m.email }}</a>

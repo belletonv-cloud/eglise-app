@@ -5,7 +5,7 @@
       <h2 class="text-lg font-bold mb-2">{{ $t('invitation.invalid') }}</h2>
       <p>{{ error }}</p>
     </div>
-    <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+    <div v-else class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 text-center">
       <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ $t('invitation.welcome', { name: invite?.first_name }) }}</h1>
       <p class="text-gray-500 mb-6">{{ $t('invitation.invite_text', { name: invite?.first_name + ' ' + invite?.last_name, email: invite?.email }) }}</p>
       <p class="text-sm text-gray-400 mb-6">{{ $t('invitation.login_hint') }}</p>

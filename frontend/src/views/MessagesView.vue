@@ -18,8 +18,8 @@
         <hr class="my-4" />
         <h3 class="font-semibold mb-2">{{ $t('messages.new') }}</h3>
         <form @submit.prevent="send">
-          <input v-model="form.subject" :placeholder="$t('messages.subject')" class="w-full p-2 border mb-2 rounded dark:bg-gray-800 dark:border-gray-600" />
-          <textarea v-model="form.content" :placeholder="$t('messages.content')" class="w-full p-2 border mb-2 rounded dark:bg-gray-800 dark:border-gray-600" rows="6"></textarea>
+          <input v-model="form.subject" :placeholder="$t('messages.subject')" class="w-full p-2 border mb-2 rounded dark:bg-gray-900 dark:border-gray-600" />
+          <textarea v-model="form.content" :placeholder="$t('messages.content')" class="w-full p-2 border mb-2 rounded dark:bg-gray-900 dark:border-gray-600" rows="6"></textarea>
 
           <!-- Member picker -->
           <div class="mb-2 member-picker-area">
@@ -28,10 +28,10 @@
               v-model="searchQuery"
               type="text"
               :placeholder="$t('search.placeholder')"
-              class="w-full p-2 border rounded mb-2 dark:bg-gray-800 dark:border-gray-600"
+              class="w-full p-2 border rounded mb-2 dark:bg-gray-900 dark:border-gray-600"
               @focus="showPicker = true"
             />
-            <div v-if="showPicker" class="border rounded max-h-48 overflow-y-auto bg-white dark:bg-gray-800 dark:border-gray-600">
+            <div v-if="showPicker" class="border rounded max-h-48 overflow-y-auto bg-white dark:bg-gray-900 dark:border-gray-600">
               <div
                 v-for="m in filteredMembers"
                 :key="m.id"

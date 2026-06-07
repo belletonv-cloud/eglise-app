@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-12 text-gray-500">{{ $t('loading') }}</div>
+    <div v-if="loading" class="text-center py-12 text-gray-500 dark:text-gray-400">{{ $t('loading') }}</div>
     <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">{{ error }}</div>
     
     <template v-else-if="group">
@@ -15,7 +15,7 @@
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">{{ group.name }}</h1>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ group.name }}</h1>
         <p v-if="group.leader_first" class="text-gray-500 mt-1">
           {{ $t('houseGroups.leader') }} : {{ group.leader_first }} {{ group.leader_last }}
         </p>
@@ -30,14 +30,14 @@
         <!-- Membres -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">{{ $t('houseGroups.members') }} ({{ group.members?.length || 0 }})</h2>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $t('houseGroups.members') }} ({{ group.members?.length || 0 }})</h2>
             <button @click="showAddMember = true"
               class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
               {{ $t('houseGroups.add_member') }}
             </button>
           </div>
 
-          <div v-if="group.members?.length === 0" class="text-center py-6 text-gray-400">
+          <div v-if="group.members?.length === 0" class="text-center py-6 text-gray-400 dark:text-gray-500">
             {{ $t('houseGroups.no_members') }}
           </div>
 
@@ -45,8 +45,8 @@
             <div v-for="m in group.members" :key="m.id"
               class="flex items-center justify-between p-2.5 border border-gray-100 rounded-lg">
               <div>
-                <span class="font-medium text-gray-800">{{ m.first_name }} {{ m.last_name }}</span>
-                <span v-if="m.role" class="text-xs text-gray-400 ml-2">{{ m.role }}</span>
+                <span class="font-medium text-gray-800 dark:text-gray-100">{{ m.first_name }} {{ m.last_name }}</span>
+                <span v-if="m.role" class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ m.role }}</span>
               </div>
               <button @click="removeMember(m.member_id)"
                 class="text-red-400 hover:text-red-600 text-sm cursor-pointer">✕</button>
@@ -57,21 +57,21 @@
         <!-- Réunions -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">{{ $t('houseGroups.meetings') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $t('houseGroups.meetings') }}</h2>
             <button @click="showAddMeeting = true"
               class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer">
               {{ $t('houseGroups.add_meeting') }}
             </button>
           </div>
 
-          <div v-if="group.meetings?.length === 0" class="text-center py-6 text-gray-400">
+          <div v-if="group.meetings?.length === 0" class="text-center py-6 text-gray-400 dark:text-gray-500">
             {{ $t('houseGroups.no_meetings') }}
           </div>
 
           <div v-else class="space-y-2">
             <div v-for="meeting in group.meetings" :key="meeting.id"
               class="p-2.5 border border-gray-100 rounded-lg">
-              <div class="font-medium text-gray-800">{{ formatDate(meeting.date) }}</div>
+              <div class="font-medium text-gray-800 dark:text-gray-100">{{ formatDate(meeting.date) }}</div>
               <p v-if="meeting.notes" class="text-sm text-gray-600 mt-1">{{ meeting.notes }}</p>
             </div>
           </div>

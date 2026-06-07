@@ -12,7 +12,7 @@
 
     <div v-else class="space-y-4">
       <div v-for="poll in polls" :key="poll.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+        class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-5">
         <div class="flex items-start justify-between mb-3">
           <div>
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ poll.question }}</h3>
@@ -37,7 +37,7 @@
     </div>
 
     <div v-if="showCreate" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="showCreate = false">
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg shadow-xl">
+      <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-lg shadow-xl">
         <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">{{ $t('polls.create_title') }}</h3>
         <form @submit.prevent="createPoll" class="space-y-4">
           <div>
