@@ -76,15 +76,76 @@
     </div>
 
     <!-- Cards view -->
-    <div v-if="currentView === 'cards'">
-      <!-- TODO: implémenter Cards view ici -->
-      <div class="text-center py-12 text-gray-400 dark:text-gray-500">Vue "Cartes" à venir…</div>
+    <div v-if="currentView === 'cards'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <article
+        v-for="item in sortedItems"
+        :key="item.id"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        @click="handleItemClick(item, $event)"
+      >
+        <div class="relative">
+          <div class="h-36 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <span class="text-5xl">{{ item.emoji || '📌' }}</span>
+          </div>
+          <div class="absolute top-2 left-2 bg-white dark:bg-gray-800 rounded-lg px-2.5 py-1.5 text-center shadow-sm min-w-[48px]">
+            <div class="text-lg font-bold leading-none text-gray-800 dark:text-gray-100">{{ formatDay(item.date) }}</div>
+            <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ formatMonth(item.date) }}</div>
+          </div>
+          <div v-if="item.type === 'plan'" class="absolute top-2 right-2 text-xs bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+            {{ $t('calendar.service') }}
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1.5 truncate">{{ item.title }}</h3>
+          <div class="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <span v-if="item.time">🕙 {{ item.time }}</span>
+            <span v-if="item.location">📍 {{ item.location }}</span>
+          </div>
+          <p v-if="item.description" class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{{ item.description }}</p>
+          <div class="flex gap-2 mt-auto pt-1">
+            <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" @click.stop
+              class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">En savoir plus</a>
+            <a v-if="item.ticketUrl" :href="item.ticketUrl" target="_blank" rel="noopener" @click.stop
+              class="text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline">🎟️ Billetterie</a>
+          </div>
+        </div>
+      </article>
+      <p v-if="sortedItems.length === 0" class="col-span-full text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('no_results') }}</p>
     </div>
 
     <!-- Agenda view -->
     <div v-if="currentView === 'agenda'">
-      <!-- TODO: implémenter Agenda view ici -->
-      <div class="text-center py-12 text-gray-400 dark:text-gray-500">Vue "Ordre du jour" à venir…</div>
+      <div v-for="group in groupedByDate" :key="group.key" class="mb-6">
+        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 pb-1 border-b border-gray-200 dark:border-gray-700">
+          {{ group.label }}
+        </h3>
+        <div class="space-y-2">
+          <div
+            v-for="item in group.items"
+            :key="item.id"
+            class="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+            @click="handleItemClick(item, $event)"
+          >
+            <div class="flex-shrink-0 w-16 text-center">
+              <div v-if="item.time" class="text-xs font-medium text-gray-600 dark:text-gray-300">{{ item.time }}</div>
+              <div v-else class="text-xs text-gray-400 dark:text-gray-500">—</div>
+            </div>
+            <div class="flex-shrink-0 text-lg mt-0.5">{{ item.emoji || '📌' }}</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-gray-800 dark:text-gray-100 text-sm">{{ item.title }}</div>
+              <div v-if="item.location" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">📍 {{ item.location }}</div>
+              <p v-if="item.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{{ item.description }}</p>
+            </div>
+            <div class="flex-shrink-0 flex gap-2 items-start">
+              <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" @click.stop
+                class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">En savoir plus</a>
+              <a v-if="item.ticketUrl" :href="item.ticketUrl" target="_blank" rel="noopener" @click.stop
+                class="text-xs text-amber-600 dark:text-amber-400 hover:underline whitespace-nowrap">🎟️</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p v-if="groupedByDate.length === 0" class="text-center py-12 text-gray-400 dark:text-gray-500">{{ $t('no_results') }}</p>
     </div>
 
     <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
