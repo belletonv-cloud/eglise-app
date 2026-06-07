@@ -4,7 +4,7 @@
       <router-link to="/about" class="text-sm text-blue-700 dark:text-blue-300 hover:underline">← {{ $t('about.title') }}</router-link>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm">
       <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
         Comparatif des fonctionnalités
       </h1>
@@ -16,7 +16,7 @@
     <section class="mt-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Modules (standalone)</h2>
       <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div v-for="app in standaloneApps" :key="app.name" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+        <div v-for="app in standaloneApps" :key="app.name" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4">
           <div class="flex items-start gap-3">
             <div class="text-2xl">{{ app.icon }}</div>
             <div class="min-w-0">
@@ -33,7 +33,7 @@
 
     <section class="mt-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Comparaison (Planning Center vs Église App)</h2>
-      <div class="mt-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+      <div class="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
         <div class="overflow-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-gray-50 dark:bg-gray-900/40">
@@ -44,17 +44,17 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in comparison" :key="row.feature" class="border-t border-gray-100 dark:border-gray-700">
+              <tr v-for="row in comparison" :key="row.feature" class="border-t border-gray-100 dark:border-gray-800">
                 <td class="px-4 py-2 text-gray-900 dark:text-gray-100">{{ row.feature }}</td>
                 <td class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ row.pco }}</td>
                 <td class="px-4 py-2">
                   <span
                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold"
-                    :class="row.us === '✅'
+                    :class="row.us.includes('✅')
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200'
-                      : row.us === '⚠️'
+                      : row.us.includes('⚠️')
                         ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'"
+                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200'"
                   >
                     {{ row.us }}
                   </span>
