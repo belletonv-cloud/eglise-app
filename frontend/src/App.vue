@@ -340,7 +340,7 @@
                     <!-- General (always visible) -->
                     <div class="pt-2 pb-1">
                         <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                            📊 {{ $t("menu.section_general") }}
+                            {{ $t("menu.section_general") }}
                         </p>
                     </div>
                     <router-link
@@ -372,7 +372,7 @@
                             class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                📅 {{ $t("menu.section_planning") }}
+                                {{ $t("menu.section_planning") }}
                             </p>
                             <svg
                                 :class="{ 'rotate-180': expandedSections.planning }"
@@ -417,7 +417,7 @@
                             class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                👥 {{ $t("menu.section_people") }}
+                                {{ $t("menu.section_people") }}
                             </p>
                             <svg
                                 :class="{ 'rotate-180': expandedSections.people }"
@@ -468,7 +468,7 @@
                             class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                🎵 {{ $t("menu.section_music") }}
+                                {{ $t("menu.section_music") }}
                             </p>
                             <svg
                                 :class="{ 'rotate-180': expandedSections.music }"
@@ -505,7 +505,7 @@
                             class="flex items-center justify-between px-3 cursor-pointer select-none"
                         >
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                📬 {{ $t("menu.section_communication") }}
+                                {{ $t("menu.section_communication") }}
                             </p>
                             <svg
                                 :class="{ 'rotate-180': expandedSections.communication }"
@@ -564,7 +564,7 @@
                                 class="flex items-center justify-between px-3 cursor-pointer select-none"
                             >
                                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                    ⚙️ {{ $t("menu.section_admin") }}
+                                    {{ $t("menu.section_admin") }}
                                 </p>
                                 <svg
                                     :class="{ 'rotate-180': expandedSections.admin }"

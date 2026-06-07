@@ -559,6 +559,138 @@ const routes0 = [
   }),
 
   // ========================================
+  // RGPD — Right to access (export my data)
+  // ========================================
+  route("GET", "/api/members/:id/gdpr-export", async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Unauthorized" }, 401);
+    // Only the member themself or an admin can export
+    if (caller.id !== Number(id) && caller.role !== "admin")
+      return json({ error: "Forbidden" }, 403);
+    const member = await env.DB.prepare("SELECT * FROM members WHERE id = ?")
+      .bind(id)
+      .first();
+    if (!member) return json({ error: "Not found" }, 404);
+    // Collect all related data
+    const teams = await env.DB.prepare(
+      `SELECT t.name, tm.position FROM team_members tm JOIN teams t ON t.id = tm.team_id WHERE tm.member_id = ?`,
+    ).bind(id).all();
+    const attendances = await env.DB.prepare(
+      "SELECT plan_id, status, created_at FROM attendances WHERE member_id = ?",
+    ).bind(id).all();
+    const scheduled = await env.DB.prepare(
+      `SELECT p.date, p.time, st.name as service_type, sp.status
+       FROM scheduled_people sp
+       JOIN plans p ON p.id = sp.plan_id
+       JOIN service_types st ON st.id = p.service_type_id
+       WHERE sp.member_id = ?`,
+    ).bind(id).all();
+    const commPrefs = await env.DB.prepare(
+      "SELECT * FROM communication_preferences WHERE member_id = ?",
+    ).bind(id).first();
+    const exportData = {
+      exported_at: new Date().toISOString(),
+      member: {
+        id: member.id,
+        first_name: member.first_name,
+        last_name: member.last_name,
+        email: member.email,
+        phone: member.phone,
+        birth_date: member.birth_date,
+        membership_type: member.membership_type,
+        role: member.role,
+        consent_data_sharing: member.consent_data_sharing,
+        consent_photo: member.consent_photo,
+        consent_communication: member.consent_communication,
+        data_origin: member.data_origin,
+        created_at: member.created_at,
+        updated_at: member.updated_at,
+      },
+      teams: teams.results,
+      attendances: attendances.results,
+      scheduled_services: scheduled.results,
+      communication_preferences: commPrefs || null,
+    };
+    // Mark export timestamp
+    await env.DB.prepare(
+      "UPDATE members SET gdpr_data_exported_at = ? WHERE id = ?",
+    ).bind(exportData.exported_at, id).run();
+    return json(exportData);
+  }),
+
+  // ========================================
+  // RGPD — Right to erasure (anonymize)
+  // ========================================
+  route("POST", "/api/members/:id/gdpr-erase", async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Unauthorized" }, 401);
+    // Only the member themself or an admin can request erasure
+    if (caller.id !== Number(id) && caller.role !== "admin")
+      return json({ error: "Forbidden" }, 403);
+    const member = await env.DB.prepare("SELECT * FROM members WHERE id = ?")
+      .bind(id)
+      .first();
+    if (!member) return json({ error: "Not found" }, 404);
+    if (member.gdpr_erased_at)
+      return json({ error: "Already erased" }, 400);
+    // Anonymize member data (keep ID for referential integrity)
+    const now = new Date().toISOString();
+    await env.DB.prepare(`
+      UPDATE members SET
+        first_name = '[anonymisé]',
+        last_name = '[anonymisé]',
+        email = NULL,
+        phone = NULL,
+        birth_date = NULL,
+        notes = NULL,
+        pco_id = NULL,
+        pco_updated_at = NULL,
+        consent_data_sharing = 0,
+        consent_photo = 0,
+        consent_communication = 0,
+        gdpr_erased_at = ?
+      WHERE id = ?
+    `).bind(now, id).run();
+    // Also clear communication preferences
+    await env.DB.prepare(
+      "DELETE FROM communication_preferences WHERE member_id = ?",
+    ).bind(id).run();
+    return json({ success: true, erased_at: now });
+  }),
+
+  // ========================================
+  // RGPD — Update member consent
+  // ========================================
+  route("PUT", "/api/members/:id/consent", async (request, env, params) => {
+    const id = requireId(params);
+    if (!id) return badRequest("ID invalide");
+    const caller = await getMemberFromRequest(request, env);
+    if (!caller) return json({ error: "Unauthorized" }, 401);
+    if (caller.id !== Number(id) && !(await hasPermission(request, env, "edit_members")))
+      return json({ error: "Forbidden" }, 403);
+    const body = await getBody(request).catch(() => null);
+    if (!body) return badRequest("Body required");
+    await env.DB.prepare(`
+      UPDATE members SET
+        consent_data_sharing = ?,
+        consent_photo = ?,
+        consent_communication = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `).bind(
+      body.consent_data_sharing ? 1 : 0,
+      body.consent_photo ? 1 : 0,
+      body.consent_communication ? 1 : 0,
+      id,
+    ).run();
+    return json({ success: true });
+  }),
+
+  // ========================================
   // TEAMS
   // ========================================
   route("GET", "/api/teams", async (request, env, params, url) => {
@@ -5815,6 +5947,117 @@ const routes3 = [
 
     // attach diagnostic info
     results.debug = { fetchCount, fetchUrls };
+    return json({ success: true, results });
+  }),
+
+  // ========================================
+  // PCO PEOPLE SYNC — enrich members with email/phone from PCO People API
+  // Admin only (contains personal data — RGPD sensitive)
+  // ========================================
+  route("POST", "/api/pco-sync-people", async (request, env) => {
+    if (!(await hasPermission(request, env, "manage_members")))
+      return json({ error: "Forbidden" }, 403);
+    const caller = await getMemberFromRequest(request, env);
+    if (caller.role !== "admin")
+      return json({ error: "Seuls les administrateurs peuvent synchroniser les données personnelles" }, 403);
+
+    const token_id = env.PCO_TOKEN_ID;
+    const token_secret = env.PCO_TOKEN_SECRET;
+    if (!token_id || !token_secret)
+      return json({ error: "PCO credentials not configured" }, 500);
+    const auth = btoa(`${token_id}:${token_secret}`);
+    const PCO_API = "https://api.planningcenteronline.com";
+
+    const results = { matched: 0, updated: 0, created: 0, errors: [] };
+
+    // Fetch all people from PCO People API with emails + phone numbers included
+    let offset = 0;
+    const perPage = 100;
+    while (true) {
+      const sp = new URLSearchParams({
+        per_page: String(perPage),
+        include: "emails,phone_numbers",
+        offset: String(offset),
+      });
+      let pcoRes;
+      try {
+        const res = await fetch(`${PCO_API}/people/v2/people?${sp.toString()}`, {
+          headers: {
+            Authorization: `Basic ${auth}`,
+            "User-Agent": "EgliseApp/1.0",
+          },
+        });
+        if (!res.ok) throw new Error(`PCO ${res.status}: ${res.statusText}`);
+        pcoRes = await res.json();
+      } catch (e) {
+        results.errors.push(`Fetch page ${offset / perPage + 1}: ${e.message}`);
+        break;
+      }
+      const people = pcoRes.data || [];
+      const included = pcoRes.included || [];
+
+      for (const person of people) {
+        const pcoId = person.id;
+        const attrs = person.attributes || {};
+        const firstName = (attrs.first_name || "").trim();
+        const lastName = (attrs.last_name || "").trim();
+        if (!firstName && !lastName) continue;
+
+        // Extract primary email and phone from included data
+        const relationships = person.relationships || {};
+        const emailIds = relationships.emails?.data?.map((e: any) => e.id) || [];
+        const phoneIds = relationships.phone_numbers?.data?.map((p: any) => p.id) || [];
+        const primaryEmail = included
+          .filter((i: any) => i.type === "Email" && emailIds.includes(i.id))
+          .sort((a: any, b: any) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
+          .map((i: any) => i.attributes?.address)
+          .find(Boolean) || null;
+        const primaryPhone = included
+          .filter((i: any) => i.type === "PhoneNumber" && phoneIds.includes(i.id))
+          .sort((a: any, b: any) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
+          .map((i: any) => i.attributes?.number)
+          .find(Boolean) || null;
+
+        // Look for existing member by pco_id first, then by name
+        const existing = await env.DB.prepare(
+          "SELECT id, email, phone FROM members WHERE pco_id = ?",
+        ).bind(pcoId).first();
+        let memberId;
+
+        if (existing) {
+          memberId = existing.id;
+          results.matched++;
+          // Update email/phone only if not already set or if we have new data
+          const newEmail = primaryEmail || existing.email;
+          const newPhone = primaryPhone || existing.phone;
+          if (newEmail !== existing.email || newPhone !== existing.phone) {
+            await env.DB.prepare(`
+              UPDATE members SET email = ?, phone = ?, data_origin = 'pco_people', updated_at = datetime('now')
+              WHERE id = ?
+            `).bind(newEmail, newPhone, memberId).run();
+            results.updated++;
+          }
+        } else {
+          // Try to find by name (first_name + last_name match)
+          const byName = await env.DB.prepare(
+            "SELECT id, email, phone FROM members WHERE first_name = ? AND last_name = ? AND pco_id IS NULL",
+          ).bind(firstName, lastName).first();
+          if (byName) {
+            memberId = byName.id;
+            results.matched++;
+            await env.DB.prepare(`
+              UPDATE members SET pco_id = ?, email = ?, phone = ?, data_origin = 'pco_people', updated_at = datetime('now')
+              WHERE id = ?
+            `).bind(pcoId, primaryEmail || byName.email, primaryPhone || byName.phone, memberId).run();
+            results.updated++;
+          }
+        }
+      }
+
+      if (people.length < perPage) break;
+      offset += perPage;
+    }
+
     return json({ success: true, results });
   }),
 

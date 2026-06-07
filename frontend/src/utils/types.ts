@@ -40,6 +40,13 @@ export interface Member {
   last_scheduled_plan?: string;
   created_at?: string;
   updated_at?: string;
+  // RGPD fields
+  consent_data_sharing?: boolean;
+  consent_photo?: boolean;
+  consent_communication?: boolean;
+  data_origin?: string;
+  gdpr_data_exported_at?: string;
+  gdpr_erased_at?: string;
 }
 
 export interface Team {

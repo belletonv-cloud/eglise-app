@@ -630,6 +630,37 @@ const API_ROUTES: Record<
     method: "POST",
     hasBody: true,
   },
+
+  // RGPD / GDPR
+  gdprExport: {
+    path: "/api/members/{id}/gdpr-export",
+    method: "GET",
+    hasId: true,
+  },
+  gdprErase: {
+    path: "/api/members/{id}/gdpr-erase",
+    method: "POST",
+    hasId: true,
+    hasBody: false,
+  },
+  updateMemberConsent: {
+    path: "/api/members/{id}/consent",
+    method: "PUT",
+    hasId: true,
+    hasBody: true,
+  },
+
+  // PCO
+  syncPCO: {
+    path: "/api/pco-sync",
+    method: "POST",
+    hasBody: true,
+  },
+  syncPCOPeople: {
+    path: "/api/pco-sync-people",
+    method: "POST",
+    hasBody: false,
+  },
 };
 
 function toKebab(s: string): string {
@@ -1198,11 +1229,6 @@ function createApi() {
         if (prop.startsWith("update")) return { success: true };
         if (prop.startsWith("delete") || prop.startsWith("remove"))
           return { deleted: true };
-        if (prop === "syncPCO")
-          return {
-            synced: true,
-            results: { imported: 5, updated: 3, errors: [] },
-          };
         return null;
       };
       return cache[prop];
