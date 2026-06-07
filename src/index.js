@@ -440,6 +440,12 @@ const routes0 = [
         delete base.pco_id;
         delete base.pco_updated_at;
         delete base.pco_deleted_at;
+        delete base.consent_data_sharing;
+        delete base.consent_photo;
+        delete base.consent_communication;
+        delete base.data_origin;
+        delete base.gdpr_data_exported_at;
+        delete base.gdpr_erased_at;
       }
       return base;
     });
