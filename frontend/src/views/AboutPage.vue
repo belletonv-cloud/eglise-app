@@ -29,7 +29,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <router-link
                     to="/compare"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors md:col-span-2"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors md:col-span-2"
                 >
                     <span class="text-3xl mt-1">🧾</span>
                     <div>
@@ -48,7 +48,7 @@
                 </router-link>
                 <router-link
                     to="/plans"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <span class="text-3xl mt-1">📋</span>
                     <div>
@@ -67,7 +67,7 @@
 
                 <router-link
                     to="/members"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <span class="text-3xl mt-1">👥</span>
                     <div>
@@ -86,7 +86,7 @@
 
                 <router-link
                     to="/songs"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <span class="text-3xl mt-1">🎵</span>
                     <div>
@@ -105,7 +105,7 @@
 
                 <router-link
                     to="/email"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                     <span class="text-3xl mt-1">📧</span>
                     <div>
@@ -124,7 +124,7 @@
 
                 <router-link
                     to="/admin"
-                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors md:col-span-2"
+                    class="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors md:col-span-2"
                 >
                     <span class="text-3xl mt-1">⚙️</span>
                     <div>

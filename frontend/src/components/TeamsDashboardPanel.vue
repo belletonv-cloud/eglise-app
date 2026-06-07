@@ -47,7 +47,7 @@
                 :key="n"
                 class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm animate-pulse"
             >
-                <div class="h-6 w-40 rounded bg-gray-200"></div>
+                <div class="h-6 w-40 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div
                     class="mt-3 h-4 w-56 rounded bg-gray-100 dark:bg-gray-700"
                 ></div>
@@ -230,7 +230,7 @@
                     <article
                         v-for="team in supportTeams"
                         :key="team.id"
-                        class="rounded-2xl border border-gray-800 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/90 p-4"
+                        class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/90 p-4"
                     >
                         <div class="flex items-start justify-between gap-3">
                             <div>

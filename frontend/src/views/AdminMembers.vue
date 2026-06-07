@@ -52,22 +52,22 @@
                         <thead>
                             <tr>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.name") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.email") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.role") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("admin.members.exceptions") }}
                                 </th>
@@ -93,7 +93,7 @@
                                     <select
                                         v-model="m.role"
                                         @change="updateRole(m)"
-                                        class="border border-gray-300 dark:border-gray-600 px-2 py-1"
+                                        class="border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                                     >
                                         <option value="viewer">viewer</option>
                                         <option value="volunteer">
@@ -130,7 +130,7 @@
                                             }}
                                             <button
                                                 @click="removeException(e.id)"
-                                                class="text-red-500 cursor-pointer"
+                                                class="text-red-500 dark:text-red-400 cursor-pointer"
                                             >
                                                 x
                                             </button>
@@ -140,18 +140,18 @@
                                         <input
                                             v-model="newPermission[m.id]"
                                             placeholder="permission"
-                                            class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-800"
+                                            class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                                         />
                                         <select
                                             v-model="newGranted[m.id]"
-                                            class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-800"
+                                            class="border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                                         >
                                             <option :value="true">grant</option>
                                             <option :value="false">deny</option>
                                         </select>
                                         <button
                                             @click="addException(m.id)"
-                                            class="px-2 py-1 bg-blue-500 text-white rounded text-sm cursor-pointer"
+                                            class="px-2 py-1 bg-blue-500 dark:bg-blue-700 text-white rounded text-sm cursor-pointer"
                                         >
                                             {{ $t("action.add") }}
                                         </button>
@@ -218,7 +218,7 @@
                     <button
                         @click="addResourcePermission"
                         :disabled="!canAddRbac"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 cursor-pointer"
+                        class="px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t("action.add") }}
                     </button>
@@ -231,31 +231,31 @@
                         <thead>
                             <tr>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.member") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.resource") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.id") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.permission") }}
                                 </th>
                                 <th
-                                    class="p-2 text-gray-800 dark:text-gray-200"
+                                    class="p-2 text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-800"
                                 >
                                     {{ $t("table.access") }}
                                 </th>
-                                <th class="p-2"></th>
+                                <th class="p-2 bg-gray-50 dark:bg-gray-800"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -287,9 +287,9 @@
                                 <td class="p-2">
                                     <span
                                         :class="
-                                            p.granted
-                                                ? 'text-green-600'
-                                                : 'text-red-600'
+                                                p.granted
+                                                    ? 'text-green-600 dark:text-green-400'
+                                                    : 'text-red-600 dark:text-red-400'
                                         "
                                         >{{
                                             p.granted
@@ -301,7 +301,7 @@
                                 <td class="p-2">
                                     <button
                                         @click="removeResourcePermission(p.id)"
-                                        class="text-red-500 cursor-pointer"
+                                        class="text-red-500 dark:text-red-400 cursor-pointer"
                                     >
                                         {{ $t("action.delete") }}
                                     </button>

@@ -13,7 +13,7 @@
                         >Teams</span
                     >
                     <span
-                        class="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-gray-600 dark:text-gray-400"
+                        class="rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-gray-600 dark:text-gray-300"
                         >Add text filter</span
                     >
                     <span class="font-medium text-gray-700 dark:text-gray-200"
@@ -101,7 +101,7 @@
                                 :class="
                                     selectedTags.includes(tag)
                                         ? 'border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
-                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                        : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                                 "
                                 @click="toggleTag(tag)"
                             >
@@ -171,7 +171,7 @@
                                 :class="
                                     selectedKeys.includes(k)
                                         ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                                        : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400'
+                                        : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                                 "
                                 @click="toggleKey(k)"
                             >
@@ -280,7 +280,7 @@
                             v-model="search"
                             type="search"
                             :placeholder="$t('songs.search_placeholder')"
-                            class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-10 pr-3 text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:border-blue-300 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30"
                         />
                     </div>
                 </div>
@@ -331,7 +331,7 @@
                             <tr
                                 v-for="song in pagedSongs"
                                 :key="song.id"
-                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50 bg-white dark:bg-gray-900"
+                                class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-900"
                                 @click="goToSong(song.id)"
                             >
                                 <td
@@ -388,7 +388,7 @@
                         type="button"
                         @click="goPrev"
                         :disabled="page === 1"
-                        class="rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 disabled:opacity-50"
+                        class="rounded bg-gray-100 dark:bg-gray-700 px-3 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
                         Précédent
                     </button>
@@ -401,7 +401,7 @@
                             'rounded px-3 py-1',
                             p === page
                                 ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100',
+                                : 'bg-gray-100 dark:bg-gray-700',
                         ]"
                     >
                         {{ p }}
@@ -410,7 +410,7 @@
                         type="button"
                         @click="goNext"
                         :disabled="page === totalPages"
-                        class="rounded bg-gray-100 px-3 py-1 hover:bg-gray-200 disabled:opacity-50"
+                        class="rounded bg-gray-100 dark:bg-gray-700 px-3 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
                     >
                         Suivant
                     </button>
@@ -424,7 +424,7 @@
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
                 @click.self="showCreate = false"
             >
-                <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                <div class="w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl">
                     <h3
                         class="mb-4 text-lg font-semibold text-gray-800 dark:text-gray-100"
                     >
@@ -433,49 +433,49 @@
                     <div class="space-y-3">
                         <div>
                             <label
-                                class="mb-1 block text-sm font-medium text-gray-700"
+                                class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >{{ $t("songs.song_title") }} *</label
                             >
                             <input
                                 v-model="form.title"
                                 type="text"
                                 autofocus
-                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-700/50"
                                 :placeholder="$t('songs.song_title')"
                             />
                         </div>
                         <div>
                             <label
-                                class="mb-1 block text-sm font-medium text-gray-700"
+                                class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >{{ $t("songs.author") }}</label
                             >
                             <input
                                 v-model="form.author"
                                 type="text"
-                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-700/50"
                             />
                         </div>
                         <div>
                             <label
-                                class="mb-1 block text-sm font-medium text-gray-700"
+                                class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >{{ $t("songs.ccli") }}</label
                             >
                             <input
                                 v-model="form.ccli_number"
                                 type="text"
-                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-700/50"
                                 placeholder="123456"
                             />
                         </div>
                         <div>
                             <label
-                                class="mb-1 block text-sm font-medium text-gray-700"
+                                class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >{{ $t("songs.themes") }}</label
                             >
                             <input
                                 v-model="form.themes"
                                 type="text"
-                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-700/50"
                                 :placeholder="$t('songs.themes_placeholder')"
                             />
                         </div>
@@ -483,7 +483,7 @@
                     <div class="mt-5 flex justify-end gap-3">
                         <button
                             @click="showCreate = false"
-                            class="cursor-pointer rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                            class="cursor-pointer rounded-lg px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                             {{ $t("cancel") }}
                         </button>

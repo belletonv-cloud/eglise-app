@@ -982,4 +982,22 @@ h1 {
 .dark .count {
     color: #d1d5db;
 }
+.dark .chart-content {
+    background: #1f2937;
+    border-color: #374151;
+}
+.dark .chord-row,
+.dark .standalone-chord-row,
+.dark .chord-text {
+    color: #f87171;
+}
+.dark .media-link {
+    color: #60a5fa;
+}
+.dark .back-btn {
+    background: #4b5563;
+}
+.dark .error {
+    background: #7f1d1d;
+}
 </style>
