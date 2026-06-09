@@ -734,7 +734,6 @@ import { ref, computed, onMounted, watch, provide } from "vue";
 import { publicRoutes, consumeIntendedRoute } from "./router/index";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import Login from "./components/Login.vue";
 import {
     user,
     isAuthenticated,

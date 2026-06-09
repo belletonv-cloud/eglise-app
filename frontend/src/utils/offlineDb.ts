@@ -10,17 +10,6 @@ function openDB(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-
-      if (!db.objectStoreNames.contains('songs')) {
-        const songStore = db.createObjectStore('songs', { keyPath: 'id' });
-        songStore.createIndex('title', 'title', { unique: false });
-      }
-
-      if (!db.objectStoreNames.contains('arrangements')) {
-        const arrStore = db.createObjectStore('arrangements', { keyPath: 'id' });
-        arrStore.createIndex('song_id', 'song_id', { unique: false });
-      }
-
       if (!db.objectStoreNames.contains('offline_songs')) {
         db.createObjectStore('offline_songs', { keyPath: 'song_id' });
       }

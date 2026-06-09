@@ -52,7 +52,7 @@ export async function processWebhookRetries(env) {
 
     for (const log of due.results) {
       try {
-        const body = JSON.stringify({ event: JSON.parse(log.event || '{}') })
+        const body = JSON.stringify({ event: log.event || 'unknown' })
         const res = await fetch(log.url, {
           method: 'POST',
           headers: {
