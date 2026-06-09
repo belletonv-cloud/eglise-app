@@ -78,7 +78,7 @@
     <!-- Cards view -->
     <div v-if="currentView === 'cards'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <article
-        v-for="item in sortedItems"
+        v-for="item in filteredItems"
         :key="item.id"
         class="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow min-h-[280px]"
         @click="handleItemClick(item, $event)"
@@ -300,6 +300,14 @@ const sortedItems = computed(() => {
   return [...allItems.value].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
 })
 
+const filteredItems = computed(() => {
+  const d = currentDate.value
+  return sortedItems.value.filter(item => {
+    const ed = new Date(item.date + 'T00:00:00')
+    return ed.getMonth() === d.getMonth() && ed.getFullYear() === d.getFullYear()
+  })
+})
+
 function getItemsForDate(dateStr: string): CalendarItem[] {
   return allItems.value.filter(item => item.date === dateStr)
 }
@@ -340,7 +348,7 @@ const calendarDays = computed(() => {
 
 const groupedByDate = computed(() => {
   const map: Record<string, { key: string; label: string; items: CalendarItem[] }> = {}
-  for (const item of sortedItems.value) {
+  for (const item of filteredItems.value) {
     const date = new Date(item.date + 'T00:00:00')
     const key = date.toDateString()
     if (!map[key]) {
