@@ -284,9 +284,9 @@ function openFullPlan() {
 
 function setTab(tab: Tab) {
     activeTab.value = tab;
-    const query = { ...route.query };
-    if (tab === "order") delete (query as any).tab;
-    else (query as any).tab = tab;
+    const query: Record<string, string> = { ...route.query as Record<string, string> };
+    if (tab === "order") delete query.tab;
+    else query.tab = tab;
     router.replace({ query });
 }
 

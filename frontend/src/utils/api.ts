@@ -82,13 +82,13 @@ const API_ROUTES: Record<
     hasBody: true,
   },
   updatePlanItem: {
-    path: "/api/plans/{planId}/items/{id}",
+    path: "/api/plan-items/{id}",
     method: "PUT",
     hasId: true,
     hasBody: true,
   },
   deletePlanItem: {
-    path: "/api/plans/{planId}/items/{id}",
+    path: "/api/plan-items/{id}",
     method: "DELETE",
     hasId: true,
   },
@@ -575,6 +575,7 @@ const API_ROUTES: Record<
     isList: true,
   },
   uploadPlanAudio: { path: "/api/upload", method: "POST", hasBody: true },
+  registerFCMToken: { path: "/api/fcm/register", method: "POST", hasBody: true },
 
   // Attachments
   deleteAttachment: {
@@ -727,7 +728,6 @@ function buildUrl(
       .replace("{tid}", String(args[0]))
       .replace("{gid}", String(args[0]))
       .replace("{mid}", String(args[1] ?? ""))
-      .replace("{memberId}", String(args[1] ?? ""))
       .replace("{token}", String(id));
     if (path === originalPath) {
       path += "/" + String(id);

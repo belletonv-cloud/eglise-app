@@ -444,7 +444,7 @@ function formatDateLabelFull(date: Date): string {
 
 function sanitizeHtml(text: string): string {
   if (typeof text !== 'string') return ''
-  return text.replace(/\\n/g, '\n').replace(/\n/g, '<br>')
+  return text.replace(/\\n/g, '\n').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
 }
 
 function expandRecurring(ev: any, now: Date, maxCount: number): any[] {

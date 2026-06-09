@@ -64,7 +64,7 @@ const annotations = ref<any[]>([])
 const editing = ref<'new' | number | null>(null)
 const form = ref({ content: '', is_shared: false })
 
-const currentMemberId = computed(() => (user.value as any)?.member_id)
+const currentMemberId = computed(() => (user.value as { member_id?: number })?.member_id)
 
 function formatDate(d: string) {
   if (!d) return ''

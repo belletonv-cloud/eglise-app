@@ -96,7 +96,7 @@ const props = defineProps({
 const visible = ref(false);
 const stepIndex = ref(0);
 const steps = computed<{ title: string; desc: string; selector?: string }[]>(
-    () => (props.steps as any) || [],
+    () => (props.steps || []) as { title: string; desc: string; selector?: string }[],
 );
 const btnRef = ref<null | HTMLButtonElement>(null);
 const modalContentRef = ref<null | HTMLElement>(null);

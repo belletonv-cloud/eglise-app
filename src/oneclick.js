@@ -21,7 +21,8 @@ export async function verifyOneClickToken(token, secret) {
     const ok = await crypto.subtle.verify('HMAC', key, sig, enc.encode(payloadJson))
     if (!ok) return null
     return JSON.parse(payloadJson)
-  } catch {
+  } catch (e) {
+    console.error('oneclick: verify failed', e);
     return null
   }
 }

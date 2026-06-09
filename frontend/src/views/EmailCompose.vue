@@ -151,7 +151,7 @@ async function sendEmail() {
       result.value = {
         success: res.success,
         msg: res.success ? t('email.sent') : t('email.fail'),
-        error: (res as any).error
+        error: res.error
       }
       if (res.success) { resetForm(); await loadData() }
     } else {

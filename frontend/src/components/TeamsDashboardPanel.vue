@@ -477,10 +477,10 @@ async function load() {
     error.value = "";
 
     try {
-        const summaries = (await api.getTeams({
+        const summaries = await api.getTeams({
             page: 1,
             size: 100,
-        } as any)) as TeamSummary[] | null;
+        }) as TeamSummary[] | null;
         const safeSummaries = Array.isArray(summaries) ? summaries : [];
         const detailedTeams = await Promise.all(
             safeSummaries.map(async (summary) => {

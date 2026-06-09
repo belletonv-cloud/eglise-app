@@ -138,7 +138,8 @@ async function verifyFirebaseToken(token, env) {
 
     tokenCache.set(token, { payload, exp: Number(payload.exp) })
     return payload
-  } catch {
+  } catch (e) {
+    console.error('auth: Firebase token verification failed', e);
     return null
   }
 }

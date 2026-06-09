@@ -651,7 +651,7 @@ async function fetchPlans() {
         const res = await api.getPlans({
             page: page.value,
             size: pageSize.value,
-        } as any);
+        });
         // API returns array or { plans, total }
         if (Array.isArray(res)) {
             plans.value = res;

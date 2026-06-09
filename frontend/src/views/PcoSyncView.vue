@@ -134,7 +134,7 @@ import { user } from '../stores/auth'
 
 const { t } = useI18n()
 
-const isAdmin = user.value && (user.value as any).role === 'admin'
+const isAdmin = user.value && (user.value as { role?: string })?.role === 'admin'
 
 const syncing = ref(false)
 const syncResult = ref<any>(null)

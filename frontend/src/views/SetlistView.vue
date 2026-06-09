@@ -93,13 +93,17 @@ const typeLabel = (tl: string) => {
   return map[tl] || tl
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 function renderChordChart(chart: string) {
   const lines = parseChordPro(chart)
   return lines.map((line: any) => {
     if (line.chords) {
-      return `<div class="text-blue-600 font-bold tracking-wider">${line.chords}</div>`
+      return `<div class="text-blue-600 font-bold tracking-wider">${escapeHtml(line.chords)}</div>`
     }
-    return `<div>${line.text || ''}</div>`
+    return `<div>${escapeHtml(line.text || '')}</div>`
   }).join('')
 }
 
@@ -119,34 +123,33 @@ onMounted(async () => {
     plan.value = planData
 
     const songItems = items.filter((i: any) => i.type === 'song')
-    const loadedSongs = await Promise.all(
-      songItems.map(async (item: any) => {
-        let song = null
-        let arrangement = null
-        if (item.arrangement_id) {
-          const songsList = await api.getSongs()
-          for (const s of songsList) {
-            const a = (s.arrangements || []).find((arr: any) => arr.id === item.arrangement_id)
-            if (a) {
-              song = s
-              arrangement = a
-              break
-            }
+    const arrangementIds = songItems.filter((i: any) => i.arrangement_id).map((i: any) => i.arrangement_id)
+    const songsList = arrangementIds.length > 0 ? await api.getSongs() : []
+    const loadedSongs = songItems.map((item: any) => {
+      let song = null
+      let arrangement = null
+      if (item.arrangement_id) {
+        for (const s of songsList) {
+          const a = (s.arrangements || []).find((arr: any) => arr.id === item.arrangement_id)
+          if (a) {
+            song = s
+            arrangement = a
+            break
           }
         }
-        return {
-          plan_item_id: item.id,
-          position: item.position,
-          type_label: typeLabel(item.type),
-          song_title: item.song_title || item.title,
-          arrangement_name: arrangement?.name || null,
-          key: arrangement?.key || null,
-          transposed_key: item.transposed_key || null,
-          chord_chart: arrangement?.chord_chart || null,
-          media: arrangement?.media || [],
-        }
-      })
-    )
+      }
+      return {
+        plan_item_id: item.id,
+        position: item.position,
+        type_label: typeLabel(item.type),
+        song_title: item.song_title || item.title,
+        arrangement_name: arrangement?.name || null,
+        key: arrangement?.key || null,
+        transposed_key: item.transposed_key || null,
+        chord_chart: arrangement?.chord_chart || null,
+        media: arrangement?.media || [],
+      }
+    })
     songs.value = loadedSongs
 
     nonSongs.value = items

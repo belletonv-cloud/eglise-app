@@ -137,12 +137,12 @@ async function load() {
         per: per.value,
         member_query: memberQuery.value || undefined,
     });
-    // server response: { rows, page, per }
-    if ((res as any).rows) {
-        rows.value = (res as any).rows;
-        page.value = (res as any).page || 1;
+    const r = res as { rows?: any[]; page?: number };
+    if (r.rows) {
+        rows.value = r.rows;
+        page.value = r.page || 1;
     } else {
-        rows.value = res as any;
+        rows.value = res;
     }
 }
 
