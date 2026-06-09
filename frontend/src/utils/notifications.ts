@@ -59,7 +59,8 @@ export async function registerToken(memberId: number, subscription: PushSubscrip
 export async function getExistingSubscription(swRegistration: ServiceWorkerRegistration): Promise<PushSubscription | null> {
   try {
     return await swRegistration.pushManager.getSubscription();
-  } catch {
+  } catch (e) {
+    console.error('getExistingSubscription failed:', e);
     return null;
   }
 }

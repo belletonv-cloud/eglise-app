@@ -159,7 +159,7 @@ export async function getMemberFromRequest(request, env) {
         'INSERT INTO members (first_name, last_name, email, role, membership_type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))'
       ).bind(nameParts[0], nameParts[1], demoEmail, role, role === 'admin' ? 'staff' : 'member').run()
       return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
-    } catch { return null }
+    } catch (e) { console.error('demo auto-create failed:', e); return null }
   }
 
   // Firebase ID token
