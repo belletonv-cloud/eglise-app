@@ -49,7 +49,11 @@ export async function registerToken(memberId: number, subscription: PushSubscrip
     console.warn('Could not extract FCM token from subscription endpoint');
     return;
   }
-  await api.registerFCMToken(memberId, fcmToken, 'web');
+  try {
+    await api.registerFCMToken(memberId, fcmToken, 'web');
+  } catch (e) {
+    console.error('Failed to register FCM token:', e);
+  }
 }
 
 export async function getExistingSubscription(swRegistration: ServiceWorkerRegistration): Promise<PushSubscription | null> {

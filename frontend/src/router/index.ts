@@ -1,41 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { isAuthenticated, waitForAuthInitialized } from "../stores/auth";
-import HomePage from "../views/HomePage.vue";
-import SongDetail from "../components/SongDetail.vue";
-import PlansList from "../views/PlansList.vue";
-import PlanDetail from "../views/PlanDetail.vue";
-import MembersList from "../views/MembersList.vue";
-import MemberDetail from "../views/MemberDetail.vue";
-import TeamsList from "../views/TeamsList.vue";
-import TeamsDashboardView from "../views/TeamsDashboardView.vue";
-import TeamDetail from "../views/TeamDetail.vue";
-import CheckInView from "../views/CheckInView.vue";
-import HouseGroupsList from "../views/HouseGroupsList.vue";
-import HouseGroupDetail from "../views/HouseGroupDetail.vue";
-import EmailCompose from "../views/EmailCompose.vue";
-import EmailTemplatesList from "../views/EmailTemplatesList.vue";
-import ConflictLogs from "../views/ConflictLogs.vue";
-import PlanTemplatesList from "../views/PlanTemplatesList.vue";
-import PlanTemplateDetail from "../views/PlanTemplateDetail.vue";
-import SetlistView from "../views/SetlistView.vue";
-import CalendarView from "../views/CalendarView.vue";
-import MonCompte from "../views/MonCompte.vue";
-import Dashboard from "../views/Dashboard.vue";
-import Historique from "../views/Historique.vue";
-import Annuaire from "../views/Annuaire.vue";
-import InvitationAccept from "../views/InvitationAccept.vue";
-import LogsView from "../views/LogsView.vue";
-import SondagesList from "../views/SondagesList.vue";
-import Annonces from "../views/Annonces.vue";
-import MemberProfile from "../views/MemberProfile.vue";
-import WebhooksView from "../views/WebhooksView.vue";
-import MessagesView from "../views/MessagesView.vue";
-import KioskView from "../views/KioskView.vue";
-import ChurchEvents from "../views/ChurchEvents.vue";
-import YoutubeView from "../views/YoutubeView.vue";
-import PcoSyncView from "../views/PcoSyncView.vue";
-import MusicStandView from "../views/MusicStandView.vue";
-import MusicStandListView from "../views/MusicStandListView.vue";
 
 export const publicRoutes: string[] = [
   "login",
@@ -43,7 +7,6 @@ export const publicRoutes: string[] = [
   "not-found",
   "checkin",
   "public-plan",
-  // One-click is token-based and should work even when not logged in.
   "admin-oneclick",
 ];
 
@@ -63,22 +26,22 @@ const router = createRouter({
     {
       path: "/dashboard",
       name: "dashboard",
-      component: Dashboard,
+      component: () => import("../views/Dashboard.vue"),
     },
     {
       path: "/calendar",
       name: "calendar",
-      component: CalendarView,
+      component: () => import("../views/CalendarView.vue"),
     },
     {
       path: "/",
       name: "home",
-      component: Dashboard,
+      component: () => import("../views/Dashboard.vue"),
     },
     {
       path: "/plans",
       name: "plans",
-      component: PlansList,
+      component: () => import("../views/PlansList.vue"),
     },
     {
       path: "/songs",
@@ -88,89 +51,89 @@ const router = createRouter({
     {
       path: "/song/:id",
       name: "song-detail",
-      component: SongDetail,
+      component: () => import("../components/SongDetail.vue"),
       props: true,
     },
     {
       path: "/plans/:id",
       name: "plan-detail",
-      component: PlanDetail,
+      component: () => import("../views/PlanDetail.vue"),
       props: true,
     },
     {
       path: "/plans/:id/setlist",
       name: "setlist",
-      component: SetlistView,
+      component: () => import("../views/SetlistView.vue"),
       props: true,
     },
     {
       path: "/plan-templates",
       name: "plan-templates",
-      component: PlanTemplatesList,
+      component: () => import("../views/PlanTemplatesList.vue"),
     },
     {
       path: "/plan-templates/:id",
       name: "plan-template-detail",
-      component: PlanTemplateDetail,
+      component: () => import("../views/PlanTemplateDetail.vue"),
       props: true,
     },
     {
       path: "/members",
       name: "members",
-      component: MembersList,
+      component: () => import("../views/MembersList.vue"),
     },
     {
       path: "/members/:id",
       name: "member-detail",
-      component: MemberDetail,
+      component: () => import("../views/MemberDetail.vue"),
       props: true,
     },
     {
       path: "/teams",
       name: "teams",
-      component: TeamsDashboardView,
+      component: () => import("../views/TeamsDashboardView.vue"),
     },
     {
       path: "/teams/manage",
       name: "teams-manage",
-      component: TeamsList,
+      component: () => import("../views/TeamsList.vue"),
     },
     {
       path: "/teams/:id",
       name: "team-detail",
-      component: TeamDetail,
+      component: () => import("../views/TeamDetail.vue"),
       props: true,
     },
     {
       path: "/checkin",
       name: "checkin",
-      component: CheckInView,
+      component: () => import("../views/CheckInView.vue"),
     },
     {
       path: "/house-groups",
       name: "house-groups",
-      component: HouseGroupsList,
+      component: () => import("../views/HouseGroupsList.vue"),
     },
     {
       path: "/house-groups/:id",
       name: "house-group-detail",
-      component: HouseGroupDetail,
+      component: () => import("../views/HouseGroupDetail.vue"),
       props: true,
     },
     {
       path: "/email",
       name: "email-compose",
-      component: EmailCompose,
+      component: () => import("../views/EmailCompose.vue"),
     },
     {
       path: "/email-templates",
       name: "email-templates",
-      component: EmailTemplatesList,
+      component: () => import("../views/EmailTemplatesList.vue"),
     },
     {
       path: "/conflicts",
       name: "conflicts",
-      component: ConflictLogs,
+      component: () => import("../views/ConflictLogs.vue"),
     },
     {
       path: "/admin",
@@ -185,7 +148,7 @@ const router = createRouter({
     {
       path: "/mon-compte",
       name: "mon-compte",
-      component: MonCompte,
+      component: () => import("../views/MonCompte.vue"),
     },
     {
       path: "/admin/oneclick",
@@ -195,78 +158,78 @@ const router = createRouter({
     {
       path: "/historique",
       name: "historique",
-      component: Historique,
+      component: () => import("../views/Historique.vue"),
     },
     {
       path: "/annuaire",
       name: "annuaire",
-      component: Annuaire,
+      component: () => import("../views/Annuaire.vue"),
     },
     {
       path: "/invitation",
       name: "invitation",
-      component: InvitationAccept,
+      component: () => import("../views/InvitationAccept.vue"),
     },
     {
       path: "/sondages",
       name: "sondages",
-      component: SondagesList,
+      component: () => import("../views/SondagesList.vue"),
     },
     {
       path: "/annonces",
       name: "annonces",
-      component: Annonces,
+      component: () => import("../views/Annonces.vue"),
     },
     {
       path: "/logs",
       name: "logs",
-      component: LogsView,
+      component: () => import("../views/LogsView.vue"),
     },
     {
       path: "/webhooks",
       name: "webhooks",
-      component: WebhooksView,
+      component: () => import("../views/WebhooksView.vue"),
     },
     {
       path: "/messages",
       name: "messages",
-      component: MessagesView,
+      component: () => import("../views/MessagesView.vue"),
     },
     {
       path: "/members/:id/profile",
       name: "member-profile",
-      component: MemberProfile,
+      component: () => import("../views/MemberProfile.vue"),
       props: true,
     },
     {
       path: "/kiosk/:id",
       name: "kiosk",
-      component: KioskView,
+      component: () => import("../views/KioskView.vue"),
     },
     {
       path: "/events",
       name: "church-events",
-      component: ChurchEvents,
+      component: () => import("../views/ChurchEvents.vue"),
     },
     {
       path: "/youtube",
       name: "youtube",
-      component: YoutubeView,
+      component: () => import("../views/YoutubeView.vue"),
     },
     {
       path: "/pco-sync",
       name: "pco-sync",
-      component: PcoSyncView,
+      component: () => import("../views/PcoSyncView.vue"),
     },
     {
       path: "/music-stand",
       name: "music-stand-list",
-      component: MusicStandListView,
+      component: () => import("../views/MusicStandListView.vue"),
     },
     {
       path: "/music-stand/:songId/:arrangementId?",
       name: "music-stand",
-      component: MusicStandView,
+      component: () => import("../views/MusicStandView.vue"),
       props: true,
     },
     {
@@ -337,7 +300,6 @@ const router = createRouter({
 });
 
 // Guard global : authentification obligatoire sur toutes les routes sauf routes publiques
-// Store intended destination to redirect after login
 export let intendedRoute: string | null = null;
 export function consumeIntendedRoute(): string | null {
   const r = intendedRoute;
@@ -346,22 +308,17 @@ export function consumeIntendedRoute(): string | null {
 }
 
 router.beforeEach(async (to) => {
-  // Les routes publiques accessibles sans connexion (invitation, not-found)
   if (to.name && publicRoutes.includes(to.name as string)) return true;
 
-  // Wait initial auth resolution (Firebase onAuthStateChanged)
   await waitForAuthInitialized();
 
-  // Si non authentifié → mémoriser la destination et rediriger vers login
   if (!isAuthenticated.value) {
     if (to.path !== "/" && to.path !== "/login") {
       intendedRoute = to.fullPath;
     }
-    // Preserve query params (ex: demo=1, preview=true) to avoid oscillations.
     return { name: "login", query: to.query };
   }
 
-  // Sinon accès autorisé (toutes routes en session)
   return true;
 });
 

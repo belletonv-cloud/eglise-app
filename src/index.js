@@ -1459,7 +1459,7 @@ const routes0 = [
                   const oneclickFrontend = `${frontend}/admin/oneclick?token=${encodeURIComponent(token)}`;
                   oneclickLinkHtml = `<p><a href="${oneclickFrontend}">Annuler l'assignation existante (un clic)</a></p>`;
                 } catch (err) {
-                  // ignore
+                  console.error('HMAC oneclick fallback failed:', err);
                 }
               }
             }
