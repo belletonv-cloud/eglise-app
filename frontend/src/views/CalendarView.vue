@@ -149,14 +149,31 @@
     </div>
 
     <PlanForm v-if="showForm" :date="selectedDate" @close="showForm = false" @saved="onPlanSaved" />
-    <EventPopover
-      v-if="popover.visible && popover.event"
-      :event="popover.event"
-      :x="popover.x"
-      :y="popover.y"
-      :visible="popover.visible"
-      :onClose="closePopover"
-    />
+    <EventModal
+      v-if="selectedEvent"
+      :model-value="!!selectedEvent"
+      :title="selectedEvent.title"
+      @close="selectedEvent = null"
+      @update:model-value="v => { if (!v) selectedEvent = null }"
+    >
+      <template #default>
+        <div v-if="selectedEvent.imageUrl" class="w-full max-w-[700px] mx-auto mb-5">
+          <img :src="selectedEvent.imageUrl" :alt="selectedEvent.title" class="w-full h-[340px] object-contain rounded-xl bg-gray-100 dark:bg-gray-700" loading="lazy" />
+        </div>
+        <div class="w-full max-w-[610px] mx-auto mb-4 px-2">
+          <div class="flex gap-4 flex-wrap items-center py-1.5 text-[#118e8e] dark:text-teal-400 text-base">
+            <span v-if="selectedEvent.date">📅 {{ formatDateLabelFull(new Date(selectedEvent.date + 'T00:00:00')) }}</span>
+            <span v-if="selectedEvent.time">🕙 {{ selectedEvent.time }}</span>
+            <span v-if="selectedEvent.location">📍 {{ selectedEvent.location }}</span>
+          </div>
+          <div v-if="selectedEvent.description" class="py-1.5 text-gray-700 dark:text-gray-300 text-base leading-relaxed" v-html="selectedEvent.description"></div>
+          <div v-if="selectedEvent.link || selectedEvent.ticketUrl" class="flex gap-2.5 flex-wrap mt-3.5">
+            <a v-if="selectedEvent.link" :href="selectedEvent.link" target="_blank" rel="noopener" class="inline-block px-4 py-2 bg-[#064886] text-white text-sm font-semibold rounded-md no-underline hover:bg-[#053870] transition-colors">En savoir plus</a>
+            <a v-if="selectedEvent.ticketUrl" :href="selectedEvent.ticketUrl" target="_blank" rel="noopener" class="inline-block px-4 py-2 bg-transparent border-2 border-[#064886] text-[#064886] dark:text-blue-300 dark:border-blue-300 text-sm font-semibold rounded-md no-underline hover:bg-[#064886] hover:text-white dark:hover:bg-blue-600 dark:hover:border-blue-600 transition-colors">🎟️ Billetterie</a>
+          </div>
+        </div>
+      </template>
+    </EventModal>
   </div>
 </div>
 
@@ -167,7 +184,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { api } from '../utils/api'
 import PlanForm from '../components/PlanForm.vue'
-import EventPopover from '../components/EventPopover.vue'
+import EventModal from '../components/EventModal.vue'
 
 const router = useRouter()
 const { t, tm } = useI18n()
@@ -180,7 +197,7 @@ const selectedDate = ref('')
 const currentDate = ref(new Date())
 const currentView = ref('month')
 
-const popover = ref<{event: CalendarItem|null, x: number, y: number, visible: boolean}>({ event: null, x: 0, y: 0, visible: false })
+const selectedEvent = ref<CalendarItem | null>(null)
 
 const views = [
   { key: 'month', label: 'Mois' },
@@ -248,6 +265,7 @@ interface CalendarItem {
   link: string
   ticketUrl: string
   planId: number | null
+  imageUrl: string
 }
 
 const allItems = computed<CalendarItem[]>(() => {
@@ -266,6 +284,7 @@ const allItems = computed<CalendarItem[]>(() => {
       link: '',
       ticketUrl: '',
       planId: p.id,
+      imageUrl: '',
     })
   }
   for (const e of events.value) {
@@ -282,6 +301,7 @@ const allItems = computed<CalendarItem[]>(() => {
       link: e.lien || '',
       ticketUrl: e.billetterie || '',
       planId: null,
+      imageUrl: e.image_url || '',
     })
   }
   return items
@@ -390,25 +410,12 @@ function goToPlan(id: number | null) {
   router.push({ name: 'plan-detail', params: { id: String(id) } })
 }
 
-function handleItemClick(item: CalendarItem, evt?: MouseEvent) {
+function handleItemClick(item: CalendarItem, _evt?: MouseEvent) {
   if (item.type === 'plan') {
     goToPlan(item.planId)
     return
   }
-  // Popover contextual uniquement pour events
-  if (evt) {
-    popover.value = {
-      event: item,
-      x: evt.clientX,
-      y: evt.clientY + 2,
-      visible: true,
-    }
-  }
-}
-
-function closePopover() {
-  popover.value.visible = false
-  popover.value.event = null
+  selectedEvent.value = item
 }
 
 const onPlanSaved = () => {
