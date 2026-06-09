@@ -31,6 +31,7 @@ import {
 import { triggerWebhooks, processWebhookRetries } from "./webhooks.js";
 import { logApiCall } from "./logger.js";
 import { route } from "./routes.js";
+import { pcoFetch, pcoFetchAll } from "./pco.js";
 
 function createRouter(routes) {
   return function (request, env) {
@@ -94,37 +95,6 @@ async function callAudioSplitter(env, file, planId) {
   }
   return await res.json();
 }
-
-// ========================================
-// PCO SYNC HELPERS
-// ========================================
-
-const pcoFetch = async (url, auth) => {
-  const res = await fetch(url, {
-    headers: { Authorization: `Basic ${auth}`, "User-Agent": "EgliseApp/1.0" },
-  });
-  if (!res.ok) throw new Error(`PCO ${url}: ${res.status}`);
-  return await res.json();
-};
-
-const pcoFetchAll = async (baseUrl, auth, params = {}) => {
-  const allData = [];
-  let offset = 0;
-  const perPage = 100;
-  while (true) {
-    const sp = new URLSearchParams({
-      per_page: String(perPage),
-      ...params,
-      offset: String(offset),
-    });
-    const json = await pcoFetch(`${baseUrl}?${sp.toString()}`, auth);
-    const items = json.data || [];
-    allData.push(...items);
-    if (items.length < perPage) break;
-    offset += perPage;
-  }
-  return allData;
-};
 
 const acquireSyncLock = async (env) => {
   await env.DB.prepare(
@@ -5092,36 +5062,8 @@ const routes3 = [
       return await globalThis.fetch(input, init);
     }
 
-    // Local PCO fetch wrappers that use fetchWithDiagnostics to preserve diagnostics
-    const pcoFetchLocal = async (url, auth) => {
-      const res = await fetchWithDiagnostics(url, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "User-Agent": "EgliseApp/1.0",
-        },
-      });
-      if (!res.ok) throw new Error(`PCO ${url}: ${res.status}`);
-      return await res.json();
-    };
-
-    const pcoFetchAllLocal = async (baseUrl, auth, params = {}) => {
-      const allData = [];
-      let offset = 0;
-      const perPage = 100;
-      while (true) {
-        const sp = new URLSearchParams({
-          per_page: String(perPage),
-          ...params,
-          offset: String(offset),
-        });
-        const json = await pcoFetchLocal(`${baseUrl}?${sp.toString()}`, auth);
-        const items = json.data || [];
-        allData.push(...items);
-        if (items.length < perPage) break;
-        offset += perPage;
-      }
-      return allData;
-    };
+    const pcoFetchLocal = (url, auth) => pcoFetch(url, auth, fetchWithDiagnostics);
+    const pcoFetchAllLocal = (baseUrl, auth, params = {}) => pcoFetchAll(baseUrl, auth, params, fetchWithDiagnostics);
 
     const results = {
       service_types: 0,
