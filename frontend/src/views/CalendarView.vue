@@ -462,7 +462,7 @@ function expandRecurring(ev: any, now: Date, maxCount: number): any[] {
 
   let count = 0
   while (count < maxCount) {
-    const dateStr = d.toISOString().slice(0, 10)
+    const dateStr = dateStrFromDate(d)
 
     const cancelled = ev.exceptions?.some((ex: any) => ex.exception_date === dateStr && ex.type === 'cancelled')
     const moved = ev.exceptions?.find((ex: any) => ex.exception_date === dateStr && ex.type === 'moved')
