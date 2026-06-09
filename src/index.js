@@ -5929,14 +5929,7 @@ const routes3 = [
       });
       let pcoRes;
       try {
-        const res = await fetch(`${PCO_API}/people/v2/people?${sp.toString()}`, {
-          headers: {
-            Authorization: `Basic ${auth}`,
-            "User-Agent": "EgliseApp/1.0",
-          },
-        });
-        if (!res.ok) throw new Error(`PCO ${res.status}: ${res.statusText}`);
-        pcoRes = await res.json();
+        pcoRes = await pcoFetch(`${PCO_API}/people/v2/people?${sp.toString()}`, auth);
       } catch (e) {
         results.errors.push(`Fetch page ${offset / perPage + 1}: ${e.message}`);
         break;
