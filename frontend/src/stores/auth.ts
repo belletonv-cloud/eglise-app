@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import type { User as FirebaseUser } from "firebase/auth";
 import { auth, googleProvider, firebaseReady } from "../firebase";
 import {
   onAuthStateChanged,
@@ -6,6 +7,8 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
+
+export type AuthUser = FirebaseUser | { email: string; uid: string; displayName: string; role?: string; member_id?: number } | null;
 
 let redirectAfterLogin: (() => void) | null = null;
 
@@ -30,7 +33,7 @@ export function onLogin(cb: () => void) {
   redirectAfterLogin = cb;
 }
 
-export function startImpersonating(personaUser: any) {
+export function startImpersonating(personaUser: AuthUser) {
   // Ne sauvegarde originalUser que si ce n'est pas déjà un impersonation
   if (!isImpersonating.value && !originalUser.value) {
     originalUser.value = user.value;
@@ -47,7 +50,7 @@ export function stopImpersonating() {
   isImpersonating.value = false;
 }
 
-export const user = ref<any>(null);
+export const user = ref<AuthUser>(null);
 export const isAuthenticated = ref(false);
 
 // Demo mode flag (checked by member store for initial role)
@@ -55,7 +58,7 @@ export const isDemoMode = ref(false);
 
 // Impersonation state
 export const isImpersonating = ref(false);
-export const originalUser = ref<any>(null);
+export const originalUser = ref<AuthUser>(null);
 
 // Démo locale : si ?demo=1 dans l'URL, on skip Firebase Auth
 if (
@@ -74,7 +77,7 @@ if (
 }
 
 if (firebaseReady) {
-  onAuthStateChanged(auth, (firebaseUser: any) => {
+  onAuthStateChanged(auth, (firebaseUser) => {
     // Ne pas override le mode demo local
     if (
       typeof window !== "undefined" &&

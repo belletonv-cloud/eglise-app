@@ -6627,7 +6627,8 @@ export default {
       return response;
     } catch (e) {
       await logApiCall(request, env, null, Date.now() - startTime, e);
-      throw e;
+      console.error('Unhandled route error:', e);
+      return json({ error: 'Internal server error' }, 500);
     }
   },
 

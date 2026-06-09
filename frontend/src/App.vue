@@ -760,7 +760,7 @@ import ConfirmDialog from "./components/ConfirmDialog.vue";
 import GlobalSearch from "./components/GlobalSearch.vue";
 import PageHelp from "./components/PageHelp.vue";
 import { stepsByPage } from "./page-help-steps";
-import { onLogin } from "./stores/auth";
+import { onLogin, type AuthUser } from "./stores/auth";
 import { useRouter } from "vue-router";
 
 // Demo mode detection
@@ -774,7 +774,7 @@ const isDemoMode = computed(
 const userRole = computed(() => member.value?.role || null);
 const localIsAdmin = computed(() => userRole.value === "admin");
 const localIsScheduler = computed(() =>
-    ["admin", "scheduler", "music_director"].includes(userRole.value),
+    ["admin", "scheduler", "music_director"].includes(userRole.value ?? ''),
 );
 
 const canManageMembersMenu = computed(
@@ -1090,8 +1090,8 @@ function switchDemoPersona(key: string) {
     } else {
         // In demo mode, set isImpersonating to show the persona switch in UI
         // Save original user on first impersonation
-        if (!isImpersonating.value && !originalUser.value) {
-            originalUser.value = { ...user.value };
+        if (!isImpersonating.value && !originalUser.value && user.value) {
+            originalUser.value = { ...user.value } as AuthUser;
         }
         isImpersonating.value = true;
         user.value = personaUser;

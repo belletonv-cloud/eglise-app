@@ -148,10 +148,10 @@ export async function getMemberFromRequest(request, env) {
   // Demo mode: allow demo email header
   const demoEmail = request.headers.get('x-demo-email') || request.headers.get('X-Demo-Email')
   if (demoEmail) {
-    const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
-    if (m) return m
-    // Auto-create member for demo — derive role from email
     try {
+      const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
+      if (m) return m
+      // Auto-create member for demo — derive role from email
       const roleHint = demoEmail.split('@')[0]  // e.g. "admin", "member", "scheduler"
       const knownRoles = ['admin', 'scheduler', 'editor', 'music_director', 'volunteer', 'viewer', 'member', 'guest']
       const role = knownRoles.includes(roleHint) ? roleHint : 'member'
@@ -160,7 +160,7 @@ export async function getMemberFromRequest(request, env) {
         'INSERT INTO members (first_name, last_name, email, role, membership_type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))'
       ).bind(nameParts[0], nameParts[1], demoEmail, role, role === 'admin' ? 'staff' : 'member').run()
       return await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(demoEmail).first()
-    } catch (e) { console.error('demo auto-create failed:', e); return null }
+    } catch (e) { console.error('auth: demo lookup failed', e); return null }
   }
 
   // Firebase ID token
@@ -169,19 +169,21 @@ export async function getMemberFromRequest(request, env) {
     const token = auth.slice(7)
     const payload = await verifyFirebaseToken(token, env)
     if (payload && payload.email) {
-      const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(payload.email).first()
-      if (m) {
-        // Safety: ensure the primary admin email is always admin, even if the member was created earlier.
-        if (payload.email === 'belletonv@gmail.com' && m.role !== 'admin') {
-          await env.DB.prepare(
-            "UPDATE members SET role = 'admin', membership_type = 'staff', updated_at = datetime('now') WHERE id = ?",
-          )
-            .bind(m.id)
-            .run();
-          return await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(m.id).first();
+      try {
+        const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(payload.email).first()
+        if (m) {
+          // Safety: ensure the primary admin email is always admin, even if the member was created earlier.
+          if (payload.email === 'belletonv@gmail.com' && m.role !== 'admin') {
+            await env.DB.prepare(
+              "UPDATE members SET role = 'admin', membership_type = 'staff', updated_at = datetime('now') WHERE id = ?",
+            )
+              .bind(m.id)
+              .run();
+            return await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(m.id).first();
+          }
+          return m
         }
-        return m
-      }
+      } catch (e) { console.error('auth: Firebase member lookup failed', e); return null }
       // Auto-create member for first-time Firebase users
       try {
         const name = payload.name || payload.email.split('@')[0] || ''
@@ -204,8 +206,10 @@ export async function getMemberFromRequest(request, env) {
   const devSecret = request.headers.get('X-Auth-Secret')
   const devEmail = request.headers.get('x-user-email')
   if (devSecret && devEmail && env.DEV_AUTH_SECRET && devSecret === env.DEV_AUTH_SECRET) {
-    const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(devEmail).first()
-    if (m) return m
+    try {
+      const m = await env.DB.prepare('SELECT * FROM members WHERE email = ?').bind(devEmail).first()
+      if (m) return m
+    } catch (e) { console.error('auth: dev fallback failed', e); return null }
   }
 
   return null
@@ -223,9 +227,12 @@ export async function hasPermission(request, env, permission) {
   // Check per-member exceptions (most recent entry wins over role default)
   // Note: resource_permissions table stores per-resource overrides (e.g. access to plan #42)
   // and is NOT consulted here — use hasResourcePermission() when that granularity is needed.
-  const ex = await env.DB.prepare(
-    'SELECT granted FROM member_exceptions WHERE member_id = ? AND permission = ? ORDER BY created_at DESC LIMIT 1'
-  ).bind(member.id, permission).first()
+  let ex = null
+  try {
+    ex = await env.DB.prepare(
+      'SELECT granted FROM member_exceptions WHERE member_id = ? AND permission = ? ORDER BY created_at DESC LIMIT 1'
+    ).bind(member.id, permission).first()
+  } catch (e) { console.error('auth: exception lookup failed', e) }
   if (ex) {
     allowed = !!ex.granted
   }

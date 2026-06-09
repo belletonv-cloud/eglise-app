@@ -191,6 +191,7 @@ export default {
     },
   },
   volunteerPreferences: {
+    title: "Préférences de service",
     loading: "Chargement...",
     max_services: "Max services par mois",
     notes: "Notes (disponibilités, préférences...)",
@@ -515,6 +516,7 @@ export default {
   plan: {
     ical: "iCal",
     loading: "Chargement...",
+    error: "Erreur",
     back: "← Calendrier",
     musician_view: "Vue musicien",
     edit: "Modifier",
@@ -563,6 +565,7 @@ export default {
     position_updated: "Rôle mis à jour",
   },
   table: {
+    no_results: "Aucun résultat",
     search: "Rechercher :",
     name: "Nom",
     email: "Email",
@@ -1089,6 +1092,8 @@ export default {
     },
     ministry: "Ministère",
     ministries: "Ministères",
+    create_ministry_success: "Ministère créé",
+    create_ministry_error: "Erreur lors de la création",
   },
   musicStand: {
     title: "Grilles d'accords",
@@ -1205,4 +1210,12 @@ export default {
     instructions: "Cliquez pour impersonnaliser un compte",
     stop: "Arrêter l'impersonnalisation",
   },
+  memberAssignment: {
+    no_ministry_selected: "Sélectionnez un ministère",
+    already_assigned: "Déjà membre de ce ministère",
+  },
+  common: {
+    help: "Aide",
+  },
+  langCode: "fr-FR",
 };

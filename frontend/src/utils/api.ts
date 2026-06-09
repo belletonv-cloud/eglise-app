@@ -33,7 +33,7 @@ export async function authenticatedFetch(
     };
     return fetch(url, { ...options, headers });
   }
-  const token = user.value ? await user.value.getIdToken() : null;
+  const token = user.value ? await (user.value as any).getIdToken() : null;
   const headers: Record<string, string> = {
     ...(options.body ? { "Content-Type": "application/json" } : {}),
     ...((options.headers as Record<string, string>) || {}),
