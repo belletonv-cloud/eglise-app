@@ -50,7 +50,7 @@ export async function registerToken(memberId: number, subscription: PushSubscrip
     return;
   }
   try {
-    await api.registerFCMToken(memberId, fcmToken, 'web');
+    await api.registerFCMToken({ member_id: memberId, token: fcmToken, platform: 'web' });
   } catch (e) {
     console.error('Failed to register FCM token:', e);
   }

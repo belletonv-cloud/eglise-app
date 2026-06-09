@@ -74,7 +74,7 @@ const formatDate = (d: string) => {
 const loadHistory = async () => {
   loading.value = true
   try {
-    const all = await api.getPlans(undefined, yearFilter.value ? Number(yearFilter.value) : undefined)
+    const all = await api.getPlans(yearFilter.value ? { year: Number(yearFilter.value) } : undefined)
     const past = all.filter((p: any) => p.date < new Date().toISOString().slice(0, 10))
 
     let filtered = past

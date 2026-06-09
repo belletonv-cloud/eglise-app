@@ -95,7 +95,7 @@ async function load() {
 async function addMember() {
   if (!newMemberId.value) return
   try {
-    await api.addTeamMember(Number(route.params.id), Number(newMemberId.value), newPosition.value || undefined)
+    await api.addTeamMember(Number(route.params.id), { member_id: Number(newMemberId.value), position: newPosition.value || undefined })
     show(t('team.added'), 'success')
     newMemberId.value = ''
     newPosition.value = ''

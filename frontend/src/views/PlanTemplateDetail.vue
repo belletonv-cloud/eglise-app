@@ -248,7 +248,7 @@ async function moveItem(idx: number, dir: number) {
 async function applyTemplate() {
   const id = parseInt(route.params.id as string)
   try {
-    const plan = await api.applyPlanTemplate(id, {
+    const plan = await api.applyPlanTemplate({ template_id: id,
       date: applyForm.value.date,
       time: applyForm.value.time || undefined,
       theme: applyForm.value.theme || undefined,

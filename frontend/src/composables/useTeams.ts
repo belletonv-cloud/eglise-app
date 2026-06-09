@@ -73,7 +73,7 @@ async function addTeamMember(teamId: number, memberId: number, position?: string
   loading.value = true
   error.value = null
   try {
-    await api.addTeamMember(teamId, memberId, position)
+    await api.addTeamMember(teamId, { member_id: memberId, position })
     // Optionnelment, recharger les équipes ou maj locale
   } catch (e: any) {
     error.value = e.message || 'Erreur d\'ajout du membre'

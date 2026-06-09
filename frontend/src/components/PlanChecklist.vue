@@ -104,7 +104,7 @@ const load = async () => {
 const addFromTemplate = async () => {
     if (!props.serviceTypeId) return;
     try {
-        const templates = await api.getChecklistTemplates(props.serviceTypeId);
+        const templates = await api.getChecklistTemplates({ service_type_id: props.serviceTypeId });
         for (const tpl of templates) {
             for (const ti of (tpl as any).items || []) {
                 await api.addPlanChecklistItem(props.planId, {

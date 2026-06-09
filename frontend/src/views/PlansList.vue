@@ -748,7 +748,7 @@ const createPlan = async () => {
 const applyTemplate = async () => {
     if (!applyTemplateId.value) return;
     try {
-        await api.applyPlanTemplate(applyTemplateId.value, {
+        await api.applyPlanTemplate({ template_id: applyTemplateId.value,
             date: applyForm.value.date,
             time: applyForm.value.time || undefined,
             theme: applyForm.value.theme || undefined,

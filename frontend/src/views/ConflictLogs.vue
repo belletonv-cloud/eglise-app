@@ -131,12 +131,12 @@ const page = ref(1);
 const per = ref(25);
 
 async function load() {
-    const res = await api.getConflictLogs(
-        planId.value || undefined,
-        page.value,
-        per.value,
-        memberQuery.value || undefined,
-    );
+    const res = await api.getConflictLogs({
+        plan_id: planId.value || undefined,
+        page: page.value,
+        per: per.value,
+        member_query: memberQuery.value || undefined,
+    });
     // server response: { rows, page, per }
     if ((res as any).rows) {
         rows.value = (res as any).rows;
@@ -159,7 +159,7 @@ watch([planId, memberQuery], () => {
 function prev() {
     if (page.value > 1) {
         page.value--;
-        api.getConflictLogs(planId.value || undefined);
+        api.getConflictLogs({ plan_id: planId.value || undefined });
         load();
     }
 }

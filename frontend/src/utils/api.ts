@@ -1209,7 +1209,194 @@ const mockFallback: Record<string, (...args: any[]) => any> = {
   getBackupStatus: () => ({ lastBackup: _d(1), status: "ok" }),
 };
 
-function createApi() {
+// ========================================
+// TYPED API CLIENT
+// ========================================
+
+interface ApiClient {
+  // Plans
+  getPlans(params?: Record<string, any>): Promise<any>;
+  getPlan(id: number, params?: Record<string, any>): Promise<any>;
+  getPlanItems(planId: number, params?: Record<string, any>): Promise<any>;
+  createPlan(data: any): Promise<any>;
+  updatePlan(id: number, data: any): Promise<any>;
+  deletePlan(id: number): Promise<any>;
+  createPlanItem(planId: number, data: any): Promise<any>;
+  updatePlanItem(id: number, data: any): Promise<any>;
+  deletePlanItem(id: number): Promise<any>;
+  applyPlanTemplate(data: any): Promise<any>;
+  getPlansByDate(params?: Record<string, any>): Promise<any>;
+
+  // Plan items (checklist)
+  getPlanChecklist(planId: number, params?: Record<string, any>): Promise<any>;
+  addPlanChecklistItem(planId: number, data: any): Promise<any>;
+  updatePlanChecklist(id: number, data: any): Promise<any>;
+  deletePlanChecklist(id: number): Promise<any>;
+  getChecklistTemplates(params?: Record<string, any>): Promise<any>;
+  createChecklistTemplate(data: any): Promise<any>;
+  deleteChecklistTemplate(id: number): Promise<any>;
+
+  // Songs
+  getSongs(params?: Record<string, any>): Promise<any>;
+  getSong(id: number, params?: Record<string, any>): Promise<any>;
+  createSong(data: any): Promise<any>;
+  updateSong(id: number, data: any): Promise<any>;
+  deleteSong(id: number): Promise<any>;
+
+  // Arrangements
+  updateArrangement(id: number, data: any): Promise<any>;
+  getArrangementMedia(id: number, params?: Record<string, any>): Promise<any>;
+  getArrangementAnnotations(id: number, params?: Record<string, any>): Promise<any>;
+  createAnnotation(id: number, data: any): Promise<any>;
+  updateAnnotation(id: number, data: any): Promise<any>;
+  deleteAnnotation(id: number): Promise<any>;
+  getArrangementDrawings(id: number, params?: Record<string, any>): Promise<any>;
+  saveArrangementDrawing(id: number, data: any): Promise<any>;
+  deleteArrangementDrawing(id: number): Promise<any>;
+
+  // Members
+  getMembers(params?: Record<string, any>): Promise<any>;
+  getMember(id: number, params?: Record<string, any>): Promise<any>;
+  createMember(data: any): Promise<any>;
+  updateMember(id: number, data: any): Promise<any>;
+  deleteMember(id: number): Promise<any>;
+  searchMembers(params?: Record<string, any>): Promise<any>;
+  getMemberExceptions(params?: Record<string, any>): Promise<any>;
+  createMemberException(data: any): Promise<any>;
+  deleteMemberException(id: number): Promise<any>;
+  updateMemberRole(id: number | string, data: any): Promise<any>;
+  gdprExport(id: number): Promise<any>;
+  gdprErase(id: number): Promise<any>;
+  updateMemberConsent(id: number, data: any): Promise<any>;
+
+  // Teams
+  getTeams(params?: Record<string, any>): Promise<any>;
+  getTeam(id: number, params?: Record<string, any>): Promise<any>;
+  createTeam(data: any): Promise<any>;
+  updateTeam(id: number, data: any): Promise<any>;
+  deleteTeam(id: number): Promise<any>;
+  addTeamMember(teamId: number, data: any): Promise<any>;
+  removeTeamMember(teamId: number, memberId: number): Promise<any>;
+  updateTeamMember(teamId: number, memberId: number, data: any): Promise<any>;
+
+  // Scheduling
+  getPlanPeople(planId: number, params?: Record<string, any>): Promise<any>;
+  updateSchedule(planId: number, scheduleId: number, data: any): Promise<any>;
+  schedulePerson(planId: number, data: any): Promise<any>;
+  removeSchedule(planId: number, scheduleId: number, data?: any): Promise<any>;
+  applyReplacement(data: any): Promise<any>;
+  getReplacements(params?: Record<string, any>): Promise<any>;
+
+  // Attendance
+  getPlanAttendances(planId: number, params?: Record<string, any>): Promise<any>;
+  createAttendance(data: any): Promise<any>;
+  deleteAttendance(id: number): Promise<any>;
+  getAttendanceStats(params?: Record<string, any>): Promise<any>;
+
+  // House groups
+  getHouseGroups(params?: Record<string, any>): Promise<any>;
+  getHouseGroup(id: number, params?: Record<string, any>): Promise<any>;
+  createHouseGroup(data: any): Promise<any>;
+  updateHouseGroup(id: number, data: any): Promise<any>;
+  deleteHouseGroup(id: number): Promise<any>;
+  addGroupMember(houseGroupId: number, data: any): Promise<any>;
+  removeGroupMember(houseGroupId: number, memberId: number): Promise<any>;
+  addGroupMeeting(houseGroupId: number, data: any): Promise<any>;
+
+  // Church events
+  getChurchEvents(params?: Record<string, any>): Promise<any>;
+  createChurchEvent(data: any): Promise<any>;
+  updateChurchEvent(id: number, data: any): Promise<any>;
+  deleteChurchEvent(id: number): Promise<any>;
+  createChurchEventException(id: number, data: any): Promise<any>;
+
+  // Plan templates
+  getPlanTemplates(params?: Record<string, any>): Promise<any>;
+  getPlanTemplate(id: number, params?: Record<string, any>): Promise<any>;
+  createPlanTemplate(data: any): Promise<any>;
+  updatePlanTemplate(id: number, data: any): Promise<any>;
+  deletePlanTemplate(id: number): Promise<any>;
+  getPlanTemplateItems(templateId: number, params?: Record<string, any>): Promise<any>;
+  createPlanTemplateItem(templateId: number, data: any): Promise<any>;
+  updatePlanTemplateItem(id: number, data: any): Promise<any>;
+  deletePlanTemplateItem(id: number): Promise<any>;
+
+  // Messages
+  getInbox(params?: Record<string, any>): Promise<any>;
+  getMessage(id: number, params?: Record<string, any>): Promise<any>;
+  markMessageRead(id: number, data?: any): Promise<any>;
+  sendMessage(data: any): Promise<any>;
+
+  // Email
+  sendEmail(data: any): Promise<any>;
+  sendBulkEmail(data: any): Promise<any>;
+  getEmailTemplates(params?: Record<string, any>): Promise<any>;
+  createEmailTemplate(data: any): Promise<any>;
+  deleteEmailTemplate(id: number): Promise<any>;
+
+  // Webhooks
+  getWebhooks(params?: Record<string, any>): Promise<any>;
+  createWebhook(data: any): Promise<any>;
+  deleteWebhook(id: number): Promise<any>;
+
+  // Polls
+  getPolls(params?: Record<string, any>): Promise<any>;
+  createPoll(data: any): Promise<any>;
+  deletePoll(id: number): Promise<any>;
+  createPollOption(pollId: number, data: any): Promise<any>;
+  deletePollOption(id: number): Promise<any>;
+  createVote(pollId: number, data: any): Promise<any>;
+  deleteVote(pollId: number): Promise<any>;
+
+  // Announcements
+  getAnnouncements(params?: Record<string, any>): Promise<any>;
+  createAnnouncement(data: any): Promise<any>;
+  updateAnnouncement(id: number, data: any): Promise<any>;
+  deleteAnnouncement(id: number): Promise<any>;
+
+  // User / profile
+  getMe(params?: Record<string, any>): Promise<any>;
+  getMySchedule(params?: Record<string, any>): Promise<any>;
+  updateMe(data: any): Promise<any>;
+  getVolunteerPreferences(memberId: number): Promise<any>;
+  updateVolunteerPreferences(memberId: number, data: any): Promise<any>;
+
+  // Various
+  getDirectory(params?: Record<string, any>): Promise<any>;
+  getStats(params?: Record<string, any>): Promise<any>;
+  getServiceTypes(params?: Record<string, any>): Promise<any>;
+  getEmailLogs(params?: Record<string, any>): Promise<any>;
+  getConflictLogs(params?: Record<string, any>): Promise<any>;
+  getAuditLogs(params?: Record<string, any>): Promise<any>;
+  getNotifications(params?: Record<string, any>): Promise<any>;
+  search(params?: Record<string, any>): Promise<any>;
+  getResourcePermissions(params?: Record<string, any>): Promise<any>;
+  createResourcePermission(data: any): Promise<any>;
+  deleteResourcePermission(id: number): Promise<any>;
+  getBackupStatus(params?: Record<string, any>): Promise<any>;
+  getCommunicationPreferences(memberId: number): Promise<any>;
+  updateCommunicationPreferences(data: any): Promise<any>;
+
+  // One-click / invitations
+  sendOneClick(data: any): Promise<any>;
+  getInvitation(token: string): Promise<any>;
+  redeemInvitation(token: string, data: any): Promise<any>;
+
+  // Audio / attachments
+  getPlanAudio(planId: number, params?: Record<string, any>): Promise<any>;
+  getAudioSegments(planId: number, params?: Record<string, any>): Promise<any>;
+  uploadPlanAudio(...args: any[]): Promise<any>;
+  deleteAttachment(id: number): Promise<any>;
+
+  // PCO sync
+  syncPCO(data?: any): Promise<any>;
+  syncPCOPeople(): Promise<any>;
+
+  // Notifications
+  registerFCMToken(data: any): Promise<any>;
+}
+
+function createApi(): ApiClient {
   const cache: Record<string, (...args: any[]) => Promise<any>> = {};
 
   const handler: ProxyHandler<any> = {
@@ -1235,8 +1422,8 @@ function createApi() {
     },
   };
 
-  return new Proxy({}, handler) as any;
+  return new Proxy({}, handler) as ApiClient;
 }
 
-export const api: any = createApi();
+export const api: ApiClient = createApi();
 export default api;

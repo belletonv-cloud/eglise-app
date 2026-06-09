@@ -491,8 +491,8 @@ const loadData = async () => {
     const month = currentDate.value.getMonth() + 1
     const year = currentDate.value.getFullYear()
     const [plansData, eventsData] = await Promise.all([
-      api.getPlans(month, year),
-      api.getChurchEvents(undefined, true).catch(() => []),
+      api.getPlans({ month, year }),
+      api.getChurchEvents().catch(() => []),
     ])
     plans.value = plansData
 

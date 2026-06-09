@@ -248,7 +248,7 @@ function formatLen(mins: any): string {
 async function loadPlans() {
     loadingPlans.value = true;
     try {
-        const res = await api.getPlans({ page: 1, size: 50 } as any);
+        const res = await api.getPlans({ page: 1, size: 50 });
         const all: any[] = Array.isArray(res?.items)
             ? res.items
             : Array.isArray(res)

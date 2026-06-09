@@ -157,7 +157,7 @@ const joinTeam = async () => {
   }
   try {
     const id = Number(route.params.id)
-    await api.addTeamMember(joinTeamId.value, id, joinPosition.value || undefined)
+    await api.addTeamMember(joinTeamId.value!, { member_id: id, position: joinPosition.value || undefined })
     show(t('memberDetail.joined_ministry'), 'success')
     joinTeamId.value = null
     joinPosition.value = ''
