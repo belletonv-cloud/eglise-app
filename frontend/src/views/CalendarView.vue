@@ -76,37 +76,38 @@
     </div>
 
     <!-- Cards view -->
-    <div v-if="currentView === 'cards'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="currentView === 'cards'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <article
         v-for="item in sortedItems"
         :key="item.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        class="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow min-h-[280px]"
         @click="handleItemClick(item, $event)"
       >
-        <div class="relative">
-          <div class="h-36 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-            <span class="text-5xl">{{ item.emoji || '📌' }}</span>
+        <div class="relative min-h-[160px] w-full">
+          <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.title" class="w-full h-40 object-cover bg-gray-100 dark:bg-gray-700" loading="lazy" />
+          <div v-else class="w-full h-40 flex items-center justify-center bg-[#ebf0fa] dark:bg-gray-700">
+            <svg width="58" height="58" viewBox="0 0 40 40" fill="#b8c7da"><circle cx="20" cy="20" r="18" stroke="#a6bed7" stroke-width="2" fill="#e9f0fa"/><path d="M12.5 27.5L20 15l7.5 12.5h-15z" fill="#b8c7da"/><rect x="17.2" y="18" width="5.6" height="5.5" rx="2.7" fill="#a6bed7"/></svg>
           </div>
-          <div class="absolute top-2 left-2 bg-white dark:bg-gray-800 rounded-lg px-2.5 py-1.5 text-center shadow-sm min-w-[48px]">
-            <div class="text-lg font-bold leading-none text-gray-800 dark:text-gray-100">{{ formatDay(item.date) }}</div>
-            <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ formatMonth(item.date) }}</div>
+          <div class="absolute top-2.5 left-3 flex flex-col items-center justify-center min-w-[46px] bg-[#064886]/97 rounded-lg px-1.5 py-1.5 text-white shadow-sm z-10">
+            <span class="text-xl font-black leading-none">{{ formatDay(item.date) }}</span>
+            <span class="text-[10px] font-bold tracking-wide opacity-85 uppercase">{{ formatMonth(item.date) }}</span>
           </div>
-          <div v-if="item.type === 'plan'" class="absolute top-2 right-2 text-xs bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+          <div v-if="item.type === 'plan'" class="absolute top-2.5 right-3 text-xs bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium z-10">
             {{ $t('calendar.service') }}
           </div>
         </div>
-        <div class="p-4">
-          <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-1.5 truncate">{{ item.title }}</h3>
-          <div class="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+        <div class="flex-1 flex flex-col gap-1.5 px-4.5 py-3.5 pb-1">
+          <h3 class="text-base font-bold text-[#064886] dark:text-blue-300 leading-tight">{{ item.title }}</h3>
+          <div class="flex gap-3.5 text-sm text-gray-500 dark:text-gray-400 flex-wrap">
             <span v-if="item.time">🕙 {{ item.time }}</span>
             <span v-if="item.location">📍 {{ item.location }}</span>
           </div>
-          <p v-if="item.description" class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{{ item.description }}</p>
-          <div class="flex gap-2 mt-auto pt-1">
+          <p v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2" v-html="sanitizeHtml(item.description)"></p>
+          <div v-if="item.link || item.ticketUrl" class="flex gap-2.5 flex-wrap mt-1">
             <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" @click.stop
-              class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline">En savoir plus</a>
+              class="inline-block px-4 py-1.5 bg-[#064886] text-white text-xs font-semibold rounded-md no-underline hover:bg-[#053870] transition-colors">En savoir plus</a>
             <a v-if="item.ticketUrl" :href="item.ticketUrl" target="_blank" rel="noopener" @click.stop
-              class="text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline">🎟️ Billetterie</a>
+              class="inline-block px-4 py-1.5 bg-transparent border-2 border-[#064886] text-[#064886] dark:text-blue-300 dark:border-blue-300 text-xs font-semibold rounded-md no-underline hover:bg-[#064886] hover:text-white dark:hover:bg-blue-600 dark:hover:border-blue-600 transition-colors">🎟️ Billetterie</a>
           </div>
         </div>
       </article>
@@ -114,33 +115,21 @@
     </div>
 
     <!-- Agenda view -->
-    <div v-if="currentView === 'agenda'">
-      <div v-for="group in groupedByDate" :key="group.key" class="mb-6">
-        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 pb-1 border-b border-gray-200 dark:border-gray-700">
-          {{ group.label }}
-        </h3>
-        <div class="space-y-2">
+    <div v-if="currentView === 'agenda'" class="flex flex-col gap-8">
+      <div v-for="group in groupedByDate" :key="group.key" class="border-l-4 border-[#064886] dark:border-blue-500 pl-5">
+        <h3 class="text-lg font-bold text-[#064886] dark:text-blue-300 mb-3 capitalize">{{ group.label }}</h3>
+        <div class="flex flex-col">
           <div
             v-for="item in group.items"
             :key="item.id"
-            class="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+            class="flex gap-4 py-2.5 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors last:border-b-0"
             @click="handleItemClick(item, $event)"
           >
-            <div class="flex-shrink-0 w-16 text-center">
-              <div v-if="item.time" class="text-xs font-medium text-gray-600 dark:text-gray-300">{{ item.time }}</div>
-              <div v-else class="text-xs text-gray-400 dark:text-gray-500">—</div>
-            </div>
-            <div class="flex-shrink-0 text-lg mt-0.5">{{ item.emoji || '📌' }}</div>
-            <div class="flex-1 min-w-0">
-              <div class="font-medium text-gray-800 dark:text-gray-100 text-sm">{{ item.title }}</div>
-              <div v-if="item.location" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">📍 {{ item.location }}</div>
-              <p v-if="item.description" class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{{ item.description }}</p>
-            </div>
-            <div class="flex-shrink-0 flex gap-2 items-start">
-              <a v-if="item.link" :href="item.link" target="_blank" rel="noopener" @click.stop
-                class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">En savoir plus</a>
-              <a v-if="item.ticketUrl" :href="item.ticketUrl" target="_blank" rel="noopener" @click.stop
-                class="text-xs text-amber-600 dark:text-amber-400 hover:underline whitespace-nowrap">🎟️</a>
+            <span class="flex-shrink-0 w-14 text-sm text-gray-500 dark:text-gray-400 font-semibold pt-0.5">{{ item.time || '—' }}</span>
+            <div class="flex flex-col gap-0.5">
+              <strong class="text-sm text-[#064886] dark:text-blue-300">{{ item.title }}</strong>
+              <span v-if="item.location" class="text-xs text-gray-500 dark:text-gray-400">📍 {{ item.location }}</span>
+              <p v-if="item.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" v-html="sanitizeHtml(item.description)"></p>
             </div>
           </div>
         </div>
@@ -443,6 +432,11 @@ function formatDateLabel(date: Date, opts?: Intl.DateTimeFormatOptions): string 
 
 function formatDateLabelFull(date: Date): string {
   return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+}
+
+function sanitizeHtml(text: string): string {
+  if (typeof text !== 'string') return ''
+  return text.replace(/\\n/g, '\n').replace(/\n/g, '<br>')
 }
 
 function expandRecurring(ev: any, now: Date, maxCount: number): any[] {
