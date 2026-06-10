@@ -8,12 +8,12 @@ Déployée sur Cloudflare Workers + Pages.
 - **Frontend** : Vue 3 + TypeScript + Vite v6 + TailwindCSS v4
 - **Router** : Vue Router
 - **i18n** : Vue i18n (FR/EN)
-- **Backend** : Cloudflare Workers (API router modulaire : `src/index.js` + `lib.js` + `auth.js` + `rate-limit.js` + `oneclick.js` + `kdrive.js` + `webhooks.js` + `logger.js` + `routes.js`)
+- **Backend** : Cloudflare Workers (API : `src/index.js` (174 lignes) + `lib.js` + modules dans `src/routes/`)
 - **Database** : Cloudflare D1 (SQL)
 - **Auth** : Firebase Auth + RBAC (7 rôles, guard global POST/PUT/DELETE)
 - **Rate limiter** : D1-based (table `api_rate_limits`)
 - **Déploiement** : Wrangler → Cloudflare Workers + Pages
-- **Tests** : Vitest backend (84 tests) + Vitest frontend (62 tests ✅) + Playwright E2E (checkin-guest ✅, 13 autres à vérifier)
+- **Tests** : Vitest backend (183 tests) + Vitest frontend (65 tests ✅) + Playwright E2E (checkin-guest ✅, 13 autres à vérifier)
 - **PWA** : vite-plugin-pwa
 
 ## URLs
@@ -49,7 +49,8 @@ Déployée sur Cloudflare Workers + Pages.
   - `src/` — Composants, vues, stores, router, locales
   - `public/` — Assets statiques (favicons, logos, manifest)
   - `e2e/` — Tests Playwright
-- `src/` — API Cloudflare Worker (`index.js`, ~3628 lignes)
+- `src/` — API Cloudflare Worker (`index.js` + modules)
+  - `index.js` — Bootstrap (174 lignes : router, RBAC guard, cron reminders)
   - `lib.js` — Utilitaires partagés (CORS, json, getBody, csv, etc.)
   - `auth.js` — Firebase Auth + RBAC (ROLE_PERMISSIONS, hasPermission, requirePermission)
   - `rate-limit.js` — Rate limiter D1 (table api_rate_limits)
@@ -58,6 +59,8 @@ Déployée sur Cloudflare Workers + Pages.
   - `webhooks.js` — Webhook triggers + retries
   - `logger.js` — API call logging
   - `routes.js` — `route()` helper
+  - `pco.js` — PCO fetch helpers
+  - `routes/` — 27 modules par domaine (songs, members, plans, etc.)
 - `migrations/` — Migrations D1
 - `scripts/` — Scripts d'import, export PCO, génération SQL
 - `docs/` — Documentation technique
@@ -104,6 +107,16 @@ Déployée sur Cloudflare Workers + Pages.
 ## ⚠️ Migrations en attente
 
 - **020_rgpd_consent.sql** : pas encore appliquée en prod. À faire : `wrangler d1 execute eglise-app --file=migrations/020_rgpd_consent.sql`
+
+## Notes d'architecture (10 juin 2026)
+
+- `src/index.js` splitté de 6705 → **174 lignes** : ne contient plus que le router, le RBAC guard, et le handler cron
+- **27 modules** dans `src/routes/` par domaine fonctionnel, ordonnés via `routes/index.js` (barrel)
+- Chaque module importe ce dont il a besoin depuis `../lib.js`, `../auth.js`, etc.
+- Variable `router` (dead code, createRouter avec routes0+routes2 uniquement) supprimée
+- Les helpers `acquireSyncLock`/`releaseSyncLock` déplacés dans `src/routes/pcoSync.js`
+- `callAudioSplitter` copié dans `src/routes/audio.js`
+- **183 tests backend** ✅, **65 tests frontend** ✅, **type-check 0 erreurs** ✅
 
 ## ⚠️ Problèmes connus
 

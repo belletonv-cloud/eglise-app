@@ -5,7 +5,7 @@ export async function triggerWebhooks(env, event, payload) {
     const webhooks = await env.DB.prepare('SELECT * FROM webhooks').all()
     for (const wh of webhooks.results) {
       let events
-      try { events = JSON.parse(wh.events || '[]') } catch { events = [] }
+      try { events = JSON.parse(wh.events || '[]') } catch { console.error('webhooks: invalid events JSON', wh.id, wh.events); events = [] }
       if (!events.includes(event) && !events.includes('*')) continue
 
       try {
