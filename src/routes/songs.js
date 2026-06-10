@@ -1,6 +1,6 @@
 // Songs & arrangements route handlers
-import { json, badRequest, notFound, getBody, validate, requireId, dbFirst, dbAll } from "../lib.js";
-import { hasPermission, getMemberFromRequest, requirePermission } from "../auth.js";
+import { json, badRequest, notFound, getBody, validate, requireId } from "../lib.js";
+import { hasPermission } from "../auth.js";
 import { route } from "../routes.js";
 
 export const songsRoutes = [
