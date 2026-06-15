@@ -48,8 +48,8 @@ const filtered = computed(() => {
 
 onMounted(async () => {
   try {
-    members.value = await api.getDirectory()
-  } catch { /* ignore */ }
+    { const r = await api.getDirectory(); members.value = r.data ?? r; }
+  } catch (e) { console.warn('Annuaire: failed to load directory', e) }
   finally { loading.value = false }
 })
 </script>

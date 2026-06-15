@@ -32,6 +32,7 @@ export async function getMembers(params: {
     }
   } catch {
     const mock = await api.getMembers()
-    return { members: mock, total: mock.length }
+    const items = mock?.data ?? []
+    return { members: items, total: mock?.totalCount ?? items.length }
   }
 }

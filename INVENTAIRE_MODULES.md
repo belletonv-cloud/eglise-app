@@ -81,7 +81,7 @@ Module: Audio (sermon audio + segments)
 Module: Notifications (FCM)
 - Endpoints: POST /api/fcm/register, POST /api/fcm/send
 - Tables: notification_tokens
-- Dépendances externes: FCM_SERVER_KEY
+- Dépendances externes: FCM_SERVICE_ACCOUNT
 
 Module: Polls & Announcements
 - Endpoints: GET/POST/DELETE /api/polls, POST /api/polls/:id/options, DELETE /api/poll-options/:id, POST /api/polls/:id/vote, DELETE /api/polls/:id/vote, GET/POST/PUT/DELETE /api/announcements
@@ -133,7 +133,7 @@ Module: Misc / Utilities
 Sécurité & infra
 - Auth: Firebase ID token via Authorization: Bearer <id_token> (validated by oauth2.googleapis.com/tokeninfo) OR demo header x-demo-email OR dev fallback X-Auth-Secret + x-user-email
 - Rate limiting: in-memory Map per IP request URL (simple limiter in src/index.js)
-- Env / Secrets (extraits): RESEND_API_KEY, EMAIL_FROM, FCM_SERVER_KEY, FIREBASE_PROJECT_ID, DEV_AUTH_SECRET, ONECLICK_SECRET, PCO_TOKEN_ID, PCO_TOKEN_SECRET, INFOMANIAK_TOKEN, KDRIVE_* , AUDIO_SPLITTER_TOKEN, AUDIO_SPLITTER_URL
+- Env / Secrets (extraits): RESEND_API_KEY, EMAIL_FROM, FCM_SERVICE_ACCOUNT (JSON), FIREBASE_PROJECT_ID, DEV_AUTH_SECRET, ONECLICK_SECRET, PCO_TOKEN_ID, PCO_TOKEN_SECRET, INFOMANIAK_TOKEN, KDRIVE_* , AUDIO_SPLITTER_TOKEN, AUDIO_SPLITTER_URL
 
 Fichiers de référence clés:
 - Backend router: src/index.js (single-file router, ~3800+ lines)

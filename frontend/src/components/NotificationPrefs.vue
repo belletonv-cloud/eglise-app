@@ -95,7 +95,7 @@ async function getSW() {
   if ('serviceWorker' in navigator) {
     try {
       swRegistration.value = await navigator.serviceWorker.ready;
-    } catch {}
+    } catch (e) { console.warn('NotificationPrefs: failed to get service worker registration', e) }
   }
   return swRegistration.value;
 }

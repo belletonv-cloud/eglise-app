@@ -100,7 +100,7 @@ function toggleMember(m: any) {
 }
 
 async function loadInbox() {
-  inbox.value = await api.getInbox().catch(() => [])
+  { const r = await api.getInbox().catch(() => ({ data: [] } as any)); inbox.value = r.data ?? []; }
 }
 
 async function loadMembers() {

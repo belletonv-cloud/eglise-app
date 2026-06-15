@@ -181,7 +181,7 @@ function goNext() {
 
 const loadMembers = async () => {
   try {
-    members.value = await api.getMembers()
+    { const r = await api.getMembers(); members.value = r.data ?? r; }
   } catch { console.warn('getMembers failed') }
 }
 onMounted(() => {

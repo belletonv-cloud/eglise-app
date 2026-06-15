@@ -135,7 +135,7 @@ async function loadData() {
     teams.value = tms
     plans.value = pls
     logs.value = lgs.slice(-10).reverse()
-  } catch { /* ignore */ }
+  } catch (e) { console.warn('EmailCompose: failed to load teams/plans/logs', e) }
 }
 
 function onRecipientTypeChange() {

@@ -54,7 +54,7 @@ export function useCheckins() {
     isLoading.value = true
     error.value = null
     try {
-      plans.value = await api.getPlans()
+      { const r = await api.getPlans(); plans.value = r.data ?? r; }
     } catch (e: any) {
       console.error('checkin error:', e)
       error.value = t('checkin.api_error')
@@ -68,7 +68,7 @@ export function useCheckins() {
     isLoading.value = true
     error.value = null
     try {
-      members.value = await api.getMembers()
+      { const r = await api.getMembers(); members.value = r.data ?? r; }
     } catch (e: any) {
       console.error('checkin error:', e)
       error.value = t('checkin.api_error')

@@ -12,7 +12,7 @@ async function loadTeams() {
   try {
     loading.value = true
     error.value = null
-    teams.value = await api.getTeams()
+    { const r = await api.getTeams(); teams.value = r.data ?? r; }
   } catch (e: any) {
     error.value = e.message || 'Erreur de chargement'
   } finally {

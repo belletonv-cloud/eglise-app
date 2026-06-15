@@ -75,7 +75,7 @@ const loadHistory = async () => {
   loading.value = true
   try {
     const all = await api.getPlans(yearFilter.value ? { year: Number(yearFilter.value) } : undefined)
-    const past = all.filter((p: any) => p.date < new Date().toISOString().slice(0, 10))
+    const past = (all.data ?? all).filter((p: any) => p.date < new Date().toISOString().slice(0, 10))
 
     let filtered = past
     if (typeFilter.value) {
@@ -91,12 +91,12 @@ const loadHistory = async () => {
     }
     filtered.sort((a: any, b: any) => b.date.localeCompare(a.date))
     plans.value = filtered
-  } catch { /* ignore */ }
+  } catch (e) { console.warn('Historique: failed to filter plans', e) }
   finally { loading.value = false }
 }
 
 onMounted(async () => {
-  try { serviceTypes.value = await api.getServiceTypes() } catch { /* ignore */ }
+  try { const res = await api.getServiceTypes(); serviceTypes.value = res.data ?? res } catch (e) { console.warn('Historique: failed to load service types', e) }
   await loadHistory()
 })
 </script>

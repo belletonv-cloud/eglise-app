@@ -38,7 +38,7 @@ onMounted(async () => {
   if (!id) { loading.value = false; return }
   try {
     member.value = await api.getMember(id)
-  } catch { /* ignore */ }
+  } catch (e) { console.warn('MemberProfile: failed to load member', e) }
   finally { loading.value = false }
 })
 </script>

@@ -440,9 +440,9 @@ const rbacForm = ref({
 });
 
 async function load() {
-    members.value = await api.getMembers();
-    exceptions.value = await api.getMemberExceptions();
-    resourcePerms.value = await api.getResourcePermissions();
+    { const r = await api.getMembers(); members.value = r.data ?? r; }
+    { const r = await api.getMemberExceptions(); exceptions.value = r.data ?? r; }
+    { const r = await api.getResourcePermissions(); resourcePerms.value = r.data ?? r; }
 }
 
 onMounted(load);

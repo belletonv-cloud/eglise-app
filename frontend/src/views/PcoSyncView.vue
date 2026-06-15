@@ -154,7 +154,7 @@ const sync = async () => {
     localStorage.setItem('pco_last_sync', lastSync.value)
   } catch (e: any) {
     let data = { results: null }
-    try { data = JSON.parse(e.message) } catch {}
+    try { data = JSON.parse(e.message) } catch (parseErr) { console.warn('PcoSyncView: failed to parse sync error message', parseErr) }
     syncResult.value = { success: false, results: data.results, message: e.message }
     showToast(t('pcoSync.error'), 'error')
   } finally {
@@ -171,7 +171,7 @@ const syncPeople = async () => {
     showToast(t('pcoSync.peopleSynced'))
   } catch (e: any) {
     let data = { results: null }
-    try { data = JSON.parse(e.message) } catch {}
+    try { data = JSON.parse(e.message) } catch (parseErr) { console.warn('PcoSyncView: failed to parse people sync error message', parseErr) }
     peopleResult.value = { success: false, results: data.results, message: e.message }
     showToast(t('pcoSync.error'), 'error')
   } finally {

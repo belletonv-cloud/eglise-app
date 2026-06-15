@@ -113,7 +113,7 @@ function openSong(song: any) {
 onMounted(async () => {
   try {
     const all = await api.getSongs()
-    songs.value = all.filter((s: any) => s.has_chord_chart === 1 || s.has_chord_chart === true)
+    songs.value = (all.data ?? all).filter((s: any) => s.has_chord_chart === 1 || s.has_chord_chart === true)
   } catch {
     songs.value = []
   } finally {

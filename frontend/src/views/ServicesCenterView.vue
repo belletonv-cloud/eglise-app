@@ -249,11 +249,13 @@ async function loadPlans() {
     loadingPlans.value = true;
     try {
         const res = await api.getPlans({ page: 1, size: 50 });
-        const all: any[] = Array.isArray(res?.items)
-            ? res.items
-            : Array.isArray(res)
-              ? res
-              : [];
+        const all: any[] = Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.items)
+              ? res.items
+              : Array.isArray(res)
+                ? res
+                : [];
         // Prefer upcoming / planned, fall back to last 10 if none
         const upcoming = all.filter((p: any) => p.status !== "done");
         plans.value =

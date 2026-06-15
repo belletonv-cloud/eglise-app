@@ -77,8 +77,8 @@ function formatDate(d: string) {
 async function loadAnnotations() {
   if (!props.arrangementId) return
   try {
-    annotations.value = await api.getArrangementAnnotations(props.arrangementId)
-  } catch { annotations.value = [] }
+    { const r = await api.getArrangementAnnotations(props.arrangementId); annotations.value = r.data ?? r; }
+  } catch (e) { console.warn('ArrangementAnnotations: failed to load annotations', e); annotations.value = [] }
 }
 
 function startNew() {

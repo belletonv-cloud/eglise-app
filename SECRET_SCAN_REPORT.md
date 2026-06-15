@@ -21,7 +21,7 @@ Findings (by file)
   - References to RESEND_API_KEY (email provider)
   - References to INFOMANIAK_TOKEN (kDrive/Infomaniak token)
   - References to ONECLICK_SECRET (one-click token signing)
-  - References to FCM_SERVER_KEY (push server key)
+  - References to FCM_SERVICE_ACCOUNT (Firebase service account JSON)
   - References to EMAIL_FROM (admin email config)
 
 - frontend/dist (was present in history)

@@ -374,9 +374,9 @@ async function moveOneTime() {
 
 const load = async () => {
   try {
-    const events = await api.getChurchEvents()
-    items.value = events
-  } catch { /* ignore */ }
+    const r = await api.getChurchEvents()
+    items.value = r.data ?? r
+  } catch (e) { console.warn('ChurchEvents: failed to load events', e) }
   finally { loading.value = false }
 }
 

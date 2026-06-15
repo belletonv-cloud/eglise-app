@@ -31,7 +31,7 @@ head_sampling_rate = 1
 #   wrangler secret put EMAIL_FROM              # Sender address (e.g. noreply@cieuxouverts.bzh)
 #   wrangler secret put ADMIN_EMAIL             # Admin notification address
 #
-#   wrangler secret put FCM_SERVER_KEY          # Firebase Cloud Messaging server key (push notifs)
+#   wrangler secret put FCM_SERVICE_ACCOUNT     # Firebase service account JSON (FCM v1 push notifs)
 #
 #   wrangler secret put AUDIO_SPLITTER_URL      # Audio splitter service URL (HF Space)
 #   wrangler secret put AUDIO_SPLITTER_TOKEN    # Bearer token for audio splitter API

@@ -946,17 +946,17 @@ export const pcoSyncRoutes = [
 
         // Extract primary email and phone from included data
         const relationships = person.relationships || {};
-        const emailIds = relationships.emails?.data?.map((e: any) => e.id) || [];
-        const phoneIds = relationships.phone_numbers?.data?.map((p: any) => p.id) || [];
+        const emailIds = relationships.emails?.data?.map((e) => e.id) || [];
+        const phoneIds = relationships.phone_numbers?.data?.map((p) => p.id) || [];
         const primaryEmail = included
-          .filter((i: any) => i.type === "Email" && emailIds.includes(i.id))
-          .sort((a: any, b: any) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
-          .map((i: any) => i.attributes?.address)
+          .filter((i) => i.type === "Email" && emailIds.includes(i.id))
+          .sort((a, b) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
+          .map((i) => i.attributes?.address)
           .find(Boolean) || null;
         const primaryPhone = included
-          .filter((i: any) => i.type === "PhoneNumber" && phoneIds.includes(i.id))
-          .sort((a: any, b: any) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
-          .map((i: any) => i.attributes?.number)
+          .filter((i) => i.type === "PhoneNumber" && phoneIds.includes(i.id))
+          .sort((a, b) => (b.attributes?.primary ? 1 : 0) - (a.attributes?.primary ? 1 : 0))
+          .map((i) => i.attributes?.number)
           .find(Boolean) || null;
 
         // Look for existing member by pco_id first, then by name

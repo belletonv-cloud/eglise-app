@@ -13,7 +13,7 @@ Déployée sur Cloudflare Workers + Pages.
 - **Auth** : Firebase Auth + RBAC (7 rôles, guard global POST/PUT/DELETE)
 - **Rate limiter** : D1-based (table `api_rate_limits`)
 - **Déploiement** : Wrangler → Cloudflare Workers + Pages
-- **Tests** : Vitest backend (183 tests) + Vitest frontend (65 tests ✅) + Playwright E2E (checkin-guest ✅, 13 autres à vérifier)
+- **Tests** : Vitest backend (562 tests ✅ - 41 files, tous les 27 modules routes + 10 nouveaux) + Vitest frontend (251 tests ✅ - 30 files) + Playwright E2E (106 tests ✅ - 20 spec files) — 919 tests total, 0 vulns ✅
 - **PWA** : vite-plugin-pwa
 
 ## URLs
@@ -104,9 +104,10 @@ Déployée sur Cloudflare Workers + Pages.
 - Audio-splitter : voir `/Users/vic/Downloads/audio-splitter/` (serveur Whisper sur :8765)
 - Variables d'env dans `.env`, secrets Cloudflare via `wrangler secret put`
 
-## ⚠️ Migrations en attente
+## ✅ Migrations
 
-- **020_rgpd_consent.sql** : pas encore appliquée en prod. À faire : `wrangler d1 execute eglise-app --file=migrations/020_rgpd_consent.sql`
+- **020_rgpd_consent.sql** : déjà appliquée (colonnes existantes)
+- **021_fcm_tokens.sql** : appliquée le 15/06/2026
 
 ## Notes d'architecture (10 juin 2026)
 
@@ -116,14 +117,40 @@ Déployée sur Cloudflare Workers + Pages.
 - Variable `router` (dead code, createRouter avec routes0+routes2 uniquement) supprimée
 - Les helpers `acquireSyncLock`/`releaseSyncLock` déplacés dans `src/routes/pcoSync.js`
 - `callAudioSplitter` copié dans `src/routes/audio.js`
-- **183 tests backend** ✅, **65 tests frontend** ✅, **type-check 0 erreurs** ✅
+- **562 tests backend** ✅ (41 files, tous les 27 modules routes + 10 nouveaux), **251 tests frontend** ✅ (30 files), **type-check 0 erreurs** ✅
+- `vitest.config.js` (dead config, référençait `test/` inexistant) supprimé le 14/06/2026
+
+## Refactoring 14/06/2026
+
+### MusicStandView.vue (−597 lignes)
+- **Composables extraits** : `useTransposition`, `useChordParser`, `useMetronome`, `useAutoScroll`
+- **Sous-composants extraits** : `MusicStandSettings`, `MusicStandNotes`
+- **Composants existants intégrés** : `MusicStandToolbar`, `MusicStandSongBrowser` (étaient définis inline)
+- **Résultat** : 1523 → 926 lignes
+
+### API Proxy pagination fixé
+- `tryCall()` dans `api.ts` retournait seulement `json.data` pour les routes `isList` → perte de `page`/`size`/`totalCount`
+- Fix : retourne le payload complet `{ data, page, size, totalCount }`
+- 17 vues mises à jour pour utiliser `response.data`
+- PlansList.vue utilise désormais `response.totalCount` pour la pagination
 
 ## ⚠️ Problèmes connus
 
 - **Rate limiter** : D1-based (OK), mais cleanup compare `window_start` (number) avec `cutoff` (ISO string) — fixé le 29/05
-- **Erreurs silencieuses** : plusieurs `catch(() => {})` dans le worker — la plupart sont des `console.error` simples sans re-throw
+- **Erreurs silencieuses** : ~13 `catch { /* ignore */ }` remplacés par `console.warn` (14/06/2026) — restent 58 `catch(e){console.error}` backend (log, pas re-throw, OK fonctionnellement)
 - **Créations de tables dans les handlers** : résolu — toutes les migrations sont dans `migrations/`
 - **Code mort** : `audioop/`, `pyaudioop/` — shims Python inutilisés
 - **i18n** : clés `help.*_step*` manquantes (20 clés) — ajoutées le 29/05
 - **CI/CD** : `deploy.yml` référence des jobs d'un autre workflow — fixé le 29/05
 - **CI** : tests backend limités à `helpers.test.js` — fixé le 29/05
+- ~~**Secrets commits** : `.env` et `frontend/.env` ne sont PAS trackés par git (vérifié le 15/06/2026) — pas un problème~~ ✅
+
+## ✅ Final cleanup (15/06/2026)
+- pcoSync.js deploy blocker fixed (TypeScript annotations removed from JS file)
+- npm audit fix applied (4 vulns: 1 critical shell-quote, 2 high @grpc/grpc-js/dompurify, 1 moderate protobufjs) — 0 remaining
+- 10 new backend test files (84 tests): csv, messages, scheduledPeople, pcoSync, invitation, directory, fcm, lib, rate-limit, webhooks
+- 6 new frontend test files (45 tests): useTransposition, useChordParser, useMetronome, useAutoScroll, api-members, api-plans
+- Error boundary added to App.vue (onErrorCaptured + toast)
+- Stale cleanup: music-service/ removed, 11 non-migration SQL → migrations/archive/, 15 scripts → scripts/archive/
+- Integration test removed (depended on deleted music-service/)
+- AGENTS.md cleaned: migrations section updated (both applied), secrets warning resolved

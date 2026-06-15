@@ -95,7 +95,7 @@ const newPosition = ref("");
 
 const load = async () => {
     try {
-        items.value = await api.getPlanChecklist(props.planId);
+        { const r = await api.getPlanChecklist(props.planId); items.value = r.data ?? r; }
     } catch {
         /* ignore */
     }
@@ -104,7 +104,8 @@ const load = async () => {
 const addFromTemplate = async () => {
     if (!props.serviceTypeId) return;
     try {
-        const templates = await api.getChecklistTemplates({ service_type_id: props.serviceTypeId });
+        const r = await api.getChecklistTemplates({ service_type_id: props.serviceTypeId });
+        const templates = r.data ?? r;
         for (const tpl of templates) {
             for (const ti of (tpl as { items?: any[] }).items || []) {
                 await api.addPlanChecklistItem(props.planId, {

@@ -124,7 +124,7 @@ onMounted(async () => {
         let song: any = null
         let arrangement: any = null
         if (item.arrangement_id) {
-          const songsList = await api.getSongs()
+          const songsList = (await api.getSongs()).data ?? []
           for (const s of songsList) {
             const a = (s.arrangements || []).find((arr: any) => arr.id === item.arrangement_id)
             if (a) { song = s; arrangement = a; break }

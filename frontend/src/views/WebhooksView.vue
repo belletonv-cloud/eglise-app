@@ -108,8 +108,8 @@ const { locale } = useI18n()
 const formatDate = (d: string) => d ? new Date(d).toLocaleString(locale.value || 'fr-FR') : ''
 
 const loadWebhooks = async () => {
-  try { webhooks.value = await api.getWebhooks() }
-  catch { /* ignore */ }
+  try { const r = await api.getWebhooks(); webhooks.value = r.data ?? r; }
+  catch (e) { console.warn('WebhooksView: failed to load webhooks', e) }
   finally { loading.value = false }
 }
 
@@ -121,7 +121,7 @@ const loadLogs = async () => {
     const res = await fetch(`${base}/webhook-logs`)
     const data = await res.json()
     logs.value = data.rows || []
-  } catch { /* ignore */ }
+  } catch (e) { console.warn('WebhooksView: failed to load webhook logs', e) }
   finally { logsLoading.value = false }
 }
 

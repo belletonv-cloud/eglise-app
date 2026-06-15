@@ -64,7 +64,7 @@ set_secret PCO_TOKEN_ID true
 set_secret PCO_TOKEN_SECRET true
 set_secret RESEND_API_KEY true
 set_secret INFOMANIAK_TOKEN true
-set_secret FCM_SERVER_KEY true
+set_secret FCM_SERVICE_ACCOUNT true
 set_secret ONECLICK_SECRET true
 set_secret EMAIL_FROM false
 

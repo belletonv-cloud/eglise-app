@@ -21,6 +21,7 @@ export async function getPlans(params: { page: number; limit: number }): Promise
     }
   } catch {
     const mock = await api.getPlans()
-    return { plans: mock, total: mock.length }
+    const items = mock?.data ?? []
+    return { plans: items, total: mock?.totalCount ?? items.length }
   }
 }

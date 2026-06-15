@@ -7,170 +7,43 @@
         tabindex="0"
     >
         <!-- Toolbar (toggles on tap) -->
-        <div v-if="showToolbar" class="toolbar" @click.stop>
-            <button
-                @click="goBack"
-                class="toolbar-btn"
-                :title="$t('musicStand.back')"
-            >
-                ←
-            </button>
-
-            <div class="toolbar-center">
-                <span class="song-title" @click="openSongBrowser">{{
-                    song?.title
-                }}</span>
-                <span
-                    v-if="arrangement"
-                    class="key-badge"
-                    @click.stop="showKeyPicker = !showKeyPicker"
-                    >{{ currentKey }}</span
-                >
-            </div>
-
-            <div class="toolbar-right">
-                <button
-                    v-if="prevSongId"
-                    @click.stop="goToPrev"
-                    class="toolbar-btn"
-                    title="Chant précédent"
-                >
-                    ⏮
-                </button>
-                <button
-                    v-if="nextSongId"
-                    @click.stop="goToNext"
-                    class="toolbar-btn"
-                    title="Chant suivant"
-                >
-                    ⏭
-                </button>
-                <button
-                    @click.stop="transpose(-1)"
-                    class="toolbar-btn sm:px-1 sm:text-sm"
-                    title="-1 demi-ton"
-                >
-                    −
-                </button>
-                <button
-                    @click.stop="transpose(1)"
-                    class="toolbar-btn sm:px-1 sm:text-sm"
-                    title="+1 demi-ton"
-                >
-                    +
-                </button>
-                <button
-                    v-if="setlistSongs.length > 0"
-                    @click.stop="showSetlist = !showSetlist"
-                    class="toolbar-btn"
-                    :class="{ active: showSetlist }"
-                    :title="$t('setlist.back_to_plan')"
-                >
-                    ☰
-                </button>
-                <button
-                    @click.stop="toggleMetronome"
-                    class="toolbar-btn"
-                    :class="{ active: metronomePlaying }"
-                    title="Métronome"
-                >
-                    ♩
-                </button>
-                <button
-                    @click.stop="toggleAutoScroll"
-                    class="toolbar-btn"
-                    :class="{ active: autoScrollActive }"
-                    :title="
-                        autoScrollActive ? 'Auto-scroll ON' : 'Auto-scroll OFF'
-                    "
-                >
-                    ⟳
-                </button>
-                <button
-                    @click.stop="toggleStageMode"
-                    class="toolbar-btn"
-                    :class="{ active: stageMode }"
-                    title="Mode scène"
-                >
-                    🌙
-                </button>
-                <button
-                    v-if="arrangement"
-                    @click.stop="showNotes = !showNotes"
-                    class="toolbar-btn"
-                    :class="{ active: showNotes }"
-                    title="Notes musiciens"
-                >
-                    📝
-                </button>
-                <button
-                    v-if="arrangement"
-                    @click.stop="canvasActive = !canvasActive"
-                    class="toolbar-btn"
-                    :class="{ active: canvasActive }"
-                    title="Annotations dessin"
-                >
-                    ✏️
-                </button>
-                <button
-                    @click.stop="showSettings = !showSettings"
-                    class="toolbar-btn"
-                    :title="$t('pdfExport.title')"
-                >
-                    ⚙
-                </button>
-            </div>
-        </div>
+        <MusicStandToolbar
+            v-if="showToolbar"
+            :songTitle="song?.title ?? ''"
+            :arrangement="arrangement"
+            :currentKey="currentKey"
+            :prevSongId="prevSongId"
+            :nextSongId="nextSongId"
+            :setlistSongs="setlistSongs"
+            :showSetlist="showSetlist"
+            :metronomePlaying="metronomePlaying"
+            :autoScrollActive="autoScrollActive"
+            :stageMode="stageMode"
+            :showNotes="showNotes"
+            :canvasActive="canvasActive"
+            @back="goBack"
+            @open-song-browser="openSongBrowser"
+            @toggle-key-picker="showKeyPicker = !showKeyPicker"
+            @go-prev="goToPrev"
+            @go-next="goToNext"
+            @transpose="transpose"
+            @toggle-setlist="showSetlist = !showSetlist"
+            @toggle-metronome="toggleMetronome"
+            @toggle-auto-scroll="toggleAutoScroll"
+            @toggle-stage-mode="toggleStageMode"
+            @toggle-notes="showNotes = !showNotes"
+            @toggle-canvas="canvasActive = !canvasActive"
+            @toggle-settings="showSettings = !showSettings"
+        />
 
         <!-- Song Browser -->
-        <div
-            v-if="showSongBrowser"
-            class="song-browser-overlay"
-            @click="showSongBrowser = false"
-        >
-            <div class="song-browser" @click.stop>
-                <div class="browser-header">
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        :placeholder="$t('musicStand.search')"
-                        class="browser-search"
-                        autofocus
-                    />
-                    <button
-                        @click="showSongBrowser = false"
-                        class="browser-close"
-                    >
-                        ✕
-                    </button>
-                </div>
-                <div class="browser-list">
-                    <div
-                        v-for="s in filteredSongs"
-                        :key="s.id"
-                        class="browser-song"
-                        :class="{ active: s.id === currentSongId }"
-                        @click="selectSong(s)"
-                    >
-                        <span class="browser-song-title">{{ s.title }}</span>
-                        <span class="browser-song-arr"
-                            >{{ s.arrangements?.[0]?.key || "" }}
-                            {{
-                                s.arrangements?.[0]?.tempo
-                                    ? "· " + s.arrangements[0].tempo + " BPM"
-                                    : ""
-                            }}</span
-                        >
-                    </div>
-                    <div
-                        v-if="filteredSongs.length === 0"
-                        class="browser-empty"
-                    >
-                        {{ $t("musicStand.no_songs") }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        <MusicStandSongBrowser
+            :visible="showSongBrowser"
+            :songs="songs"
+            :currentSongId="currentSongId"
+            @select-song="selectSong"
+            @close="showSongBrowser = false"
+        />
 
         <!-- Setlist Sidebar (refacto component) -->
         <MusicStandSetlist
@@ -223,34 +96,18 @@
         />
 
         <!-- Settings panel -->
-        <div v-if="showSettings" class="settings-panel" @click.stop>
-            <h4 class="text-sm font-bold mb-2 text-gray-300">
-                {{ $t("pdfExport.title") }}
-            </h4>
-            <label class="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                <input type="checkbox" v-model="showChords" class="rounded" />
-                Accords
-            </label>
-            <label class="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                <input type="checkbox" v-model="showLyrics" class="rounded" />
-                Paroles
-            </label>
-            <label class="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                <input type="checkbox" v-model="showSections" class="rounded" />
-                Sections
-            </label>
-            <div class="text-sm text-gray-300 mb-2">
-                <span>Taille du texte</span>
-                <input
-                    type="range"
-                    v-model.number="fontSize"
-                    min="14"
-                    max="48"
-                    class="w-full mt-1"
-                />
-                <span>{{ fontSize }}px</span>
-            </div>
-        </div>
+        <MusicStandSettings
+            :visible="showSettings"
+            :showChords="showChords"
+            :showLyrics="showLyrics"
+            :showSections="showSections"
+            :fontSize="fontSize"
+            @update:showChords="(v: boolean) => showChords = v"
+            @update:showLyrics="(v: boolean) => showLyrics = v"
+            @update:showSections="(v: boolean) => showSections = v"
+            @update:fontSize="(v: number) => fontSize = v"
+            @close="showSettings = false"
+        />
 
         <!-- Chart Viewer Component (refacto) -->
         <div style="position: relative">
@@ -284,67 +141,12 @@
         </div>
 
         <!-- Notes / Annotations Panel -->
-        <div v-if="showNotes && arrangement" class="notes-panel" @click.stop>
-            <div class="notes-header">
-                <span class="notes-title">📝 Notes</span>
-                <button @click="showNotes = false" class="notes-close">
-                    ✕
-                </button>
-            </div>
-            <div class="notes-list">
-                <div v-if="notesLoading" class="notes-loading">Chargement…</div>
-                <div v-else-if="annotations.length === 0" class="notes-empty">
-                    Aucune note pour ce chant
-                </div>
-                <div
-                    v-for="ann in annotations"
-                    :key="ann.id"
-                    class="note-item"
-                    :class="{ 'note-shared': ann.is_shared }"
-                >
-                    <div class="note-meta">
-                        <span class="note-author"
-                            >{{ ann.first_name }} {{ ann.last_name }}</span
-                        >
-                        <span v-if="ann.is_shared" class="note-badge shared"
-                            >Partagée</span
-                        >
-                        <span v-else class="note-badge private">Privée</span>
-                        <button
-                            v-if="ann.member_id === currentMemberId"
-                            @click="deleteNote(ann.id)"
-                            class="note-delete"
-                        >
-                            🗑
-                        </button>
-                    </div>
-                    <p class="note-content">{{ ann.content }}</p>
-                </div>
-            </div>
-            <div class="notes-add">
-                <textarea
-                    v-model="newNoteContent"
-                    rows="2"
-                    placeholder="Ajouter une note…"
-                    class="notes-textarea"
-                    @click.stop
-                    @keydown.stop
-                ></textarea>
-                <div class="notes-add-footer">
-                    <label class="notes-share-label">
-                        <input type="checkbox" v-model="newNoteShared" />
-                        Partager avec l'équipe
-                    </label>
-                    <button
-                        @click="addNote"
-                        :disabled="!newNoteContent.trim()"
-                        class="notes-save-btn"
-                    >
-                        Enregistrer
-                    </button>
-                </div>
-            </div>
-        </div>
+        <MusicStandNotes
+            :visible="showNotes && !!arrangement"
+            :arrangementId="arrangement?.id ?? null"
+            :currentMemberId="currentMemberId"
+            @close="showNotes = false"
+        />
 
         <!-- Bottom song nav -->
         <div
@@ -368,15 +170,26 @@ import MusicStandMetronome from "../components/musicstand/MusicStandMetronome.vu
 import MusicStandSetlist from "../components/musicstand/MusicStandSetlist.vue";
 import MusicStandChartViewer from "../components/musicstand/MusicStandChartViewer.vue";
 import MusicStandCanvas from "../components/musicstand/MusicStandCanvas.vue";
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import MusicStandToolbar from "../components/musicstand/MusicStandToolbar.vue";
+import MusicStandSongBrowser from "../components/musicstand/MusicStandSongBrowser.vue";
+import MusicStandSettings from "../components/musicstand/MusicStandSettings.vue";
+import MusicStandNotes from "../components/musicstand/MusicStandNotes.vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "../utils/api";
 import { showToast } from "../stores/toast";
 import { member as currentMemberRef } from "../stores/member";
+import { useTransposition } from "../composables/useTransposition";
+import { useChordParser } from "../composables/useChordParser";
+import { useMetronome } from "../composables/useMetronome";
+import { useAutoScroll } from "../composables/useAutoScroll";
 
 const route = useRoute();
 const router = useRouter();
-const currentMemberId = computed(() => currentMemberRef.value?.id ?? null);
+const currentMemberId = computed(() => {
+  const id = currentMemberRef.value?.id;
+  return typeof id === 'number' ? id : null;
+});
 
 const song = ref<any>(null);
 const arrangement = ref<any>(null);
@@ -389,93 +202,21 @@ const showLyrics = ref(true);
 const showSections = ref(true);
 const fontSize = ref(22);
 const stageMode = ref(false);
-const currentKey = ref("C");
-const semitones = ref(0);
+const { currentKey, semitones, originalKey, transpose, transposeChord, keyOptions } = useTransposition()
 
 const showSongBrowser = ref(false);
-const searchQuery = ref("");
 
 const planId = ref<number | null>(null);
 const planItems = ref<any[]>([]);
 const showSetlist = ref(false);
 
-// Notes / Annotations
 const showNotes = ref(false);
 const canvasActive = ref(false);
-const annotations = ref<any[]>([]);
-const notesLoading = ref(false);
-const newNoteContent = ref("");
-const newNoteShared = ref(false);
-
-async function loadAnnotations() {
-    if (!arrangement.value?.id) return;
-    notesLoading.value = true;
-    try {
-        annotations.value = await api.getArrangementAnnotations(
-            arrangement.value.id,
-        );
-    } catch {
-        annotations.value = [];
-    } finally {
-        notesLoading.value = false;
-    }
-}
-
-async function addNote() {
-    if (!arrangement.value?.id || !newNoteContent.value.trim()) return;
-    try {
-        await api.createAnnotation(arrangement.value.id, {
-            content: newNoteContent.value.trim(),
-            is_shared: newNoteShared.value,
-        });
-        newNoteContent.value = "";
-        await loadAnnotations();
-    } catch (e: any) {
-        showToast(e.message || "Erreur", "error");
-    }
-}
-
-async function deleteNote(id: number) {
-    try {
-        await api.deleteAnnotation(id);
-        await loadAnnotations();
-    } catch (e: any) {
-        showToast(e.message || "Erreur", "error");
-    }
-}
-
-watch(showNotes, (v) => {
-    if (v) loadAnnotations();
-});
-watch(
-    () => arrangement.value?.id,
-    () => {
-        if (showNotes.value) loadAnnotations();
-    },
-);
 
 const songs = ref<any[]>([]);
-const filteredSongs = computed(() => {
-    if (!searchQuery.value) return songs.value;
 
-    const q = searchQuery.value.toLowerCase();
-    return songs.value.filter((s) => s.title.toLowerCase().includes(q));
-});
-
-// Metronome
-const metronomeVisible = ref(false);
-const metronomePlaying = ref(false);
-const bpm = ref(120);
-const meter = ref(4);
-const currentBeat = ref(0);
-const editBpm = ref(false);
-let metroInterval: any = null;
-
-// Auto-scroll
-const autoScrollActive = ref(false);
-const autoScrollInterval = ref<any>(null);
-const chartContainer = ref<HTMLElement | null>(null);
-const currentScrollLine = ref(0);
+const { metronomeVisible, metronomePlaying, bpm, meter, currentBeat, editBpm, toggleMetronome } = useMetronome()
+const { autoScrollActive, currentScrollLine, chartContainer, startAutoScroll, stopAutoScroll, toggleAutoScroll } = useAutoScroll(bpm, metronomePlaying)
 
 // Song browser / setlist navigation
 const currentSongId = ref<number | null>(null);
@@ -513,7 +254,6 @@ const nextSongTitle = computed(() => {
 
 function openSongBrowser() {
     showSongBrowser.value = true;
-    searchQuery.value = "";
 }
 
 function selectSong(s: any) {
@@ -584,233 +324,10 @@ async function loadSetlist() {
     }
 }
 
-function toggleAutoScroll() {
-    autoScrollActive.value = !autoScrollActive.value;
-    if (autoScrollActive.value && metronomePlaying.value) {
-        startAutoScroll();
-    } else {
-        stopAutoScroll();
-    }
-}
 
-function startAutoScroll() {
-    stopAutoScroll();
-    if (!bpm.value) return;
-    const intervalMs = (60 / bpm.value) * 1000;
-    const linesPerTick = 1;
-    autoScrollInterval.value = setInterval(() => {
-        const container = chartContainer.value;
-        if (!container) return;
-        const lineHeight = parseInt(getComputedStyle(container).fontSize) * 1.6;
-        const scrollBy = lineHeight * linesPerTick;
-        container.scrollBy({ top: scrollBy, behavior: "smooth" });
-    }, intervalMs);
-}
 
-function stopAutoScroll() {
-    if (autoScrollInterval.value) {
-        clearInterval(autoScrollInterval.value);
-        autoScrollInterval.value = null;
-    }
-}
-
-const keyOptions = [
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-    "A",
-    "A#",
-    "B",
-];
-
-import type { ParsedLine } from "../types/ParsedLine";
-
-// Détecte si une ligne ne contient que des accords (format 2 lignes ChordPro)
-const CHORD_TOKEN_RE =
-    /^[A-G][#b]?(m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?(\/[A-G][#b]?(m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?)?$/;
-const CHORD_INLINE_RE =
-    /([A-G][#b]?(?:m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?(?:\/[A-G][#b]?(?:m|dim|aug|sus[24]?|maj[79]?|[2679]|add[249]?)?)?)/g;
-
-function isChordOnlyLine(line: string): boolean {
-    if (!line.trim()) return false;
-    const tokens = line.trim().split(/\s+/);
-    if (tokens.length === 0) return false;
-    return tokens.every((t) => CHORD_TOKEN_RE.test(t));
-}
-
-function buildTwoLineParts(
-    chordLine: string,
-    lyricLine: string,
-): { chord: string; lyric: string }[] {
-    const chords: { chord: string; pos: number }[] = [];
-    let m: RegExpExecArray | null;
-    while ((m = CHORD_INLINE_RE.exec(chordLine)) !== null) {
-        chords.push({
-            chord: showChords.value ? transposeChord(m[0]) : "",
-            pos: m.index,
-        });
-    }
-    if (chords.length === 0) {
-        return [
-            {
-                chord: "",
-                lyric: showLyrics.value ? transposeText(lyricLine) : "",
-            },
-        ];
-    }
-    const parts: { chord: string; lyric: string }[] = [];
-    for (let i = 0; i < chords.length; i++) {
-        const { chord, pos } = chords[i]!;
-        const nextPos =
-            i < chords.length - 1
-                ? chords[i + 1]!.pos
-                : Math.max(chordLine.length, lyricLine.length);
-        const lyric = lyricLine.slice(pos, nextPos).trim();
-        parts.push({
-            chord,
-            lyric: showLyrics.value ? transposeText(lyric) : "",
-        });
-    }
-    return parts;
-}
-
-const parsedLines = computed<ParsedLine[]>(() => {
-    if (!arrangement.value?.chord_chart) return [];
-    const chart = arrangement.value.chord_chart;
-    const lines = chart.split("\n");
-    const result: ParsedLine[] = [];
-
-    let i = 0;
-    while (i < lines.length) {
-        const line = lines[i];
-        const trimmed = line.trim();
-        i++;
-        if (!trimmed) continue;
-
-        // Section header: {section: Verse} or {chorus}, {verse}, etc.
-        const sectionMatch = trimmed.match(/^\{([^}]+)\}/);
-        if (sectionMatch && showSections.value) {
-            let label = sectionMatch[1].replace(/\s{2,}/g, " ").trim();
-            result.push({ type: "section", label });
-            continue;
-        }
-
-        // Comment/directive: skip or show as plain
-        // Only treat as section if there's a single bracket pair (not a chord-only line)
-        if (
-            trimmed.startsWith("[") &&
-            trimmed.endsWith("]") &&
-            trimmed.indexOf("[") === trimmed.lastIndexOf("[")
-        ) {
-            if (showSections.value) {
-                let label = trimmed
-                    .slice(1, -1)
-                    .replace(/\s{2,}/g, " ")
-                    .trim();
-                result.push({ type: "section", label });
-            }
-            continue;
-        }
-
-        // ChordPro line with chords: text[Chord]text
-        if (/\[.*?\]/.test(trimmed)) {
-            if (!showChords.value && !showLyrics.value) {
-                continue;
-            }
-            const parts: { chord: string; lyric: string }[] = [];
-            let remaining = trimmed;
-            while (remaining.length > 0) {
-                const chordIdx = remaining.indexOf("[");
-                const closeIdx =
-                    chordIdx !== -1 ? remaining.indexOf("]", chordIdx) : -1;
-
-                if (chordIdx === -1 || closeIdx === -1) {
-                    if (remaining) {
-                        parts.push({
-                            chord: "",
-                            lyric: showLyrics.value
-                                ? transposeText(remaining)
-                                : "",
-                        });
-                    }
-                    break;
-                }
-
-                if (chordIdx > 0) {
-                    const lyric = remaining.slice(0, chordIdx);
-                    if (lyric)
-                        parts.push({
-                            chord: "",
-                            lyric: showLyrics.value ? transposeText(lyric) : "",
-                        });
-                }
-                const chord = remaining.slice(chordIdx + 1, closeIdx);
-                const transposedChord = transposeChord(chord);
-                let afterChord = remaining.slice(closeIdx + 1);
-                let nextChordIdx = afterChord.indexOf("[");
-                let lyric =
-                    nextChordIdx === -1
-                        ? afterChord
-                        : afterChord.slice(0, nextChordIdx);
-                parts.push({
-                    chord: showChords.value ? transposedChord : "",
-                    lyric: showLyrics.value ? transposeText(lyric) : "",
-                });
-                remaining =
-                    nextChordIdx === -1 ? "" : afterChord.slice(nextChordIdx);
-            }
-            if (parts.length > 0) {
-                let MAX_PARTS = 100;
-                result.push({
-                    type: "chord-lyric",
-                    parts: parts.slice(0, MAX_PARTS),
-                });
-            }
-            continue;
-        }
-
-        // Two-line ChordPro: chord-only line followed by lyrics
-        if (isChordOnlyLine(trimmed)) {
-            if (!showChords.value && !showLyrics.value) continue;
-            // Cherche la prochaine ligne non-vide qui n'est pas un en-tête / directive
-            let lyricLine = "";
-            let skipIdx = -1;
-            for (let j = i; j < lines.length; j++) {
-                const l = lines[j].trim();
-                if (!l) continue;
-                if (
-                    /^\{/.test(l) ||
-                    (l.startsWith("[") && l.endsWith("]")) ||
-                    isChordOnlyLine(l)
-                )
-                    break;
-                lyricLine = l;
-                skipIdx = j;
-                break;
-            }
-            if (lyricLine) {
-                const parts = buildTwoLineParts(line, lyricLine);
-                if (parts.length > 0)
-                    result.push({ type: "chord-lyric", parts });
-                i = skipIdx + 1;
-            } else {
-                result.push({ type: "plain", text: trimmed });
-            }
-            continue;
-        }
-
-        // Plain text (lyrics only)
-        result.push({ type: "plain", text: trimmed });
-    }
-
-    return result;
-});
+const chordChart = computed(() => arrangement.value?.chord_chart ?? null)
+const { parsedLines } = useChordParser(chordChart, semitones, showChords, showLyrics, showSections)
 
 // Pagination (split into pages by line count)
 const currentPage = ref(0);
@@ -836,43 +353,16 @@ function prevPage() {
         });
 }
 
-function transposeChord(chord: string): string {
-    if (semitones.value === 0) return chord;
-    const rootMatch = chord.match(/^([A-G][#b]?)(.*)/);
-    if (!rootMatch || !rootMatch[1]) return chord;
-    const root = rootMatch[1];
-    const suffix = rootMatch[2] || "";
-    const idx = keyOptions.indexOf(root);
-    if (idx === -1) return chord;
-    const newIdx = (idx + semitones.value + 12) % 12;
-    return keyOptions[newIdx] + suffix;
-}
-
-function transposeText(text: string): string {
-    return text; // lyrics don't change
-}
-
-function transpose(delta: number) {
-    semitones.value = (semitones.value + delta + 12) % 12;
-    const origIdx = keyOptions.indexOf(arrangement.value?.key || "C");
-    if (origIdx !== -1) {
-        currentKey.value =
-            keyOptions[(origIdx + semitones.value + 12) % 12] ||
-            currentKey.value;
-    } else {
-        currentKey.value = (arrangement.value?.key || "C") as string;
-    }
-}
-
 function setKey(k: string) {
-    const origIdx = keyOptions.indexOf(arrangement.value?.key || "C");
-    const targetIdx = keyOptions.indexOf(k);
+    const origIdx = keyOptions.indexOf(originalKey.value)
+    const targetIdx = keyOptions.indexOf(k)
     if (origIdx !== -1 && targetIdx !== -1) {
-        semitones.value = (targetIdx - origIdx + 12) % 12;
+        semitones.value = (targetIdx - origIdx + 12) % 12
     }
-    currentKey.value = k;
-    showKeyPicker.value = false;
+    showKeyPicker.value = false
 }
+
+
 
 function toggleToolbar() {
     showToolbar.value = !showToolbar.value;
@@ -887,39 +377,21 @@ function toggleStageMode() {
     document.documentElement.classList.toggle("dark", stageMode.value);
 }
 
-// Metronome
-function toggleMetronome() {
-    if (metronomeVisible.value) {
-        metronomeVisible.value = false;
-        metronomePlaying.value = false;
-        clearInterval(metroInterval);
-    } else {
-        metronomeVisible.value = true;
-    }
-}
+
 
 watch(metronomePlaying, (playing) => {
     if (playing) {
-        const intervalMs = 60000 / bpm.value;
-        let beat = 0;
-        metroInterval = setInterval(() => {
-            currentBeat.value = beat % meter.value;
-            beat++;
-        }, intervalMs);
-        if (autoScrollActive.value) startAutoScroll();
+        if (autoScrollActive.value) startAutoScroll()
     } else {
-        clearInterval(metroInterval);
-        currentBeat.value = 0;
-        stopAutoScroll();
+        stopAutoScroll()
     }
-});
+})
 
 watch(bpm, () => {
-    if (metronomePlaying.value) {
-        metronomePlaying.value = false;
-        metronomePlaying.value = true;
+    if (metronomePlaying.value && autoScrollActive.value) {
+        startAutoScroll()
     }
-});
+})
 
 // Navigation
 function onKeydown(e: KeyboardEvent) {
@@ -971,7 +443,8 @@ async function loadSongData(songId: number, arrId: number | null) {
                 ) || song.value.arrangements?.[0];
         }
         if (arrangement.value?.key) {
-            currentKey.value = arrangement.value.key;
+            originalKey.value = arrangement.value.key;
+            semitones.value = 0;
         }
         if (arrangement.value?.tempo) {
             bpm.value = arrangement.value.tempo;
@@ -983,7 +456,6 @@ async function loadSongData(songId: number, arrId: number | null) {
             const targetIdx = keyOptions.indexOf(targetKey);
             if (origIdx !== -1 && targetIdx !== -1) {
                 semitones.value = (targetIdx - origIdx + 12) % 12;
-                currentKey.value = targetKey;
             }
         }
         const targetBpm = parseInt(route.query.bpm as string, 10);
@@ -1012,7 +484,7 @@ onMounted(async () => {
         // Only show songs that have at least one arrangement WITH a chord chart
         try {
             const all = await api.getSongs();
-            songs.value = (all || []).filter(
+            songs.value = ((all?.data ?? all) || []).filter(
                 (s: any) =>
                     s.has_chord_chart === 1 || s.has_chord_chart === true,
             );
@@ -1045,10 +517,6 @@ watch(
     },
 );
 
-onUnmounted(() => {
-    clearInterval(metroInterval);
-    stopAutoScroll();
-});
 </script>
 
 <style scoped>
@@ -1070,82 +538,6 @@ onUnmounted(() => {
 .music-stand.stage-mode {
     background: #000;
     color: #fff;
-}
-
-.toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(30, 30, 50, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 100;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.toolbar-center {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    justify-content: center;
-}
-
-.song-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #e0e0e0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.key-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #6366f1;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.key-badge:hover {
-    background: #4f46e5;
-}
-
-.toolbar-btn {
-    background: none;
-    border: none;
-    color: #a0a0b0;
-    font-size: 20px;
-    padding: 8px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-
-.toolbar-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.toolbar-btn.active {
-    color: #6366f1;
-}
-
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .key-picker {
@@ -1318,112 +710,6 @@ onUnmounted(() => {
     background: #6366f1;
     box-shadow: 0 0 12px #6366f1;
     transform: scale(1.3);
-}
-
-.settings-panel {
-    position: fixed;
-    top: 56px;
-    right: 12px;
-    background: rgba(30, 30, 50, 0.98);
-    border-radius: 12px;
-    padding: 16px;
-    z-index: 101;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    min-width: 200px;
-}
-
-/* Song Browser Overlay */
-.song-browser-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-}
-
-.song-browser {
-    width: 100%;
-    max-width: 500px;
-    max-height: 70vh;
-    background: #1a1a2e;
-    border-radius: 16px 16px 0 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.browser-header {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.browser-search {
-    flex: 1;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-}
-
-.browser-search::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.browser-close {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.browser-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px;
-}
-
-.browser-song {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-
-.browser-song:hover {
-    background: rgba(99, 102, 241, 0.2);
-}
-
-.browser-song.active {
-    background: rgba(99, 102, 241, 0.3);
-}
-
-.browser-song-title {
-    color: #e0e0e0;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.browser-song-arr {
-    color: #818cf8;
-    font-size: 12px;
-    margin-top: 2px;
-}
-
-.browser-empty {
-    text-align: center;
-    color: #6b7280;
-    padding: 24px;
-    font-size: 14px;
 }
 
 /* Bottom song nav bar */
@@ -1634,171 +920,10 @@ onUnmounted(() => {
     .song-nav-bottom {
         bottom: 80px;
     }
-    .song-browser {
-        max-width: 100%;
-    }
     .setlist-panel {
         max-width: 100%;
     }
 }
 
-/* Notes Panel */
-.notes-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 340px;
-    max-width: 90vw;
-    background: rgba(20, 20, 40, 0.97);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    z-index: 200;
-    backdrop-filter: blur(12px);
-}
-.notes-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-.notes-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e0e0e0;
-}
-.notes-close {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 18px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-.notes-close:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-.notes-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.notes-loading,
-.notes-empty {
-    color: #888;
-    font-size: 13px;
-    text-align: center;
-    padding: 20px 0;
-}
-.note-item {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    padding: 10px 12px;
-    border-left: 3px solid transparent;
-}
-.note-item.note-shared {
-    border-left-color: #6366f1;
-}
-.note-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-}
-.note-author {
-    font-size: 12px;
-    font-weight: 600;
-    color: #ccc;
-}
-.note-badge {
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-.note-badge.shared {
-    background: rgba(99, 102, 241, 0.3);
-    color: #a5b4fc;
-}
-.note-badge.private {
-    background: rgba(255, 255, 255, 0.08);
-    color: #9ca3af;
-}
-.note-delete {
-    margin-left: auto;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
-    opacity: 0.5;
-    padding: 2px 4px;
-}
-.note-delete:hover {
-    opacity: 1;
-}
-.note-content {
-    font-size: 13px;
-    color: #d1d5db;
-    white-space: pre-wrap;
-    line-height: 1.5;
-}
-.notes-add {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 12px;
-}
-.notes-textarea {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    color: #e0e0e0;
-    font-size: 13px;
-    padding: 8px 10px;
-    resize: none;
-    outline: none;
-    box-sizing: border-box;
-}
-.notes-textarea:focus {
-    border-color: #6366f1;
-}
-.notes-add-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 8px;
-    gap: 8px;
-}
-.notes-share-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #9ca3af;
-    cursor: pointer;
-}
-.notes-save-btn {
-    background: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 600;
-}
-.notes-save-btn:hover {
-    background: #4f46e5;
-}
-.notes-save-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-}
+
 </style>

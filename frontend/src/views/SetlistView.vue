@@ -124,7 +124,7 @@ onMounted(async () => {
 
     const songItems = items.filter((i: any) => i.type === 'song')
     const arrangementIds = songItems.filter((i: any) => i.arrangement_id).map((i: any) => i.arrangement_id)
-    const songsList = arrangementIds.length > 0 ? await api.getSongs() : []
+    const songsList = arrangementIds.length > 0 ? (await api.getSongs()).data ?? [] : []
     const loadedSongs = songItems.map((item: any) => {
       let song = null
       let arrangement = null

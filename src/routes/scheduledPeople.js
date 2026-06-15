@@ -15,9 +15,8 @@ import {
   getMemberFromRequest,
   requirePermission,
 } from "../auth.js";
-import { signOneClickToken } from "../oneclick.js";
-import { triggerWebhooks } from "../webhooks.js";
 import { route } from "../routes.js";
+import { sendFcmV1FireAndForget } from "../fcm.js";
 
 export const scheduledPeopleRoutes = [
   // ========================================
@@ -288,24 +287,18 @@ export const scheduledPeopleRoutes = [
         )
           .bind(body.member_id)
           .all();
-        if (memberTokens.results.length > 0 && env.FCM_SERVER_KEY) {
-          const title = "Nouvelle assignation";
-          const msg = `Tu es planifié(e) pour le ${planForNotif.date}${planForNotif.time ? " à " + planForNotif.time.slice(0, 5) : ""}`;
-          for (const t of memberTokens.results) {
-            fetch("https://fcm.googleapis.com/fcm/send", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `key=${env.FCM_SERVER_KEY}`,
-              },
-              body: JSON.stringify({
-                to: t.token,
-                notification: { title, body: msg },
-                data: { plan_id: String(planId), action: "view_plan" },
-              }),
-            }).catch((err) => {
-              console.error("Internal fetch retry failed", err);
-            });
+        if (memberTokens.results.length > 0 && env.FCM_SERVICE_ACCOUNT) {
+          let fcmSa;
+          try { fcmSa = JSON.parse(env.FCM_SERVICE_ACCOUNT); } catch { fcmSa = null; }
+          if (fcmSa) {
+            const title = "Nouvelle assignation";
+            const msg = `Tu es planifié(e) pour le ${planForNotif.date}${planForNotif.time ? " à " + planForNotif.time.slice(0, 5) : ""}`;
+            for (const t of memberTokens.results) {
+              sendFcmV1FireAndForget(
+                fcmSa, t.token, title, msg,
+                { plan_id: String(planId), action: "view_plan" },
+              );
+            }
           }
         }
       } catch (e) {

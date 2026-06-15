@@ -480,8 +480,9 @@ async function load() {
         const summaries = await api.getTeams({
             page: 1,
             size: 100,
-        }) as TeamSummary[] | null;
-        const safeSummaries = Array.isArray(summaries) ? summaries : [];
+        }) as any;
+        const raw = summaries?.data ?? summaries;
+        const safeSummaries = Array.isArray(raw) ? raw as TeamSummary[] : [];
         const detailedTeams = await Promise.all(
             safeSummaries.map(async (summary) => {
                 const detail = await api.getTeam(summary.id);

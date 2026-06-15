@@ -33,7 +33,7 @@ const filteredSongs = computed(() => {
 
 async function loadFromAPI() {
   try {
-    songs.value = await api.getSongs();
+    { const r = await api.getSongs(); songs.value = r.data ?? r; }
     offlineMode.value = false;
   } catch (e: any) {
     throw e;

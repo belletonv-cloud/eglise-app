@@ -131,8 +131,8 @@ const createPoll = async () => {
 
 const loadPolls = async () => {
   try {
-    polls.value = await api.getPolls()
-  } catch { /* ignore */ }
+    { const r = await api.getPolls(); polls.value = r.data ?? r; }
+  } catch (e) { console.warn('SondagesList: failed to load polls', e) }
   finally { loading.value = false }
 }
 

@@ -147,7 +147,7 @@ async function load() {
 }
 
 onMounted(async () => {
-    plans.value = await api.getPlans();
+    { const r = await api.getPlans(); plans.value = r.data ?? r; }
     await load();
 });
 

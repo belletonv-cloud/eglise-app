@@ -730,7 +730,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, provide } from "vue";
+import { ref, computed, onMounted, watch, provide, onErrorCaptured } from "vue";
 import { publicRoutes, consumeIntendedRoute } from "./router/index";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
@@ -761,6 +761,7 @@ import GlobalSearch from "./components/GlobalSearch.vue";
 import PageHelp from "./components/PageHelp.vue";
 import { stepsByPage } from "./page-help-steps";
 import { onLogin, type AuthUser } from "./stores/auth";
+import { showToast } from "./stores/toast";
 import { useRouter } from "vue-router";
 
 // Demo mode detection
@@ -1135,5 +1136,12 @@ onMounted(() => {
             demoPersonaMenuOpen.value = false;
     };
     window.addEventListener("click", closeMenu);
+});
+
+// Global error boundary
+onErrorCaptured((err, instance, info) => {
+    console.error("Error captured:", err, info);
+    showToast("Une erreur est survenue", "error");
+    return false;
 });
 </script>

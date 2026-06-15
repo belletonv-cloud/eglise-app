@@ -120,7 +120,7 @@ const remove = async (id: number) => {
 
 onMounted(async () => {
   try {
-    members.value = await api.getMembers()
+    { const r = await api.getMembers(); members.value = r.data ?? r; }
   } catch { console.warn('AttendanceSection getMembers failed') }
   loadAttendances()
 })

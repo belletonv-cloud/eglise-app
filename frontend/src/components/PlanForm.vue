@@ -74,7 +74,7 @@ const save = async () => {
 
 onMounted(async () => {
   try {
-    serviceTypes.value = await api.getServiceTypes()
+    { const r = await api.getServiceTypes(); serviceTypes.value = r.data ?? r; }
   } catch { console.warn('PlanForm getServiceTypes failed') }
   if (props.plan) {
     form.value = {

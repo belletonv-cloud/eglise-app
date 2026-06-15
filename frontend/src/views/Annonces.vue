@@ -90,8 +90,8 @@ const create = async () => {
 }
 
 const load = async () => {
-  try { items.value = await api.getAnnouncements() }
-  catch { /* ignore */ }
+  try { const r = await api.getAnnouncements(); items.value = r.data ?? r; }
+  catch (e) { console.warn('Annonces: failed to load announcements', e) }
   finally { loading.value = false }
 }
 

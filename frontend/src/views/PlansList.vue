@@ -652,13 +652,13 @@ async function fetchPlans() {
             page: page.value,
             size: pageSize.value,
         });
-        // API returns array or { plans, total }
+        // API returns array or { data, totalCount, page, size }
         if (Array.isArray(res)) {
             plans.value = res;
             total.value = res.length;
         } else {
-            plans.value = res.plans ?? [];
-            total.value = res.total ?? plans.value.length;
+            plans.value = res.data ?? res.plans ?? [];
+            total.value = res.totalCount ?? res.total ?? plans.value.length;
         }
     } catch (e: any) {
         error.value = "Impossible de charger les plans.";
@@ -678,9 +678,9 @@ async function loadAux() {
             api.getServiceTypes(),
             api.getPlanTemplates(),
         ]);
-        serviceTypes.value = st;
-        planTemplates.value = tpl;
-    } catch {}
+        serviceTypes.value = st.data ?? st;
+        planTemplates.value = tpl.data ?? tpl;
+    } catch (e) { console.warn('PlansList: failed to load service types / plan templates', e) }
 }
 onMounted(loadAux);
 
