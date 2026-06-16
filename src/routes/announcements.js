@@ -1,6 +1,7 @@
 import { route } from "../routes.js";
 import { json, getBody, badRequest, requireId, CORS } from "../lib.js";
 import { hasPermission, getMemberFromRequest } from "../auth.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // ANNONCES & POINTS DE PRIÈRE
@@ -43,12 +44,12 @@ export const announcementsRoutes = [
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
-    if (!body || !body.content) return badRequest("content required");
-    const type = body.type || "announcement";
+    const err = validate({ title: { required: true, type: 'string', maxLength: 200 }, content: { required: true, type: 'string', maxLength: 5000 }, target_audience: { type: 'string', enum: ['everyone', 'members', 'team'] }, type: { type: 'string', enum: ['announcement', 'prayer'] } }, body)
+    if (err) return validationError(err)
     const result = await env.DB.prepare(
       "INSERT INTO announcements (type, content, author_id, plan_id) VALUES (?, ?, ?, ?)",
     )
-      .bind(type, body.content, member.id, body.plan_id || null)
+      .bind(body.type || 'announcement', body.content, member.id, body.plan_id || null)
       .run();
     const created = await env.DB.prepare(
       "SELECT a.*, m.first_name as author_first, m.last_name as author_last FROM announcements a LEFT JOIN members m ON m.id = a.author_id WHERE a.id = ?",
@@ -66,7 +67,8 @@ export const announcementsRoutes = [
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
     const body = await getBody(request);
-    if (!body) return badRequest("Corps requis");
+    const putErr = validate({ title: { type: 'string', maxLength: 200 }, content: { type: 'string', maxLength: 5000 }, target_audience: { type: 'string', enum: ['everyone', 'members', 'team'] }, type: { type: 'string', enum: ['announcement', 'prayer'] } }, body)
+    if (putErr) return validationError(putErr)
     await env.DB.prepare(
       "UPDATE announcements SET content = ?, type = ? WHERE id = ?",
     )

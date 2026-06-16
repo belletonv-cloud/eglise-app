@@ -2,6 +2,7 @@ import { route } from "../routes.js";
 import { getBody, badRequest, json, generateSecureToken, requireId, notFound, CORS } from "../lib.js";
 import { hasPermission, getMemberFromRequest } from "../auth.js";
 import { signOneClickToken } from "../oneclick.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // INVITATION SYSTEM
@@ -9,7 +10,8 @@ import { signOneClickToken } from "../oneclick.js";
 export const invitationRoutes = [
   route("POST", "/api/invitations", async (request, env) => {
     const body = await getBody(request);
-    if (!body || !body.email) return badRequest("email required");
+    const invErr = validate({ email: { required: true, type: 'string', maxLength: 255, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ } }, body)
+    if (invErr) return validationError(invErr)
     if (!(await hasPermission(request, env, "manage_members")))
       return json({ error: "Forbidden" }, 403);
 
@@ -87,8 +89,8 @@ export const invitationRoutes = [
     async (request, env, params) => {
       const token = params.token;
       const body = await getBody(request);
-      if (!body || !body.firebase_uid)
-        return badRequest("firebase_uid required");
+      const redeErr = validate({ firebase_uid: { required: true, type: 'string', maxLength: 200 } }, body)
+      if (redeErr) return validationError(redeErr)
 
       const row = await env.DB.prepare(
         "SELECT * FROM invitation_tokens WHERE token = ?",

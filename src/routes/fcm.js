@@ -2,6 +2,7 @@ import { json, badRequest, unauthorized, getBody } from '../lib.js'
 import { getMemberFromRequest, requirePermission } from '../auth.js'
 import { route } from '../routes.js'
 import { sendFcmV1 } from '../fcm.js'
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // FCM NOTIFICATIONS (Push)
@@ -11,9 +12,8 @@ export const fcmRoutes = [
   // Register a push notification token
   route("POST", "/api/fcm/register", async (request, env) => {
     const body = await getBody(request);
-    if (!body) return badRequest("Invalid JSON body");
-    if (!body.member_id || !body.token)
-      return badRequest("member_id and token are required");
+    const regErr = validate({ member_id: { required: true, type: 'integer' }, token: { required: true, type: 'string', maxLength: 500 } }, body)
+    if (regErr) return validationError(regErr)
     // Only allow members to register their own push token
     const member = await getMemberFromRequest(request, env);
     if (!member) return unauthorized();
@@ -38,6 +38,8 @@ export const fcmRoutes = [
     if (guard) return guard;
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
+    const sendErr = validate({ member_id: { type: 'integer' }, plan_id: { type: 'integer' }, title: { type: 'string', maxLength: 200 }, message: { type: 'string', maxLength: 1000 } }, body)
+    if (sendErr) return validationError(sendErr)
 
     const serviceAccount = env.FCM_SERVICE_ACCOUNT;
     if (!serviceAccount) return badRequest("FCM not configured (FCM_SERVICE_ACCOUNT)");

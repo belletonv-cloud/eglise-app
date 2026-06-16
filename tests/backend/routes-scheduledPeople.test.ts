@@ -79,7 +79,7 @@ describe('scheduledPeopleRoutes', () => {
         new Request('http://localhost/api/plans/1/scheduled-people', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ member_id: 5, team_id: 2, position: 'guitar' }),
+          body: JSON.stringify({ member_id: 5, team_id: 2, service_type_id: 1, position: 'guitar' }),
         }),
         { DB },
         { id: '1' },

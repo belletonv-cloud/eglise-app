@@ -4,12 +4,12 @@ import {
   badRequest,
   notFound,
   getBody,
-  validate,
   requireId,
   dbFirst,
   dbAll,
   generateSecureToken,
 } from "../lib.js";
+import { validate, validationError } from '../validate.js'
 import {
   hasPermission,
   getMemberFromRequest,
@@ -65,7 +65,9 @@ export const scheduledPeopleRoutes = [
       if (!body) return badRequest("Corps JSON invalide");
       const err = validate(
         {
-          member_id: { required: true, type: "int" },
+          member_id: { required: true, type: 'integer' },
+          team_id: { required: true, type: 'integer' },
+          service_type_id: { required: true, type: 'integer' },
         },
         body,
       );
@@ -75,7 +77,7 @@ export const scheduledPeopleRoutes = [
       // if forcing, require force_schedule permission
       if (body.force && !(await hasPermission(request, env, "force_schedule")))
         return json({ error: "Forbidden to force" }, 403);
-      if (err) return badRequest(err);
+      if (err) return validationError(err);
 
       // Check if the member has marked this plan's date as unavailable
       if (!body.force) {
@@ -330,6 +332,8 @@ export const scheduledPeopleRoutes = [
       if (!existing) return notFound();
       const body = await getBody(request);
       if (!body) return badRequest("Corps JSON invalide");
+      const spStatusErr = validate({ status: { type: 'string', enum: ['confirmed', 'pending', 'declined'] } }, body)
+      if (spStatusErr) return validationError(spStatusErr)
       await env.DB.prepare(
         "UPDATE scheduled_people SET position=?, status=? WHERE id=? AND plan_id=?",
       )
@@ -412,11 +416,8 @@ export const scheduledPeopleRoutes = [
       return json({ error: "Forbidden" }, 403);
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
-
-    // Validate required fields
-    if (!body.plan_id || !body.member_id) {
-      return badRequest("plan_id and member_id are required");
-    }
+    const attErr = validate({ plan_id: { required: true, type: 'integer' }, member_id: { required: true, type: 'integer' } }, body);
+    if (attErr) return validationError(attErr);
 
     // Check if already checked in for this plan
     const existing = await env.DB.prepare(
@@ -832,9 +833,8 @@ export const scheduledPeopleRoutes = [
   route("POST", "/api/email-templates", async (request, env) => {
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
-    if (!body.name || !body.subject || !body.body) {
-      return badRequest("name, subject and body are required");
-    }
+    const etErr = validate({ name: { required: true, type: 'string', maxLength: 100 }, subject: { required: true, type: 'string', maxLength: 200 }, body: { required: true, type: 'string' } }, body);
+    if (etErr) return validationError(etErr);
 
     const result = await env.DB.prepare(
       `
@@ -885,6 +885,8 @@ export const scheduledPeopleRoutes = [
 
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
+    const etuErr = validate({ name: { type: 'string', maxLength: 100 }, subject: { type: 'string', maxLength: 200 }, body: { type: 'string' } }, body);
+    if (etuErr) return validationError(etuErr);
 
     await env.DB.prepare(
       `

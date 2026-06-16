@@ -2,6 +2,7 @@ import { CORS, json, badRequest, notFound, getBody, requireId } from "../lib.js"
 import { hasPermission, getMemberFromRequest } from "../auth.js";
 import { route } from "../routes.js";
 import { pcoFetch, pcoFetchAll } from "../pco.js";
+import { validate, validationError } from '../validate.js'
 
 const acquireSyncLock = async (env) => {
   await env.DB.prepare(
@@ -80,6 +81,10 @@ export const pcoSyncRoutes = [
     const syncLockBody = await getBody(request).catch(() => null);
     const isForceSync =
       syncLockBody?.force === true || syncLockBody?.phase === "arrangements";
+    if (syncLockBody) {
+      const pcoErr = validate({ service_type_id: { type: 'integer' } }, syncLockBody)
+      if (pcoErr) return validationError(pcoErr)
+    }
     if (!isForceSync && !(await acquireSyncLock(env))) {
       // Stale lock — force-release it
       await env.DB.prepare("DELETE FROM sync_locks WHERE lock_name = ?")

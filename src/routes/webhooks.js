@@ -1,6 +1,7 @@
 import { route } from "../routes.js";
 import { json, badRequest, getBody, requireId, CORS } from "../lib.js";
 import { hasPermission } from "../auth.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // WEBHOOKS
@@ -20,8 +21,8 @@ export const webhooksRoutes = [
     if (!(await hasPermission(request, env, "manage_members")))
       return json({ error: "Forbidden" }, 403);
     const body = await getBody(request);
-    if (!body || !body.url || !body.events)
-      return badRequest("url and events required");
+    const whErr = validate({ url: { required: true, type: 'string', maxLength: 500, pattern: /^https?:\/\// }, events: { required: true, type: 'array' } }, body);
+    if (whErr) return validationError(whErr);
     const result = await env.DB.prepare(
       "INSERT INTO webhooks (url, events, secret, label) VALUES (?, ?, ?, ?)",
     )
@@ -45,6 +46,8 @@ export const webhooksRoutes = [
     if (!id) return badRequest("ID invalide");
     const body = await getBody(request);
     if (!body) return badRequest("Corps requis");
+    const whuErr = validate({ url: { type: 'string', maxLength: 500, pattern: /^https?:\/\// }, events: { type: 'array' } }, body);
+    if (whuErr) return validationError(whuErr);
     await env.DB.prepare(
       "UPDATE webhooks SET url = COALESCE(?, url), events = COALESCE(?, events), secret = COALESCE(?, secret), label = COALESCE(?, label) WHERE id = ?",
     )

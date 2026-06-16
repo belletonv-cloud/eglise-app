@@ -1,5 +1,6 @@
 // Plans & plan items route handlers
-import { json, badRequest, notFound, getBody, validate, requireId, CORS } from "../lib.js";
+import { json, badRequest, notFound, getBody, requireId, CORS } from "../lib.js";
+import { validate, validationError } from '../validate.js'
 import { hasPermission } from "../auth.js";
 import { route } from "../routes.js";
 import { triggerWebhooks } from "../webhooks.js";
@@ -142,12 +143,12 @@ export const plansRoutes = [
     if (!body) return badRequest("Corps JSON invalide");
     const err = validate(
       {
-        date: { required: true, maxLength: 20 },
-        service_type_id: { type: "int" },
+        service_type_id: { required: true, type: 'integer' },
+        date: { required: true, type: 'string' },
       },
       body,
     );
-    if (err) return badRequest(err);
+    if (err) return validationError(err);
     const result = await env.DB.prepare(
       "INSERT INTO plans (service_type_id, date, time, theme, notes, status) VALUES (?, ?, ?, ?, ?, ?)",
     )
@@ -279,12 +280,14 @@ export const plansRoutes = [
     if (!body) return badRequest("Corps JSON invalide");
     const err = validate(
       {
-        type: { required: true, maxLength: 50 },
-        title: { required: true, maxLength: 200 },
+        type: { required: true, type: 'string', maxLength: 50 },
+        title: { required: true, type: 'string', maxLength: 200 },
+        song_id: { type: 'integer' },
+        arrangement_id: { type: 'integer' },
       },
       body,
     );
-    if (err) return badRequest(err);
+    if (err) return validationError(err);
 
     let position = body.position;
     if (position === undefined || position === null) {

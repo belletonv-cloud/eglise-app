@@ -1,6 +1,7 @@
 import { route } from "../routes.js";
 import { json, getBody, badRequest, toCsv, CORS } from "../lib.js";
 import { hasPermission, getMemberFromRequest } from "../auth.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // IMPORT / EXPORT CSV
@@ -83,6 +84,7 @@ export const csvRoutes = [
       console.error("import: failed to read request body", e);
       return badRequest("Corps requis");
     }
+    if (!body || body.trim().length === 0) return badRequest("CSV content required");
     const lines = body.split("\n").filter((l) => l.trim());
     if (lines.length < 2)
       return badRequest("CSV doit avoir un en-tête et au moins une ligne");

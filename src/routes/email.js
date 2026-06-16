@@ -1,6 +1,7 @@
-import { CORS, json, badRequest, getBody, validate, requireId, dbFirst } from '../lib.js';
+import { CORS, json, badRequest, getBody, requireId, dbFirst } from '../lib.js';
 import { hasPermission, getMemberFromRequest, requirePermission } from '../auth.js';
 import { route } from '../routes.js';
+import { validate, validationError } from '../validate.js'
 
 export const emailRoutes = [
   // ========================================
@@ -8,8 +9,8 @@ export const emailRoutes = [
   // ========================================
   route("POST", "/api/send-bulk-email", async (request, env) => {
     const body = await getBody(request);
-    if (!body || !body.subject || !body.body)
-      return badRequest("subject and body required");
+    const beErr = validate({ subject: { required: true, type: 'string', maxLength: 200 }, body: { required: true, type: 'string', maxLength: 50000 } }, body)
+    if (beErr) return validationError(beErr)
     if (!body.team_id && !body.plan_id && !body.member_ids)
       return badRequest("team_id, plan_id, or member_ids required");
 

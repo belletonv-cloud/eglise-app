@@ -1,5 +1,6 @@
 import { route } from "../routes.js";
 import { requireId, badRequest, notFound, getBody, json } from "../lib.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // REPLACEMENT SUGGESTION (quand un bénévole refuse)
@@ -47,8 +48,8 @@ export const replacementRoutes = [
       const scheduledId = requireId({ id: params.scheduledId });
       if (!planId || !scheduledId) return badRequest("ID invalide");
       const body = await getBody(request);
-      if (!body || !body.new_member_id)
-        return badRequest("new_member_id required");
+      const repErr = validate({ new_member_id: { required: true, type: 'integer' }, plan_id: { required: true, type: 'integer' }, reason: { type: 'string', maxLength: 500 } }, body)
+      if (repErr) return validationError(repErr)
 
       const sp = await env.DB.prepare(
         "SELECT * FROM scheduled_people WHERE id = ? AND plan_id = ?",

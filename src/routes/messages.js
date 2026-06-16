@@ -1,6 +1,7 @@
 import { route } from "../routes.js";
 import { json, getBody, badRequest, requireId } from "../lib.js";
 import { hasPermission, getMemberFromRequest } from "../auth.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // MESSAGERIE INTERNE
@@ -12,13 +13,13 @@ export const messagesRoutes = [
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
-    if (!body || !body.content) return badRequest("content required");
-    const subject = body.subject || null;
+    const msgErr = validate({ title: { required: true, type: 'string', maxLength: 200 }, content: { type: 'string', maxLength: 10000 } }, body)
+    if (msgErr) return validationError(msgErr)
     const recipients = Array.isArray(body.recipients) ? body.recipients : [];
     const res = await env.DB.prepare(
       "INSERT INTO messages (sender_id, subject, content) VALUES (?, ?, ?)",
     )
-      .bind(member.id, subject, body.content)
+      .bind(member.id, body.title || body.subject || null, body.content)
       .run();
     const messageId = res.meta.last_row_id;
     for (const rid of recipients) {

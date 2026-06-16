@@ -98,7 +98,7 @@ describe('replacementRoutes', () => {
           new Request('http://localhost/api/plans/10/replacements/1', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ new_member_id: 2 }),
+            body: JSON.stringify({ plan_id: 10, new_member_id: 2 }),
           }),
           { DB, RESEND_API_KEY: 're_test', EMAIL_FROM: 'church@test.com', FRONTEND_URL: 'https://app.test.com' },
           { id: '10', scheduledId: '1' },
@@ -126,7 +126,7 @@ describe('replacementRoutes', () => {
         new Request('http://localhost/api/plans/10/replacements/1', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ new_member_id: 2 }),
+          body: JSON.stringify({ plan_id: 10, new_member_id: 2 }),
         }),
         { DB },
         { id: '10', scheduledId: '1' },
@@ -146,7 +146,7 @@ describe('replacementRoutes', () => {
         new Request('http://localhost/api/plans/10/replacements/999', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ new_member_id: 2 }),
+          body: JSON.stringify({ plan_id: 10, new_member_id: 2 }),
         }),
         { DB },
         { id: '10', scheduledId: '999' },

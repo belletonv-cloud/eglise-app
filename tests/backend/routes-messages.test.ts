@@ -40,7 +40,7 @@ describe('messagesRoutes', () => {
         new Request('http://localhost/api/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: 'Hello', recipients: [2] }),
+          body: JSON.stringify({ title: 'Test', content: 'Hello', recipients: [2] }),
         }),
         { DB },
       )

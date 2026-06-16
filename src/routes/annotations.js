@@ -2,6 +2,7 @@ import { json, badRequest, notFound, unauthorized, getBody, requireId, dbFirst }
 import { hasPermission, getMemberFromRequest } from '../auth.js'
 import { route } from '../routes.js'
 import { kdriveUpload, kdriveGet, kdriveDelete, kdriveParseId } from '../kdrive.js'
+import { validate, validateId, validationError } from '../validate.js'
 
 // ========================================
 // ANNOTATIONS (partagées/privées)
@@ -41,7 +42,8 @@ export const annotationsRoutes = [
       const arrId = requireId(params);
       if (!arrId) return badRequest("Invalid arrangement ID");
       const body = await getBody(request);
-      if (!body || !body.content) return badRequest("content is required");
+      const errors = validate({ content: { required: true, type: 'string', minLength: 1, maxLength: 10000 } }, body)
+      if (errors) return validationError(errors)
       const result = await env.DB.prepare(
         "INSERT INTO arrangement_annotations (arrangement_id, member_id, content, is_shared) VALUES (?, ?, ?, ?)",
       )
@@ -68,6 +70,8 @@ export const annotationsRoutes = [
     if (!id) return badRequest("Invalid annotation ID");
     const body = await getBody(request);
     if (!body) return badRequest();
+    const errs = validate({ content: { type: 'string', maxLength: 10000 }, is_shared: { type: 'boolean' } }, body)
+    if (errs) return validationError(errs)
     const annotation = await env.DB.prepare(
       "SELECT * FROM arrangement_annotations WHERE id = ?",
     )
@@ -168,6 +172,8 @@ export const annotationsRoutes = [
       if (!arrangementId) return badRequest("Invalid arrangement id");
       const body = await getBody(request);
       if (!body) return badRequest("Missing body");
+      const drwErrs = validate({ paths: { type: 'string' }, is_shared: { type: 'boolean' } }, body)
+      if (drwErrs) return validationError(drwErrs)
       const paths =
         typeof body.paths === "string"
           ? body.paths
@@ -247,16 +253,13 @@ export const annotationsRoutes = [
     const member = await getMemberFromRequest(request, env);
     if (!member || member.role !== "admin") return unauthorized();
     const body = await getBody(request);
-    if (
-      !body ||
-      !body.member_id ||
-      !body.resource_type ||
-      !body.resource_id ||
-      !body.permission
-    )
-      return badRequest(
-        "member_id, resource_type, resource_id, permission required",
-      );
+    const rpErr = validate({
+      member_id: { required: true, type: 'integer' },
+      resource_type: { required: true, type: 'string', maxLength: 50 },
+      resource_id: { required: true, type: 'string', maxLength: 50 },
+      permission: { required: true, type: 'string', maxLength: 50 }
+    }, body)
+    if (rpErr) return validationError(rpErr)
     const existing = await env.DB.prepare(
       "SELECT id FROM resource_permissions WHERE member_id = ? AND resource_type = ? AND resource_id = ? AND permission = ?",
     )

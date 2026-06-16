@@ -119,7 +119,7 @@ describe('announcementsRoutes', () => {
         new Request('http://localhost/api/announcements', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: 'Test', type: 'announcement' }),
+          body: JSON.stringify({ title: 'Test', content: 'Test', type: 'announcement' }),
         }),
         { DB },
       )

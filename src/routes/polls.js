@@ -1,6 +1,7 @@
 import { route } from "../routes.js";
 import { json, getBody, badRequest, requireId, notFound, CORS } from "../lib.js";
 import { hasPermission, getMemberFromRequest } from "../auth.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // SONDAGES (Polls)
@@ -56,7 +57,8 @@ export const pollsRoutes = [
     if (!(await hasPermission(request, env, "edit_members")))
       return json({ error: "Forbidden" }, 403);
     const body = await getBody(request);
-    if (!body || !body.question) return badRequest("question required");
+    const pollErr = validate({ question: { required: true, type: 'string', maxLength: 500 }, options: { type: 'array' } }, body);
+    if (pollErr) return validationError(pollErr);
     const maxVotes = body.max_votes || 1;
     const expiresAt = body.expires_at || null;
     const result = await env.DB.prepare(
@@ -87,7 +89,8 @@ export const pollsRoutes = [
     const pollId = requireId(params);
     if (!pollId) return badRequest("ID sondage invalide");
     const body = await getBody(request);
-    if (!body || !body.label) return badRequest("label required");
+    const optErr = validate({ label: { required: true, type: 'string', maxLength: 200 } }, body);
+    if (optErr) return validationError(optErr);
     const maxPos = await env.DB.prepare(
       "SELECT COALESCE(MAX(position), 0) + 1 as next FROM poll_options WHERE poll_id = ?",
     )
@@ -121,7 +124,8 @@ export const pollsRoutes = [
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
-    if (!body || !body.option_id) return badRequest("option_id required");
+    const voteErr = validate({ option_id: { required: true, type: 'integer', min: 0 } }, body);
+    if (voteErr) return validationError(voteErr);
 
     const poll = await env.DB.prepare("SELECT * FROM polls WHERE id = ?")
       .bind(pollId)
@@ -159,7 +163,8 @@ export const pollsRoutes = [
     const member = await getMemberFromRequest(request, env);
     if (!member) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
-    if (!body || !body.option_id) return badRequest("option_id required");
+    const dVoteErr = validate({ option_id: { required: true, type: 'integer', min: 0 } }, body);
+    if (dVoteErr) return validationError(dVoteErr);
     await env.DB.prepare(
       "DELETE FROM poll_votes WHERE poll_id = ? AND member_id = ? AND poll_option_id = ?",
     )

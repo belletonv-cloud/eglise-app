@@ -58,14 +58,14 @@ describe('planTemplatesRoutes', () => {
     it('creates a new template and returns 201', async () => {
       const { DB, run, first } = createMockDb()
       run.mockResolvedValueOnce({ meta: { last_row_id: 1 } })
-      first.mockResolvedValueOnce({ id: 1, name: 'Test Template', description: 'A test', service_type_id: null })
+      first.mockResolvedValueOnce({ id: 1, name: 'Test Template', description: 'A test', service_type_id: 1 })
 
       const route = planTemplatesRoutes.find(r => r.method === 'POST' && r.pattern.test('/api/plan-templates') && r.names.length === 0)!
       const response = await route.handler(
         new Request('http://localhost/api/plan-templates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: 'Test Template', description: 'A test' }),
+          body: JSON.stringify({ name: 'Test Template', description: 'A test', service_type_id: 1 }),
         }),
         { DB },
       )

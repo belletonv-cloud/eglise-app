@@ -1,5 +1,6 @@
 import { route } from "../routes.js";
 import { getBody, requireId, badRequest, json, CORS } from "../lib.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // CHECKLIST PAR POSTE
@@ -37,8 +38,8 @@ export const checklistRoutes = [
 
   route("POST", "/api/checklist-templates", async (request, env) => {
     const body = await getBody(request);
-    if (!body || !body.position || !body.label)
-      return badRequest("position and label required");
+    const ctErr = validate({ position: { required: true, type: 'integer' }, label: { required: true, type: 'string', maxLength: 200 } }, body)
+    if (ctErr) return validationError(ctErr)
     const result = await env.DB.prepare(
       "INSERT INTO checklist_templates (service_type_id, position, label) VALUES (?, ?, ?)",
     )
@@ -73,7 +74,8 @@ export const checklistRoutes = [
       const checklistId = requireId(params);
       if (!checklistId) return badRequest("ID invalide");
       const body = await getBody(request);
-      if (!body || !body.label) return badRequest("label required");
+      const itemErr = validate({ label: { required: true, type: 'string', maxLength: 200 } }, body)
+      if (itemErr) return validationError(itemErr)
       const maxPos = await env.DB.prepare(
         "SELECT COALESCE(MAX(position), 0) + 1 as next_pos FROM checklist_template_items WHERE checklist_id = ?",
       )
@@ -122,8 +124,8 @@ export const checklistRoutes = [
     const planId = requireId(params);
     if (!planId) return badRequest("ID invalide");
     const body = await getBody(request);
-    if (!body || !body.position || !body.label)
-      return badRequest("position and label required");
+    const pcErr = validate({ position: { required: true, type: 'integer' }, label: { required: true, type: 'string', maxLength: 200 } }, body)
+    if (pcErr) return validationError(pcErr)
     const result = await env.DB.prepare(
       "INSERT INTO plan_checklists (plan_id, member_id, position, done, label) VALUES (?, ?, ?, 0, ?)",
     )
@@ -141,7 +143,8 @@ export const checklistRoutes = [
     const id = requireId(params);
     if (!id) return badRequest("ID invalide");
     const body = await getBody(request);
-    if (!body) return badRequest("Corps requis");
+    const updErr = validate({ done: { required: true, type: 'boolean' } }, body)
+    if (updErr) return validationError(updErr)
     await env.DB.prepare(
       `UPDATE plan_checklists SET done = ?, done_at = CASE WHEN ? THEN datetime('now') ELSE NULL END WHERE id = ?`,
     )

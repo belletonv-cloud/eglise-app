@@ -1,5 +1,6 @@
 import { route } from "../routes.js";
 import { json, getBody, badRequest, requireId, notFound } from "../lib.js";
+import { validate, validationError } from '../validate.js'
 
 // ========================================
 // CHURCH EVENTS (external scraped events)
@@ -7,8 +8,8 @@ import { json, getBody, badRequest, requireId, notFound } from "../lib.js";
 export const eventsRoutes = [
   route("POST", "/api/church-events", async (request, env, params) => {
     const body = await getBody(request);
-    if (!body || !body.title || !body.start_date)
-      return badRequest("title et start_date requis");
+    const ceErr = validate({ title: { required: true, type: 'string', maxLength: 200 }, start_date: { required: true, type: 'string', maxLength: 20 } }, body)
+    if (ceErr) return validationError(ceErr)
     const result = await env.DB.prepare(
       `INSERT INTO church_events (title, description, location, start_date, start_time, end_date, end_time, color, repeat_period, image_url, rsvp_enabled, source, status, link, ticket_url, emoji)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -150,6 +151,8 @@ export const eventsRoutes = [
     if (!id) return badRequest("ID invalide");
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
+    const putCeErr = validate({ title: { type: 'string', maxLength: 200 }, start_date: { type: 'string', maxLength: 20 } }, body)
+    if (putCeErr) return validationError(putCeErr)
 
     const updates = [];
     const values = [];
@@ -254,10 +257,8 @@ export const eventsRoutes = [
       const id = requireId(params);
       if (!id) return badRequest("ID invalide");
       const body = await getBody(request);
-      if (!body || !body.type)
-        return badRequest(
-          "type requis (cancelled, moved, periodicity_changed)",
-        );
+      const exErr = validate({ type: { required: true, type: 'string', enum: ['cancelled', 'moved', 'periodicity_changed'] } }, body)
+      if (exErr) return validationError(exErr)
 
       await env.DB.prepare(
         "INSERT INTO church_event_exceptions (event_id, exception_date, type, new_date, new_repeat_period, reason) VALUES (?, ?, ?, ?, ?, ?)",

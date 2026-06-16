@@ -2,6 +2,7 @@ import { route } from "../routes.js";
 import { requireId, badRequest, notFound, json, getBody, dbFirst } from "../lib.js";
 import { getMemberFromRequest } from "../auth.js";
 import { kdriveUpload, kdriveParseId, kdriveGet, kdriveDelete } from "../kdrive.js";
+import { validate, validationError } from '../validate.js'
 
 async function callAudioSplitter(env, file, planId) {
   const url = env.AUDIO_SPLITTER_URL || "http://localhost:8765";
@@ -286,6 +287,8 @@ export const audioRoutes = [
       if (!planId) return badRequest("ID plan invalide");
       const body = await getBody(request).catch(() => null);
       if (!body || !body.segments) return badRequest("segments requis");
+      const segErr = validate({ segments: { required: true, type: 'array' } }, body)
+      if (segErr) return validationError(segErr)
       const token = request.headers.get("x-audio-token");
       if (token !== env.AUDIO_SPLITTER_TOKEN)
         return json({ error: "Invalid token" }, 401);

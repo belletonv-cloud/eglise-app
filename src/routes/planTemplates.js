@@ -1,4 +1,5 @@
-import { json, badRequest, notFound, getBody, validate, requireId, dbFirst, dbAll, CORS } from '../lib.js'
+import { json, badRequest, notFound, getBody, requireId, dbFirst, dbAll, CORS } from '../lib.js'
+import { validate, validationError } from '../validate.js'
 import { hasPermission, getMemberFromRequest, requirePermission } from '../auth.js'
 import { route } from '../routes.js'
 
@@ -20,11 +21,12 @@ export const planTemplatesRoutes = [
 
   route("POST", "/api/plan-templates", async (request, env) => {
     const body = await getBody(request);
-    if (!body || !body.name) return badRequest("name required");
+    const err = validate({ name: { required: true, type: 'string', maxLength: 200 }, service_type_id: { required: true, type: 'integer' } }, body);
+    if (err) return validationError(err);
     const stmt = await env.DB.prepare(
       "INSERT INTO plan_templates (name, description, service_type_id) VALUES (?, ?, ?)",
     )
-      .bind(body.name, body.description || null, body.service_type_id || null)
+      .bind(body.name, body.description || null, body.service_type_id)
       .run();
     const created = await env.DB.prepare(
       "SELECT * FROM plan_templates WHERE id = ?",
@@ -109,8 +111,8 @@ export const planTemplatesRoutes = [
       const templateId = requireId(params);
       if (!templateId) return badRequest("Invalid template ID");
       const body = await getBody(request);
-      if (!body || !body.type || !body.title)
-        return badRequest("type and title required");
+      const ptiErr = validate({ type: { required: true, type: 'string', maxLength: 50 }, title: { required: true, type: 'string', maxLength: 200 } }, body);
+      if (ptiErr) return validationError(ptiErr);
       const maxPos = await env.DB.prepare(
         "SELECT COALESCE(MAX(position), 0) + 1 as next_pos FROM plan_template_items WHERE plan_template_id = ?",
       )

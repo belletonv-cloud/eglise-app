@@ -1,7 +1,8 @@
-import { CORS, json, badRequest, notFound, getBody, validate, requireId, dbFirst, dbAll } from '../lib.js';
+import { CORS, json, badRequest, notFound, getBody, requireId, dbFirst, dbAll } from '../lib.js';
 import { hasPermission, getMemberFromRequest, requirePermission } from '../auth.js';
 import { route } from '../routes.js';
 import { triggerWebhooks } from '../webhooks.js';
+import { validate, validationError } from '../validate.js'
 
 export const portalRoutes = [
   // ========================================
@@ -27,6 +28,8 @@ export const portalRoutes = [
     if (!member) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON");
+    const meErr = validate({ phone: { type: 'string', maxLength: 30 }, notes: { type: 'string', maxLength: 1000 } }, body)
+    if (meErr) return validationError(meErr)
     // Only allow updating safe fields
     const allowed = ["phone", "notes", "birth_date"];
     const updates = [];
@@ -119,6 +122,8 @@ export const portalRoutes = [
       }
       const body = await getBody(request);
       if (!body) return badRequest("Invalid JSON");
+      const vpErr = validate({ unavailable_dates: { type: 'array' }, max_services_per_month: { type: 'integer', min: 0, max: 31 }, notes: { type: 'string', maxLength: 500 } }, body)
+      if (vpErr) return validationError(vpErr)
       const existing = await env.DB.prepare(
         "SELECT id FROM volunteer_preferences WHERE member_id = ?",
       )
