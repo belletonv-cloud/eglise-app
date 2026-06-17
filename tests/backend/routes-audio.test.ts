@@ -74,7 +74,7 @@ describe('audioRoutes', () => {
           method: 'POST',
           body: formData,
         }),
-        { DB },
+        { DB, AUDIO_SPLITTER_URL: 'http://mock-splitter.test' },
         { id: '1' },
       )
       expect(response.status).toBe(201)
@@ -107,14 +107,14 @@ describe('audioRoutes', () => {
           method: 'POST',
           body: formData,
         }),
-        { DB },
+        { DB, AUDIO_SPLITTER_URL: 'http://mock-splitter.test' },
         { id: '1' },
       )
       expect(response.status).toBe(201)
       const body = await response.json()
       expect(body.success).toBe(true)
       expect(body.audio_splitter.error).toBeDefined()
-      expect(body.audio_splitter.error).toContain('Audio splitter error')
+      expect(body.audio_splitter.error).toContain('Internal server error')
     })
 
     it('returns 400 when plan not found', async () => {

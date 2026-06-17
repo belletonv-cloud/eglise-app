@@ -1,5 +1,6 @@
 // Songs & arrangements route handlers
-import { json, badRequest, notFound, getBody, validate, requireId } from "../lib.js";
+import { json, badRequest, notFound, getBody, requireId } from "../lib.js";
+import { validate, validationError } from "../validate.js";
 import { hasPermission } from "../auth.js";
 import { route } from "../routes.js";
 
@@ -70,8 +71,8 @@ export const songsRoutes = [
       return json({ error: "Forbidden" }, 403);
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
-    const err = validate({ title: { required: true, maxLength: 200 } }, body);
-    if (err) return badRequest(err);
+    const err = validate({ title: { required: true, type: 'string', maxLength: 200 } }, body);
+    if (err) return validationError(err);
     const result = await env.DB.prepare(
       "INSERT INTO songs (title, author, ccli_number, copyright, themes, notes) VALUES (?, ?, ?, ?, ?, ?)",
     )

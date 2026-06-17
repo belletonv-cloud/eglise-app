@@ -26,6 +26,7 @@ export { pcoSyncRoutes } from "./pcoSync.js";
 export { eventsRoutes } from "./events.js";
 export { searchRoutes } from "./search.js";
 export { webhooksRoutes } from "./webhooks.js";
+export { autoScheduleRoutes } from "./autoSchedule.js";
 
 // Combined arrays preserving original ordering
 const routes0 = [
@@ -62,6 +63,7 @@ const routes3 = [
   ...eventsRoutes,
   ...searchRoutes,
   ...webhooksRoutes,
+  ...autoScheduleRoutes,
 ];
 
 export { routes0, routes2, routes3 };

@@ -1,5 +1,6 @@
 // Teams & service types route handlers
-import { CORS, json, badRequest, notFound, getBody, validate, requireId, dbFirst, dbAll } from "../lib.js";
+import { CORS, json, badRequest, notFound, getBody, requireId } from "../lib.js";
+import { validate, validationError } from "../validate.js";
 import { hasPermission, getMemberFromRequest, requirePermission } from "../auth.js";
 import { route } from "../routes.js";
 
@@ -38,8 +39,8 @@ export const teamsRoutes = [
       return json({ error: "Forbidden" }, 403);
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
-    const err = validate({ name: { required: true, maxLength: 100 } }, body);
-    if (err) return badRequest(err);
+    const err = validate({ name: { required: true, type: 'string', maxLength: 100 } }, body);
+    if (err) return validationError(err);
     const result = await env.DB.prepare(
       "INSERT INTO teams (name, description, service_type) VALUES (?, ?, ?)",
     )

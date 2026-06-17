@@ -1,4 +1,5 @@
-import { CORS, json, badRequest, notFound, getBody, validate, requireId } from '../lib.js'
+import { CORS, json, badRequest, notFound, getBody, requireId } from '../lib.js'
+import { validate, validationError } from '../validate.js'
 import { hasPermission, getMemberFromRequest } from '../auth.js'
 import { route } from '../routes.js'
 import { triggerWebhooks } from '../webhooks.js'
@@ -133,12 +134,12 @@ export const membersRoutes = [
     if (!body) return badRequest("Corps JSON invalide");
     const err = validate(
       {
-        first_name: { required: true, maxLength: 100 },
-        last_name: { required: true, maxLength: 100 },
+        first_name: { required: true, type: 'string', maxLength: 100 },
+        last_name: { required: true, type: 'string', maxLength: 100 },
       },
       body,
     );
-    if (err) return badRequest(err);
+    if (err) return validationError(err);
     const stmt = env.DB.prepare(
       "INSERT INTO members (first_name, last_name, email, phone, birth_date, membership_type, baptism_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );

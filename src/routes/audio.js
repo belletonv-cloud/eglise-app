@@ -5,7 +5,8 @@ import { kdriveUpload, kdriveParseId, kdriveGet, kdriveDelete } from "../kdrive.
 import { validate, validationError } from '../validate.js'
 
 async function callAudioSplitter(env, file, planId) {
-  const url = env.AUDIO_SPLITTER_URL || "http://localhost:8765";
+  const url = env.AUDIO_SPLITTER_URL;
+  if (!url) throw new Error('AUDIO_SPLITTER_URL env var not set');
   const buffer =
     typeof file.arrayBuffer === "function" ? await file.arrayBuffer() : file;
   const boundary = "----FormBoundary" + Math.random().toString(36).slice(2);

@@ -228,7 +228,7 @@ describe('songsRoutes', () => {
       )
       expect(response.status).toBe(400)
       const body = await response.json()
-      expect(body.error).toMatch(/titre est requis|title est requis/i)
+      expect(body.error).toMatch(/title is required/i)
     })
   })
 

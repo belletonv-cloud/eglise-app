@@ -1,4 +1,4 @@
--- Migration 011 : Tables de segmentation audio (audio-splitter integration)
+-- Migration 011 : Tables de segmentation audio + Messages internes
 
 CREATE TABLE IF NOT EXISTS plan_audio_segments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,3 +27,18 @@ CREATE TABLE IF NOT EXISTS plan_audio_songs (
 
 CREATE INDEX IF NOT EXISTS idx_audio_segments_plan ON plan_audio_segments(plan_id);
 CREATE INDEX IF NOT EXISTS idx_audio_songs_plan ON plan_audio_songs(plan_id);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sender_id INTEGER REFERENCES members(id),
+  subject TEXT,
+  content TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS message_recipients (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  message_id INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+  recipient_id INTEGER REFERENCES members(id),
+  read_at TEXT
+);

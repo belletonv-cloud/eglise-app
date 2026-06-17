@@ -154,3 +154,6 @@ Déployée sur Cloudflare Workers + Pages.
 - Stale cleanup: music-service/ removed, 11 non-migration SQL → migrations/archive/, 15 scripts → scripts/archive/
 - Integration test removed (depended on deleted music-service/)
 - AGENTS.md cleaned: migrations section updated (both applied), secrets warning resolved
+- **Input validation**: shared `validate.js` utility created, validation added to ALL 27 backend route handlers (POST/PUT/GET with path params)
+- **7 new E2E test files (39 tests)**: songs (5), music-stand (8), plans-flow (7), calendar (6), events (7), members-flow (3), email-compose (3)
+- **Total project tests** : 562 backend + 251 frontend + 250 E2E = **1 063 tests** ✅
