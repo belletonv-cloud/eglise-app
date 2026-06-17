@@ -46,7 +46,7 @@
                     @click="showForm = true"
                     class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                 >
-                    + {{ $t("plansList.add_new") }}
+                    {{ $t("plansList.add_new") }}
                 </button>
             </div>
         </div>

@@ -728,8 +728,8 @@ async function loadSongs() {
             api.getSongs(),
             api.getTeams(),
         ]);
-        songs.value = (songData || []) as Song[];
-        teams.value = (teamData || []) as Team[];
+        songs.value = (songData?.data ?? songData ?? []) as Song[];
+        teams.value = (teamData?.data ?? teamData ?? []) as Team[];
     } catch (e: any) {
         error.value = e.message || "Erreur lors du chargement des chants";
         songs.value = [];
