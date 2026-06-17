@@ -1,4 +1,5 @@
 import { CORS, json, badRequest, getBody, requireId, dbFirst, dbAll } from '../lib.js';
+import { validate, validationError } from '../validate.js';
 import { hasPermission, getMemberFromRequest } from '../auth.js';
 import { route } from '../routes.js';
 
@@ -45,9 +46,8 @@ export const statsRoutes = [
     if (!caller) return json({ error: "Not authenticated" }, 401);
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
-    if (!body.subject || !body.body || !body.recipient_email) {
-      return badRequest("subject, body and recipient_email are required");
-    }
+    const emailLogsErr = validate({ subject: { required: true, type: 'string' }, body: { required: true, type: 'string' }, recipient_email: { required: true, type: 'string' } }, body);
+    if (emailLogsErr) return validationError(emailLogsErr);
 
     const result = await env.DB.prepare(
       `
@@ -84,10 +84,8 @@ export const statsRoutes = [
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
 
-    // Required fields: recipient_email, subject, body (html)
-    if (!body.recipient_email || !body.subject || !body.body) {
-      return badRequest("recipient_email, subject and body are required");
-    }
+    const sendEmailErr = validate({ recipient_email: { required: true, type: 'string' }, subject: { required: true, type: 'string' }, body: { required: true, type: 'string' } }, body);
+    if (sendEmailErr) return validationError(sendEmailErr);
 
     // Provider configuration from environment
     const apiKey = env.RESEND_API_KEY;
@@ -180,7 +178,9 @@ export const statsRoutes = [
   // One-click action endpoint — executes an admin action based on a token
   route("POST", "/api/oneclick", async (request, env) => {
     const body = await getBody(request);
-    if (!body || !body.token) return badRequest("token required");
+    if (!body) return badRequest("Invalid JSON body");
+    const oneclickErr = validate({ token: { required: true, type: 'string' } }, body);
+    if (oneclickErr) return validationError(oneclickErr);
     if (!env.ONECLICK_SECRET) return json({ error: "Not configured" }, 500);
     // If email_oneclicks table exists, prefer DB-driven one-time tokens
     let payload = null;
@@ -277,7 +277,8 @@ export const statsRoutes = [
   route("POST", "/api/communication-preferences", async (request, env) => {
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON body");
-    if (!body.member_id) return badRequest("member_id is required");
+    const commPrefErr = validate({ member_id: { required: true } }, body);
+    if (commPrefErr) return validationError(commPrefErr);
 
     await env.DB.prepare(
       `

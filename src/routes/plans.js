@@ -186,6 +186,18 @@ export const plansRoutes = [
     if (!id) return badRequest("ID invalide");
     const body = await getBody(request);
     if (!body) return badRequest("Corps JSON invalide");
+    const err = validate(
+      {
+        service_type_id: { type: 'integer' },
+        date: { type: 'string' },
+        time: { type: 'string' },
+        theme: { type: 'string' },
+        notes: { type: 'string' },
+        status: { type: 'string' },
+      },
+      body,
+    );
+    if (err) return validationError(err);
     const existing = await env.DB.prepare("SELECT * FROM plans WHERE id = ?")
       .bind(id)
       .first();

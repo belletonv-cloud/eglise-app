@@ -188,7 +188,7 @@ function findEligibleMembers(membersInTeam, position, planDate, planMonth, sched
             ? JSON.parse(prefs.unavailable_dates)
             : prefs.unavailable_dates
           if (Array.isArray(dates) && dates.includes(planDate)) return false
-        } catch {}
+        } catch { console.warn('autoSchedule: failed to parse unavailable_dates for member', m.member_id); }
       }
       return true
     })

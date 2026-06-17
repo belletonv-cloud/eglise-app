@@ -148,6 +148,8 @@ export const planTemplatesRoutes = [
     if (!id) return badRequest("Invalid ID");
     const body = await getBody(request);
     if (!body) return badRequest("Invalid JSON");
+    const err = validate({ type: { type: 'string', maxLength: 50 }, title: { type: 'string', maxLength: 200 }, key: { type: 'string', maxLength: 20 }, description: { type: 'string', maxLength: 500 }, sequence: { type: 'integer', min: 0 }, song_id: { type: 'integer', min: 0 } }, body);
+    if (err) return validationError(err);
     await env.DB.prepare(
       `UPDATE plan_template_items SET
         type = COALESCE(?, type), title = COALESCE(?, title), description = COALESCE(?, description),

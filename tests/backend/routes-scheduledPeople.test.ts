@@ -102,36 +102,5 @@ describe('scheduledPeopleRoutes', () => {
     })
   })
 
-  describe('POST /api/attendances', () => {
-    it('checks in a member', async () => {
-      const { DB, first, run } = createMockDb()
-      first.mockResolvedValueOnce(null)
-      run.mockResolvedValueOnce({ meta: { last_row_id: 1 } })
-      const route = scheduledPeopleRoutes.find(r => r.method === 'POST' && r.pattern.test('/api/attendances'))!
-      const response = await route.handler(
-        new Request('http://localhost/api/attendances', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan_id: 1, member_id: 5 }),
-        }),
-        { DB },
-      )
-      expect(response.status).toBe(201)
-    })
-
-    it('returns 400 for duplicate check-in', async () => {
-      const { DB, first } = createMockDb()
-      first.mockResolvedValueOnce({ id: 99 })
-      const route = scheduledPeopleRoutes.find(r => r.method === 'POST' && r.pattern.test('/api/attendances'))!
-      const response = await route.handler(
-        new Request('http://localhost/api/attendances', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan_id: 1, member_id: 5 }),
-        }),
-        { DB },
-      )
-      expect(response.status).toBe(400)
-    })
-  })
+  // Attendance tests moved to routes-attendances.test.ts
 })

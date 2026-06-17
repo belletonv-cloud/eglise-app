@@ -5,6 +5,8 @@ export { membersRoutes } from "./members.js";
 export { teamsRoutes } from "./teams.js";
 export { plansRoutes } from "./plans.js";
 export { scheduledPeopleRoutes } from "./scheduledPeople.js";
+export { attendanceRoutes } from "./attendances.js";
+export { adminSchedulingRoutes } from "./adminScheduling.js";
 export { portalRoutes } from "./portal.js";
 export { planTemplatesRoutes } from "./planTemplates.js";
 export { emailRoutes } from "./email.js";
@@ -36,6 +38,8 @@ const routes0 = [
   ...teamsRoutes,
   ...plansRoutes,
   ...scheduledPeopleRoutes,
+  ...attendanceRoutes,
+  ...adminSchedulingRoutes,
   ...portalRoutes,
   ...planTemplatesRoutes,
   ...emailRoutes,

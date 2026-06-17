@@ -13,7 +13,7 @@ Déployée sur Cloudflare Workers + Pages.
 - **Auth** : Firebase Auth + RBAC (7 rôles, guard global POST/PUT/DELETE)
 - **Rate limiter** : D1-based (table `api_rate_limits`)
 - **Déploiement** : Wrangler → Cloudflare Workers + Pages
-- **Tests** : Vitest backend (562 tests ✅ - 41 files, tous les 27 modules routes + 10 nouveaux) + Vitest frontend (251 tests ✅ - 30 files) + Playwright E2E (106 tests ✅ - 20 spec files) — 919 tests total, 0 vulns ✅
+- **Tests** : Vitest backend (586 tests ✅ - 43 files, tous les 29 modules routes) + Vitest frontend (251 tests ✅ - 30 files) + Playwright E2E (250 tests ✅ - 26 spec files) — 1 087 tests total, 0 vulns ✅
 - **PWA** : vite-plugin-pwa
 
 ## URLs
@@ -60,7 +60,7 @@ Déployée sur Cloudflare Workers + Pages.
   - `logger.js` — API call logging
   - `routes.js` — `route()` helper
   - `pco.js` — PCO fetch helpers
-  - `routes/` — 27 modules par domaine (songs, members, plans, etc.)
+  - `routes/` — 29 modules par domaine (songs, members, plans, etc.)
 - `migrations/` — Migrations D1
 - `scripts/` — Scripts d'import, export PCO, génération SQL
 - `docs/` — Documentation technique
@@ -112,12 +112,12 @@ Déployée sur Cloudflare Workers + Pages.
 ## Notes d'architecture (10 juin 2026)
 
 - `src/index.js` splitté de 6705 → **174 lignes** : ne contient plus que le router, le RBAC guard, et le handler cron
-- **27 modules** dans `src/routes/` par domaine fonctionnel, ordonnés via `routes/index.js` (barrel)
+- **29 modules** dans `src/routes/` par domaine fonctionnel, ordonnés via `routes/index.js` (barrel)
 - Chaque module importe ce dont il a besoin depuis `../lib.js`, `../auth.js`, etc.
 - Variable `router` (dead code, createRouter avec routes0+routes2 uniquement) supprimée
 - Les helpers `acquireSyncLock`/`releaseSyncLock` déplacés dans `src/routes/pcoSync.js`
 - `callAudioSplitter` copié dans `src/routes/audio.js`
-- **562 tests backend** ✅ (41 files, tous les 27 modules routes + 10 nouveaux), **251 tests frontend** ✅ (30 files), **type-check 0 erreurs** ✅
+- **586 tests backend** ✅ (43 files, tous les 29 modules routes), **251 tests frontend** ✅ (30 files), **type-check 0 erreurs** ✅
 - `vitest.config.js` (dead config, référençait `test/` inexistant) supprimé le 14/06/2026
 
 ## Refactoring 14/06/2026
@@ -154,6 +154,26 @@ Déployée sur Cloudflare Workers + Pages.
 - Stale cleanup: music-service/ removed, 11 non-migration SQL → migrations/archive/, 15 scripts → scripts/archive/
 - Integration test removed (depended on deleted music-service/)
 - AGENTS.md cleaned: migrations section updated (both applied), secrets warning resolved
-- **Input validation**: shared `validate.js` utility created, validation added to ALL 27 backend route handlers (POST/PUT/GET with path params)
+- **Input validation**: shared `validate.js` utility created, validation added to ALL 32 backend route handlers (POST/PUT/GET with path params)
 - **7 new E2E test files (39 tests)**: songs (5), music-stand (8), plans-flow (7), calendar (6), events (7), members-flow (3), email-compose (3)
-- **Total project tests** : 562 backend + 251 frontend + 250 E2E = **1 063 tests** ✅
+- **Total project tests** : 586 backend + 251 frontend + 250 E2E = **1 087 tests** ✅
+
+## Module count update (17/06/2026)
+
+- **scheduledPeople.js**: 1013 → 374 lines (split into 3 files)
+- **New modules**: `attendances.js` (76 lines, 6 routes), `adminScheduling.js` (211 lines, 17 routes)
+- **Route modules**: 27 → 29 domain modules
+- **Backend test files**: 41 → 43 (new: `routes-attendances.test.ts` + `routes-adminScheduling.test.ts`)
+- **All 29 modules now have dedicated test coverage**
+
+## validate.js migration (17/06/2026)
+
+Final validation gaps filled:
+- `stats.js` — added `validate` import + schema validation to 4 POST handlers (email-logs, send-email, oneclick, communication-preferences)
+- `plans.js` — PUT `/api/plans/:id` now validates optional fields
+- `planTemplates.js` — PUT `/api/plan-template-items/:id` now validates optional fields
+- `adminScheduling.js` — 5 POST/PUT handlers converted from manual `if (!body.x)` to `validate()` calls
+
+## Empty catch blocks fixed (17/06/2026)
+- `autoSchedule.js:191` — added `console.warn` to silent JSON.parse failure
+- `scheduledPeople.js:290` — added `console.warn` to FCM service account parse failure
